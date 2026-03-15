@@ -23,7 +23,7 @@ This design covers wiring the frontend to consume the backend API.
 | Multi-tenancy | Transparent | Backend scopes data via JWT automatically; no UI needed |
 | Migration | Full replacement | All mock data replaced with API calls in one pass |
 | Reports | Preview + download | Modal with parameter inputs, PDF preview in iframe, download button |
-| Toast library | sonner or react-hot-toast | Lightweight notification for mutation feedback |
+| Toast library | sonner | Lightweight notification for mutation feedback |
 
 ## Architecture
 
@@ -149,12 +149,12 @@ export const studentsService = {
 | `classes.service.ts` | `/api/admin/classes` | — |
 | `enrollments.service.ts` | `/api/admin/enrollments` | `checkConflict(data)` |
 | `sessions.service.ts` | `/api/admin/sessions` | `generate(data)`, `approveReschedule(id)` |
-| `attendance.service.ts` | `/api/admin/attendance` | `getSummary(params)` |
+| `attendance.service.ts` | `/api/admin/attendance` | `getBySession(params)`, `getSummary(params)`, `update(id, data)` — no create/delete (records are auto-generated with sessions) |
 | `payments.service.ts` | `/api/admin/payments` | — |
 | `payouts.service.ts` | `/api/admin/payouts` | — |
 | `expenses.service.ts` | `/api/admin/expenses` | — |
 | `dashboard.service.ts` | `/api/admin/dashboard` | `getStats()`, `getActivity()` |
-| `reports.service.ts` | `/api/admin/reports` | `getAttendanceReport(params)`, `getFinanceReport(params)`, `getStudentProgressReport(params)` — all return PDF blob |
+| `reports.service.ts` | `/api/admin/reports` | `getAttendanceReport(params)`, `getFinanceReport(params)`, `getStudentProgressReport(params)` — all use `responseType: 'blob'` and return PDF blob |
 
 ## Section 3: Type Definitions
 
@@ -259,7 +259,7 @@ export function useCreateStudent() {
 | `useAttendanceSummary(params)` | Query for attendance summary by student/class/date |
 | `useDashboardStats()` | Query for dashboard statistics |
 | `useDashboardActivity()` | Query for recent activity feed |
-| `useReport(type, params)` | Query returning PDF blob for preview, enabled on demand |
+| `useReport(type, params)` | Query returning PDF blob for preview, enabled on demand, `staleTime: Infinity` (manual refetch only — PDF generation is expensive) |
 
 ### QueryClient Configuration (`src/main.tsx`)
 
@@ -293,11 +293,13 @@ Every page transforms from mock data to real API data. The pattern is consistent
 
 **Dashboard** — `useDashboardStats()` feeds stat cards and charts. `useDashboardActivity()` feeds the activity feed. Both use skeleton loading.
 
-**Students** — Full CRUD via modals. CSV import uses `useImportStudents()` with file input. CSV export uses `useExportStudents()` triggering a download. Bulk delete iterates `useDeleteStudent()` or a future bulk endpoint.
+**Students** — Full CRUD via modals. CSV import uses `useImportStudents()` with file input. CSV export uses `useExportStudents()` triggering a download. Bulk delete iterates `useDeleteStudent()` for each selected student.
+
+**Attendance** — Not a standard CRUD page. Records are auto-generated when sessions are created. The admin can only view attendance by session (`getBySession`), view summaries (`getSummary`), and update individual records (`update`). No create or delete operations.
 
 **Schedules** — Maps to Sessions API. Auto-generate button calls `useGenerateSessions()`. Reschedule approval uses `useApproveReschedule()`.
 
-**Attendance** — Loaded by session. Summary view uses `useAttendanceSummary()` with date/class/student filters.
+**Attendance** — View and update only (see note above). Summary view uses `useAttendanceSummary()` with date/class/student filters.
 
 **Finance pages** — Standard CRUD. Finance Overview aggregates data from dashboard stats.
 
