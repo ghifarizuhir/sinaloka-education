@@ -1,7 +1,10 @@
+import { createRequire } from 'module';
 import { test, expect } from '../../fixtures/auth.fixture';
 import { setupExpenseMocks } from '../../helpers/api-mocker';
 import { OperatingExpensesPage } from '../../pages/operating-expenses.page';
-import expensesData from '../../mocks/expenses.json';
+
+const require = createRequire(import.meta.url);
+const expensesData = require('../../mocks/expenses.json');
 
 test.describe('Operating Expenses CRUD', () => {
   test.beforeEach(async ({ authenticatedPage: page, mockApi }) => {

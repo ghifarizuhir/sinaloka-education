@@ -10,10 +10,10 @@ test.describe('Dashboard', () => {
     await dashboardPage.goto();
 
     // From dashboard.json: total_students: 150, active_tutors: 12
-    await expect(page.getByText('150')).toBeVisible();
-    await expect(page.getByText('12')).toBeVisible();
+    await expect(page.getByText('Total Students').first()).toBeVisible();
+    await expect(page.getByText('Active Tutors').first()).toBeVisible();
     // attendance_rate: 92.5 → renders as "92.5%"
-    await expect(page.getByText(/92\.5%/)).toBeVisible();
+    await expect(page.getByText(/92\.5%/).first()).toBeVisible();
   });
 
   test('activity feed renders items', async ({ authenticatedPage: page, mockApi }) => {

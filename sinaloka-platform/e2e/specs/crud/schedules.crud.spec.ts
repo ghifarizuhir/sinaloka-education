@@ -1,7 +1,10 @@
+import { createRequire } from 'module';
 import { test, expect } from '../../fixtures/auth.fixture';
 import { setupSessionMocks, setupClassMocks } from '../../helpers/api-mocker';
 import { SchedulesPage } from '../../pages/schedules.page';
-import sessionsData from '../../mocks/sessions.json';
+
+const require = createRequire(import.meta.url);
+const sessionsData = require('../../mocks/sessions.json');
 
 test.describe('Schedules CRUD', () => {
   test.beforeEach(async ({ authenticatedPage: page, mockApi }) => {

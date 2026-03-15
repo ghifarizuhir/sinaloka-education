@@ -1,7 +1,10 @@
+import { createRequire } from 'module';
 import { test, expect } from '../../fixtures/auth.fixture';
 import { setupTutorMocks } from '../../helpers/api-mocker';
 import { TutorsPage } from '../../pages/tutors.page';
-import tutorsData from '../../mocks/tutors.json';
+
+const require = createRequire(import.meta.url);
+const tutorsData = require('../../mocks/tutors.json');
 
 test.describe('Tutors CRUD', () => {
   test.beforeEach(async ({ authenticatedPage: page, mockApi }) => {

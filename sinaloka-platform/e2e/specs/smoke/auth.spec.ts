@@ -1,7 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { test as mockTest } from '../../fixtures/mock-api.fixture';
 import { test as authTest } from '../../fixtures/auth.fixture';
-import { setupAuthMocks } from '../../helpers/api-mocker';
+import { setupAuthMocks, setupDashboardMocks } from '../../helpers/api-mocker';
 import { LoginPage } from '../../pages/login.page';
 
 // --- Unauthenticated redirect (no fixture needed) ---
@@ -21,8 +21,7 @@ mockTest.describe('Auth – login page', () => {
     await loginPage.goto();
     await loginPage.login('admin@sinaloka.com', 'password');
 
-    await expect(page).toHaveURL(/^\//);
-    // Should not be on /login anymore
+    // Should redirect away from /login after successful login
     await expect(page).not.toHaveURL(/\/login/);
   });
 
@@ -46,18 +45,14 @@ mockTest.describe('Auth – login page', () => {
 authTest.describe('Auth – authenticated flows', () => {
   authTest('logout clears tokens and redirects to /login', async ({ authenticatedPage: page, mockApi }) => {
     await mockApi.onPost('**/api/auth/logout').respondWith(200, {});
+    await setupDashboardMocks(mockApi);
 
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/\/login/);
 
-    // Clear tokens from localStorage (simulating logout)
-    await page.evaluate(() => {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-    });
-
-    // Navigate somewhere protected after tokens are gone
-    await page.goto('/students');
+    // Click the logout button in the sidebar
+    await page.getByRole('button', { name: /log out/i }).click();
     await expect(page).toHaveURL(/\/login/);
   });
 

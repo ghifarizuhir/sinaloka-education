@@ -1,15 +1,18 @@
+import { createRequire } from 'module';
 import { MockApi } from '../fixtures/mock-api.fixture';
-import authData from '../mocks/auth.json';
-import studentsData from '../mocks/students.json';
-import tutorsData from '../mocks/tutors.json';
-import classesData from '../mocks/classes.json';
-import enrollmentsData from '../mocks/enrollments.json';
-import sessionsData from '../mocks/sessions.json';
-import paymentsData from '../mocks/payments.json';
-import payoutsData from '../mocks/payouts.json';
-import attendanceData from '../mocks/attendance.json';
-import expensesData from '../mocks/expenses.json';
-import dashboardData from '../mocks/dashboard.json';
+
+const require = createRequire(import.meta.url);
+const authData = require('../mocks/auth.json');
+const studentsData = require('../mocks/students.json');
+const tutorsData = require('../mocks/tutors.json');
+const classesData = require('../mocks/classes.json');
+const enrollmentsData = require('../mocks/enrollments.json');
+const sessionsData = require('../mocks/sessions.json');
+const paymentsData = require('../mocks/payments.json');
+const payoutsData = require('../mocks/payouts.json');
+const attendanceData = require('../mocks/attendance.json');
+const expensesData = require('../mocks/expenses.json');
+const dashboardData = require('../mocks/dashboard.json');
 
 export async function setupAuthMocks(mockApi: MockApi) {
   await mockApi.onPost('**/api/auth/login').respondWith(200, authData.login);
