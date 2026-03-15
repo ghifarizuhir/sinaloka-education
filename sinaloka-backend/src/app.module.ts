@@ -8,6 +8,7 @@ import { TenantInterceptor } from './common/interceptors/tenant.interceptor.js';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { InstitutionModule } from './modules/institution/institution.module.js';
+import { UserModule } from './modules/user/user.module.js';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { InstitutionModule } from './modules/institution/institution.module.js';
     PrismaModule,
     AuthModule,
     InstitutionModule,
+    UserModule,
   ],
   providers: [
     {
