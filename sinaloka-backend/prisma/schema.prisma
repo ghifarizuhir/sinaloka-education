@@ -70,6 +70,13 @@ enum ExpenseCategory {
   OTHER
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
 model Institution {
   id         String   @id @default(uuid())
   name       String
@@ -94,6 +101,7 @@ model Institution {
   expenses        Expense[]
   parents         Parent[]
   parent_invites  ParentInvite[]
+  invitations     Invitation[]
 
   @@map("institutions")
 }
@@ -102,7 +110,7 @@ model User {
   id              String    @id @default(uuid())
   institution_id  String?
   email           String    @unique
-  password_hash   String
+  password_hash   String?
   name            String
   avatar_url      String?
   role            Role
@@ -164,6 +172,7 @@ model Tutor {
   institution          Institution @relation(fields: [institution_id], references: [id])
   classes              Class[]
   payouts              Payout[]
+  invitation           Invitation?
 
   @@map("tutors")
 }
@@ -208,6 +217,22 @@ model ParentInvite {
   institution     Institution @relation(fields: [institution_id], references: [id])
 
   @@map("parent_invites")
+}
+
+model Invitation {
+  id             String           @id @default(uuid())
+  email          String
+  token          String           @unique
+  institution_id String
+  institution    Institution      @relation(fields: [institution_id], references: [id])
+  tutor_id       String           @unique
+  tutor          Tutor            @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  status         InvitationStatus @default(PENDING)
+  expires_at     DateTime
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+
+  @@map("invitations")
 }
 
 model Class {
