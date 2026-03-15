@@ -86,7 +86,7 @@ sinaloka-platform/
 
 ## Playwright Configuration
 
-- **Base URL**: `http://localhost:5173` (Vite dev server default port)
+- **Base URL**: `http://localhost:3000` (Vite dev server with `--port=3000`)
 - **API URL**: `http://localhost:5000` (backend; all `page.route()` mocks target this host)
 - **Projects**: `light-mode` (default) and `dark-mode` (injects `.dark` class on `<html>`)
 - **Browser**: Chromium only
