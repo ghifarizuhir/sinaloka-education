@@ -24,6 +24,15 @@ Replace the current direct tutor creation flow (admin sets password) with an inv
 
 ## Database
 
+### Schema Migration: Make `password_hash` nullable
+
+The `User` model currently has `password_hash String` (not nullable). To support invited tutors who haven't set a password yet, this must become `String?`. The login flow in `auth.service.ts` must also guard against null `password_hash` (reject login attempt before `bcrypt.compare`).
+
+```prisma
+// In User model:
+password_hash String?   // Changed from String to String?
+```
+
 ### New Model: `Invitation`
 
 ```prisma
@@ -39,6 +48,8 @@ model Invitation {
   expires_at      DateTime
   created_at      DateTime         @default(now())
   updated_at      DateTime         @updatedAt
+
+  @@map("invitations")
 }
 
 enum InvitationStatus {
@@ -49,11 +60,18 @@ enum InvitationStatus {
 }
 ```
 
+**Relation fields to add on existing models:**
+- `Institution`: add `invitations Invitation[]`
+- `Tutor`: add `invitation Invitation?` (one-to-one, a tutor has at most one invitation)
+
 **Key points:**
 - `token`: 32-byte hex string via `crypto.randomBytes(32).toString('hex')`
-- `tutor_id`: FK to Tutor (created at invite time with `user.is_active = false`)
-- `onDelete: Cascade`: cancelling/deleting tutor removes invitation
+- `tutor_id`: FK to Tutor (created at invite time with `user.is_active = false`, `password_hash: null`)
+- `onDelete: Cascade`: deleting tutor removes invitation
 - `expires_at`: set to `now() + 48 hours` on creation
+- `@@map("invitations")`: follows existing convention for table naming
+
+**Note:** The existing `ParentInvite` model uses a simpler pattern (`used_at` nullable DateTime). This spec uses a status enum instead because we need richer states (PENDING/ACCEPTED/EXPIRED/CANCELLED) to drive the admin UI badge display and action menus.
 
 ## Data Flow
 
@@ -62,53 +80,75 @@ enum InvitationStatus {
 1. Admin submits invite form (email, subjects, optional name/experience)
 2. Backend `POST /api/admin/tutors/invite`:
    - Check email uniqueness (User table)
-   - Create `User` (role: TUTOR, `is_active: false`, `password_hash: null`)
-   - Create `Tutor` (linked to user, with subjects/experience)
-   - Create `Invitation` (token, status: PENDING, expires_at: now + 48h)
-   - Send email via Resend with link: `{TUTOR_PORTAL_URL}/accept-invite?token={token}`
+   - **In a single `$transaction`:**
+     - Create `User` (role: TUTOR, `is_active: false`, `password_hash: null`, name: provided name or email prefix)
+     - Create `Tutor` (linked to user, with subjects/experience)
+     - Create `Invitation` (token, status: PENDING, expires_at: now + 48h)
+   - **After transaction succeeds:** send email via Resend
+   - If email send fails: records remain in DB (admin can resend later), return success with warning
    - Return tutor + invitation data
 3. Tutor clicks link in email
 4. Tutor portal `GET /api/auth/invitation/{token}`:
    - Validate token exists and is not expired/cancelled/accepted
+   - Validate institution is still active
    - Return: email, institution name, tutor name (if set)
 5. Tutor fills in password (+ optional name override, bank details)
 6. `POST /api/auth/accept-invite`:
-   - Validate token again
-   - Set `password_hash` on User
-   - Set `is_active: true` on User
-   - Set invitation status to ACCEPTED
+   - Validate token again (exists, not expired/cancelled/accepted)
+   - Validate institution is still active
+   - **In a single `$transaction`:**
+     - Set `password_hash` on User
+     - Set `is_active: true` on User
+     - Update name/bank details on Tutor (if provided)
+     - Set invitation status to ACCEPTED
    - Return success
 7. Tutor redirected to login page
+
+**Name default strategy:** If admin doesn't provide a name, `User.name` is set to the email prefix (part before `@`). Tutor can override this when accepting.
 
 ### Resend Flow
 
 1. Admin clicks "Resend Invite" on a pending/expired tutor
 2. Backend `POST /api/admin/tutors/:id/resend-invite`:
-   - Generate new token
-   - Reset `expires_at` to now + 48h
-   - Set status back to PENDING (if was EXPIRED)
-   - Send new email via Resend
-3. Old token is invalidated (replaced)
+   - Verify tutor exists and `user.is_active === false`
+   - **Update-in-place** on the existing Invitation record:
+     - Generate new token (replaces old token — old token stops working since it no longer exists in DB)
+     - Reset `expires_at` to now + 48h
+     - Set status back to PENDING (if was EXPIRED)
+   - Send new email via Resend with new token
+   - If email fails: token is still updated, return success with warning (admin can retry)
 
 ### Cancel Flow
 
 1. Admin clicks "Cancel Invite" on a pending tutor
 2. Backend `POST /api/admin/tutors/:id/cancel-invite`:
-   - Set invitation status to CANCELLED
-   - Delete Tutor record (cascades to invitation)
-   - Delete User record
+   - Verify tutor exists and `user.is_active === false`
+   - **In a single `$transaction`:**
+     - Delete User record (this cascades: User → Tutor → Invitation all removed)
+   - Tutor and invitation records are cleaned up via cascade deletes
 
 ## API Endpoints
 
 ### New Endpoints
+
+**Admin endpoints (on TutorController):**
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `POST` | `/api/admin/tutors/invite` | Admin JWT | Create tutor + send invitation email |
 | `POST` | `/api/admin/tutors/:id/resend-invite` | Admin JWT | Resend invitation (new token + expiry) |
 | `POST` | `/api/admin/tutors/:id/cancel-invite` | Admin JWT | Cancel invitation, delete inactive tutor |
-| `GET` | `/api/auth/invitation/:token` | Public | Validate token, return invitation details |
-| `POST` | `/api/auth/accept-invite` | Public | Set password, activate account |
+
+**Public endpoints (on InvitationController — new `src/modules/invitation/` module):**
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/api/invitation/:token` | Public | Validate token, return invitation details |
+| `POST` | `/api/invitation/accept` | Public | Set password, activate account |
+
+The invitation module owns the `InvitationService` which handles token generation, validation, and acceptance. The `TutorController` delegates to `InvitationService` for the invite/resend/cancel actions. This keeps auth module clean and invitation logic self-contained.
+
+**Rate limiting:** Public endpoints (`GET /api/invitation/:token` and `POST /api/invitation/accept`) must be rate-limited (e.g., 10 requests/minute per IP) to prevent token enumeration and brute-force attempts.
 
 ### DTOs
 
@@ -207,13 +247,20 @@ tutorsService.cancelInvite(id: string)             // POST /api/admin/tutors/:id
 
 ## Tutor Portal Changes (sinaloka-tutors)
 
+### Prerequisite: Install React Router
+
+The tutor portal currently uses state-based tab navigation (`activeTab` state), not URL-based routing. The `/accept-invite` page needs to be a URL route (linked from email). Install `react-router-dom` and convert the app to use URL-based routing:
+- `/login` → LoginPage
+- `/accept-invite` → AcceptInvitePage (public, no auth)
+- `/` → Main app (authenticated, current tab-based layout)
+
 ### New Route: `/accept-invite`
 
 **Page: `AcceptInvitePage`**
 
 On mount:
 - Extract `token` from URL query params
-- Call `GET /api/auth/invitation/{token}`
+- Call `GET /api/invitation/{token}`
 - If valid → show registration form
 - If expired → show "Invitation expired — contact your admin to resend"
 - If already accepted → redirect to `/login`
@@ -228,7 +275,7 @@ On mount:
 - Bank Account Holder (optional)
 
 On submit:
-- Call `POST /api/auth/accept-invite` with token + form data
+- Call `POST /api/invitation/accept` with token + form data
 - On success → redirect to `/login` with toast "Account created! Please log in."
 - On error → show error message
 
@@ -250,3 +297,5 @@ Add public route (no auth required):
 | Token cancelled | 410 Gone | "This invitation was cancelled" |
 | Resend for active tutor | 400 Bad Request | "This tutor is already active" |
 | Resend email fails | 502 Bad Gateway | "Failed to send email. Try again." |
+| Login with null password (invited but not accepted) | 401 Unauthorized | "Please accept your invitation first" |
+| Institution deactivated between invite and acceptance | 403 Forbidden | "This institution is no longer active" |
