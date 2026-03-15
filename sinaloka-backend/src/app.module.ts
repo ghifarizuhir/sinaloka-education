@@ -11,6 +11,8 @@ import { InstitutionModule } from './modules/institution/institution.module.js';
 import { UserModule } from './modules/user/user.module.js';
 import { StudentModule } from './modules/student/student.module.js';
 import { TutorModule } from './modules/tutor/tutor.module.js';
+import { ClassModule } from './modules/class/class.module.js';
+import { EnrollmentModule } from './modules/enrollment/enrollment.module.js';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { TutorModule } from './modules/tutor/tutor.module.js';
     UserModule,
     StudentModule,
     TutorModule,
+    ClassModule,
+    EnrollmentModule,
   ],
   providers: [
     {
