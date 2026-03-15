@@ -8,8 +8,9 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { LoginSchema, RefreshTokenSchema, LogoutSchema } from './auth.dto.js';
-import type { LoginDto, RefreshTokenDto, LogoutDto } from './auth.dto.js';
+import { LoginSchema, RefreshTokenSchema, LogoutSchema, ParentRegisterSchema } from './auth.dto.js';
+import type { LoginDto, RefreshTokenDto, LogoutDto, ParentRegisterDto } from './auth.dto.js';
+import { ParentInviteService } from '../parent/parent-invite.service.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
@@ -17,7 +18,10 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly parentInviteService: ParentInviteService,
+  ) {}
 
   @Public()
   @Post('login')
@@ -33,6 +37,19 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(RefreshTokenSchema))
   async refresh(@Body() dto: RefreshTokenDto) {
     return this.authService.refresh(dto);
+  }
+
+  @Public()
+  @Post('register/parent')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ZodValidationPipe(ParentRegisterSchema))
+  async registerParent(@Body() dto: ParentRegisterDto) {
+    const { user } = await this.parentInviteService.registerParent(dto);
+    // Auto-login: return tokens
+    return this.authService.login({
+      email: user.email,
+      password: dto.password,
+    });
   }
 
   @Post('logout')

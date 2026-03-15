@@ -18,3 +18,6 @@ export const LogoutSchema = z.object({
 });
 
 export type LogoutDto = z.infer<typeof LogoutSchema>;
+
+export { ParentRegisterSchema } from '../parent/parent.dto.js';
+export type { ParentRegisterDto } from '../parent/parent.dto.js';
