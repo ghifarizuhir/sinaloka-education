@@ -23,12 +23,14 @@ import { ReportModule } from './modules/report/report.module.js';
 import { UploadModule } from './modules/upload/upload.module.js';
 import { ParentModule } from './modules/parent/parent.module.js';
 import { EmailModule } from './modules/email/email.module.js';
+import { InvitationModule } from './modules/invitation/invitation.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     EmailModule,
+    InvitationModule,
     AuthModule,
     InstitutionModule,
     UserModule,
