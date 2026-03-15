@@ -11,6 +11,7 @@ enum Role {
   SUPER_ADMIN
   ADMIN
   TUTOR
+  PARENT
 }
 
 enum StudentStatus {
@@ -90,7 +91,9 @@ model Institution {
   attendances Attendance[]
   payments    Payment[]
   payouts     Payout[]
-  expenses    Expense[]
+  expenses        Expense[]
+  parents         Parent[]
+  parent_invites  ParentInvite[]
 
   @@map("institutions")
 }
@@ -110,6 +113,7 @@ model User {
 
   institution     Institution? @relation(fields: [institution_id], references: [id])
   tutor           Tutor?
+  parent          Parent?
   created_sessions Session[]   @relation("SessionCreatedBy")
   approved_sessions Session[]  @relation("SessionApprovedBy")
   refresh_tokens  RefreshToken[]
@@ -136,6 +140,7 @@ model Student {
   enrollments     Enrollment[]
   attendances     Attendance[]
   payments        Payment[]
+  parent_links    ParentStudent[]
 
   @@map("students")
 }
@@ -161,6 +166,48 @@ model Tutor {
   payouts              Payout[]
 
   @@map("tutors")
+}
+
+model Parent {
+  id              String          @id @default(uuid())
+  user_id         String          @unique
+  institution_id  String
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  user            User            @relation(fields: [user_id], references: [id])
+  institution     Institution     @relation(fields: [institution_id], references: [id])
+  children        ParentStudent[]
+
+  @@map("parents")
+}
+
+model ParentStudent {
+  id          String   @id @default(uuid())
+  parent_id   String
+  student_id  String
+  created_at  DateTime @default(now())
+
+  parent      Parent   @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  student     Student  @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([parent_id, student_id])
+  @@map("parent_students")
+}
+
+model ParentInvite {
+  id              String    @id @default(uuid())
+  institution_id  String
+  email           String
+  token           String    @unique
+  student_ids     String[]
+  used_at         DateTime?
+  expires_at      DateTime
+  created_at      DateTime  @default(now())
+
+  institution     Institution @relation(fields: [institution_id], references: [id])
+
+  @@map("parent_invites")
 }
 
 model Class {
