@@ -1,6 +1,6 @@
-import api from '@/lib/api';
-import type { PaginatedResponse } from '@/types/common';
-import type { Tutor, CreateTutorDto, UpdateTutorDto, TutorQueryParams } from '@/types/tutor';
+import api from '@/src/lib/api';
+import type { PaginatedResponse } from '@/src/types/common';
+import type { Tutor, CreateTutorDto, UpdateTutorDto, TutorQueryParams } from '@/src/types/tutor';
 
 export const tutorsService = {
   getAll: (params?: TutorQueryParams) =>

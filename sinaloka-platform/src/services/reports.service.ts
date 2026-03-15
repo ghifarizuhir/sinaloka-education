@@ -1,5 +1,5 @@
-import api from '@/lib/api';
-import type { AttendanceReportParams, FinanceReportParams, StudentProgressReportParams } from '@/types/report';
+import api from '@/src/lib/api';
+import type { AttendanceReportParams, FinanceReportParams, StudentProgressReportParams } from '@/src/types/report';
 
 export const reportsService = {
   getAttendanceReport: (params: AttendanceReportParams) =>

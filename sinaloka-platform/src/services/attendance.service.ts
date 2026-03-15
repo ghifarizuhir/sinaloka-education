@@ -1,5 +1,5 @@
-import api from '@/lib/api';
-import type { Attendance, UpdateAttendanceDto, AttendanceQueryParams, AttendanceSummaryParams } from '@/types/attendance';
+import api from '@/src/lib/api';
+import type { Attendance, UpdateAttendanceDto, AttendanceQueryParams, AttendanceSummaryParams } from '@/src/types/attendance';
 
 export const attendanceService = {
   getBySession: (params: AttendanceQueryParams) =>

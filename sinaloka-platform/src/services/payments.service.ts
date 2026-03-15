@@ -1,6 +1,6 @@
-import api from '@/lib/api';
-import type { PaginatedResponse } from '@/types/common';
-import type { Payment, CreatePaymentDto, UpdatePaymentDto, PaymentQueryParams } from '@/types/payment';
+import api from '@/src/lib/api';
+import type { PaginatedResponse } from '@/src/types/common';
+import type { Payment, CreatePaymentDto, UpdatePaymentDto, PaymentQueryParams } from '@/src/types/payment';
 
 export const paymentsService = {
   getAll: (params?: PaymentQueryParams) =>

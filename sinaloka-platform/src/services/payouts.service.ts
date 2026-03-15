@@ -1,6 +1,6 @@
-import api from '@/lib/api';
-import type { PaginatedResponse } from '@/types/common';
-import type { Payout, CreatePayoutDto, UpdatePayoutDto, PayoutQueryParams } from '@/types/payout';
+import api from '@/src/lib/api';
+import type { PaginatedResponse } from '@/src/types/common';
+import type { Payout, CreatePayoutDto, UpdatePayoutDto, PayoutQueryParams } from '@/src/types/payout';
 
 export const payoutsService = {
   getAll: (params?: PayoutQueryParams) =>

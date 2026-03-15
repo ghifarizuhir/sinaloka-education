@@ -1,6 +1,6 @@
-import api from '@/lib/api';
-import type { PaginatedResponse } from '@/types/common';
-import type { Enrollment, CreateEnrollmentDto, UpdateEnrollmentDto, EnrollmentQueryParams, CheckConflictDto } from '@/types/enrollment';
+import api from '@/src/lib/api';
+import type { PaginatedResponse } from '@/src/types/common';
+import type { Enrollment, CreateEnrollmentDto, UpdateEnrollmentDto, EnrollmentQueryParams, CheckConflictDto } from '@/src/types/enrollment';
 
 export const enrollmentsService = {
   getAll: (params?: EnrollmentQueryParams) =>

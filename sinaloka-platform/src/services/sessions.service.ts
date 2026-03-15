@@ -1,6 +1,6 @@
-import api from '@/lib/api';
-import type { PaginatedResponse } from '@/types/common';
-import type { Session, CreateSessionDto, UpdateSessionDto, SessionQueryParams, GenerateSessionsDto, ApproveRescheduleDto } from '@/types/session';
+import api from '@/src/lib/api';
+import type { PaginatedResponse } from '@/src/types/common';
+import type { Session, CreateSessionDto, UpdateSessionDto, SessionQueryParams, GenerateSessionsDto, ApproveRescheduleDto } from '@/src/types/session';
 
 export const sessionsService = {
   getAll: (params?: SessionQueryParams) =>

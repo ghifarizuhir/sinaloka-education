@@ -1,6 +1,6 @@
-import api from '@/lib/api';
-import type { PaginatedResponse } from '@/types/common';
-import type { Student, CreateStudentDto, UpdateStudentDto, StudentQueryParams } from '@/types/student';
+import api from '@/src/lib/api';
+import type { PaginatedResponse } from '@/src/types/common';
+import type { Student, CreateStudentDto, UpdateStudentDto, StudentQueryParams } from '@/src/types/student';
 
 export const studentsService = {
   getAll: (params?: StudentQueryParams) =>

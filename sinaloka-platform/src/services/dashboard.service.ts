@@ -1,5 +1,5 @@
-import api from '@/lib/api';
-import type { DashboardStats, ActivityItem } from '@/types/dashboard';
+import api from '@/src/lib/api';
+import type { DashboardStats, ActivityItem } from '@/src/types/dashboard';
 
 export const dashboardService = {
   getStats: () => api.get<DashboardStats>('/api/admin/dashboard/stats').then((r) => r.data),

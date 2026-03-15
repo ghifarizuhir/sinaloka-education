@@ -1,5 +1,5 @@
-import api from '@/lib/api';
-import type { LoginRequest, TokenResponse, User } from '@/types/auth';
+import api from '@/src/lib/api';
+import type { LoginRequest, TokenResponse, User } from '@/src/types/auth';
 
 export const authService = {
   login: (data: LoginRequest) =>

@@ -1,6 +1,6 @@
-import api from '@/lib/api';
-import type { PaginatedResponse } from '@/types/common';
-import type { Expense, CreateExpenseDto, UpdateExpenseDto, ExpenseQueryParams } from '@/types/expense';
+import api from '@/src/lib/api';
+import type { PaginatedResponse } from '@/src/types/common';
+import type { Expense, CreateExpenseDto, UpdateExpenseDto, ExpenseQueryParams } from '@/src/types/expense';
 
 export const expensesService = {
   getAll: (params?: ExpenseQueryParams) =>
