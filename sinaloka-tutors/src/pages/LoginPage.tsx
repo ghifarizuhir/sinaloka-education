@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { LogIn, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const invited = searchParams.get('invited') === 'true';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +48,13 @@ export function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {invited && (
+            <div className="flex items-center gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+              <span>Akun berhasil diaktivasi! Silakan masuk.</span>
+            </div>
+          )}
+
           {error && (
             <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-lg text-sm">
               <AlertCircle className="w-5 h-5 shrink-0" />
