@@ -1,50 +1,50 @@
 {
   "data": [
     {
-      "id": 1,
-      "session_id": 1,
-      "student_id": 1,
+      "id": "att-001",
+      "session_id": "ses-001",
+      "student_id": "stu-001",
       "status": "PRESENT",
       "homework_done": true,
       "notes": null,
       "student": {
-        "id": 1,
+        "id": "stu-001",
         "name": "Aisyah Putri"
       },
       "session": {
-        "id": 1,
+        "id": "ses-001",
         "date": "2026-03-15"
       }
     },
     {
-      "id": 2,
-      "session_id": 1,
-      "student_id": 2,
+      "id": "att-002",
+      "session_id": "ses-001",
+      "student_id": "stu-002",
       "status": "ABSENT",
       "homework_done": false,
       "notes": "Sick",
       "student": {
-        "id": 2,
+        "id": "stu-002",
         "name": "Rizki Pratama"
       },
       "session": {
-        "id": 1,
+        "id": "ses-001",
         "date": "2026-03-15"
       }
     },
     {
-      "id": 3,
-      "session_id": 1,
-      "student_id": 3,
+      "id": "att-003",
+      "session_id": "ses-001",
+      "student_id": "stu-003",
       "status": "LATE",
       "homework_done": false,
       "notes": "Arrived 10 min late",
       "student": {
-        "id": 3,
+        "id": "stu-003",
         "name": "Fajar Hidayat"
       },
       "session": {
-        "id": 1,
+        "id": "ses-001",
         "date": "2026-03-15"
       }
     }

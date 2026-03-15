@@ -1,7 +1,7 @@
 {
   "data": [
     {
-      "id": 1,
+      "id": "cls-001",
       "name": "Math Advanced",
       "subject": "Mathematics",
       "capacity": 20,
@@ -11,15 +11,15 @@
       "schedule_end_time": "10:30",
       "room": "Room A",
       "status": "ACTIVE",
-      "tutor_id": 1,
+      "tutor_id": "tut-001",
       "tutor": {
-        "id": 1,
+        "id": "tut-001",
         "name": "Dewi Lestari"
       },
       "institution_id": 1
     },
     {
-      "id": 2,
+      "id": "cls-002",
       "name": "Physics Basic",
       "subject": "Physics",
       "capacity": 15,
@@ -29,9 +29,9 @@
       "schedule_end_time": "11:30",
       "room": "Room B",
       "status": "ACTIVE",
-      "tutor_id": 1,
+      "tutor_id": "tut-001",
       "tutor": {
-        "id": 1,
+        "id": "tut-001",
         "name": "Dewi Lestari"
       },
       "institution_id": 1

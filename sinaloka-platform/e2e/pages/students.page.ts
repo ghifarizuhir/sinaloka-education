@@ -60,7 +60,7 @@ export class StudentsPage {
   async deleteStudent(name: string) {
     this.page.on('dialog', (dialog) => dialog.accept());
     await this.openRowMenu(name);
-    await this.page.getByText(/^delete$/i).click();
+    await this.page.getByRole('button', { name: /delete/i }).click();
   }
 
   async search(query: string) { await this.searchInput.fill(query); }

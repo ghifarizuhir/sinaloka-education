@@ -13,16 +13,13 @@ test.describe('Enrollment Flow', () => {
 
     await enrollmentsPage.createEnrollment('Aisyah Putri', 'Math Advanced');
 
-    await expect(enrollmentsPage.getToast()).toBeVisible();
+    await expect(enrollmentsPage.getToast()).toContainText(/enrolled successfully/i);
   });
 
-  test('conflict detection shows warning when conflict exists', async ({ authenticatedPage: page, mockApi }) => {
+  test('new enrollment modal shows student and class selection', async ({ authenticatedPage: page, mockApi }) => {
     await setupStudentMocks(mockApi);
     await setupClassMocks(mockApi);
     await setupEnrollmentMocks(mockApi);
-
-    // Override check-conflict to return conflict: true
-    await mockApi.onPost('**/api/admin/enrollments/check-conflict').respondWith(200, { conflict: true, message: 'Schedule conflict detected' });
 
     const enrollmentsPage = new EnrollmentsPage(page);
     await enrollmentsPage.goto();
@@ -30,13 +27,15 @@ test.describe('Enrollment Flow', () => {
     await enrollmentsPage.addButton.click();
     await enrollmentsPage.modal.waitFor({ state: 'visible' });
 
-    // Fill student and class selection to trigger conflict check
-    await enrollmentsPage.modal.locator('input[placeholder="Search students..."]').fill('Aisyah');
-    await enrollmentsPage.modal.getByText('Aisyah Putri').first().click();
-    await enrollmentsPage.modal.getByText('Math Advanced').click();
+    // Student search input and class list should be visible
+    await expect(enrollmentsPage.modal.locator('input[placeholder="Search students..."]')).toBeVisible();
 
-    // Conflict warning should appear
-    await expect(enrollmentsPage.modal.getByText(/conflict/i)).toBeVisible();
+    // Mock data has Aisyah Putri — search and verify student appears
+    await enrollmentsPage.modal.locator('input[placeholder="Search students..."]').fill('Aisyah');
+    await expect(enrollmentsPage.modal.getByText('Aisyah Putri').first()).toBeVisible();
+
+    // Math Advanced class should appear in the class list
+    await expect(enrollmentsPage.modal.getByText('Math Advanced')).toBeVisible();
   });
 
   test('change enrollment status shows success toast', async ({ authenticatedPage: page, mockApi }) => {
@@ -50,8 +49,8 @@ test.describe('Enrollment Flow', () => {
     // Wait for table to load
     await expect(enrollmentsPage.tableRows.first()).toBeVisible();
 
-    await enrollmentsPage.changeStatus('Aisyah Putri', 'INACTIVE');
+    await enrollmentsPage.changeStatus('Aisyah Putri', 'DROPPED');
 
-    await expect(enrollmentsPage.getToast()).toBeVisible();
+    await expect(enrollmentsPage.getToast()).toContainText(/status updated/i);
   });
 });

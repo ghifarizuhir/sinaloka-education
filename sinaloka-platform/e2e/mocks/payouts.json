@@ -1,25 +1,25 @@
 {
   "data": [
     {
-      "id": 1,
-      "tutor_id": 1,
+      "id": "pyt-001",
+      "tutor_id": "tut-001",
       "amount": 2000000,
       "status": "PENDING",
       "period": "2026-03",
       "tutor": {
-        "id": 1,
+        "id": "tut-001",
         "name": "Dewi Lestari"
       },
       "created_at": "2026-03-01T08:00:00Z"
     },
     {
-      "id": 2,
-      "tutor_id": 2,
+      "id": "pyt-002",
+      "tutor_id": "tut-002",
       "amount": 1500000,
       "status": "APPROVED",
       "period": "2026-02",
       "tutor": {
-        "id": 2,
+        "id": "tut-002",
         "name": "Rina Wijaya"
       },
       "created_at": "2026-02-28T08:00:00Z"

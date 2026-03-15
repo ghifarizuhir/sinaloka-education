@@ -23,14 +23,19 @@ export class StudentPaymentsPage {
     await row.locator('button[title="Record Payment"]').click();
     await this.page.getByRole('heading', { name: /record payment/i }).waitFor({ state: 'visible' });
 
+    // The modal uses Label components without htmlFor - locate inputs by their position in the modal
+    const modal = this.page.locator('.bg-white, .dark\\:bg-zinc-900').filter({ hasText: /record payment/i }).last();
     if (options?.amount !== undefined) {
-      await this.page.getByLabel(/payment amount/i).fill(String(options.amount));
+      // First number input is payment amount
+      await modal.locator('input[type="number"]').first().fill(String(options.amount));
     }
     if (options?.discount !== undefined) {
-      await this.page.getByLabel(/discount.*adj/i).fill(String(options.discount));
+      // Second number input is discount
+      await modal.locator('input[type="number"]').nth(1).fill(String(options.discount));
     }
     if (options?.method) {
-      await this.page.getByLabel(/method/i).selectOption(options.method);
+      // The select element for method
+      await modal.locator('select').selectOption(options.method);
     }
     await this.page.getByRole('button', { name: /confirm payment/i }).click();
   }

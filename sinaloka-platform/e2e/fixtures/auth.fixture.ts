@@ -30,8 +30,9 @@ export const test = mockTest.extend<AuthFixtures>({
         });
       }
 
-      // Mock the /me endpoint
+      // Mock auth endpoints to prevent token refresh loops
       await mockApi.onGet('**/api/auth/me').respondWith(200, TEST_USER);
+      await mockApi.onPost('**/api/auth/refresh').respondWith(200, TEST_TOKENS);
 
       // Inject tokens into localStorage before navigating
       await page.addInitScript(

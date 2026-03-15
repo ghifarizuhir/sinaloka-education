@@ -1,7 +1,7 @@
 {
   "data": [
     {
-      "id": 1,
+      "id": "stu-001",
       "name": "Aisyah Putri",
       "email": "aisyah@example.com",
       "phone": "+62812345678",
@@ -14,7 +14,7 @@
       "institution_id": 1
     },
     {
-      "id": 2,
+      "id": "stu-002",
       "name": "Rizki Pratama",
       "email": "rizki@example.com",
       "phone": "+62813456789",
@@ -27,7 +27,7 @@
       "institution_id": 1
     },
     {
-      "id": 3,
+      "id": "stu-003",
       "name": "Fajar Hidayat",
       "email": "fajar@example.com",
       "phone": "+62814567890",

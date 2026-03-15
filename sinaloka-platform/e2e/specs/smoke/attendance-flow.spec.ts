@@ -64,7 +64,6 @@ test.describe('Attendance Flow', () => {
 
     const initialState = await checkbox.isChecked();
     await attendancePage.toggleHomework('Rizki Pratama');
-    await expect(checkbox).not.toBeChecked();
     // If it was unchecked, it should now be checked; if checked, now unchecked
     if (initialState) {
       await expect(checkbox).not.toBeChecked();

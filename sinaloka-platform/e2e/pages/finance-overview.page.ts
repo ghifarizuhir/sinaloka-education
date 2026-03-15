@@ -21,7 +21,8 @@ export class FinanceOverviewPage {
   }
 
   async navigateToModule(module: 'Student Payments' | 'Tutor Payouts' | 'Operating Expenses') {
-    await this.page.getByRole('link', { name: module }).click();
+    // Link appears in both nav sidebar and main content; target the main content one
+    await this.page.getByRole('main').getByRole('link', { name: module }).click();
   }
 
   async selectDateRange(range: 'This Month' | 'This Quarter' | 'Year to Date') {

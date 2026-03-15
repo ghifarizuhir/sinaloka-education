@@ -1,64 +1,64 @@
 {
   "data": [
     {
-      "id": 1,
-      "student_id": 1,
-      "enrollment_id": 1,
+      "id": "pay-001",
+      "student_id": "stu-001",
+      "enrollment_id": "enr-001",
       "amount": 500000,
       "due_date": "2026-02-01",
       "paid_date": "2026-02-01",
       "status": "PAID",
       "method": "TRANSFER",
       "student": {
-        "id": 1,
+        "id": "stu-001",
         "name": "Aisyah Putri"
       },
       "enrollment": {
-        "id": 1,
+        "id": "enr-001",
         "class": {
-          "id": 1,
+          "id": "cls-001",
           "name": "Math Advanced"
         }
       }
     },
     {
-      "id": 2,
-      "student_id": 2,
-      "enrollment_id": 2,
+      "id": "pay-002",
+      "student_id": "stu-002",
+      "enrollment_id": "enr-002",
       "amount": 450000,
       "due_date": "2026-03-01",
       "paid_date": null,
       "status": "PENDING",
       "method": null,
       "student": {
-        "id": 2,
+        "id": "stu-002",
         "name": "Rizki Pratama"
       },
       "enrollment": {
-        "id": 2,
+        "id": "enr-002",
         "class": {
-          "id": 2,
+          "id": "cls-002",
           "name": "Physics Basic"
         }
       }
     },
     {
-      "id": 3,
-      "student_id": 3,
-      "enrollment_id": 3,
+      "id": "pay-003",
+      "student_id": "stu-003",
+      "enrollment_id": "enr-003",
       "amount": 500000,
       "due_date": "2026-01-15",
       "paid_date": null,
       "status": "OVERDUE",
       "method": null,
       "student": {
-        "id": 3,
+        "id": "stu-003",
         "name": "Fajar Hidayat"
       },
       "enrollment": {
-        "id": 3,
+        "id": "enr-003",
         "class": {
-          "id": 1,
+          "id": "cls-001",
           "name": "Math Advanced"
         }
       }

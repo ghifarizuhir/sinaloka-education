@@ -50,7 +50,8 @@ test.describe('Payment Flow', () => {
     await page.getByRole('heading', { name: /record payment/i }).waitFor({ state: 'visible' });
 
     // Verify payment method options are present
-    const methodSelect = page.getByLabel(/method/i);
+    // The modal has a select with TRANSFER/CASH options (no htmlFor label association)
+    const methodSelect = page.locator('select').filter({ has: page.locator('option[value="TRANSFER"]') });
     await expect(methodSelect).toBeVisible();
     await expect(methodSelect.locator('option[value="TRANSFER"]')).toHaveCount(1);
     await expect(methodSelect.locator('option[value="CASH"]')).toHaveCount(1);

@@ -22,7 +22,7 @@ export class AttendancePage {
   async goto() { await this.page.goto('/attendance'); }
 
   async selectSession(className: string) {
-    await this.sessionList.getByText(className).click();
+    await this.sessionList.getByText(className).first().click();
   }
 
   async markStatus(studentName: string, status: 'P' | 'A' | 'L') {
