@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
-export function LoginPage({ onSwitchToRegister }: { onSwitchToRegister?: () => void }) {
+export function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,12 +49,6 @@ export function LoginPage({ onSwitchToRegister }: { onSwitchToRegister?: () => v
             {loading ? 'Masuk...' : 'Masuk'}
           </button>
         </form>
-        {onSwitchToRegister && (
-          <p className="text-center text-zinc-500 text-sm mt-6">
-            Punya kode undangan?{' '}
-            <button onClick={onSwitchToRegister} className="text-lime-400 font-semibold">Daftar</button>
-          </p>
-        )}
       </motion.div>
     </div>
   );

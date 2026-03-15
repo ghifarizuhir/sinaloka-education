@@ -15,9 +15,8 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  // Check URL for invite token
+  // Check URL for invite token (only way to access registration)
   const urlParams = new URLSearchParams(window.location.search);
   const inviteToken = urlParams.get('token');
 
@@ -30,10 +29,11 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
-    if (inviteToken || authMode === 'register') {
-      return <RegisterPage inviteToken={inviteToken ?? ''} onSwitchToLogin={() => setAuthMode('login')} />;
+    // Registration only accessible via invite link (URL with ?token=)
+    if (inviteToken) {
+      return <RegisterPage inviteToken={inviteToken} onSwitchToLogin={() => window.history.replaceState({}, '', window.location.pathname)} />;
     }
-    return <LoginPage onSwitchToRegister={() => setAuthMode('register')} />;
+    return <LoginPage />;
   }
 
   const parentName = profile?.name ?? 'Orang Tua';
