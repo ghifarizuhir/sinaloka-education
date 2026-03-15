@@ -520,7 +520,7 @@ These are static JSON fixtures used by the `api-mocker.ts` helper. Each file con
       "name": "Aisyah Putri",
       "email": "aisyah@example.com",
       "phone": "+62812345678",
-      "grade": "10th",
+      "grade": "10th Grade",
       "status": "ACTIVE",
       "parent_name": "Budi Santoso",
       "parent_phone": "+62898765432",
@@ -533,7 +533,7 @@ These are static JSON fixtures used by the `api-mocker.ts` helper. Each file con
       "name": "Rizki Pratama",
       "email": "rizki@example.com",
       "phone": "+62813456789",
-      "grade": "11th",
+      "grade": "11th Grade",
       "status": "ACTIVE",
       "parent_name": "Siti Rahayu",
       "parent_phone": "+62897654321",
@@ -546,7 +546,7 @@ These are static JSON fixtures used by the `api-mocker.ts` helper. Each file con
       "name": "Fajar Hidayat",
       "email": "fajar@example.com",
       "phone": "+62814567890",
-      "grade": "12th",
+      "grade": "12th Grade",
       "status": "INACTIVE",
       "parent_name": "Ahmad Hidayat",
       "parent_phone": "+62896543210",
@@ -931,12 +931,6 @@ export class StudentsPage {
   async importCSV(filePath: string) {
     const fileInput = this.page.locator('input[type="file"]');
     await fileInput.setInputFiles(filePath);
-  }
-
-  async exportCSV() {
-    const downloadPromise = this.page.waitForEvent('download');
-    await this.exportButton.click();
-    return downloadPromise;
   }
 
   private async openRowMenu(name: string) {
