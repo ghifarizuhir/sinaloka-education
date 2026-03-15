@@ -9,7 +9,8 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { JwtPayload } from '../../common/decorators/current-user.decorator.js';
-import { LoginDto, RefreshTokenDto, LogoutDto } from './auth.dto.js';
+import { LoginDto, RefreshTokenDto, LogoutDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto.js';
+import { EmailService } from '../email/email.service.js';
 
 export interface TokenResponse {
   access_token: string;
@@ -26,6 +27,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async login(dto: LoginDto): Promise<TokenResponse> {
@@ -191,6 +193,90 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    // Always return success to prevent email enumeration
+    if (!user || !user.is_active) {
+      return { message: 'Jika email terdaftar, link reset password telah dikirim.' };
+    }
+
+    // Invalidate existing unused tokens
+    await this.prisma.passwordResetToken.updateMany({
+      where: { user_id: user.id, used_at: null },
+      data: { used_at: new Date() },
+    });
+
+    // Create new token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        user_id: user.id,
+        token,
+        expires_at: expiresAt,
+      },
+    });
+
+    // Send email
+    await this.emailService.sendPasswordReset({
+      to: user.email,
+      userName: user.name,
+      resetToken: token,
+    });
+
+    return { message: 'Jika email terdaftar, link reset password telah dikirim.' };
+  }
+
+  async validateResetToken(token: string): Promise<{ valid: boolean; email: string }> {
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token },
+      include: { user: true },
+    });
+
+    if (!resetToken || resetToken.used_at || resetToken.expires_at < new Date()) {
+      throw new UnauthorizedException('Token tidak valid atau sudah kedaluwarsa.');
+    }
+
+    return { valid: true, email: resetToken.user.email };
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token: dto.token },
+      include: { user: true },
+    });
+
+    if (!resetToken || resetToken.used_at || resetToken.expires_at < new Date()) {
+      throw new UnauthorizedException('Token tidak valid atau sudah kedaluwarsa.');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    await this.prisma.$transaction([
+      // Update password
+      this.prisma.user.update({
+        where: { id: resetToken.user_id },
+        data: { password_hash: passwordHash },
+      }),
+      // Mark token as used
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { used_at: new Date() },
+      }),
+      // Revoke all refresh tokens (force re-login)
+      this.prisma.refreshToken.updateMany({
+        where: { user_id: resetToken.user_id, revoked: false },
+        data: { revoked: true },
+      }),
+    ]);
+
+    return { message: 'Password berhasil direset.' };
   }
 
   private calculateExpiry(expiry: string): Date {

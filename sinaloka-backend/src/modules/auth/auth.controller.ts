@@ -3,13 +3,14 @@ import {
   Post,
   Get,
   Body,
+  Param,
   UsePipes,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { LoginSchema, RefreshTokenSchema, LogoutSchema, ParentRegisterSchema } from './auth.dto.js';
-import type { LoginDto, RefreshTokenDto, LogoutDto, ParentRegisterDto } from './auth.dto.js';
+import { LoginSchema, RefreshTokenSchema, LogoutSchema, ParentRegisterSchema, ForgotPasswordSchema, ResetPasswordSchema } from './auth.dto.js';
+import type { LoginDto, RefreshTokenDto, LogoutDto, ParentRegisterDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto.js';
 import { ParentInviteService } from '../parent/parent-invite.service.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
@@ -57,6 +58,28 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(LogoutSchema))
   async logout(@Body() dto: LogoutDto) {
     return this.authService.logout(dto);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(ForgotPasswordSchema))
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Public()
+  @Get('reset-password/:token')
+  async validateResetToken(@Param('token') token: string) {
+    return this.authService.validateResetToken(token);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(ResetPasswordSchema))
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 
   @Get('me')
