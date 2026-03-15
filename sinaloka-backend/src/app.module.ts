@@ -15,6 +15,9 @@ import { ClassModule } from './modules/class/class.module.js';
 import { EnrollmentModule } from './modules/enrollment/enrollment.module.js';
 import { SessionModule } from './modules/session/session.module.js';
 import { AttendanceModule } from './modules/attendance/attendance.module.js';
+import { PaymentModule } from './modules/payment/payment.module.js';
+import { PayoutModule } from './modules/payout/payout.module.js';
+import { ExpenseModule } from './modules/expense/expense.module.js';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { AttendanceModule } from './modules/attendance/attendance.module.js';
     EnrollmentModule,
     SessionModule,
     AttendanceModule,
+    PaymentModule,
+    PayoutModule,
+    ExpenseModule,
   ],
   providers: [
     {
