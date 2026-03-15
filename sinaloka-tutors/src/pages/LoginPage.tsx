@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export function LoginPage() {
@@ -9,6 +9,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const invited = searchParams.get('invited') === 'true';
+  const reset = searchParams.get('reset') === 'true';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +56,13 @@ export function LoginPage() {
             </div>
           )}
 
+          {reset && (
+            <div className="flex items-center gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+              <span>Password berhasil direset. Silakan login.</span>
+            </div>
+          )}
+
           {error && (
             <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-lg text-sm">
               <AlertCircle className="w-5 h-5 shrink-0" />
@@ -98,6 +106,13 @@ export function LoginPage() {
             <LogIn className="w-6 h-6" />
             {loading ? 'Masuk...' : 'Masuk'}
           </button>
+
+          <Link
+            to="/forgot-password"
+            className="w-full flex items-center justify-center text-zinc-500 hover:text-zinc-300 text-sm font-medium transition-colors"
+          >
+            Lupa Password?
+          </Link>
         </form>
       </motion.div>
     </div>

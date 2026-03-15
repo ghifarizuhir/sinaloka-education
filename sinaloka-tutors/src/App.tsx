@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, X } from 'lucide-react';
 import { BottomNav } from './components/BottomNav';
 import { LoginPage } from './pages/LoginPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SchedulePage } from './pages/SchedulePage';
@@ -299,6 +301,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />} />
       <Route path="/*" element={isAuthenticated ? <MainAppContent /> : <Navigate to="/login" replace />} />
     </Routes>
