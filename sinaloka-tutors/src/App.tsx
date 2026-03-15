@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Bell,
   ChevronRight,
-  Star,
   TrendingUp,
   Calendar as CalendarIcon,
   CheckCircle2,
   X,
   LogOut,
-  Settings,
-  ShieldCheck,
-  CreditCard,
-  Download,
   Clock,
-  MessageSquare,
 } from 'lucide-react';
 import { BottomNav } from './components/BottomNav';
 import { ScheduleCard } from './components/ScheduleCard';
@@ -24,7 +17,6 @@ import { useAuth } from './hooks/useAuth';
 import { useSchedule } from './hooks/useSchedule';
 import { usePayouts } from './hooks/usePayouts';
 import { useAttendance } from './hooks/useAttendance';
-import type { ClassSchedule } from './types';
 import { cn } from './lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -142,14 +134,6 @@ export default function App() {
     }
   };
 
-  const handleReschedule = (id: string) => {
-    triggerNotification('Fitur atur ulang jadwal akan segera hadir!');
-  };
-
-  const handleEdit = (id: string) => {
-    triggerNotification('Fitur edit detail jadwal akan segera hadir!');
-  };
-
   const renderAttendanceView = () => {
     if (!selectedClass) return null;
 
@@ -192,25 +176,16 @@ export default function App() {
           </div>
         </div>
 
-        {/* Topic & Attachments */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Topic Covered</label>
-            <input
-              type="text"
-              value={topicCovered}
-              onChange={(e) => setTopicCovered(e.target.value)}
-              placeholder="e.g., Algebraic Fractions"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Attachments</label>
-            <button className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center gap-3 text-zinc-500 hover:text-white transition-all text-sm font-bold">
-              <Download className="w-4 h-4" />
-              Upload Lesson Notes
-            </button>
-          </div>
+        {/* Topic */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Topic Covered</label>
+          <input
+            type="text"
+            value={topicCovered}
+            onChange={(e) => setTopicCovered(e.target.value)}
+            placeholder="e.g., Algebraic Fractions"
+            className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+          />
         </div>
 
         {/* Student List */}
@@ -254,7 +229,7 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+                <div className="flex items-center pt-4 border-t border-zinc-800">
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -264,9 +239,6 @@ export default function App() {
                     />
                     <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">HW Done</span>
                   </div>
-                  <button className="text-zinc-500 hover:text-white transition-colors">
-                    <MessageSquare className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
             ))}
@@ -302,17 +274,9 @@ export default function App() {
   const renderDashboard = () => (
     <div className="space-y-8 pb-24">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Halo, {firstName}!</h1>
-          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Jadwal Mengajar Kamu</p>
-        </div>
-        <div className="relative">
-          <button className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
-            <Bell className="w-5 h-5" />
-          </button>
-          <div className="absolute top-0 right-0 w-3 h-3 bg-lime-400 rounded-full border-2 border-zinc-950"></div>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Halo, {firstName}!</h1>
+        <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Jadwal Mengajar Kamu</p>
       </div>
 
       {/* Stats Cards */}
@@ -356,8 +320,6 @@ export default function App() {
               item={item}
               onOpenAttendance={setSelectedClassId}
               onCancel={handleCancel}
-              onReschedule={handleReschedule}
-              onEdit={handleEdit}
             />
           ))
         ) : (
@@ -367,24 +329,6 @@ export default function App() {
         )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <button className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
-              <Star className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white">Rating Siswa</span>
-          </button>
-          <button className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white">Sertifikasi</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 
@@ -432,8 +376,6 @@ export default function App() {
               item={item}
               onOpenAttendance={setSelectedClassId}
               onCancel={handleCancel}
-              onReschedule={handleReschedule}
-              onEdit={handleEdit}
             />
           ))
         ) : (
@@ -487,12 +429,9 @@ export default function App() {
   const renderProfile = () => (
     <div className="space-y-8 pb-24">
       <div className="flex flex-col items-center text-center pt-8">
-        <div className="relative mb-6">
+        <div className="mb-6">
           <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-lime-400 shadow-[0_0_40px_rgba(163,230,53,0.3)]">
             <img src={profile?.avatar ?? ''} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-          </div>
-          <div className="absolute -bottom-2 -right-2 bg-zinc-950 border-2 border-zinc-800 p-2 rounded-lg">
-            <Settings className="w-5 h-5 text-lime-400" />
           </div>
         </div>
         <h1 className="text-3xl font-bold tracking-tight mb-1">{tutorName}</h1>
@@ -510,24 +449,6 @@ export default function App() {
       </div>
 
       <div className="space-y-4">
-        <button className="w-full flex items-center justify-between p-5 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors group">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-lime-400">
-              <CreditCard className="w-5 h-5" />
-            </div>
-            <span className="text-sm font-bold uppercase tracking-wider">Metode Pembayaran</span>
-          </div>
-          <ChevronRight className="w-5 h-5 text-zinc-600" />
-        </button>
-        <button className="w-full flex items-center justify-between p-5 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors group">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-lime-400">
-              <Settings className="w-5 h-5" />
-            </div>
-            <span className="text-sm font-bold uppercase tracking-wider">Pengaturan Akun</span>
-          </div>
-          <ChevronRight className="w-5 h-5 text-zinc-600" />
-        </button>
         <button
           onClick={logout}
           className="w-full flex items-center justify-between p-5 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors group"
@@ -598,10 +519,6 @@ export default function App() {
               </div>
               <div className="p-6">
                 <img src={selectedProof} alt="Proof" className="w-full rounded-lg shadow-2xl" referrerPolicy="no-referrer" />
-                <button className="w-full mt-6 bg-lime-400 text-black font-semibold py-4 rounded-lg flex items-center justify-center gap-2">
-                  <Download className="w-5 h-5" />
-                  Simpan Gambar
-                </button>
               </div>
             </motion.div>
           </div>
