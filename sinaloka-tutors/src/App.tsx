@@ -50,6 +50,17 @@ export default function App() {
     }
   }, [selectedClassId, fetchStudents]);
 
+  // Reset topic/summary when opening a new attendance view
+  useEffect(() => {
+    if (selectedClassId) {
+      const cls = schedule.find((s) => s.id === selectedClassId);
+      if (cls) {
+        setTopicCovered(cls.topicCovered ?? '');
+        setSessionSummary(cls.sessionSummary ?? '');
+      }
+    }
+  }, [selectedClassId, schedule]);
+
   // Auth loading screen
   if (authLoading) {
     return (
@@ -99,14 +110,6 @@ export default function App() {
   const selectedClass = selectedClassId
     ? schedule.find((s) => s.id === selectedClassId) ?? null
     : null;
-
-  // Reset topic/summary when opening a new attendance view
-  useEffect(() => {
-    if (selectedClass) {
-      setTopicCovered(selectedClass.topicCovered ?? '');
-      setSessionSummary(selectedClass.sessionSummary ?? '');
-    }
-  }, [selectedClassId]);
 
   const handleFinishAttendance = async (classId: string) => {
     const allMarked = students.every((s) => s.attendance !== undefined);
