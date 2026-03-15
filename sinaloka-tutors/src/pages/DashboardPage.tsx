@@ -11,6 +11,7 @@ interface DashboardPageProps {
   onOpenAttendance: (id: string) => void;
   onReschedule: (id: string) => void;
   onCancel: (id: string) => void;
+  onViewDetail: (id: string) => void;
   onViewAllSchedule: () => void;
 }
 
@@ -22,6 +23,7 @@ export function DashboardPage({
   onOpenAttendance,
   onReschedule,
   onCancel,
+  onViewDetail,
   onViewAllSchedule,
 }: DashboardPageProps) {
   return (
@@ -71,6 +73,7 @@ export function DashboardPage({
               onOpenAttendance={onOpenAttendance}
               onReschedule={onReschedule}
               onCancel={onCancel}
+              onViewDetail={onViewDetail}
             />
           ))
         ) : (

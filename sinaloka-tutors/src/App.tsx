@@ -10,6 +10,8 @@ import { SchedulePage } from './pages/SchedulePage';
 import { PayoutsPage } from './pages/PayoutsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AttendancePage } from './pages/AttendancePage';
+import { ProfileEditPage } from './pages/ProfileEditPage';
+import { SessionDetailPage } from './pages/SessionDetailPage';
 import { RescheduleModal } from './components/RescheduleModal';
 import { useAuth } from './hooks/useAuth';
 import { useSchedule } from './hooks/useSchedule';
@@ -30,6 +32,8 @@ function MainAppContent() {
   const [topicCovered, setTopicCovered] = useState('');
   const [sessionSummary, setSessionSummary] = useState('');
   const [rescheduleSessionId, setRescheduleSessionId] = useState<string | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [detailSessionId, setDetailSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedClassId) {
@@ -109,6 +113,8 @@ function MainAppContent() {
 
   const rescheduleSession = rescheduleSessionId ? schedule.find((s) => s.id === rescheduleSessionId) ?? null : null;
 
+  const detailSession = detailSessionId ? schedule.find((s) => s.id === detailSessionId) ?? null : null;
+
   const renderPage = () => {
     if (selectedClassId && selectedClass) {
       return (
@@ -128,6 +134,27 @@ function MainAppContent() {
       );
     }
 
+    if (detailSession) {
+      return (
+        <SessionDetailPage
+          session={detailSession}
+          onClose={() => setDetailSessionId(null)}
+        />
+      );
+    }
+
+    if (editingProfile) {
+      return (
+        <ProfileEditPage
+          onSaved={() => {
+            setEditingProfile(false);
+            triggerNotification('Profil berhasil diperbarui.');
+          }}
+          onClose={() => setEditingProfile(false)}
+        />
+      );
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return (
@@ -139,6 +166,7 @@ function MainAppContent() {
             onOpenAttendance={setSelectedClassId}
             onReschedule={setRescheduleSessionId}
             onCancel={handleCancel}
+            onViewDetail={setDetailSessionId}
             onViewAllSchedule={() => setActiveTab('schedule')}
           />
         );
@@ -152,6 +180,7 @@ function MainAppContent() {
             onOpenAttendance={setSelectedClassId}
             onReschedule={setRescheduleSessionId}
             onCancel={handleCancel}
+            onViewDetail={setDetailSessionId}
           />
         );
       case 'payouts':
@@ -165,7 +194,7 @@ function MainAppContent() {
           />
         );
       case 'profile':
-        return <ProfilePage profile={profile} onLogout={logout} />;
+        return <ProfilePage profile={profile} onLogout={logout} onEditProfile={() => setEditingProfile(true)} />;
       default:
         return null;
     }
@@ -176,7 +205,7 @@ function MainAppContent() {
       <main className="relative z-10 max-w-md mx-auto px-6 pt-8 min-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
-            key={selectedClassId ? 'attendance' : activeTab}
+            key={selectedClassId ? 'attendance' : detailSessionId ? 'detail' : editingProfile ? 'edit-profile' : activeTab}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -187,7 +216,7 @@ function MainAppContent() {
         </AnimatePresence>
       </main>
 
-      {!selectedClassId && <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />}
+      {!selectedClassId && !detailSessionId && !editingProfile && <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />}
 
       {/* Proof Modal */}
       <AnimatePresence>

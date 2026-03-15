@@ -1,13 +1,14 @@
 import React from 'react';
-import { Star, CheckCircle2, LogOut, ChevronRight } from 'lucide-react';
+import { Star, CheckCircle2, LogOut, ChevronRight, Pencil } from 'lucide-react';
 import type { TutorProfile } from '../types';
 
 interface ProfilePageProps {
   profile: TutorProfile | null;
   onLogout: () => void;
+  onEditProfile: () => void;
 }
 
-export function ProfilePage({ profile, onLogout }: ProfilePageProps) {
+export function ProfilePage({ profile, onLogout, onEditProfile }: ProfilePageProps) {
   const tutorName = profile?.name ?? 'Tutor';
 
   return (
@@ -33,6 +34,18 @@ export function ProfilePage({ profile, onLogout }: ProfilePageProps) {
       </div>
 
       <div className="space-y-4">
+        <button
+          onClick={onEditProfile}
+          className="w-full flex items-center justify-between p-5 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-lime-400">
+              <Pencil className="w-5 h-5" />
+            </div>
+            <span className="text-sm font-bold uppercase tracking-wider">Edit Profil</span>
+          </div>
+          <ChevronRight className="w-5 h-5 text-zinc-600" />
+        </button>
         <button
           onClick={onLogout}
           className="w-full flex items-center justify-between p-5 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors group"

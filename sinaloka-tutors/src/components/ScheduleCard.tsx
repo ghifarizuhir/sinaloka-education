@@ -11,9 +11,10 @@ interface ScheduleCardProps {
   onOpenAttendance: (id: string) => void;
   onReschedule: (id: string) => void;
   onCancel: (id: string) => void;
+  onViewDetail?: (id: string) => void;
 }
 
-export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendance, onReschedule, onCancel }) => {
+export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendance, onReschedule, onCancel, onViewDetail }) => {
   const isUpcoming = item.status === 'upcoming';
   const allAttended = item.students.length > 0 && item.students.every(s => s.attendance !== undefined);
   
@@ -90,6 +91,15 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
         <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
           <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Absensi Murid Selesai</p>
         </div>
+      )}
+
+      {!isUpcoming && onViewDetail && (
+        <button
+          onClick={() => onViewDetail(item.id)}
+          className="w-full p-3 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider"
+        >
+          Lihat Detail
+        </button>
       )}
     </motion.div>
   );

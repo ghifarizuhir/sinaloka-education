@@ -19,6 +19,7 @@ interface SchedulePageProps {
   onOpenAttendance: (id: string) => void;
   onReschedule: (id: string) => void;
   onCancel: (id: string) => void;
+  onViewDetail: (id: string) => void;
 }
 
 export function SchedulePage({
@@ -29,6 +30,7 @@ export function SchedulePage({
   onOpenAttendance,
   onReschedule,
   onCancel,
+  onViewDetail,
 }: SchedulePageProps) {
   return (
     <div className="space-y-6 pb-24">
@@ -69,6 +71,7 @@ export function SchedulePage({
               onOpenAttendance={onOpenAttendance}
               onReschedule={onReschedule}
               onCancel={onCancel}
+              onViewDetail={onViewDetail}
             />
           ))
         ) : (
