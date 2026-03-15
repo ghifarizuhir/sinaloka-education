@@ -4,7 +4,7 @@ import { login } from './helpers';
 test.describe('Attendance', () => {
   test('should mark attendance and complete session', async ({ page }) => {
     await login(page);
-    await page.getByText('Jadwal').click();
+    await page.getByRole('button', { name: 'Jadwal' }).click();
     await expect(page.getByText('Jadwal Mengajar')).toBeVisible();
     await page.getByRole('button', { name: 'Upcoming' }).click();
     await page.getByText('Absen Murid').first().click({ timeout: 10000 });

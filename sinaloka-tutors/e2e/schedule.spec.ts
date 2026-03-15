@@ -7,14 +7,16 @@ test.describe('Schedule', () => {
   });
 
   test('should display schedule page with sessions', async ({ page }) => {
-    await page.getByText('Jadwal').click();
+    await page.getByRole('button', { name: 'Jadwal' }).click();
     await expect(page.getByText('Jadwal Mengajar')).toBeVisible();
     await expect(page.getByText('Manajemen sesi dan absensi')).toBeVisible();
-    await expect(page.getByText('Matematika').first()).toBeVisible({ timeout: 10000 });
+    // Click Completed to verify sessions that won't be consumed by attendance test
+    await page.getByRole('button', { name: 'Completed' }).click();
+    await expect(page.getByText('Matematika').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('should filter schedule by status', async ({ page }) => {
-    await page.getByText('Jadwal').click();
+    await page.getByRole('button', { name: 'Jadwal' }).click();
     await expect(page.getByText('Jadwal Mengajar')).toBeVisible();
     await page.getByRole('button', { name: 'Completed' }).click();
     await expect(page.getByRole('button', { name: 'Completed' })).toHaveClass(/bg-lime-400/);

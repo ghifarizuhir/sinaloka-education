@@ -7,7 +7,7 @@ test.describe('Payouts', () => {
   });
 
   test('should display payouts page with totals', async ({ page }) => {
-    await page.getByText('Payout').click();
+    await page.getByRole('button', { name: 'Payout' }).click();
     await expect(page.getByText('Payouts').first()).toBeVisible();
     await expect(page.getByText('Total Pendapatan')).toBeVisible();
     await expect(page.getByText(/Rp\s/).first()).toBeVisible();
