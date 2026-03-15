@@ -1,0 +1,232 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { UnauthorizedException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+
+// Mock PrismaService module to avoid importing generated prisma client
+jest.mock('../../common/prisma/prisma.service', () => {
+  return {
+    PrismaService: jest.fn(),
+  };
+});
+
+import { AuthService } from './auth.service.js';
+import { PrismaService } from '../../common/prisma/prisma.service.js';
+
+// Mock bcrypt
+jest.mock('bcrypt', () => ({
+  compare: jest.fn(),
+}));
+
+// Mock crypto
+jest.mock('crypto', () => ({
+  randomBytes: jest.fn(() => ({
+    toString: jest.fn(() => 'mock-refresh-token-hex'),
+  })),
+}));
+
+describe('AuthService', () => {
+  let service: AuthService;
+  let prisma: {
+    user: {
+      findUnique: jest.Mock;
+      update: jest.Mock;
+    };
+    refreshToken: {
+      create: jest.Mock;
+      findUnique: jest.Mock;
+      update: jest.Mock;
+    };
+  };
+  let jwtService: { sign: jest.Mock };
+
+  const mockUser = {
+    id: 'user-1',
+    email: 'admin@test.com',
+    password_hash: '$2b$10$hashedpassword',
+    name: 'Test Admin',
+    role: 'ADMIN',
+    is_active: true,
+    institution_id: 'inst-1',
+    last_login_at: null,
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+
+  beforeEach(async () => {
+    prisma = {
+      user: {
+        findUnique: jest.fn(),
+        update: jest.fn(),
+      },
+      refreshToken: {
+        create: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+      },
+    };
+
+    jwtService = {
+      sign: jest.fn(() => 'mock-access-token'),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: JwtService, useValue: jwtService },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string, defaultValue?: string) => {
+              const config: Record<string, string> = {
+                JWT_EXPIRY: '15m',
+                JWT_REFRESH_EXPIRY: '7d',
+              };
+              return config[key] ?? defaultValue;
+            }),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<AuthService>(AuthService);
+  });
+
+  describe('login', () => {
+    it('should return tokens on successful login', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue(mockUser);
+      prisma.refreshToken.create.mockResolvedValue({});
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      const result = await service.login({
+        email: 'admin@test.com',
+        password: 'password123',
+      });
+
+      expect(result.access_token).toBe('mock-access-token');
+      expect(result.refresh_token).toBe('mock-refresh-token-hex');
+      expect(result.token_type).toBe('Bearer');
+      expect(result.expires_in).toBe(900); // 15m = 900s
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        sub: 'user-1',
+        institutionId: 'inst-1',
+        role: 'ADMIN',
+      });
+      expect(prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'user-1' },
+        }),
+      );
+    });
+
+    it('should throw UnauthorizedException for wrong email', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.login({ email: 'wrong@test.com', password: 'password123' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException for wrong password', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        service.login({ email: 'admin@test.com', password: 'wrongpass' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException for inactive user', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        is_active: false,
+      });
+
+      await expect(
+        service.login({ email: 'admin@test.com', password: 'password123' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('refresh', () => {
+    it('should return new tokens for valid refresh token', async () => {
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1',
+        token: 'valid-refresh-token',
+        revoked: false,
+        expires_at: new Date(Date.now() + 86400000), // 1 day from now
+        user: mockUser,
+      });
+      prisma.refreshToken.update.mockResolvedValue({});
+      prisma.refreshToken.create.mockResolvedValue({});
+
+      const result = await service.refresh({
+        refresh_token: 'valid-refresh-token',
+      });
+
+      expect(result.access_token).toBe('mock-access-token');
+      expect(result.refresh_token).toBe('mock-refresh-token-hex');
+      expect(result.token_type).toBe('Bearer');
+      // Old token should be revoked
+      expect(prisma.refreshToken.update).toHaveBeenCalledWith({
+        where: { id: 'rt-1' },
+        data: { revoked: true },
+      });
+    });
+
+    it('should throw UnauthorizedException for invalid refresh token', async () => {
+      prisma.refreshToken.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.refresh({ refresh_token: 'invalid-token' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException for revoked refresh token', async () => {
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1',
+        token: 'revoked-token',
+        revoked: true,
+        expires_at: new Date(Date.now() + 86400000),
+        user: mockUser,
+      });
+
+      await expect(
+        service.refresh({ refresh_token: 'revoked-token' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('logout', () => {
+    it('should revoke the refresh token', async () => {
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1',
+        token: 'token-to-revoke',
+      });
+      prisma.refreshToken.update.mockResolvedValue({});
+
+      const result = await service.logout({
+        refresh_token: 'token-to-revoke',
+      });
+
+      expect(result.message).toBe('Logged out successfully');
+      expect(prisma.refreshToken.update).toHaveBeenCalledWith({
+        where: { id: 'rt-1' },
+        data: { revoked: true },
+      });
+    });
+
+    it('should succeed even if token does not exist', async () => {
+      prisma.refreshToken.findUnique.mockResolvedValue(null);
+
+      const result = await service.logout({
+        refresh_token: 'nonexistent-token',
+      });
+
+      expect(result.message).toBe('Logged out successfully');
+    });
+  });
+});
