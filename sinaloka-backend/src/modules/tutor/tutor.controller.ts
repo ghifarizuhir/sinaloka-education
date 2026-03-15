@@ -26,11 +26,17 @@ import type {
   UpdateTutorDto,
   TutorQueryDto,
 } from './tutor.dto.js';
+import { InvitationService } from '../invitation/invitation.service.js';
+import { InviteTutorSchema } from '../invitation/invitation.dto.js';
+import type { InviteTutorDto } from '../invitation/invitation.dto.js';
 
 @Controller('admin/tutors')
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)
 export class TutorController {
-  constructor(private readonly tutorService: TutorService) {}
+  constructor(
+    private readonly tutorService: TutorService,
+    private readonly invitationService: InvitationService,
+  ) {}
 
   @Post()
   async create(
@@ -46,6 +52,24 @@ export class TutorController {
     @Query(new ZodValidationPipe(TutorQuerySchema)) query: TutorQueryDto,
   ) {
     return this.tutorService.findAll(user.institutionId!, query);
+  }
+
+  @Post('invite')
+  async invite(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(InviteTutorSchema)) dto: InviteTutorDto,
+  ) {
+    return this.invitationService.invite(user.institutionId!, dto);
+  }
+
+  @Post(':id/resend-invite')
+  async resendInvite(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.invitationService.resendInvite(user.institutionId!, id);
+  }
+
+  @Post(':id/cancel-invite')
+  async cancelInvite(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.invitationService.cancelInvite(user.institutionId!, id);
   }
 
   @Get(':id')
