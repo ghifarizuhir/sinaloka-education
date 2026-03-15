@@ -16,10 +16,12 @@ import { SessionService } from './session.service.js';
 import {
   RequestRescheduleSchema,
   TutorScheduleQuerySchema,
+  CompleteSessionSchema,
 } from './session.dto.js';
 import type {
   RequestRescheduleDto,
   TutorScheduleQueryDto,
+  CompleteSessionDto,
 } from './session.dto.js';
 
 @Controller('tutor/schedule')
@@ -50,5 +52,22 @@ export class TutorSessionController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.sessionService.cancelSession(user.userId, id);
+  }
+
+  @Get(':id/students')
+  getStudents(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.sessionService.getSessionStudents(user.userId, id);
+  }
+
+  @Patch(':id/complete')
+  complete(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodValidationPipe(CompleteSessionSchema)) dto: CompleteSessionDto,
+  ) {
+    return this.sessionService.completeSession(user.userId, id, dto);
   }
 }
