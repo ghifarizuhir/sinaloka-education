@@ -9,6 +9,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { InstitutionModule } from './modules/institution/institution.module.js';
 import { UserModule } from './modules/user/user.module.js';
+import { StudentModule } from './modules/student/student.module.js';
+import { TutorModule } from './modules/tutor/tutor.module.js';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { UserModule } from './modules/user/user.module.js';
     AuthModule,
     InstitutionModule,
     UserModule,
+    StudentModule,
+    TutorModule,
   ],
   providers: [
     {
