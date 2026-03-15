@@ -14,7 +14,6 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
 import { Tutors } from './pages/Tutors';
-import { Parents } from './pages/Parents';
 import { Classes } from './pages/Classes';
 import { Schedules } from './pages/Schedules';
 import { Enrollments } from './pages/Enrollments';
@@ -36,7 +35,6 @@ export default function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/students" element={<Students />} />
             <Route path="/tutors" element={<Tutors />} />
-            <Route path="/parents" element={<Parents />} />
             <Route path="/classes" element={<Classes />} />
             <Route path="/schedules" element={<Schedules />} />
             <Route path="/enrollments" element={<Enrollments />} />

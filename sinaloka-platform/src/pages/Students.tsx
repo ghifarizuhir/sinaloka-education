@@ -18,7 +18,6 @@ import {
   EyeOff,
   Search,
   X,
-  MessageSquare,
   CheckCircle2
 } from 'lucide-react';
 import {
@@ -43,6 +42,7 @@ import {
   useImportStudents,
   useExportStudents
 } from '@/src/hooks/useStudents';
+import { useInviteParent } from '@/src/hooks/useParents';
 import type { Student } from '@/src/types/student';
 
 export const Students = () => {
@@ -64,6 +64,7 @@ export const Students = () => {
   const [formStatus, setFormStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
   const [formParentName, setFormParentName] = useState('');
   const [formParentPhone, setFormParentPhone] = useState('');
+  const [formParentEmail, setFormParentEmail] = useState('');
 
   const { data, isLoading } = useStudents({ page, limit });
   const createStudent = useCreateStudent();
@@ -71,6 +72,7 @@ export const Students = () => {
   const deleteStudent = useDeleteStudent();
   const importStudents = useImportStudents();
   const exportStudents = useExportStudents();
+  const inviteParent = useInviteParent();
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -169,6 +171,7 @@ export const Students = () => {
     setFormStatus('ACTIVE');
     setFormParentName('');
     setFormParentPhone('');
+    setFormParentEmail('');
     setShowAddModal(true);
   };
 
@@ -180,6 +183,7 @@ export const Students = () => {
     setFormStatus(student.status);
     setFormParentName(student.parent_name ?? '');
     setFormParentPhone(student.parent_phone ?? '');
+    setFormParentEmail(student.parent_email ?? '');
     setShowAddModal(true);
   };
 
@@ -191,6 +195,7 @@ export const Students = () => {
       status: formStatus,
       parent_name: formParentName || undefined,
       parent_phone: formParentPhone || undefined,
+      parent_email: formParentEmail || undefined,
     };
 
     if (editingStudent) {
@@ -471,6 +476,26 @@ export const Students = () => {
                                     >
                                       <Eye size={14} /> View / Edit
                                     </button>
+                                    {student.parent_email && (
+                                      <button
+                                        onClick={() => {
+                                          inviteParent.mutate(
+                                            { email: student.parent_email!, student_ids: [student.id] },
+                                            {
+                                              onSuccess: () => {
+                                                toast.success(`Invitation sent to ${student.parent_email}`);
+                                                setActiveActionMenu(null);
+                                              },
+                                              onError: (err: any) => toast.error(err?.response?.data?.message || 'Failed to send invitation'),
+                                            }
+                                          );
+                                          setActiveActionMenu(null);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
+                                      >
+                                        <UserPlus size={14} /> Invite Parent
+                                      </button>
+                                    )}
                                     <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
                                     <button
                                       onClick={() => { handleDeleteStudent(student.id); setActiveActionMenu(null); }}
@@ -651,16 +676,34 @@ export const Students = () => {
                     <div>
                       <p className="text-sm font-bold dark:text-zinc-200">{selectedStudent.parent_name ?? '—'}</p>
                       <p className="text-xs text-zinc-500">Primary Contact</p>
+                      <span className="text-xs text-zinc-400">{selectedStudent.parent_email ?? ''}</span>
                     </div>
                   </div>
                   <Button size="sm" variant="outline" className="h-8 w-8 p-0 justify-center">
                     <Phone size={14} />
                   </Button>
                 </div>
-                <Button className="w-full justify-center gap-2" variant="secondary">
-                  <MessageSquare size={16} />
-                  Message Parent
-                </Button>
+                {selectedStudent.parent_email ? (
+                  <Button
+                    className="w-full justify-center gap-2"
+                    variant="secondary"
+                    onClick={() => {
+                      inviteParent.mutate(
+                        { email: selectedStudent.parent_email!, student_ids: [selectedStudent.id] },
+                        {
+                          onSuccess: () => toast.success(`Invitation sent to ${selectedStudent.parent_email}`),
+                          onError: (err: any) => toast.error(err?.response?.data?.message || 'Failed to send invitation'),
+                        }
+                      );
+                    }}
+                    disabled={inviteParent.isPending}
+                  >
+                    <UserPlus size={16} />
+                    {inviteParent.isPending ? 'Sending...' : 'Invite Parent'}
+                  </Button>
+                ) : (
+                  <p className="text-xs text-zinc-500 text-center">No parent email on file</p>
+                )}
               </Card>
             </div>
           </div>
@@ -734,6 +777,16 @@ export const Students = () => {
               placeholder="+62 812 3456 7890"
               value={formParentPhone}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormParentPhone(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-parent-email">Parent/Guardian Email</Label>
+            <Input
+              id="new-parent-email"
+              type="email"
+              placeholder="parent@example.com"
+              value={formParentEmail}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormParentEmail(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3 mt-8">

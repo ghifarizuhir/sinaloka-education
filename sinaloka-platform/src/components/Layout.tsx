@@ -4,7 +4,6 @@ import {
   Users,
   GraduationCap,
   BookOpen,
-  ContactRound,
   Settings,
   Search,
   Bell,
@@ -123,7 +122,6 @@ export const Layout = () => {
     '/': 'Dashboard',
     '/students': 'Students',
     '/tutors': 'Tutors',
-    '/parents': 'Parents',
     '/classes': 'Classes',
     '/schedules': 'Schedules',
     '/enrollments': 'Enrollments',
@@ -162,7 +160,6 @@ export const Layout = () => {
             <div className="space-y-1">
               <SidebarItem icon={Users} label="Students" href="/students" active={location.pathname === '/students'} minimized={isSidebarMinimized} />
               <SidebarItem icon={GraduationCap} label="Tutors" href="/tutors" active={location.pathname === '/tutors'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={ContactRound} label="Parents" href="/parents" active={location.pathname === '/parents'} minimized={isSidebarMinimized} />
               <SidebarItem icon={BookOpen} label="Classes" href="/classes" active={location.pathname === '/classes'} minimized={isSidebarMinimized} />
             </div>
           </div>
