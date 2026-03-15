@@ -32,7 +32,8 @@ export class TenantInterceptor implements NestInterceptor {
         (request.query['institution_id'] as string) || null;
     } else if (
       user.role === Role.ADMIN ||
-      user.role === Role.TUTOR
+      user.role === Role.TUTOR ||
+      user.role === Role.PARENT
     ) {
       if (!user.institutionId) {
         throw new ForbiddenException(
