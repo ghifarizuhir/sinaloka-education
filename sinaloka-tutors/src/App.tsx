@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronRight,
+  Star,
   TrendingUp,
   Calendar as CalendarIcon,
   CheckCircle2,
