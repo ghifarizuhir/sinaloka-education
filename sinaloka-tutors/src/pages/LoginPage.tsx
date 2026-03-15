@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { LogIn, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export function LoginPage() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +19,7 @@ export function LoginPage() {
 
     try {
       await login(email, password);
+      navigate('/');
     } catch (err: any) {
       const message =
         err?.response?.data?.message || 'Login gagal. Periksa email dan password.';

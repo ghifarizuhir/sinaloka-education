@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, X } from 'lucide-react';
 import { BottomNav } from './components/BottomNav';
 import { LoginPage } from './pages/LoginPage';
+import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SchedulePage } from './pages/SchedulePage';
 import { PayoutsPage } from './pages/PayoutsPage';
@@ -14,8 +16,8 @@ import { useSchedule } from './hooks/useSchedule';
 import { usePayouts } from './hooks/usePayouts';
 import { useAttendance } from './hooks/useAttendance';
 
-export default function App() {
-  const { isAuthenticated, isLoading: authLoading, profile, logout } = useAuth();
+function MainAppContent() {
+  const { profile, logout } = useAuth();
   const { data: schedule, isLoading: scheduleLoading, activeFilter, setFilter, refetch: refetchSchedule, cancelSession, requestReschedule } = useSchedule();
   const { data: payouts } = usePayouts();
   const { students, setStudents, fetchStudents, submitAttendance } = useAttendance();
@@ -44,18 +46,6 @@ export default function App() {
       }
     }
   }, [selectedClassId, schedule]);
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
 
   const upcomingClasses = schedule.filter((s) => s.status === 'upcoming');
   const pendingPayout = payouts.filter((p) => p.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0);
@@ -263,5 +253,25 @@ export default function App() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
+  );
+}
+
+export default function App() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/accept-invite" element={<AcceptInvitePage />} />
+      <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />} />
+      <Route path="/*" element={isAuthenticated ? <MainAppContent /> : <Navigate to="/login" replace />} />
+    </Routes>
   );
 }
