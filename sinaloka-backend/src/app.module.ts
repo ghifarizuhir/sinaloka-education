@@ -13,6 +13,8 @@ import { StudentModule } from './modules/student/student.module.js';
 import { TutorModule } from './modules/tutor/tutor.module.js';
 import { ClassModule } from './modules/class/class.module.js';
 import { EnrollmentModule } from './modules/enrollment/enrollment.module.js';
+import { SessionModule } from './modules/session/session.module.js';
+import { AttendanceModule } from './modules/attendance/attendance.module.js';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { EnrollmentModule } from './modules/enrollment/enrollment.module.js';
     TutorModule,
     ClassModule,
     EnrollmentModule,
+    SessionModule,
+    AttendanceModule,
   ],
   providers: [
     {
