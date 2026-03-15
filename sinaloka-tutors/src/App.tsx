@@ -64,7 +64,7 @@ export default function App() {
   // Auth loading screen
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -162,32 +162,32 @@ export default function App() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSelectedClassId(null)}
-              className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-white"
+              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white"
             >
               <X className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-xl font-black tracking-tighter uppercase italic leading-none mb-1">{selectedClass.subject}</h1>
-              <div className="flex items-center gap-3 text-stone-500 text-[10px] font-bold uppercase tracking-widest">
-                <span className="bg-stone-800 px-2 py-0.5 rounded text-stone-400">Scheduled</span>
+              <h1 className="text-xl font-semibold leading-none mb-1">{selectedClass.subject}</h1>
+              <div className="flex items-center gap-3 text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+                <span className="bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">Scheduled</span>
                 <span>{tutorName}</span>
               </div>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-black tracking-tighter leading-none">{presentCount} / {students.length}</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Present</p>
+            <p className="text-2xl font-bold tracking-tight leading-none">{presentCount} / {students.length}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Present</p>
           </div>
         </div>
 
         {/* Info Bar */}
-        <div className="flex flex-wrap gap-4 text-stone-400 text-[10px] font-bold uppercase tracking-widest bg-stone-900/50 p-4 rounded-2xl border border-stone-800">
+        <div className="flex flex-wrap gap-4 text-zinc-400 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 p-4 rounded-lg border border-zinc-800">
           <div className="flex items-center gap-2">
-            <CalendarIcon className="w-3 h-3 text-stone-600" />
+            <CalendarIcon className="w-3 h-3 text-zinc-600" />
             <span>{format(new Date(selectedClass.date), 'EEEE, MMM d, yyyy', { locale: id })}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="w-3 h-3 text-stone-600" />
+            <Clock className="w-3 h-3 text-zinc-600" />
             <span>{selectedClass.startTime} - {selectedClass.endTime}</span>
           </div>
         </div>
@@ -195,18 +195,18 @@ export default function App() {
         {/* Topic & Attachments */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-stone-500 ml-2">Topic Covered</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Topic Covered</label>
             <input
               type="text"
               value={topicCovered}
               onChange={(e) => setTopicCovered(e.target.value)}
               placeholder="e.g., Algebraic Fractions"
-              className="w-full px-6 py-4 rounded-2xl bg-stone-900 border border-stone-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-stone-500 ml-2">Attachments</label>
-            <button className="w-full px-6 py-4 rounded-2xl bg-stone-900 border border-stone-800 flex items-center justify-center gap-3 text-stone-500 hover:text-white transition-all text-sm font-bold">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Attachments</label>
+            <button className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center gap-3 text-zinc-500 hover:text-white transition-all text-sm font-bold">
               <Download className="w-4 h-4" />
               Upload Lesson Notes
             </button>
@@ -216,10 +216,10 @@ export default function App() {
         {/* Student List */}
         <div className="space-y-4">
           <div className="flex justify-between items-center px-2">
-            <h3 className="text-xs font-black uppercase tracking-widest text-stone-500">Student List</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Student List</h3>
             <button
               onClick={() => students.forEach((s) => handleToggleAttendance(selectedClass.id, s.id, 'P'))}
-              className="text-[10px] font-black uppercase tracking-widest text-lime-400 hover:text-lime-300"
+              className="text-[10px] font-bold uppercase tracking-wider text-lime-400 hover:text-lime-300"
             >
               Mark All Present
             </button>
@@ -227,11 +227,11 @@ export default function App() {
 
           <div className="space-y-3">
             {students.map((student) => (
-              <div key={student.id} className="bg-stone-900 border border-stone-800 rounded-[24px] p-5">
+              <div key={student.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h4 className="text-white font-black uppercase italic tracking-tighter">{student.name}</h4>
-                    <p className="text-stone-500 text-[10px] font-bold uppercase tracking-widest">{student.grade}</p>
+                    <h4 className="text-white font-semibold">{student.name}</h4>
+                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">{student.grade}</p>
                   </div>
                   <div className="flex gap-1">
                     {(['P', 'A', 'L'] as const).map((status) => (
@@ -239,14 +239,14 @@ export default function App() {
                         key={status}
                         onClick={() => handleToggleAttendance(selectedClass.id, student.id, status)}
                         className={cn(
-                          'w-8 h-8 rounded-lg text-[10px] font-black transition-all border',
+                          'w-8 h-8 rounded-lg text-[10px] font-bold transition-all border',
                           student.attendance === status
                             ? status === 'P'
                               ? 'bg-lime-400 border-lime-400 text-black'
                               : status === 'A'
                                 ? 'bg-red-500 border-red-500 text-white'
                                 : 'bg-orange-400 border-orange-400 text-white'
-                            : 'bg-stone-800 border-stone-700 text-stone-500',
+                            : 'bg-zinc-800 border-zinc-700 text-zinc-500',
                         )}
                       >
                         {status}
@@ -254,17 +254,17 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-stone-800">
+                <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={student.homeworkDone || false}
                       onChange={() => handleToggleHomework(selectedClass.id, student.id)}
-                      className="w-4 h-4 rounded border-stone-700 bg-stone-800 text-lime-400 focus:ring-lime-400/20"
+                      className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-lime-400 focus:ring-lime-400/20"
                     />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-500">HW Done</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">HW Done</span>
                   </div>
-                  <button className="text-stone-500 hover:text-white transition-colors">
+                  <button className="text-zinc-500 hover:text-white transition-colors">
                     <MessageSquare className="w-4 h-4" />
                   </button>
                 </div>
@@ -275,13 +275,13 @@ export default function App() {
 
         {/* Session Summary */}
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-stone-500 ml-2">Session Summary</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Session Summary</label>
           <textarea
             value={sessionSummary}
             onChange={(e) => setSessionSummary(e.target.value)}
             placeholder="Enter learning summary, materials taught, or important notes..."
             rows={4}
-            className="w-full px-6 py-4 rounded-3xl bg-stone-900 border border-stone-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm resize-none"
+            className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm resize-none"
           />
         </div>
 
@@ -289,7 +289,7 @@ export default function App() {
         <div className="pt-8">
           <button
             onClick={() => handleFinishAttendance(selectedClass.id)}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-5 rounded-[24px] shadow-[0_10px_30px_rgba(16,185,129,0.2)] uppercase italic tracking-tighter text-lg flex items-center justify-center gap-3 transition-all"
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-5 rounded-xl text-lg flex items-center justify-center gap-3 transition-all"
           >
             <CheckCircle2 className="w-6 h-6" />
             Finalize & Close
@@ -304,49 +304,49 @@ export default function App() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-black tracking-tighter uppercase italic">Halo, {firstName}!</h1>
-          <p className="text-stone-500 text-xs font-bold uppercase tracking-widest">Jadwal Mengajar Kamu</p>
+          <h1 className="text-2xl font-bold tracking-tight">Halo, {firstName}!</h1>
+          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Jadwal Mengajar Kamu</p>
         </div>
         <div className="relative">
-          <button className="w-10 h-10 rounded-full bg-stone-900 border border-stone-800 flex items-center justify-center text-stone-400">
+          <button className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
             <Bell className="w-5 h-5" />
           </button>
-          <div className="absolute top-0 right-0 w-3 h-3 bg-lime-400 rounded-full border-2 border-black"></div>
+          <div className="absolute top-0 right-0 w-3 h-3 bg-lime-400 rounded-full border-2 border-zinc-950"></div>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-lime-400 p-5 rounded-[32px] text-black">
+        <div className="bg-lime-400 p-5 rounded-xl text-black">
           <div className="flex justify-between items-start mb-4">
             <TrendingUp className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Pending</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">Pending</span>
           </div>
           <p className="text-xs font-bold uppercase tracking-tighter mb-1">Total Payout</p>
-          <p className="text-xl font-black tracking-tighter">Rp {pendingPayout.toLocaleString('id-ID')}</p>
+          <p className="text-xl font-bold tracking-tight">Rp {pendingPayout.toLocaleString('id-ID')}</p>
         </div>
-        <div className="bg-stone-900 border border-stone-800 p-5 rounded-[32px] text-white">
+        <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl text-white">
           <div className="flex justify-between items-start mb-4">
             <CalendarIcon className="w-6 h-6 text-lime-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-stone-500">Today</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Today</span>
           </div>
-          <p className="text-xs font-bold uppercase tracking-tighter mb-1 text-stone-400">Sesi Mengajar</p>
-          <p className="text-xl font-black tracking-tighter">{upcomingClasses.length} Kelas</p>
+          <p className="text-xs font-bold uppercase tracking-tighter mb-1 text-zinc-400">Sesi Mengajar</p>
+          <p className="text-xl font-bold tracking-tight">{upcomingClasses.length} Kelas</p>
         </div>
       </div>
 
       {/* Today's Schedule Preview */}
       <div>
         <div className="flex justify-between items-end mb-4">
-          <h2 className="text-lg font-black uppercase italic tracking-tighter">Jadwal Hari Ini</h2>
-          <button onClick={() => setActiveTab('schedule')} className="text-lime-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+          <h2 className="text-lg font-semibold">Jadwal Hari Ini</h2>
+          <button onClick={() => setActiveTab('schedule')} className="text-lime-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
             Lihat Semua <ChevronRight className="w-3 h-3" />
           </button>
         </div>
         {scheduleLoading ? (
           <div className="space-y-4">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-stone-900 rounded-[24px] h-32 animate-pulse" />
+              <div key={i} className="bg-zinc-900 rounded-xl h-32 animate-pulse" />
             ))}
           </div>
         ) : upcomingClasses.length > 0 ? (
@@ -361,27 +361,27 @@ export default function App() {
             />
           ))
         ) : (
-          <div className="bg-stone-900/50 border border-dashed border-stone-800 rounded-[24px] p-8 text-center">
-            <p className="text-stone-500 text-sm italic">Gak ada jadwal buat hari ini. <br/>Waktunya istirahat!</p>
+          <div className="bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl p-8 text-center">
+            <p className="text-zinc-500 text-sm">Gak ada jadwal buat hari ini. <br/>Waktunya istirahat!</p>
           </div>
         )}
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-stone-900 border border-stone-800 rounded-[32px] p-6">
-        <h3 className="text-sm font-black uppercase tracking-widest text-stone-500 mb-4">Quick Actions</h3>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-4">
-          <button className="flex items-center gap-3 p-3 rounded-2xl bg-stone-800 hover:bg-stone-700 transition-colors">
+          <button className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors">
             <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
               <Star className="w-4 h-4" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-tighter text-white">Rating Siswa</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white">Rating Siswa</span>
           </button>
-          <button className="flex items-center gap-3 p-3 rounded-2xl bg-stone-800 hover:bg-stone-700 transition-colors">
+          <button className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors">
             <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
               <ShieldCheck className="w-4 h-4" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-tighter text-white">Sertifikasi</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white">Sertifikasi</span>
           </button>
         </div>
       </div>
@@ -397,8 +397,8 @@ export default function App() {
   const renderSchedule = () => (
     <div className="space-y-6 pb-24">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tighter uppercase italic mb-2">Jadwal Mengajar</h1>
-        <p className="text-stone-500 text-xs font-bold uppercase tracking-widest">Manajemen sesi dan absensi</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Jadwal Mengajar</h1>
+        <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Manajemen sesi dan absensi</p>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
@@ -407,10 +407,10 @@ export default function App() {
             key={f.value}
             onClick={() => setFilter(activeFilter === f.value ? undefined : f.value)}
             className={cn(
-              'px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all',
+              'px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all',
               activeFilter === f.value
                 ? 'bg-lime-400 text-black'
-                : 'bg-stone-900 text-stone-500 border border-stone-800',
+                : 'bg-zinc-900 text-zinc-500 border border-zinc-800',
             )}
           >
             {f.label}
@@ -422,7 +422,7 @@ export default function App() {
         {scheduleLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-stone-900 rounded-[24px] h-32 animate-pulse" />
+              <div key={i} className="bg-zinc-900 rounded-xl h-32 animate-pulse" />
             ))}
           </div>
         ) : schedule.length > 0 ? (
@@ -437,8 +437,8 @@ export default function App() {
             />
           ))
         ) : (
-          <div className="bg-stone-900/50 border border-dashed border-stone-800 rounded-[24px] p-8 text-center">
-            <p className="text-stone-500 text-sm italic">Tidak ada jadwal ditemukan.</p>
+          <div className="bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl p-8 text-center">
+            <p className="text-zinc-500 text-sm">Tidak ada jadwal ditemukan.</p>
           </div>
         )}
       </div>
@@ -448,35 +448,35 @@ export default function App() {
   const renderPayouts = () => (
     <div className="space-y-6 pb-24">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tighter uppercase italic mb-2">Payouts</h1>
-        <p className="text-stone-500 text-xs font-bold uppercase tracking-widest">Riwayat pendapatan kamu</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Payouts</h1>
+        <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Riwayat pendapatan kamu</p>
       </div>
 
-      <div className="bg-stone-900 border border-stone-800 rounded-[32px] p-6 mb-8">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-lime-400 flex items-center justify-center text-black">
+          <div className="w-12 h-12 rounded-lg bg-lime-400 flex items-center justify-center text-black">
             <TrendingUp className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-stone-500 text-[10px] font-black uppercase tracking-widest">Total Pendapatan</p>
-            <p className="text-2xl font-black tracking-tighter text-white">Rp {totalEarnings.toLocaleString('id-ID')}</p>
+            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Total Pendapatan</p>
+            <p className="text-2xl font-bold tracking-tight text-white">Rp {totalEarnings.toLocaleString('id-ID')}</p>
           </div>
         </div>
-        <div className="h-px bg-stone-800 mb-6"></div>
+        <div className="h-px bg-zinc-800 mb-6"></div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-stone-500 text-[10px] font-black uppercase tracking-widest">Pending</p>
-            <p className="text-lg font-black tracking-tighter text-orange-400">Rp {pendingPayout.toLocaleString('id-ID')}</p>
+            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Pending</p>
+            <p className="text-lg font-bold tracking-tight text-orange-400">Rp {pendingPayout.toLocaleString('id-ID')}</p>
           </div>
           <div>
-            <p className="text-stone-500 text-[10px] font-black uppercase tracking-widest">Paid</p>
-            <p className="text-lg font-black tracking-tighter text-lime-400">Rp {totalPaid.toLocaleString('id-ID')}</p>
+            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Paid</p>
+            <p className="text-lg font-bold tracking-tight text-lime-400">Rp {totalPaid.toLocaleString('id-ID')}</p>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-sm font-black uppercase tracking-widest text-stone-500 mb-4 px-2">Transaksi Terakhir</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4 px-2">Transaksi Terakhir</h3>
         {payouts.map((payout) => (
           <PayoutCard key={payout.id} payout={payout} onViewProof={setSelectedProof} />
         ))}
@@ -488,55 +488,55 @@ export default function App() {
     <div className="space-y-8 pb-24">
       <div className="flex flex-col items-center text-center pt-8">
         <div className="relative mb-6">
-          <div className="w-32 h-32 rounded-[40px] overflow-hidden border-4 border-lime-400 shadow-[0_0_40px_rgba(163,230,53,0.3)]">
+          <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-lime-400 shadow-[0_0_40px_rgba(163,230,53,0.3)]">
             <img src={profile?.avatar ?? ''} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </div>
-          <div className="absolute -bottom-2 -right-2 bg-black border-2 border-stone-800 p-2 rounded-2xl">
+          <div className="absolute -bottom-2 -right-2 bg-zinc-950 border-2 border-zinc-800 p-2 rounded-lg">
             <Settings className="w-5 h-5 text-lime-400" />
           </div>
         </div>
-        <h1 className="text-3xl font-black tracking-tighter uppercase italic mb-1">{tutorName}</h1>
-        <p className="text-lime-400 text-xs font-black uppercase tracking-widest mb-4">{profile?.subject ?? ''} Tutor</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-1">{tutorName}</h1>
+        <p className="text-lime-400 text-xs font-bold uppercase tracking-wider mb-4">{profile?.subject ?? ''} Tutor</p>
         <div className="flex gap-4">
-          <div className="bg-stone-900 px-4 py-2 rounded-full border border-stone-800 flex items-center gap-2">
+          <div className="bg-zinc-900 px-4 py-2 rounded-full border border-zinc-800 flex items-center gap-2">
             <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-            <span className="text-sm font-black">{profile?.rating?.toFixed(1) ?? '0.0'}</span>
+            <span className="text-sm font-bold">{profile?.rating?.toFixed(1) ?? '0.0'}</span>
           </div>
-          <div className="bg-stone-900 px-4 py-2 rounded-full border border-stone-800 flex items-center gap-2">
+          <div className="bg-zinc-900 px-4 py-2 rounded-full border border-zinc-800 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-lime-400" />
-            <span className="text-sm font-black tracking-tighter uppercase italic">Verified</span>
+            <span className="text-sm font-bold">Verified</span>
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <button className="w-full flex items-center justify-between p-5 rounded-[24px] bg-stone-900 border border-stone-800 hover:bg-stone-800 transition-colors group">
+        <button className="w-full flex items-center justify-between p-5 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors group">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-stone-800 flex items-center justify-center text-stone-400 group-hover:text-lime-400">
+            <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-lime-400">
               <CreditCard className="w-5 h-5" />
             </div>
-            <span className="text-sm font-black uppercase tracking-tighter">Metode Pembayaran</span>
+            <span className="text-sm font-bold uppercase tracking-wider">Metode Pembayaran</span>
           </div>
-          <ChevronRight className="w-5 h-5 text-stone-600" />
+          <ChevronRight className="w-5 h-5 text-zinc-600" />
         </button>
-        <button className="w-full flex items-center justify-between p-5 rounded-[24px] bg-stone-900 border border-stone-800 hover:bg-stone-800 transition-colors group">
+        <button className="w-full flex items-center justify-between p-5 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors group">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-stone-800 flex items-center justify-center text-stone-400 group-hover:text-lime-400">
+            <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-lime-400">
               <Settings className="w-5 h-5" />
             </div>
-            <span className="text-sm font-black uppercase tracking-tighter">Pengaturan Akun</span>
+            <span className="text-sm font-bold uppercase tracking-wider">Pengaturan Akun</span>
           </div>
-          <ChevronRight className="w-5 h-5 text-stone-600" />
+          <ChevronRight className="w-5 h-5 text-zinc-600" />
         </button>
         <button
           onClick={logout}
-          className="w-full flex items-center justify-between p-5 rounded-[24px] bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors group"
+          className="w-full flex items-center justify-between p-5 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors group"
         >
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400">
               <LogOut className="w-5 h-5" />
             </div>
-            <span className="text-sm font-black uppercase tracking-tighter text-red-400">Keluar Platform</span>
+            <span className="text-sm font-bold uppercase tracking-wider text-red-400">Keluar Platform</span>
           </div>
           <ChevronRight className="w-5 h-5 text-red-400/50" />
         </button>
@@ -545,13 +545,7 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-lime-400 selection:text-black overflow-x-hidden">
-      {/* Background Glow */}
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-lime-500/10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-600/10 rounded-full blur-[120px]"></div>
-      </div>
-
+    <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-lime-400 selection:text-black overflow-x-hidden">
       {/* Main Content Area */}
       <main className="relative z-10 max-w-md mx-auto px-6 pt-8 min-h-screen">
         <AnimatePresence mode="wait">
@@ -588,23 +582,23 @@ export default function App() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedProof(null)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+              className="absolute inset-0 bg-zinc-950/90 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-stone-900 border border-stone-800 rounded-[40px] overflow-hidden"
+              className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden"
             >
-              <div className="p-6 border-b border-stone-800 flex justify-between items-center">
-                <h3 className="text-lg font-black uppercase italic tracking-tighter">Bukti Transfer</h3>
-                <button onClick={() => setSelectedProof(null)} className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center">
+              <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Bukti Transfer</h3>
+                <button onClick={() => setSelectedProof(null)} className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               <div className="p-6">
-                <img src={selectedProof} alt="Proof" className="w-full rounded-2xl shadow-2xl" referrerPolicy="no-referrer" />
-                <button className="w-full mt-6 bg-lime-400 text-black font-black py-4 rounded-2xl flex items-center justify-center gap-2 uppercase italic tracking-tighter">
+                <img src={selectedProof} alt="Proof" className="w-full rounded-lg shadow-2xl" referrerPolicy="no-referrer" />
+                <button className="w-full mt-6 bg-lime-400 text-black font-semibold py-4 rounded-lg flex items-center justify-center gap-2">
                   <Download className="w-5 h-5" />
                   Simpan Gambar
                 </button>
@@ -623,7 +617,7 @@ export default function App() {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-24 left-6 right-6 z-[110] flex justify-center pointer-events-none"
           >
-            <div className="bg-lime-400 text-black px-6 py-3 rounded-full font-black uppercase italic tracking-tighter shadow-[0_10px_30px_rgba(163,230,53,0.4)] flex items-center gap-2">
+            <div className="bg-lime-400 text-black px-6 py-3 rounded-full font-semibold shadow-[0_10px_30px_rgba(163,230,53,0.4)] flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
               {notificationMessage}
             </div>
