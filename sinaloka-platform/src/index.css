@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Force class-based dark mode for dark: utilities in Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --color-sidebar: #fafafa;
+    --color-sidebar-border: #e5e5e5;
+    --color-border: #f0f0f0;
+  }
+
+  .dark {
+    --color-sidebar: #09090b;
+    --color-sidebar-border: #27272a;
+    --color-border: #27272a;
+  }
+
+  body {
+    @apply font-sans text-zinc-900 antialiased bg-white transition-colors duration-300;
+  }
+
+  .dark body {
+    @apply text-zinc-100 bg-zinc-950;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+
+  .dark .glass {
+    @apply bg-zinc-900/80 border-zinc-800/50;
+  }
+
+  .sidebar-item-active {
+    @apply bg-zinc-100 text-zinc-900 font-medium;
+  }
+
+  .dark .sidebar-item-active {
+    @apply bg-zinc-800 text-zinc-100;
+  }
+}
+

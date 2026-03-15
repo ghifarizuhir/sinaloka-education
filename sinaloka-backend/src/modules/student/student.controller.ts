@@ -15,7 +15,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';

@@ -4,6 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Prisma } from '../../../generated/prisma/client.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import {
   buildPaginationMeta,
@@ -239,9 +240,16 @@ export class TutorService {
   async updateProfile(userId: string, dto: UpdateTutorProfileDto) {
     const tutor = await this.getProfile(userId);
 
+    const { availability, ...rest } = dto;
+
     return this.prisma.tutor.update({
       where: { id: tutor.id },
-      data: dto,
+      data: {
+        ...rest,
+        ...(availability !== undefined && {
+          availability: availability === null ? Prisma.DbNull : availability,
+        }),
+      },
       include: {
         user: {
           select: {

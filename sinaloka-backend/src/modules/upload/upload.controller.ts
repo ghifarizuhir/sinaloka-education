@@ -5,7 +5,7 @@ import {
   Res,
   ForbiddenException,
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { Role } from '../../../generated/prisma/client.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
