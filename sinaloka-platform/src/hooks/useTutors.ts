@@ -20,3 +20,15 @@ export function useDeleteTutor() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: tutorsService.remove, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
 }
+export function useInviteTutor() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: tutorsService.invite, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
+}
+export function useResendInvite() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: tutorsService.resendInvite, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
+}
+export function useCancelInvite() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: tutorsService.cancelInvite, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
+}
