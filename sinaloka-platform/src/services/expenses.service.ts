@@ -1,0 +1,16 @@
+import api from '@/lib/api';
+import type { PaginatedResponse } from '@/types/common';
+import type { Expense, CreateExpenseDto, UpdateExpenseDto, ExpenseQueryParams } from '@/types/expense';
+
+export const expensesService = {
+  getAll: (params?: ExpenseQueryParams) =>
+    api.get<PaginatedResponse<Expense>>('/api/admin/expenses', { params }).then((r) => r.data),
+  getById: (id: string) =>
+    api.get<Expense>(`/api/admin/expenses/${id}`).then((r) => r.data),
+  create: (data: CreateExpenseDto) =>
+    api.post<Expense>('/api/admin/expenses', data).then((r) => r.data),
+  update: ({ id, data }: { id: string; data: UpdateExpenseDto }) =>
+    api.patch<Expense>(`/api/admin/expenses/${id}`, data).then((r) => r.data),
+  remove: (id: string) =>
+    api.delete(`/api/admin/expenses/${id}`),
+};

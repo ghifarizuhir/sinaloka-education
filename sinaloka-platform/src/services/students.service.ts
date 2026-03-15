@@ -1,0 +1,25 @@
+import api from '@/lib/api';
+import type { PaginatedResponse } from '@/types/common';
+import type { Student, CreateStudentDto, UpdateStudentDto, StudentQueryParams } from '@/types/student';
+
+export const studentsService = {
+  getAll: (params?: StudentQueryParams) =>
+    api.get<PaginatedResponse<Student>>('/api/admin/students', { params }).then((r) => r.data),
+  getById: (id: string) =>
+    api.get<Student>(`/api/admin/students/${id}`).then((r) => r.data),
+  create: (data: CreateStudentDto) =>
+    api.post<Student>('/api/admin/students', data).then((r) => r.data),
+  update: ({ id, data }: { id: string; data: UpdateStudentDto }) =>
+    api.patch<Student>(`/api/admin/students/${id}`, data).then((r) => r.data),
+  remove: (id: string) =>
+    api.delete(`/api/admin/students/${id}`),
+  importCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/admin/students/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
+  exportCsv: () =>
+    api.get('/api/admin/students/export', { responseType: 'blob' }).then((r) => r.data),
+};
