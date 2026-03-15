@@ -21,8 +21,18 @@ Data comes from the existing seed script at `sinaloka-backend/prisma/seed.ts`.
 
 ## Prerequisites
 
-- Backend running on `localhost:3000` with seeded database
+- Backend running on `localhost:3000`
 - Frontend dev server running on `localhost:5173`
+- Database accessible via `DATABASE_URL` environment variable
+
+## Idempotency
+
+The test suite is fully idempotent. A `globalSetup` script runs before all tests to reset and re-seed the database:
+
+1. `npx prisma db push --force-reset` — drops and recreates all tables
+2. `npx prisma db seed` — populates with known test data
+
+This ensures every test run starts from a clean, known state regardless of what previous runs did (e.g., the attendance test completing a session).
 
 ## Test Cases
 
@@ -59,7 +69,7 @@ Data comes from the existing seed script at `sinaloka-backend/prisma/seed.ts`.
 - Verify success toast appears
 - Verify return to schedule view
 
-**Note:** This test mutates data (completes a session). It is not idempotent — the database should be re-seeded before re-running.
+**Note:** This test mutates data (completes a session). Idempotency is ensured by the globalSetup re-seeding the database before each test run.
 
 ### 5. View Payouts (`e2e/payouts.spec.ts`)
 
@@ -80,6 +90,8 @@ Data comes from the existing seed script at `sinaloka-backend/prisma/seed.ts`.
 sinaloka-tutors/
 ├── playwright.config.ts       # Playwright configuration
 ├── e2e/
+│   ├── global-setup.ts        # DB reset + re-seed before all tests
+│   ├── helpers.ts             # Shared login helper
 │   ├── auth.spec.ts           # Login + Logout tests
 │   ├── schedule.spec.ts       # View schedule + filter tabs
 │   ├── attendance.spec.ts     # Mark attendance flow
@@ -91,9 +103,10 @@ sinaloka-tutors/
 - **Browser:** Chromium only (sufficient for a mobile-first SPA)
 - **Base URL:** `http://localhost:5173`
 - **Timeout:** 30s per test (real backend may be slow)
-- **Retries:** 0 (tests depend on data state)
+- **Retries:** 0
 - **Screenshots:** On failure only
-- **Test order:** Serial (attendance test mutates data)
+- **Test order:** Serial (attendance test mutates data, must run after schedule)
+- **Global setup:** `e2e/global-setup.ts` — resets and re-seeds the database
 
 ## Authentication Helper
 
