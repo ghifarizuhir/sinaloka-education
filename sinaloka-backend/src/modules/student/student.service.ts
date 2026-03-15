@@ -1,10 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { parse } from 'csv-parse/sync';
+import { stringify } from 'csv-stringify/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import {
   buildPaginationMeta,
   PaginatedResponse,
 } from '../../common/dto/pagination.dto.js';
-import { CreateStudentDto, UpdateStudentDto, StudentQueryDto } from './student.dto.js';
+import { CreateStudentSchema } from './student.dto.js';
+import type { CreateStudentDto, UpdateStudentDto, StudentQueryDto } from './student.dto.js';
 
 @Injectable()
 export class StudentService {
@@ -96,5 +99,74 @@ export class StudentService {
     return this.prisma.student.delete({
       where: { id },
     });
+  }
+
+  async importFromCsv(buffer: Buffer, institutionId: string) {
+    const records: Record<string, string>[] = parse(buffer, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+    });
+    const valid: any[] = [];
+    const errors: { row: number; message: string }[] = [];
+
+    records.forEach((rec, i) => {
+      // Convert empty strings to undefined for optional fields
+      const cleaned: Record<string, any> = {};
+      for (const [key, val] of Object.entries(rec)) {
+        cleaned[key] = val === '' ? undefined : val;
+      }
+      const result = CreateStudentSchema.safeParse(cleaned);
+      if (result.success) {
+        valid.push({
+          ...result.data,
+          institution_id: institutionId,
+          enrolled_at: result.data.enrolled_at ?? new Date(),
+        });
+      } else {
+        errors.push({
+          row: i + 1,
+          message: result.error.issues
+            .map((e: any) => `${e.path}: ${e.message}`)
+            .join('; '),
+        });
+      }
+    });
+
+    let created = 0;
+    if (valid.length > 0) {
+      const res = await this.prisma.student.createMany({
+        data: valid,
+        skipDuplicates: true,
+      });
+      created = res.count;
+    }
+    return { created, errors };
+  }
+
+  async exportToCsv(
+    query: Record<string, any>,
+    institutionId: string,
+  ): Promise<string> {
+    const where: any = { institution_id: institutionId };
+    if (query.status) where.status = query.status;
+    if (query.grade) where.grade = query.grade;
+    if (query.search)
+      where.name = { contains: query.search, mode: 'insensitive' };
+
+    const students = await this.prisma.student.findMany({
+      where,
+      select: {
+        name: true,
+        email: true,
+        phone: true,
+        grade: true,
+        status: true,
+        parent_name: true,
+        parent_phone: true,
+        parent_email: true,
+      },
+    });
+    return stringify(students, { header: true });
   }
 }

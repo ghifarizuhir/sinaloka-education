@@ -20,6 +20,7 @@ import { PayoutModule } from './modules/payout/payout.module.js';
 import { ExpenseModule } from './modules/expense/expense.module.js';
 import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { ReportModule } from './modules/report/report.module.js';
+import { UploadModule } from './modules/upload/upload.module.js';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ReportModule } from './modules/report/report.module.js';
     ExpenseModule,
     DashboardModule,
     ReportModule,
+    UploadModule,
   ],
   providers: [
     {

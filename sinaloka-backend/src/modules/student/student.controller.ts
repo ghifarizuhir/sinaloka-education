@@ -9,7 +9,13 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  Res,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
@@ -72,5 +78,38 @@ export class StudentController {
     @Param('id') id: string,
   ) {
     await this.studentService.delete(user.institutionId!, id);
+  }
+
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  async importCsv(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    if (!file) throw new BadRequestException('CSV file required');
+    if (
+      file.mimetype !== 'text/csv' &&
+      !file.originalname.endsWith('.csv')
+    ) {
+      throw new BadRequestException('File must be a CSV');
+    }
+    return this.studentService.importFromCsv(file.buffer, user.institutionId!);
+  }
+
+  @Get('export')
+  async exportCsv(
+    @Query() query: any,
+    @CurrentUser() user: JwtPayload,
+    @Res() res: Response,
+  ) {
+    const csv = await this.studentService.exportToCsv(
+      query,
+      user.institutionId!,
+    );
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': 'attachment; filename=students.csv',
+    });
+    res.send(csv);
   }
 }
