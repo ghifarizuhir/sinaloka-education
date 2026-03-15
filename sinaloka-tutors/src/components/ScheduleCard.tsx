@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Clock, MapPin, CheckCircle2, XCircle, RefreshCcw, Edit } from 'lucide-react';
+import { Calendar, Clock, MapPin, CheckCircle2, XCircle } from 'lucide-react';
 import { ClassSchedule } from '../types';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -10,11 +10,9 @@ interface ScheduleCardProps {
   item: ClassSchedule;
   onOpenAttendance: (id: string) => void;
   onCancel: (id: string) => void;
-  onReschedule: (id: string) => void;
-  onEdit: (id: string) => void;
 }
 
-export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendance, onCancel, onReschedule, onEdit }) => {
+export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendance, onCancel }) => {
   const isUpcoming = item.status === 'upcoming';
   const allAttended = item.students.length > 0 && item.students.every(s => s.attendance !== undefined);
   
@@ -27,17 +25,9 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
     >
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-white leading-tight">
-              {item.subject}
-            </h3>
-            <button 
-              onClick={() => onEdit(item.id)}
-              className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
-            >
-              <Edit className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <h3 className="text-lg font-semibold text-white leading-tight">
+            {item.subject}
+          </h3>
           <div className={cn(
             "inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mt-2",
             item.status === 'upcoming' ? "bg-blue-500/20 text-blue-400" :
@@ -70,22 +60,15 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
       </div>
 
       {isUpcoming && !allAttended && (
-        <div className="grid grid-cols-3 gap-2">
-          <button 
+        <div className="grid grid-cols-2 gap-2">
+          <button
             onClick={() => onOpenAttendance(item.id)}
             className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-lime-400 text-black hover:bg-lime-300 transition-colors"
           >
             <CheckCircle2 className="w-5 h-5" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Absen Murid</span>
           </button>
-          <button 
-            onClick={() => onReschedule(item.id)}
-            className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
-          >
-            <RefreshCcw className="w-5 h-5" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Atur Ulang</span>
-          </button>
-          <button 
+          <button
             onClick={() => onCancel(item.id)}
             className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-zinc-800 text-red-400 hover:bg-zinc-700 transition-colors"
           >
