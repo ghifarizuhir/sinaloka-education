@@ -18,6 +18,8 @@ import { AttendanceModule } from './modules/attendance/attendance.module.js';
 import { PaymentModule } from './modules/payment/payment.module.js';
 import { PayoutModule } from './modules/payout/payout.module.js';
 import { ExpenseModule } from './modules/expense/expense.module.js';
+import { DashboardModule } from './modules/dashboard/dashboard.module.js';
+import { ReportModule } from './modules/report/report.module.js';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { ExpenseModule } from './modules/expense/expense.module.js';
     PaymentModule,
     PayoutModule,
     ExpenseModule,
+    DashboardModule,
+    ReportModule,
   ],
   providers: [
     {
