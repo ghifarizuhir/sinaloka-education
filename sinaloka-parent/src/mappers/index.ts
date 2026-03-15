@@ -1,0 +1,94 @@
+import type {
+  ChildSummary,
+  AttendanceRecord,
+  SessionRecord,
+  PaymentRecord,
+  EnrollmentRecord,
+  ParentProfile,
+} from '../types';
+
+export function mapChild(raw: any): ChildSummary {
+  return {
+    id: raw.id,
+    name: raw.name,
+    grade: raw.grade,
+    status: raw.status,
+    enrollment_count: raw.enrollment_count,
+    attendance_rate: raw.attendance_rate,
+    pending_payments: raw.pending_payments,
+    overdue_payments: raw.overdue_payments,
+    next_session: raw.next_session
+      ? {
+          date: new Date(raw.next_session.date).toISOString(),
+          start_time: raw.next_session.start_time,
+          subject: raw.next_session.subject,
+          class_name: raw.next_session.class_name,
+        }
+      : null,
+    enrollments: raw.enrollments ?? [],
+  };
+}
+
+export function mapAttendance(raw: any): AttendanceRecord {
+  return {
+    id: raw.id,
+    status: raw.status,
+    homework_done: raw.homework_done,
+    notes: raw.notes ?? null,
+    session: {
+      date: new Date(raw.session.date).toISOString(),
+      start_time: raw.session.start_time,
+      end_time: raw.session.end_time,
+      class: raw.session.class,
+    },
+  };
+}
+
+export function mapSession(raw: any): SessionRecord {
+  return {
+    id: raw.id,
+    date: new Date(raw.date).toISOString(),
+    start_time: raw.start_time,
+    end_time: raw.end_time,
+    status: raw.status,
+    topic_covered: raw.topic_covered ?? null,
+    session_summary: raw.session_summary ?? null,
+    class: raw.class,
+  };
+}
+
+export function mapPayment(raw: any): PaymentRecord {
+  return {
+    id: raw.id,
+    amount: Number(raw.amount),
+    due_date: new Date(raw.due_date).toISOString().split('T')[0],
+    paid_date: raw.paid_date ? new Date(raw.paid_date).toISOString().split('T')[0] : null,
+    status: raw.status,
+    method: raw.method ?? null,
+    enrollment: raw.enrollment,
+  };
+}
+
+export function mapEnrollment(raw: any): EnrollmentRecord {
+  return {
+    id: raw.id,
+    status: raw.status,
+    class: {
+      name: raw.class.name,
+      subject: raw.class.subject,
+      schedule_days: raw.class.schedule_days,
+      schedule_start_time: raw.class.schedule_start_time,
+      schedule_end_time: raw.class.schedule_end_time,
+      fee: Number(raw.class.fee),
+      tutor: { user: { name: raw.class.tutor?.user?.name ?? '' } },
+    },
+  };
+}
+
+export function mapProfile(raw: any): ParentProfile {
+  return {
+    id: raw.id,
+    name: raw.name,
+    email: raw.email,
+  };
+}
