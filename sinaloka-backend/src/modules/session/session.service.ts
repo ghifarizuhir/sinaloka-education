@@ -13,7 +13,9 @@ import type {
   ApproveRescheduleDto,
   RequestRescheduleDto,
   TutorScheduleQueryDto,
+  CompleteSessionDto,
 } from './session.dto.js';
+import { SessionStatus } from '../../../generated/prisma/client.js';
 import { addDays, getDay, isAfter, isBefore, isEqual } from 'date-fns';
 
 const DAY_MAP: Record<string, number> = {
@@ -161,7 +163,7 @@ export class SessionService {
       date: Date;
       start_time: string;
       end_time: string;
-      status: string;
+      status: SessionStatus;
       created_by: string;
     }> = [];
 
@@ -181,7 +183,7 @@ export class SessionService {
             date: new Date(dateStr),
             start_time: classRecord.schedule_start_time,
             end_time: classRecord.schedule_end_time,
-            status: 'SCHEDULED',
+            status: SessionStatus.SCHEDULED,
             created_by: userId,
           });
         }
@@ -305,9 +307,9 @@ export class SessionService {
       return this.prisma.session.update({
         where: { id: sessionId, institution_id: institutionId },
         data: {
-          date: session.proposed_date,
-          start_time: session.proposed_start_time,
-          end_time: session.proposed_end_time,
+          date: session.proposed_date!,
+          start_time: session.proposed_start_time!,
+          end_time: session.proposed_end_time!,
           status: 'SCHEDULED',
           approved_by: userId,
           proposed_date: null,
@@ -353,6 +355,98 @@ export class SessionService {
     return this.prisma.session.update({
       where: { id: sessionId },
       data: { status: 'CANCELLED' },
+      include: { class: true },
+    });
+  }
+
+  async getSessionStudents(userId: string, sessionId: string) {
+    const session = await this.prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { class: true },
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session with id ${sessionId} not found`);
+    }
+
+    const tutor = await this.prisma.tutor.findFirst({
+      where: { user_id: userId },
+    });
+
+    if (!tutor || session.class.tutor_id !== tutor.id) {
+      throw new ForbiddenException('You can only view students for your own sessions');
+    }
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        class_id: session.class_id,
+        status: 'ACTIVE',
+      },
+      include: {
+        student: {
+          select: {
+            id: true,
+            name: true,
+            grade: true,
+          },
+        },
+      },
+    });
+
+    const attendances = await this.prisma.attendance.findMany({
+      where: { session_id: sessionId },
+    });
+
+    const attendanceMap = new Map(
+      attendances.map((a) => [a.student_id, a]),
+    );
+
+    return {
+      students: enrollments.map((e) => {
+        const att = attendanceMap.get(e.student.id);
+        return {
+          id: e.student.id,
+          name: e.student.name,
+          grade: e.student.grade,
+          attendance: att?.status ?? null,
+          homework_done: att?.homework_done ?? false,
+          notes: att?.notes ?? null,
+        };
+      }),
+    };
+  }
+
+  async completeSession(userId: string, sessionId: string, dto: CompleteSessionDto) {
+    const session = await this.prisma.session.findUnique({
+      where: { id: sessionId },
+      include: { class: true },
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session with id ${sessionId} not found`);
+    }
+
+    const tutor = await this.prisma.tutor.findFirst({
+      where: { user_id: userId },
+    });
+
+    if (!tutor || session.class.tutor_id !== tutor.id) {
+      throw new ForbiddenException('You can only complete your own sessions');
+    }
+
+    if (session.status !== 'SCHEDULED') {
+      throw new BadRequestException(
+        'Only sessions with status SCHEDULED can be completed',
+      );
+    }
+
+    return this.prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        status: 'COMPLETED',
+        topic_covered: dto.topic_covered,
+        session_summary: dto.session_summary ?? null,
+      },
       include: { class: true },
     });
   }
