@@ -21,6 +21,7 @@ import { ExpenseModule } from './modules/expense/expense.module.js';
 import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { ReportModule } from './modules/report/report.module.js';
 import { UploadModule } from './modules/upload/upload.module.js';
+import { ParentModule } from './modules/parent/parent.module.js';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { UploadModule } from './modules/upload/upload.module.js';
     DashboardModule,
     ReportModule,
     UploadModule,
+    ParentModule,
   ],
   providers: [
     {
