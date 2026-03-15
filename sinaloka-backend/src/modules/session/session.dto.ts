@@ -72,3 +72,9 @@ export const TutorScheduleQuerySchema = z.object({
   sort_order: z.enum(['asc', 'desc']).default('asc'),
 });
 export type TutorScheduleQueryDto = z.infer<typeof TutorScheduleQuerySchema>;
+
+export const CompleteSessionSchema = z.object({
+  topic_covered: z.string().min(1).max(500),
+  session_summary: z.string().max(2000).optional().nullable(),
+});
+export type CompleteSessionDto = z.infer<typeof CompleteSessionSchema>;
