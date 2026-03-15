@@ -37,6 +37,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    if (!user.password_hash) {
+      throw new UnauthorizedException('Please accept your invitation first');
+    }
+
     if (!user.is_active) {
       throw new UnauthorizedException('User account is inactive');
     }
