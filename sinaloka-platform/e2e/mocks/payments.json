@@ -1,0 +1,73 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "student_id": 1,
+      "enrollment_id": 1,
+      "amount": 500000,
+      "due_date": "2026-02-01",
+      "paid_date": "2026-02-01",
+      "status": "PAID",
+      "method": "TRANSFER",
+      "student": {
+        "id": 1,
+        "name": "Aisyah Putri"
+      },
+      "enrollment": {
+        "id": 1,
+        "class": {
+          "id": 1,
+          "name": "Math Advanced"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "student_id": 2,
+      "enrollment_id": 2,
+      "amount": 450000,
+      "due_date": "2026-03-01",
+      "paid_date": null,
+      "status": "PENDING",
+      "method": null,
+      "student": {
+        "id": 2,
+        "name": "Rizki Pratama"
+      },
+      "enrollment": {
+        "id": 2,
+        "class": {
+          "id": 2,
+          "name": "Physics Basic"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "student_id": 3,
+      "enrollment_id": 3,
+      "amount": 500000,
+      "due_date": "2026-01-15",
+      "paid_date": null,
+      "status": "OVERDUE",
+      "method": null,
+      "student": {
+        "id": 3,
+        "name": "Fajar Hidayat"
+      },
+      "enrollment": {
+        "id": 3,
+        "class": {
+          "id": 1,
+          "name": "Math Advanced"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 3,
+    "total_pages": 1
+  }
+}

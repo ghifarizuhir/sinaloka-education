@@ -1,0 +1,58 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "session_id": 1,
+      "student_id": 1,
+      "status": "PRESENT",
+      "homework_done": true,
+      "notes": null,
+      "student": {
+        "id": 1,
+        "name": "Aisyah Putri"
+      },
+      "session": {
+        "id": 1,
+        "date": "2026-03-15"
+      }
+    },
+    {
+      "id": 2,
+      "session_id": 1,
+      "student_id": 2,
+      "status": "ABSENT",
+      "homework_done": false,
+      "notes": "Sick",
+      "student": {
+        "id": 2,
+        "name": "Rizki Pratama"
+      },
+      "session": {
+        "id": 1,
+        "date": "2026-03-15"
+      }
+    },
+    {
+      "id": 3,
+      "session_id": 1,
+      "student_id": 3,
+      "status": "LATE",
+      "homework_done": false,
+      "notes": "Arrived 10 min late",
+      "student": {
+        "id": 3,
+        "name": "Fajar Hidayat"
+      },
+      "session": {
+        "id": 1,
+        "date": "2026-03-15"
+      }
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 3,
+    "total_pages": 1
+  }
+}

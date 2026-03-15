@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "category": "Rent",
+      "description": "Office rent March 2026",
+      "amount": 5000000,
+      "date": "2026-03-01",
+      "institution_id": 1,
+      "created_at": "2026-03-01T08:00:00Z"
+    },
+    {
+      "id": 2,
+      "category": "Supplies",
+      "description": "Whiteboard markers and papers",
+      "amount": 250000,
+      "date": "2026-03-10",
+      "institution_id": 1,
+      "created_at": "2026-03-10T08:00:00Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 2,
+    "total_pages": 1
+  }
+}

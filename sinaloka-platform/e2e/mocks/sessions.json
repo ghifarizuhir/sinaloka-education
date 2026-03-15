@@ -1,0 +1,61 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "class_id": 1,
+      "date": "2026-03-15",
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "status": "SCHEDULED",
+      "class": {
+        "id": 1,
+        "name": "Math Advanced",
+        "subject": "Mathematics",
+        "tutor": {
+          "id": 1,
+          "name": "Dewi Lestari"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "class_id": 1,
+      "date": "2026-03-13",
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "status": "COMPLETED",
+      "class": {
+        "id": 1,
+        "name": "Math Advanced",
+        "subject": "Mathematics",
+        "tutor": {
+          "id": 1,
+          "name": "Dewi Lestari"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "class_id": 2,
+      "date": "2026-03-14",
+      "start_time": "10:00",
+      "end_time": "11:30",
+      "status": "CANCELLED",
+      "class": {
+        "id": 2,
+        "name": "Physics Basic",
+        "subject": "Physics",
+        "tutor": {
+          "id": 1,
+          "name": "Dewi Lestari"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 3,
+    "total_pages": 1
+  }
+}

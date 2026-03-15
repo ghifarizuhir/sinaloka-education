@@ -1,0 +1,26 @@
+{
+  "stats": {
+    "total_students": 150,
+    "active_tutors": 12,
+    "total_revenue": 75000000,
+    "attendance_rate": 92.5,
+    "upcoming_sessions": 8
+  },
+  "activity": [
+    {
+      "type": "enrollment",
+      "description": "Aisyah Putri enrolled in Math Advanced",
+      "created_at": "2026-03-15T10:00:00Z"
+    },
+    {
+      "type": "payment",
+      "description": "Payment received from Rizki Pratama",
+      "created_at": "2026-03-15T09:30:00Z"
+    },
+    {
+      "type": "attendance",
+      "description": "Attendance marked for Physics Basic",
+      "created_at": "2026-03-15T09:00:00Z"
+    }
+  ]
+}

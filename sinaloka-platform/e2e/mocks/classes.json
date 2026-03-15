@@ -1,0 +1,46 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Math Advanced",
+      "subject": "Mathematics",
+      "capacity": 20,
+      "fee": 500000,
+      "schedule_days": ["Monday", "Wednesday"],
+      "schedule_start_time": "09:00",
+      "schedule_end_time": "10:30",
+      "room": "Room A",
+      "status": "ACTIVE",
+      "tutor_id": 1,
+      "tutor": {
+        "id": 1,
+        "name": "Dewi Lestari"
+      },
+      "institution_id": 1
+    },
+    {
+      "id": 2,
+      "name": "Physics Basic",
+      "subject": "Physics",
+      "capacity": 15,
+      "fee": 450000,
+      "schedule_days": ["Tuesday", "Thursday"],
+      "schedule_start_time": "10:00",
+      "schedule_end_time": "11:30",
+      "room": "Room B",
+      "status": "ACTIVE",
+      "tutor_id": 1,
+      "tutor": {
+        "id": 1,
+        "name": "Dewi Lestari"
+      },
+      "institution_id": 1
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 2,
+    "total_pages": 1
+  }
+}

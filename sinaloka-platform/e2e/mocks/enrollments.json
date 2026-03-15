@@ -1,0 +1,46 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "student_id": 1,
+      "class_id": 1,
+      "status": "ACTIVE",
+      "payment_status": "PAID",
+      "enrolled_at": "2026-01-15T08:00:00Z",
+      "student": {
+        "id": 1,
+        "name": "Aisyah Putri"
+      },
+      "class": {
+        "id": 1,
+        "name": "Math Advanced",
+        "subject": "Mathematics"
+      },
+      "institution_id": 1
+    },
+    {
+      "id": 2,
+      "student_id": 2,
+      "class_id": 2,
+      "status": "TRIAL",
+      "payment_status": "PENDING",
+      "enrolled_at": "2026-02-01T08:00:00Z",
+      "student": {
+        "id": 2,
+        "name": "Rizki Pratama"
+      },
+      "class": {
+        "id": 2,
+        "name": "Physics Basic",
+        "subject": "Physics"
+      },
+      "institution_id": 1
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 2,
+    "total_pages": 1
+  }
+}
