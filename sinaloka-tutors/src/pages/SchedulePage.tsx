@@ -17,6 +17,7 @@ interface SchedulePageProps {
   activeFilter: ScheduleFilter;
   onSetFilter: (filter: ScheduleFilter) => void;
   onOpenAttendance: (id: string) => void;
+  onReschedule: (id: string) => void;
   onCancel: (id: string) => void;
 }
 
@@ -26,6 +27,7 @@ export function SchedulePage({
   activeFilter,
   onSetFilter,
   onOpenAttendance,
+  onReschedule,
   onCancel,
 }: SchedulePageProps) {
   return (
@@ -65,6 +67,7 @@ export function SchedulePage({
               key={item.id}
               item={item}
               onOpenAttendance={onOpenAttendance}
+              onReschedule={onReschedule}
               onCancel={onCancel}
             />
           ))

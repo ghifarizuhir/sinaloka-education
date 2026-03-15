@@ -9,6 +9,7 @@ interface DashboardPageProps {
   pendingPayout: number;
   scheduleLoading: boolean;
   onOpenAttendance: (id: string) => void;
+  onReschedule: (id: string) => void;
   onCancel: (id: string) => void;
   onViewAllSchedule: () => void;
 }
@@ -19,6 +20,7 @@ export function DashboardPage({
   pendingPayout,
   scheduleLoading,
   onOpenAttendance,
+  onReschedule,
   onCancel,
   onViewAllSchedule,
 }: DashboardPageProps) {
@@ -67,6 +69,7 @@ export function DashboardPage({
               key={item.id}
               item={item}
               onOpenAttendance={onOpenAttendance}
+              onReschedule={onReschedule}
               onCancel={onCancel}
             />
           ))

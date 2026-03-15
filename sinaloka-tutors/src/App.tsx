@@ -8,6 +8,7 @@ import { SchedulePage } from './pages/SchedulePage';
 import { PayoutsPage } from './pages/PayoutsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AttendancePage } from './pages/AttendancePage';
+import { RescheduleModal } from './components/RescheduleModal';
 import { useAuth } from './hooks/useAuth';
 import { useSchedule } from './hooks/useSchedule';
 import { usePayouts } from './hooks/usePayouts';
@@ -15,7 +16,7 @@ import { useAttendance } from './hooks/useAttendance';
 
 export default function App() {
   const { isAuthenticated, isLoading: authLoading, profile, logout } = useAuth();
-  const { data: schedule, isLoading: scheduleLoading, activeFilter, setFilter, refetch: refetchSchedule, cancelSession } = useSchedule();
+  const { data: schedule, isLoading: scheduleLoading, activeFilter, setFilter, refetch: refetchSchedule, cancelSession, requestReschedule } = useSchedule();
   const { data: payouts } = usePayouts();
   const { students, setStudents, fetchStudents, submitAttendance } = useAttendance();
 
@@ -26,6 +27,7 @@ export default function App() {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [topicCovered, setTopicCovered] = useState('');
   const [sessionSummary, setSessionSummary] = useState('');
+  const [rescheduleSessionId, setRescheduleSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedClassId) {
@@ -106,6 +108,17 @@ export default function App() {
     }
   };
 
+  const handleRescheduleSubmit = async (
+    id: string,
+    dto: { proposed_date: string; proposed_start_time: string; proposed_end_time: string; reschedule_reason: string },
+  ) => {
+    await requestReschedule(id, dto);
+    setRescheduleSessionId(null);
+    triggerNotification('Permintaan reschedule berhasil dikirim.');
+  };
+
+  const rescheduleSession = rescheduleSessionId ? schedule.find((s) => s.id === rescheduleSessionId) ?? null : null;
+
   const renderPage = () => {
     if (selectedClassId && selectedClass) {
       return (
@@ -134,6 +147,7 @@ export default function App() {
             pendingPayout={pendingPayout}
             scheduleLoading={scheduleLoading}
             onOpenAttendance={setSelectedClassId}
+            onReschedule={setRescheduleSessionId}
             onCancel={handleCancel}
             onViewAllSchedule={() => setActiveTab('schedule')}
           />
@@ -146,6 +160,7 @@ export default function App() {
             activeFilter={activeFilter}
             onSetFilter={setFilter}
             onOpenAttendance={setSelectedClassId}
+            onReschedule={setRescheduleSessionId}
             onCancel={handleCancel}
           />
         );
@@ -212,6 +227,17 @@ export default function App() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Reschedule Modal */}
+      <AnimatePresence>
+        {rescheduleSession && (
+          <RescheduleModal
+            session={rescheduleSession}
+            onSubmit={handleRescheduleSubmit}
+            onClose={() => setRescheduleSessionId(null)}
+          />
         )}
       </AnimatePresence>
 

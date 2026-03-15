@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Clock, MapPin, CheckCircle2, XCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, CheckCircle2, XCircle, RefreshCcw } from 'lucide-react';
 import { ClassSchedule } from '../types';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -9,10 +9,11 @@ import { cn } from '../lib/utils';
 interface ScheduleCardProps {
   item: ClassSchedule;
   onOpenAttendance: (id: string) => void;
+  onReschedule: (id: string) => void;
   onCancel: (id: string) => void;
 }
 
-export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendance, onCancel }) => {
+export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendance, onReschedule, onCancel }) => {
   const isUpcoming = item.status === 'upcoming';
   const allAttended = item.students.length > 0 && item.students.every(s => s.attendance !== undefined);
   
@@ -60,13 +61,20 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
       </div>
 
       {isUpcoming && !allAttended && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => onOpenAttendance(item.id)}
             className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-lime-400 text-black hover:bg-lime-300 transition-colors"
           >
             <CheckCircle2 className="w-5 h-5" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Absen Murid</span>
+          </button>
+          <button
+            onClick={() => onReschedule(item.id)}
+            className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+          >
+            <RefreshCcw className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Atur Ulang</span>
           </button>
           <button
             onClick={() => onCancel(item.id)}
