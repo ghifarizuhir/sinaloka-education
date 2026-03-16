@@ -5,8 +5,8 @@ import type { ClassQueryParams } from '@/src/types/class';
 export function useClasses(params?: ClassQueryParams) {
   return useQuery({ queryKey: ['classes', params], queryFn: () => classesService.getAll(params) });
 }
-export function useClass(id: string) {
-  return useQuery({ queryKey: ['classes', id], queryFn: () => classesService.getById(id), enabled: !!id });
+export function useClass(id: string | null) {
+  return useQuery({ queryKey: ['classes', id], queryFn: () => classesService.getById(id!), enabled: !!id });
 }
 export function useCreateClass() {
   const qc = useQueryClient();

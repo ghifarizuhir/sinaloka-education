@@ -39,3 +39,13 @@ export interface ClassQueryParams extends PaginationParams {
   subject?: string;
   status?: 'ACTIVE' | 'ARCHIVED';
 }
+
+export interface ClassDetail extends Class {
+  enrolled_count: number;
+  enrollments: {
+    id: string;
+    status: string;
+    student: { id: string; name: string; grade: string; status: string };
+  }[];
+  tutor?: { id: string; name: string; email?: string };
+}
