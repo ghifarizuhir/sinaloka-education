@@ -11,7 +11,7 @@ Future phases will add more notification triggers (sessions, attendance) and pla
 - **Shared account**: Sinaloka owns one WhatsApp Business Account. All institutions send from the same number. Institution name is embedded in message templates.
 - **First notification**: Payment reminders (PENDING near due date + OVERDUE).
 - **Trigger modes**: Both automatic (daily cron) and manual (admin clicks "Send Reminder").
-- **SDK**: `whatsapp-business-sdk` npm package (community TypeScript wrapper for Cloud API).
+- **SDK**: Thin `fetch` wrapper over the Cloud API (no external dependency — the API is simple REST to `graph.facebook.com`). Avoids community package maintenance risk.
 
 ## 1. Environment Configuration
 
@@ -22,6 +22,7 @@ WHATSAPP_PHONE_NUMBER_ID=           # From Meta Business Suite
 WHATSAPP_ACCESS_TOKEN=              # Permanent system user token
 WHATSAPP_WEBHOOK_VERIFY_TOKEN=      # Random string for webhook verification
 WHATSAPP_BUSINESS_ACCOUNT_ID=       # WABA ID
+WHATSAPP_APP_SECRET=                # For webhook signature verification (HMAC)
 PARENT_PORTAL_URL=http://localhost:5174  # For links in messages
 ```
 
@@ -41,6 +42,7 @@ model WhatsappMessage {
   wa_message_id   String?           // WhatsApp message ID (returned on send)
   status          String   @default("PENDING") // PENDING, SENT, DELIVERED, READ, FAILED
   error           String?           // Error message if FAILED
+  retry_count     Int      @default(0)  // Number of retry attempts
   related_type    String?           // "payment", "session", "attendance"
   related_id      String?           // ID of the related entity
   created_at      DateTime @default(now())
@@ -48,6 +50,9 @@ model WhatsappMessage {
 
   institution     Institution @relation(fields: [institution_id], references: [id])
 
+  @@index([related_type, related_id, created_at])
+  @@index([wa_message_id])
+  @@index([institution_id, created_at])
   @@map("whatsapp_messages")
 }
 ```
@@ -82,7 +87,8 @@ export class WhatsappService {
   ) {
     const token = this.config.get<string>('WHATSAPP_ACCESS_TOKEN');
     if (token) {
-      this.client = new WhatsAppAPI({ token, appSecret: '...' });
+      this.phoneNumberId = this.config.get<string>('WHATSAPP_PHONE_NUMBER_ID');
+      // Uses native fetch to graph.facebook.com — no SDK dependency
     }
   }
 
@@ -169,15 +175,19 @@ export class WhatsappCron {
 
 **Logic:**
 1. Skip if WhatsApp not configured (`!whatsappService.isConfigured()`)
-2. Query all payments where:
+2. Load institutions that have NOT opted out (`settings.whatsapp_auto_reminders !== false`)
+3. Query payments for those institutions where:
    - `status` is `PENDING` AND `due_date <= today + 1 day` (due tomorrow or already past)
    - OR `status` is `OVERDUE`
-3. For each payment:
+4. Also retry: query `WhatsappMessage` records with `status = 'FAILED'` and `retry_count < 3` and `created_at > 24h ago` (retryable failures only)
+5. For each payment:
    - Check `student.parent_phone` exists
-   - Check no `WhatsappMessage` sent for this payment in last 24h
+   - Check no successful message sent for this payment in last 24h
    - Call `whatsappService.sendPaymentReminder()`
    - Catch and log errors per-payment (don't let one failure stop others)
-4. Log summary: `"Payment reminders: X sent, Y skipped (no phone), Z failed"`
+6. Log summary: `"Payment reminders: X sent, Y skipped (no phone), Z failed, R retried"`
+
+**Institution opt-out:** Institutions can disable auto-reminders by setting `settings.whatsapp_auto_reminders: false` in their institution settings. The cron job checks this before sending. Manual reminders via the admin endpoint are always allowed regardless of this setting.
 
 ### 3.4 DTOs (`whatsapp.dto.ts`)
 
@@ -197,10 +207,10 @@ export const WebhookVerifySchema = z.object({
 
 ## 4. Admin Payment Reminder Endpoint
 
-New endpoint on the existing payment controller (or a new whatsapp-admin controller):
+New endpoint in the WhatsApp module (keeps WhatsApp logic self-contained):
 
 ```
-POST /api/admin/payments/:id/remind
+POST /api/admin/whatsapp/payment-reminder/:paymentId
 ```
 
 - **Roles:** ADMIN, SUPER_ADMIN
@@ -281,8 +291,9 @@ normalizePhone(raw: string): string {
 
 - **WhatsApp not configured:** Service methods return early or throw 503. Cron job skips silently.
 - **Invalid phone:** `normalizePhone` throws `BadRequestException`. Cron job logs and skips.
-- **API failure:** Caught per-message. `WhatsappMessage.status` set to `FAILED` with error detail. Cron continues to next payment.
-- **Duplicate prevention:** Query `WhatsappMessage` for same `related_type + related_id` in last 24h before sending.
+- **API failure (transient — 5xx, 429, network timeout):** Set status to `FAILED`, increment `retry_count`. Next cron run retries if `retry_count < 3`.
+- **API failure (permanent — 400, template not found):** Set status to `FAILED` with error. No retry.
+- **Duplicate prevention:** Query `WhatsappMessage` for same `related_type + related_id` with `status != 'FAILED'` in last 24h before sending.
 - **Webhook signature invalid:** Return 403, don't process.
 
 ## 8. Files Changed
@@ -300,16 +311,22 @@ normalizePhone(raw: string): string {
 | File | Change |
 |------|--------|
 | `sinaloka-backend/prisma/schema.prisma` | Add `WhatsappMessage` model, add relation to Institution |
-| `sinaloka-backend/src/app.module.ts` | Import `WhatsappModule` |
+| `sinaloka-backend/src/app.module.ts` | Import `WhatsappModule` and `ScheduleModule.forRoot()` |
 | `sinaloka-backend/.env.example` | Add WhatsApp env vars |
-| `sinaloka-backend/src/modules/payment/payment.controller.ts` | Add `POST /:id/remind` endpoint (or new controller) |
 
 ### Dependencies
-| Package | Purpose |
-|---------|---------|
-| `whatsapp-business-sdk` | Meta Cloud API client |
 
-## 9. Future Phases (Out of Scope)
+No new npm dependencies. Uses native `fetch` for the Cloud API (`graph.facebook.com`) and built-in `crypto` for HMAC webhook verification.
+
+## 9. Testing Strategy
+
+- **`normalizePhone` unit tests:** Pure function — test Indonesian formats: `081234567890`, `6281234567890`, `+6281234567890`, `08-123-456-7890`, invalid inputs
+- **`WhatsappService` unit tests:** Mock `fetch` and `PrismaService`. Test `sendTemplate` success/failure flows, dedup logic, retry count increment
+- **`WhatsappCron` unit tests:** Mock `WhatsappService`. Test payment selection logic, institution opt-out filtering, error isolation (one failure doesn't stop others)
+- **`WhatsappController` unit tests:** Test webhook verification (correct/wrong token), signature validation (valid/invalid HMAC), status update processing
+- **Integration:** Manual test with Meta's test phone number (available in Meta Business Suite sandbox)
+
+## 10. Future Phases (Out of Scope)
 
 - **Phase 2:** Session notifications, attendance alerts, parent invite via WhatsApp
 - **Phase 3:** Platform UI — WhatsApp settings page, message log viewer, send status dashboard
