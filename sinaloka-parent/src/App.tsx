@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BottomNav } from './components/BottomNav';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ChildDetailPage } from './pages/ChildDetailPage';
 import { useAuth } from './hooks/useAuth';
@@ -15,10 +17,12 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [authScreen, setAuthScreen] = useState<'login' | 'forgot'>('login');
 
-  // Check URL for invite token (only way to access registration)
+  // Check URL params for invite token or reset token
   const urlParams = new URLSearchParams(window.location.search);
   const inviteToken = urlParams.get('token');
+  const resetToken = urlParams.get('reset_token');
 
   if (authLoading) {
     return (
@@ -29,11 +33,18 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
+    // Reset password via URL with ?reset_token=
+    if (resetToken) {
+      return <ResetPasswordPage token={resetToken} onBack={() => { window.history.replaceState({}, '', window.location.pathname); setAuthScreen('login'); }} />;
+    }
     // Registration only accessible via invite link (URL with ?token=)
     if (inviteToken) {
       return <RegisterPage inviteToken={inviteToken} onSwitchToLogin={() => window.history.replaceState({}, '', window.location.pathname)} />;
     }
-    return <LoginPage />;
+    if (authScreen === 'forgot') {
+      return <ForgotPasswordPage onBack={() => setAuthScreen('login')} />;
+    }
+    return <LoginPage onForgotPassword={() => setAuthScreen('forgot')} />;
   }
 
   const parentName = profile?.name ?? 'Orang Tua';

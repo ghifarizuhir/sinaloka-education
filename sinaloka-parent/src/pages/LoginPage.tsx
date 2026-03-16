@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
-export function LoginPage() {
+export function LoginPage({ onForgotPassword }: { onForgotPassword: () => void }) {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,6 +47,13 @@ export function LoginPage() {
             className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all">
             <LogIn className="w-6 h-6" />
             {loading ? 'Masuk...' : 'Masuk'}
+          </button>
+          <button
+            type="button"
+            onClick={onForgotPassword}
+            className="w-full text-center text-zinc-500 hover:text-lime-400 text-sm font-medium transition-colors"
+          >
+            Lupa Password?
           </button>
         </form>
       </motion.div>
