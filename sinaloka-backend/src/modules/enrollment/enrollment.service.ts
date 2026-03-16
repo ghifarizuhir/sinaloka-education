@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
@@ -15,8 +16,8 @@ import {
   UpdateEnrollmentDto,
   EnrollmentQueryDto,
   CheckConflictDto,
+  ImportEnrollmentRowSchema,
 } from './enrollment.dto.js';
-import { ImportEnrollmentRowSchema } from './enrollment.dto.js';
 
 @Injectable()
 export class EnrollmentService {
@@ -118,11 +119,12 @@ export class EnrollmentService {
       );
     }
 
-    // Check for duplicate enrollment (student+class)
+    // Check for duplicate enrollment (student+class) scoped to institution
     const existing = await this.prisma.enrollment.findFirst({
       where: {
         student_id: dto.student_id,
         class_id: dto.class_id,
+        institution_id: institutionId,
       },
     });
 
@@ -270,6 +272,10 @@ export class EnrollmentService {
       skip_empty_lines: true,
       trim: true,
     });
+
+    if (records.length > 500) {
+      throw new BadRequestException(`CSV exceeds maximum of 500 rows`);
+    }
 
     let created = 0;
     let skipped = 0;

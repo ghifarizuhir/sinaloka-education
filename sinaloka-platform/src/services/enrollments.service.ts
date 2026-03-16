@@ -18,8 +18,6 @@ export const enrollmentsService = {
   importCsv: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.post('/api/admin/enrollments/import', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }).then((r) => r.data);
+    return api.post('/api/admin/enrollments/import', formData).then((r) => r.data);
   },
 };
