@@ -21,9 +21,6 @@ describe('ClassService', () => {
       update: jest.Mock;
       delete: jest.Mock;
     };
-    enrollment: {
-      count: jest.Mock;
-    };
   };
 
   const mockClass = {
@@ -33,7 +30,7 @@ describe('ClassService', () => {
     name: 'Math 101',
     subject: 'Mathematics',
     capacity: 30,
-    fee: 500000,
+    fee: '500000',
     schedule_days: ['Monday', 'Wednesday'],
     schedule_start_time: '14:00',
     schedule_end_time: '15:30',
@@ -41,6 +38,19 @@ describe('ClassService', () => {
     status: 'ACTIVE',
     created_at: new Date(),
     updated_at: new Date(),
+    tutor: { id: 'tutor-1', user: { id: 'user-1', name: 'John Doe', email: 'john@example.com' } },
+  };
+
+  const mockClassWithRelations = {
+    ...mockClass,
+    enrollments: [
+      {
+        id: 'enr-1',
+        status: 'ACTIVE',
+        created_at: new Date(),
+        student: { id: 'student-1', name: 'Alice', grade: '10', status: 'ACTIVE' },
+      },
+    ],
   };
 
   beforeEach(async () => {
@@ -52,9 +62,6 @@ describe('ClassService', () => {
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
-      },
-      enrollment: {
-        count: jest.fn(),
       },
     };
 
@@ -69,7 +76,7 @@ describe('ClassService', () => {
   });
 
   describe('create', () => {
-    it('should create a class with institution scoping', async () => {
+    it('should create a class with institution scoping and numeric fee', async () => {
       prisma.class.create.mockResolvedValue(mockClass);
 
       const result = await service.create('inst-1', {
@@ -85,13 +92,11 @@ describe('ClassService', () => {
         status: 'ACTIVE',
       });
 
-      expect(result).toEqual(mockClass);
+      expect(result.fee).toBe(500000);
       expect(prisma.class.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             institution_id: 'inst-1',
-            tutor_id: 'tutor-1',
-            name: 'Math 101',
           }),
         }),
       );
@@ -99,7 +104,7 @@ describe('ClassService', () => {
   });
 
   describe('findAll', () => {
-    it('should return paginated classes', async () => {
+    it('should return paginated classes with tutor and numeric fee', async () => {
       prisma.class.findMany.mockResolvedValue([mockClass]);
       prisma.class.count.mockResolvedValue(1);
 
@@ -111,10 +116,13 @@ describe('ClassService', () => {
       });
 
       expect(result.data).toHaveLength(1);
+      expect(result.data[0].fee).toBe(500000);
+      expect(result.data[0].tutor).toEqual({ id: 'tutor-1', name: 'John Doe' });
       expect(result.meta.total).toBe(1);
       expect(prisma.class.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ institution_id: 'inst-1' }),
+          include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
         }),
       );
     });
@@ -182,58 +190,38 @@ describe('ClassService', () => {
   });
 
   describe('findOne', () => {
-    it('should return a class with enrolled_count', async () => {
-      prisma.class.findFirst.mockResolvedValue(mockClass);
-      prisma.enrollment.count.mockResolvedValue(5);
-
+    it('should return a class with tutor, enrollments and numeric fee', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClassWithRelations);
       const result = await service.findOne('inst-1', 'class-1');
-
-      expect(result).toEqual({ ...mockClass, enrolled_count: 5 });
-      expect(prisma.class.findFirst).toHaveBeenCalledWith({
-        where: { id: 'class-1', institution_id: 'inst-1' },
-      });
-      expect(prisma.enrollment.count).toHaveBeenCalledWith({
-        where: {
-          class_id: 'class-1',
-          status: { in: ['ACTIVE', 'TRIAL'] },
-        },
-      });
+      expect(result.fee).toBe(500000);
+      expect(result.tutor).toEqual({ id: 'tutor-1', name: 'John Doe', email: 'john@example.com' });
+      expect(result.enrolled_count).toBe(1);
+      expect(result.enrollments).toHaveLength(1);
+      expect(result.enrollments[0].student.name).toBe('Alice');
+      expect(prisma.class.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'class-1', institution_id: 'inst-1' },
+          include: expect.objectContaining({ tutor: expect.any(Object), enrollments: expect.any(Object) }),
+        }),
+      );
     });
-
     it('should throw NotFoundException if class not found', async () => {
       prisma.class.findFirst.mockResolvedValue(null);
-
-      await expect(service.findOne('inst-1', 'nonexistent')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('inst-1', 'nonexistent')).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('update', () => {
-    it('should update a class after verifying existence', async () => {
+    it('should update a class and return numeric fee', async () => {
       prisma.class.findFirst.mockResolvedValue(mockClass);
-      prisma.class.update.mockResolvedValue({
-        ...mockClass,
-        name: 'Updated Math',
-      });
-
-      const result = await service.update('inst-1', 'class-1', {
-        name: 'Updated Math',
-      });
-
+      prisma.class.update.mockResolvedValue({ ...mockClass, name: 'Updated Math' });
+      const result = await service.update('inst-1', 'class-1', { name: 'Updated Math' });
       expect(result.name).toBe('Updated Math');
-      expect(prisma.class.update).toHaveBeenCalledWith({
-        where: { id: 'class-1' },
-        data: { name: 'Updated Math' },
-      });
+      expect(result.fee).toBe(500000);
     });
-
     it('should throw NotFoundException if class not found', async () => {
       prisma.class.findFirst.mockResolvedValue(null);
-
-      await expect(
-        service.update('inst-1', 'nonexistent', { name: 'New Name' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update('inst-1', 'nonexistent', { name: 'New Name' })).rejects.toThrow(NotFoundException);
     });
   });
 

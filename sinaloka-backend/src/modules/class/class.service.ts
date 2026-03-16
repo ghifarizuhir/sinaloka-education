@@ -11,7 +11,7 @@ export class ClassService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(institutionId: string, dto: CreateClassDto) {
-    return this.prisma.class.create({
+    const record = await this.prisma.class.create({
       data: {
         institution_id: institutionId,
         tutor_id: dto.tutor_id,
@@ -26,6 +26,7 @@ export class ClassService {
         status: dto.status ?? 'ACTIVE',
       },
     });
+    return { ...record, fee: Number(record.fee) };
   }
 
   async findAll(
@@ -59,12 +60,17 @@ export class ClassService {
         skip,
         take: limit,
         orderBy: { [sort_by]: sort_order },
+        include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
       }),
       this.prisma.class.count({ where }),
     ]);
 
     return {
-      data,
+      data: data.map((c) => ({
+        ...c,
+        fee: Number(c.fee),
+        tutor: c.tutor ? { id: c.tutor.id, name: c.tutor.user.name } : null,
+      })),
       meta: buildPaginationMeta(total, page, limit),
     };
   }
@@ -72,22 +78,26 @@ export class ClassService {
   async findOne(institutionId: string, id: string) {
     const classRecord = await this.prisma.class.findFirst({
       where: { id, institution_id: institutionId },
+      include: {
+        tutor: { include: { user: { select: { id: true, name: true, email: true } } } },
+        enrollments: {
+          where: { status: { in: ['ACTIVE', 'TRIAL'] } },
+          include: { student: { select: { id: true, name: true, grade: true, status: true } } },
+          orderBy: { created_at: 'desc' },
+        },
+      },
     });
 
     if (!classRecord) {
       throw new NotFoundException(`Class with ID "${id}" not found`);
     }
 
-    const enrolledCount = await this.prisma.enrollment.count({
-      where: {
-        class_id: id,
-        status: { in: ['ACTIVE', 'TRIAL'] },
-      },
-    });
-
     return {
       ...classRecord,
-      enrolled_count: enrolledCount,
+      fee: Number(classRecord.fee),
+      tutor: classRecord.tutor ? { id: classRecord.tutor.id, name: classRecord.tutor.user.name, email: classRecord.tutor.user.email } : null,
+      enrolled_count: classRecord.enrollments.length,
+      enrollments: classRecord.enrollments.map((e) => ({ id: e.id, status: e.status, student: e.student })),
     };
   }
 
@@ -100,10 +110,11 @@ export class ClassService {
       throw new NotFoundException(`Class with ID "${id}" not found`);
     }
 
-    return this.prisma.class.update({
+    const record = await this.prisma.class.update({
       where: { id },
       data: dto,
     });
+    return { ...record, fee: Number(record.fee) };
   }
 
   async delete(institutionId: string, id: string) {
