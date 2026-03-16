@@ -669,7 +669,10 @@
       "statusUpdated": "Status diperbarui menjadi {{status}}",
       "statusError": "Gagal memperbarui status",
       "deleted": "Pendaftaran dihapus",
-      "deleteError": "Gagal menghapus pendaftaran"
+      "deleteError": "Gagal menghapus pendaftaran",
+      "importSuccess": "Berhasil mengimpor {{count}} pendaftaran",
+      "importPartial": "Mengimpor {{created}} pendaftaran dengan {{errors}} kesalahan",
+      "importError": "Gagal mengimpor pendaftaran"
     },
     "modal": {
       "newTitle": "Pendaftaran Siswa Baru",
@@ -692,7 +695,8 @@
       "clickToUpload": "Klik untuk mengunggah CSV",
       "csvMapDesc": "Petakan Student_ID ke Class_ID dalam satu langkah",
       "csvFormatGuide": "Panduan Format CSV",
-      "processImport": "Proses Impor"
+      "processImport": "Proses Impor",
+      "uuidNote": "Gunakan UUID lengkap untuk kolom student_id dan class_id"
     }
   },
 
@@ -794,7 +798,23 @@
     "reminderSent": "Pengingat pembayaran dikirim ke orang tua {{student}} via WhatsApp.",
     "recordsTotal": "total data",
     "tutor": "Tutor",
-    "sessions": "Sesi"
+    "sessions": "Sesi",
+    "revenueBreakdown": "Rincian Pendapatan",
+    "byClass": "Per Kelas",
+    "byPaymentMethod": "Per Metode Pembayaran",
+    "byStatus": "Per Status",
+    "expenseBreakdown": "Rincian Pengeluaran",
+    "byCategory": "Per Kategori",
+    "monthlyTrend": "Tren Bulanan",
+    "exportPayments": "Ekspor Pembayaran",
+    "exportPayouts": "Ekspor Pembayaran Tutor",
+    "exportExpenses": "Ekspor Pengeluaran",
+    "exportSuccess": "Ekspor berhasil diunduh",
+    "noDataForPeriod": "Tidak ada data untuk periode ini",
+    "paymentCountLabel": "{{count}} pembayaran",
+    "payoutCountLabel": "{{count}} pembayaran tutor",
+    "expenseCountLabel": "{{count}} catatan",
+    "exportCsv": "Ekspor CSV"
   },
 
   "payments": {

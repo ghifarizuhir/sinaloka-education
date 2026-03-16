@@ -669,7 +669,10 @@
       "statusUpdated": "Status updated to {{status}}",
       "statusError": "Failed to update status",
       "deleted": "Enrollment deleted",
-      "deleteError": "Failed to delete enrollment"
+      "deleteError": "Failed to delete enrollment",
+      "importSuccess": "Successfully imported {{count}} enrollment(s)",
+      "importPartial": "Imported {{created}} enrollment(s) with {{errors}} error(s)",
+      "importError": "Failed to import enrollments"
     },
     "modal": {
       "newTitle": "New Student Enrollment",
@@ -692,7 +695,8 @@
       "clickToUpload": "Click to upload CSV",
       "csvMapDesc": "Map Student_ID to Class_ID in one go",
       "csvFormatGuide": "CSV Format Guide",
-      "processImport": "Process Import"
+      "processImport": "Process Import",
+      "uuidNote": "Use full UUIDs for student_id and class_id columns"
     }
   },
 
@@ -794,7 +798,23 @@
     "reminderSent": "Payment reminder sent to {{student}}'s parent via WhatsApp.",
     "recordsTotal": "records total",
     "tutor": "Tutor",
-    "sessions": "Sessions"
+    "sessions": "Sessions",
+    "revenueBreakdown": "Revenue Breakdown",
+    "byClass": "By Class",
+    "byPaymentMethod": "By Payment Method",
+    "byStatus": "By Status",
+    "expenseBreakdown": "Expense Breakdown",
+    "byCategory": "By Category",
+    "monthlyTrend": "Monthly Trend",
+    "exportPayments": "Export Payments",
+    "exportPayouts": "Export Payouts",
+    "exportExpenses": "Export Expenses",
+    "exportSuccess": "Export downloaded",
+    "noDataForPeriod": "No data for this period",
+    "paymentCountLabel": "{{count}} payments",
+    "payoutCountLabel": "{{count}} payouts",
+    "expenseCountLabel": "{{count}} records",
+    "exportCsv": "Export CSV"
   },
 
   "payments": {

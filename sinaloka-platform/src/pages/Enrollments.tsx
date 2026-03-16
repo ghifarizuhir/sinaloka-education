@@ -43,7 +43,7 @@ import {
 } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
 import { toast } from 'sonner';
-import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict } from '@/src/hooks/useEnrollments';
+import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict, useImportEnrollments } from '@/src/hooks/useEnrollments';
 import { useStudents } from '@/src/hooks/useStudents';
 import { useClasses } from '@/src/hooks/useClasses';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
@@ -128,11 +128,15 @@ export const Enrollments = () => {
   const students = studentsQuery.data?.data ?? [];
   const classes = classesQuery.data?.data ?? [];
 
+  // Import state
+  const [importFile, setImportFile] = useState<File | null>(null);
+
   // Mutations
   const createEnrollment = useCreateEnrollment();
   const updateEnrollment = useUpdateEnrollment();
   const deleteEnrollment = useDeleteEnrollment();
   const checkConflict = useCheckConflict();
+  const importEnrollments = useImportEnrollments();
 
   const filteredEnrollments = useMemo(() => {
     return enrollments.filter(e => {
@@ -196,6 +200,30 @@ export const Enrollments = () => {
   };
 
   const isLoading = enrollmentsQuery.isLoading;
+
+  const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setImportFile(file);
+  };
+
+  const handleImportSubmit = () => {
+    if (!importFile) return;
+    importEnrollments.mutate(importFile, {
+      onSuccess: (data: { created: number; skipped: number; errors: { row: number; message: string }[] }) => {
+        if (data.errors.length === 0) {
+          toast.success(t('enrollments.toast.importSuccess', { count: data.created }));
+        } else {
+          toast.warning(t('enrollments.toast.importPartial', { created: data.created, errors: data.errors.length }));
+        }
+        setImportModal(false);
+        setImportFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      },
+      onError: () => {
+        toast.error(t('enrollments.toast.importError'));
+      },
+    });
+  };
 
   return (
     <div className="space-y-6 pb-20">
@@ -629,22 +657,36 @@ export const Enrollments = () => {
       {/* Bulk Import Modal */}
       <Modal
         isOpen={importModal}
-        onClose={() => setImportModal(false)}
+        onClose={() => { setImportModal(false); setImportFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
         title={t('enrollments.modal.importTitle')}
       >
         <div className="space-y-6">
           <div
-            className="border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-indigo-400 transition-colors cursor-pointer"
+            className={cn(
+              "border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 transition-colors cursor-pointer",
+              importFile
+                ? "border-emerald-400 bg-emerald-50/30 dark:bg-emerald-900/10"
+                : "border-zinc-200 dark:border-zinc-800 hover:border-indigo-400"
+            )}
             onClick={() => fileInputRef.current?.click()}
           >
             <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-400">
               <Upload size={32} />
             </div>
             <div>
-              <p className="text-sm font-bold dark:text-zinc-200">{t('enrollments.import.clickToUpload')}</p>
-              <p className="text-xs text-zinc-500">{t('enrollments.import.csvMapDesc')}</p>
+              {importFile ? (
+                <>
+                  <p className="text-sm font-bold text-emerald-600">{importFile.name}</p>
+                  <p className="text-xs text-zinc-500">{t('enrollments.import.clickToUpload')}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-bold dark:text-zinc-200">{t('enrollments.import.clickToUpload')}</p>
+                  <p className="text-xs text-zinc-500">{t('enrollments.import.csvMapDesc')}</p>
+                </>
+              )}
             </div>
-            <input type="file" ref={fileInputRef} className="hidden" accept=".csv" />
+            <input type="file" ref={fileInputRef} className="hidden" accept=".csv" onChange={handleImportFileChange} />
           </div>
 
           <div className="bg-zinc-50 dark:bg-zinc-900 p-4 rounded-xl space-y-2">
@@ -653,15 +695,22 @@ export const Enrollments = () => {
               {t('enrollments.import.csvFormatGuide')}
             </p>
             <div className="text-[10px] font-mono text-zinc-500 bg-white dark:bg-zinc-950 p-2 rounded border border-zinc-100 dark:border-zinc-800">
-              student_id, class_id, enrollment_type<br />
-              S101, C005, ACTIVE<br />
-              S102, C005, TRIAL
+              student_id, class_id, status<br />
+              550e8400-e29b-41d4-a716-446655440000, 6ba7b810-9dad-11d1-80b4-00c04fd430c8, ACTIVE<br />
+              7c9e6679-7425-40de-944b-e07fc1f90ae7, 6ba7b810-9dad-11d1-80b4-00c04fd430c8, TRIAL
             </div>
+            <p className="text-[10px] text-zinc-400 mt-1">{t('enrollments.import.uuidNote')}</p>
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="flex-1 justify-center" onClick={() => setImportModal(false)}>{t('common.cancel')}</Button>
-            <Button className="flex-1 justify-center" onClick={() => setImportModal(false)}>{t('enrollments.import.processImport')}</Button>
+            <Button variant="outline" className="flex-1 justify-center" onClick={() => { setImportModal(false); setImportFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}>{t('common.cancel')}</Button>
+            <Button
+              className="flex-1 justify-center"
+              onClick={handleImportSubmit}
+              disabled={!importFile || importEnrollments.isPending}
+            >
+              {importEnrollments.isPending ? t('common.processing') : t('enrollments.import.processImport')}
+            </Button>
           </div>
         </div>
       </Modal>

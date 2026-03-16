@@ -15,4 +15,11 @@ export const enrollmentsService = {
     api.delete(`/api/admin/enrollments/${id}`),
   checkConflict: (data: CheckConflictDto) =>
     api.post('/api/admin/enrollments/check-conflict', data).then((r) => r.data),
+  importCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/admin/enrollments/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
 };

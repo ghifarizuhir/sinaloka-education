@@ -35,3 +35,10 @@ export const CheckConflictSchema = z.object({
   class_id: z.string().uuid(),
 });
 export type CheckConflictDto = z.infer<typeof CheckConflictSchema>;
+
+export const ImportEnrollmentRowSchema = z.object({
+  student_id: z.string().uuid(),
+  class_id: z.string().uuid(),
+  status: EnrollmentStatus.default('ACTIVE'),
+});
+export type ImportEnrollmentRowDto = z.infer<typeof ImportEnrollmentRowSchema>;

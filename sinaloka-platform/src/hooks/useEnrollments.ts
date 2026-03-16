@@ -23,3 +23,7 @@ export function useDeleteEnrollment() {
 export function useCheckConflict() {
   return useMutation({ mutationFn: (data: CheckConflictDto) => enrollmentsService.checkConflict(data) });
 }
+export function useImportEnrollments() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: enrollmentsService.importCsv, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+}
