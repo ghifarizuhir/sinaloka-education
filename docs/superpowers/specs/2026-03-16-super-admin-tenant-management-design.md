@@ -67,7 +67,7 @@ SUPER_ADMIN gets a separate route tree (`/super/*`) with its own sidebar. When i
 
 - **Form fields:**
   - Name (required)
-  - Slug (auto-generated from name, editable)
+  - Slug (auto-generated from name by backend, displayed as read-only on edit)
   - Address, Phone, Email
   - Logo upload
   - Timezone (dropdown, default "Asia/Jakarta")
@@ -79,7 +79,7 @@ SUPER_ADMIN gets a separate route tree (`/super/*`) with its own sidebar. When i
 
 - **Tabbed layout with three tabs:**
   - **General** — edit form (same fields as create, plus active/inactive toggle)
-  - **Admins** — list of admin users for this institution, "Add Admin" button to create new admin assigned to this institution
+  - **Admins** — list of admin users for this institution, "Add Admin" button to create new admin (uses existing `POST /api/admin/users` with the institution's ID)
   - **Overview** — read-only quick stats: student count, tutor count, active class count
 - **Danger Zone** (bottom of General tab): Deactivate institution only. Hard deletion is not supported — institutions have cascading relations (users, students, classes, payments, etc.) and deleting would risk data loss. Deactivation (`is_active = false`) is the safe approach at this scale.
 
@@ -133,7 +133,7 @@ SUPER_ADMIN gets a separate route tree (`/super/*`) with its own sidebar. When i
 - `GET /api/admin/institutions/:id` — enhance to include admin users relation
 - `POST /api/admin/institutions` — enhance to accept optional `admin` nested object for atomic institution + first admin creation (Prisma transaction)
 - `PATCH /api/admin/institutions/:id` — add `is_active` to `UpdateInstitutionSchema` DTO (used for both general edits and deactivation — no separate status endpoint needed)
-- `DELETE /api/admin/institutions/:id` — remove or disable this endpoint (deactivation-only policy)
+- `DELETE /api/admin/institutions/:id` — return `403 Forbidden` with message "Institution deletion is not supported. Use deactivation instead." to prevent accidental data loss from cascading deletes
 - `GET /api/admin/users` — add query param support for `role` and `status` filters (currently only supports `search` and tenant scoping)
 - TenantInterceptor `?institution_id` handling — no changes needed
 
@@ -146,22 +146,24 @@ SUPER_ADMIN gets a separate route tree (`/super/*`) with its own sidebar. When i
 
 ### DTO Changes
 
-- `CreateInstitutionSchema`: add optional fields `slug`, `timezone`, `default_language`, and optional nested `admin` object (`{ name, email, password }`)
+- `CreateInstitutionSchema`: add optional fields `timezone`, `default_language`, and optional nested `admin` object (`{ name, email, password }`). Note: `slug` is auto-generated from name by the backend — do not accept it in the DTO to avoid uniqueness conflicts
 - `UpdateInstitutionSchema`: add `is_active` boolean field
 - `UserQuerySchema` (or equivalent): add optional `role` and `is_active` filter params
 
 ### Schema Change
 
 - Add `is_active` Boolean field to the `institution` model (default: `true`)
-- Migration to add the column
+- Migration to add the column with `DEFAULT true` so all existing institution rows remain active
 
 ### Login & Token Refresh Change
 
 - In `auth.service.ts`, both `login()` and `refresh()` methods:
+  - Add `include: { institution: true }` to the Prisma user query (currently not included)
   - After credential/token validation, check if `user.institution` exists and `user.institution.is_active === false`
   - Throw `ForbiddenException('Your institution has been deactivated. Contact support.')`
   - SUPER_ADMIN users (no institution) are unaffected
   - This ensures deactivated institutions are blocked immediately, not just on next login
+  - Note: existing short-lived access tokens (15min) will continue to work until expiry after deactivation — this is acceptable for the current scale
 
 ## Frontend File Structure
 
