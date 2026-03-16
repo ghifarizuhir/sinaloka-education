@@ -79,7 +79,6 @@ describe('UserService', () => {
       const result = await service.findAll('inst-1', {
         page: 1,
         limit: 20,
-        sort_order: 'asc' as const,
       });
 
       expect(result.data).toHaveLength(1);
@@ -98,7 +97,6 @@ describe('UserService', () => {
       const result = await service.findAll(null, {
         page: 1,
         limit: 20,
-        sort_order: 'asc' as const,
       });
 
       expect(result.data).toHaveLength(1);

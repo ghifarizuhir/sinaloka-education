@@ -16,11 +16,9 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
-import { PaginationSchema } from '../../common/dto/pagination.dto.js';
-import type { PaginationDto } from '../../common/dto/pagination.dto.js';
 import { UserService } from './user.service.js';
-import { CreateUserSchema, UpdateUserSchema } from './user.dto.js';
-import type { CreateUserDto, UpdateUserDto } from './user.dto.js';
+import { CreateUserSchema, UpdateUserSchema, UserQuerySchema } from './user.dto.js';
+import type { CreateUserDto, UpdateUserDto, UserQueryDto } from './user.dto.js';
 
 @Controller('admin/users')
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)
@@ -30,7 +28,7 @@ export class UserController {
   @Get()
   async findAll(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(PaginationSchema)) query: PaginationDto,
+    @Query(new ZodValidationPipe(UserQuerySchema)) query: UserQueryDto,
   ) {
     return this.userService.findAll(user.institutionId, query);
   }
