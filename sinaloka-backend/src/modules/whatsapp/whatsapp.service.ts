@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import type { WhatsappMessagesQueryDto, UpdateWhatsappSettingsDto } from './whatsapp.dto.js';
 
 const GRAPH_API_URL = 'https://graph.facebook.com/v21.0';
 
@@ -179,6 +180,114 @@ export class WhatsappService {
       where: { wa_message_id: waMessageId },
       data: { status: mappedStatus },
     });
+  }
+
+  async getMessages(institutionId: string, query: WhatsappMessagesQueryDto) {
+    const { page, limit, status, date_from, date_to, related_type } = query;
+    const where: any = { institution_id: institutionId };
+    if (status) where.status = status;
+    if (related_type) where.related_type = related_type;
+    if (date_from || date_to) {
+      where.created_at = {};
+      if (date_from) where.created_at.gte = new Date(date_from);
+      if (date_to) where.created_at.lte = new Date(date_to + 'T23:59:59.999Z');
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.whatsappMessage.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+      }),
+      this.prisma.whatsappMessage.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async getStats(institutionId: string, dateFrom?: string, dateTo?: string) {
+    const now = new Date();
+    const startOfMonth = dateFrom
+      ? new Date(dateFrom)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = dateTo
+      ? new Date(dateTo + 'T23:59:59.999Z')
+      : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const messages = await this.prisma.whatsappMessage.groupBy({
+      by: ['status'],
+      where: {
+        institution_id: institutionId,
+        created_at: { gte: startOfMonth, lte: endOfMonth },
+      },
+      _count: true,
+    });
+
+    const counts: Record<string, number> = {};
+    let total = 0;
+    for (const m of messages) {
+      counts[m.status] = m._count;
+      total += m._count;
+    }
+
+    return {
+      configured: this.isConfigured(),
+      total,
+      sent: counts['SENT'] ?? 0,
+      delivered: counts['DELIVERED'] ?? 0,
+      read: counts['READ'] ?? 0,
+      failed: counts['FAILED'] ?? 0,
+      pending: counts['PENDING'] ?? 0,
+    };
+  }
+
+  async getSettings(institutionId: string) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { settings: true },
+    });
+    const settings = institution?.settings as Record<string, any> | null;
+    return {
+      auto_reminders: settings?.whatsapp_auto_reminders ?? true,
+      remind_days_before: settings?.whatsapp_remind_days_before ?? 1,
+    };
+  }
+
+  async updateSettings(institutionId: string, dto: UpdateWhatsappSettingsDto) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { settings: true },
+    });
+    const existing = (institution?.settings as Record<string, any>) ?? {};
+
+    const updated = { ...existing };
+    if (dto.auto_reminders !== undefined) {
+      updated.whatsapp_auto_reminders = dto.auto_reminders;
+    }
+    if (dto.remind_days_before !== undefined) {
+      updated.whatsapp_remind_days_before = dto.remind_days_before;
+    }
+
+    await this.prisma.institution.update({
+      where: { id: institutionId },
+      data: { settings: updated },
+    });
+
+    return {
+      auto_reminders: updated.whatsapp_auto_reminders ?? true,
+      remind_days_before: updated.whatsapp_remind_days_before ?? 1,
+    };
   }
 
   async sendPaymentReminder(institutionId: string, paymentId: string) {

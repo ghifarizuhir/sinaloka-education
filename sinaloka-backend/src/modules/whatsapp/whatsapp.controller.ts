@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Param,
   Query,
   Body,
@@ -16,7 +17,14 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { WhatsappService } from './whatsapp.service.js';
+import {
+  WhatsappMessagesQuerySchema,
+  type WhatsappMessagesQueryDto,
+  UpdateWhatsappSettingsSchema,
+  type UpdateWhatsappSettingsDto,
+} from './whatsapp.dto.js';
 import type { Request } from 'express';
 
 @Controller()
@@ -80,6 +88,40 @@ export class WhatsappController {
       user.institutionId!,
       paymentId,
     );
-    return { success: true, message_id: message!.id };
+    return { success: true, message_id: message?.id ?? null };
+  }
+
+  @Get('admin/whatsapp/messages')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async getMessages(
+    @CurrentUser() user: JwtPayload,
+    @Query(new ZodValidationPipe(WhatsappMessagesQuerySchema)) query: WhatsappMessagesQueryDto,
+  ) {
+    return this.whatsappService.getMessages(user.institutionId!, query);
+  }
+
+  @Get('admin/whatsapp/stats')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async getStats(
+    @CurrentUser() user: JwtPayload,
+    @Query('date_from') dateFrom?: string,
+    @Query('date_to') dateTo?: string,
+  ) {
+    return this.whatsappService.getStats(user.institutionId!, dateFrom, dateTo);
+  }
+
+  @Get('admin/whatsapp/settings')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async getSettings(@CurrentUser() user: JwtPayload) {
+    return this.whatsappService.getSettings(user.institutionId!);
+  }
+
+  @Patch('admin/whatsapp/settings')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async updateSettings(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(UpdateWhatsappSettingsSchema)) dto: UpdateWhatsappSettingsDto,
+  ) {
+    return this.whatsappService.updateSettings(user.institutionId!, dto);
   }
 }

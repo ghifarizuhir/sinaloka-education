@@ -21,32 +21,39 @@ export class WhatsappCron {
 
     this.logger.log('Starting daily payment reminder job');
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(23, 59, 59, 999);
-
     // Load institutions that haven't opted out
     const institutions = await this.prisma.institution.findMany({
       select: { id: true, settings: true },
     });
-    const activeInstitutionIds = institutions
+    const activeInstitutions = institutions
       .filter((inst) => {
         const settings = inst.settings as Record<string, any> | null;
         return settings?.whatsapp_auto_reminders !== false;
       })
-      .map((inst) => inst.id);
+      .map((inst) => {
+        const settings = inst.settings as Record<string, any> | null;
+        return {
+          id: inst.id,
+          remindDays: (settings?.whatsapp_remind_days_before as number) ?? 1,
+        };
+      });
 
-    if (activeInstitutionIds.length === 0) {
+    if (activeInstitutions.length === 0) {
       this.logger.log('No institutions with auto-reminders enabled');
       return;
     }
 
+    const maxRemindDays = Math.max(...activeInstitutions.map(i => i.remindDays));
+    const remindDate = new Date();
+    remindDate.setDate(remindDate.getDate() + maxRemindDays);
+    remindDate.setHours(23, 59, 59, 999);
+
     // Find payments needing reminders
     const payments = await this.prisma.payment.findMany({
       where: {
-        institution_id: { in: activeInstitutionIds },
+        institution_id: { in: activeInstitutions.map(i => i.id) },
         OR: [
-          { status: 'PENDING', due_date: { lte: tomorrow } },
+          { status: 'PENDING', due_date: { lte: remindDate } },
           { status: 'OVERDUE' },
         ],
       },
@@ -87,7 +94,7 @@ export class WhatsappCron {
         retry_count: { lt: 3 },
         related_type: 'payment',
         created_at: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-        institution_id: { in: activeInstitutionIds },
+        institution_id: { in: activeInstitutions.map(i => i.id) },
       },
     });
 
