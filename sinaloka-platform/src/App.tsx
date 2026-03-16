@@ -24,6 +24,7 @@ import { TutorPayouts } from './pages/Finance/TutorPayouts';
 import { OperatingExpenses } from './pages/Finance/OperatingExpenses';
 import { SettingsPage } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
+import { WhatsApp } from './pages/WhatsApp';
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="/finance/payouts" element={<TutorPayouts />} />
             <Route path="/finance/expenses" element={<OperatingExpenses />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/whatsapp" element={<WhatsApp />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Route>

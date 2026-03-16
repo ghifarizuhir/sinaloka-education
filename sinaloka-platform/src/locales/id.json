@@ -78,7 +78,9 @@
     "studentPayments": "Pembayaran Siswa",
     "tutorPayouts": "Pembayaran Tutor",
     "operatingExpenses": "Biaya Operasional",
-    "settings": "Pengaturan"
+    "settings": "Pengaturan",
+    "messaging": "Perpesanan",
+    "whatsapp": "WhatsApp"
   },
 
   "layout": {
@@ -99,7 +101,8 @@
       "studentPayments": "Pembayaran Siswa",
       "tutorPayouts": "Pembayaran Tutor",
       "operatingExpenses": "Biaya Operasional",
-      "settings": "Pengaturan"
+      "settings": "Pengaturan",
+      "whatsapp": "WhatsApp"
     }
   },
 
@@ -390,6 +393,8 @@
       "endTime": "Waktu Selesai",
       "capacity": "Kapasitas",
       "feePerSession": "Biaya per Sesi (Rp)",
+      "packageFee": "Biaya Paket Bulanan (Rp)",
+      "tutorFee": "Biaya Tutor per Sesi (Rp)",
       "room": "Ruangan (opsional)",
       "roomPlaceholder": "contoh: Ruang 101"
     },
@@ -549,6 +554,67 @@
       "homework": "PR",
       "markAttendance": "Catat Kehadiran",
       "cancelSession": "Batalkan Sesi"
+    }
+  },
+
+  "whatsapp": {
+    "tabs": {
+      "messages": "Pesan",
+      "paymentReminders": "Pengingat Pembayaran",
+      "settings": "Pengaturan"
+    },
+    "stats": {
+      "totalSent": "Total Terkirim",
+      "delivered": "Terkirim",
+      "read": "Dibaca",
+      "failed": "Gagal"
+    },
+    "filter": {
+      "allStatuses": "Semua Status",
+      "allTypes": "Semua Tipe",
+      "dateFrom": "Dari Tanggal",
+      "dateTo": "Sampai Tanggal"
+    },
+    "table": {
+      "recipient": "Penerima",
+      "template": "Template",
+      "status": "Status",
+      "relatedTo": "Terkait",
+      "date": "Tanggal",
+      "error": "Error"
+    },
+    "drawer": {
+      "title": "Detail Pesan",
+      "phone": "Telepon",
+      "templateName": "Template",
+      "templateParams": "Parameter",
+      "currentStatus": "Status Saat Ini",
+      "errorDetails": "Detail Error",
+      "retryCount": "Jumlah Percobaan",
+      "relatedEntity": "Entitas Terkait"
+    },
+    "notConfigured": "WhatsApp belum dikonfigurasi. Hubungi administrator sistem untuk mengatur kredensial API.",
+    "noMessages": "Belum ada pesan yang dikirim.",
+    "send": {
+      "title": "Kirim Pengingat Pembayaran",
+      "searchPlaceholder": "Cari nama siswa...",
+      "sendReminder": "Kirim Pengingat",
+      "noPhone": "Tidak ada nomor orang tua",
+      "noPayments": "Tidak ada pembayaran yang cocok"
+    },
+    "settings": {
+      "title": "Pengaturan WhatsApp",
+      "autoReminders": "Pengingat Otomatis",
+      "autoRemindersDesc": "Kirim pengingat pembayaran otomatis sebelum jatuh tempo",
+      "remindDaysBefore": "Hari Sebelum Jatuh Tempo",
+      "remindDaysBeforeDesc": "Jumlah hari sebelum jatuh tempo untuk mengirim pengingat",
+      "save": "Simpan Pengaturan"
+    },
+    "toast": {
+      "reminderSent": "Pengingat pembayaran terkirim",
+      "reminderError": "Gagal mengirim pengingat",
+      "settingsSaved": "Pengaturan WhatsApp tersimpan",
+      "settingsError": "Gagal menyimpan pengaturan"
     }
   },
 
@@ -783,6 +849,13 @@
       "sendReminder": "Kirim Pengingat",
       "viewDetails": "Lihat Detail",
       "delete": "Hapus"
+    },
+    "overdueAlert": {
+      "title": "Pembayaran Terlambat",
+      "students": "{{count}} siswa",
+      "totalDebt": "Total {{amount}}",
+      "viewDetails": "Lihat Detail",
+      "warning": "Terlambat"
     }
   },
 
@@ -850,7 +923,16 @@
     },
     "confirm": {
       "deletePayout": "Hapus pembayaran ini?"
-    }
+    },
+    "periodStart": "Periode Mulai",
+    "periodEnd": "Periode Akhir",
+    "calculate": "Hitung",
+    "calculating": "Menghitung...",
+    "sessionBreakdown": "Rincian Sesi",
+    "sessionsCount": "{{count}} sesi",
+    "overlapWarning": "Peringatan: Tumpang tindih dengan pembayaran yang sudah ada",
+    "noSessions": "Tidak ada sesi ditemukan dalam periode ini",
+    "period": "Periode"
   },
 
   "expenses": {

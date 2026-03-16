@@ -78,7 +78,9 @@
     "studentPayments": "Student Payments",
     "tutorPayouts": "Tutor Payouts",
     "operatingExpenses": "Operating Expenses",
-    "settings": "Settings"
+    "settings": "Settings",
+    "messaging": "Messaging",
+    "whatsapp": "WhatsApp"
   },
 
   "layout": {
@@ -99,7 +101,8 @@
       "studentPayments": "Student Payments",
       "tutorPayouts": "Tutor Payouts",
       "operatingExpenses": "Operating Expenses",
-      "settings": "Settings"
+      "settings": "Settings",
+      "whatsapp": "WhatsApp"
     }
   },
 
@@ -390,6 +393,8 @@
       "endTime": "End Time",
       "capacity": "Capacity",
       "feePerSession": "Fee per Session (Rp)",
+      "packageFee": "Monthly Package Fee (Rp)",
+      "tutorFee": "Tutor Fee per Session (Rp)",
       "room": "Room (optional)",
       "roomPlaceholder": "e.g. Room 101"
     },
@@ -549,6 +554,67 @@
       "homework": "HW",
       "markAttendance": "Mark Attendance",
       "cancelSession": "Cancel Session"
+    }
+  },
+
+  "whatsapp": {
+    "tabs": {
+      "messages": "Messages",
+      "paymentReminders": "Payment Reminders",
+      "settings": "Settings"
+    },
+    "stats": {
+      "totalSent": "Total Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed"
+    },
+    "filter": {
+      "allStatuses": "All Statuses",
+      "allTypes": "All Types",
+      "dateFrom": "Date From",
+      "dateTo": "Date To"
+    },
+    "table": {
+      "recipient": "Recipient",
+      "template": "Template",
+      "status": "Status",
+      "relatedTo": "Related To",
+      "date": "Date",
+      "error": "Error"
+    },
+    "drawer": {
+      "title": "Message Details",
+      "phone": "Phone",
+      "templateName": "Template",
+      "templateParams": "Parameters",
+      "currentStatus": "Current Status",
+      "errorDetails": "Error Details",
+      "retryCount": "Retry Count",
+      "relatedEntity": "Related Entity"
+    },
+    "notConfigured": "WhatsApp is not configured. Contact your system administrator to set up API credentials.",
+    "noMessages": "No messages sent yet.",
+    "send": {
+      "title": "Send Payment Reminder",
+      "searchPlaceholder": "Search student name...",
+      "sendReminder": "Send Reminder",
+      "noPhone": "No parent phone",
+      "noPayments": "No matching payments found"
+    },
+    "settings": {
+      "title": "WhatsApp Settings",
+      "autoReminders": "Auto-Reminders",
+      "autoRemindersDesc": "Automatically send payment reminders before due date",
+      "remindDaysBefore": "Remind Days Before Due Date",
+      "remindDaysBeforeDesc": "Number of days before the due date to send the reminder",
+      "save": "Save Settings"
+    },
+    "toast": {
+      "reminderSent": "Payment reminder sent",
+      "reminderError": "Failed to send reminder",
+      "settingsSaved": "WhatsApp settings saved",
+      "settingsError": "Failed to save settings"
     }
   },
 
@@ -783,6 +849,13 @@
       "sendReminder": "Send Reminder",
       "viewDetails": "View Details",
       "delete": "Delete"
+    },
+    "overdueAlert": {
+      "title": "Overdue Payments",
+      "students": "{{count}} students",
+      "totalDebt": "Total {{amount}}",
+      "viewDetails": "View Details",
+      "warning": "Overdue"
     }
   },
 
@@ -850,7 +923,16 @@
     },
     "confirm": {
       "deletePayout": "Delete this payout?"
-    }
+    },
+    "periodStart": "Period Start",
+    "periodEnd": "Period End",
+    "calculate": "Calculate",
+    "calculating": "Calculating...",
+    "sessionBreakdown": "Session Breakdown",
+    "sessionsCount": "{{count}} sessions",
+    "overlapWarning": "Warning: Overlaps with existing payout",
+    "noSessions": "No sessions found in this period",
+    "period": "Period"
   },
 
   "expenses": {
