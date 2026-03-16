@@ -22,7 +22,7 @@ Prisma schema defines `fee` as `Decimal`. Prisma returns `Decimal` fields as **s
 data: data.map(c => ({ ...c, fee: Number(c.fee) })),
 ```
 
-Apply the same transform in `findOne`.
+Apply the same transform in `findOne`, `create`, and `update` — all methods that return a raw Prisma class record must map `fee` to `Number` for API contract consistency.
 
 **Frontend** (defensive): Also convert in the `totalRevenue` reduce in case the backend hasn't been deployed yet:
 
@@ -86,10 +86,17 @@ Uses existing `Modal` component. Content:
 4. Text input — user must type "delete" to enable the button
 5. Cancel + Delete buttons (delete disabled until text matches, shows loading state)
 
-### Handler
+### Handlers
+
+Following the Students page naming convention — `handleDeleteClass` opens the modal, `confirmDeleteClass` executes the mutation:
 
 ```typescript
-const handleDeleteClass = () => {
+const handleDeleteClass = (cls: Class) => {
+  setDeleteTarget(cls);
+  setActiveActionMenu(null); // close action menu
+};
+
+const confirmDeleteClass = () => {
   if (!deleteTarget) return;
   deleteClass.mutate(deleteTarget.id, {
     onSuccess: () => {
@@ -102,7 +109,9 @@ const handleDeleteClass = () => {
 };
 ```
 
-The 3-dots menu "Delete Class" button now sets `setDeleteTarget(cls)` instead of calling `handleDeleteClass(cls.id)` directly.
+The 3-dots menu "Delete Class" button calls `handleDeleteClass(cls)`. The modal's Delete button calls `confirmDeleteClass()`.
+
+HTML-containing translation keys (`permanentDelete`, `typeDelete`) must be rendered with `dangerouslySetInnerHTML`, matching the Students page pattern.
 
 ### Translation Keys
 
@@ -150,7 +159,9 @@ const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
 
 Menu button `onClick` toggles `activeActionMenu` to `cls.id` or `null`. A transparent backdrop overlay closes the menu on outside click. Use `AnimatePresence` + `motion.div` for open/close animation (scale 0.95 → 1, opacity fade).
 
-The table row `onClick` for opening the drawer must check `e.target` to avoid triggering when the action menu button or its children are clicked. Use a `data-action-menu` attribute or `stopPropagation` on the menu button.
+The table row `onClick` for opening the drawer must not trigger when the action menu is clicked. Use `stopPropagation` on the action menu `<td>` (same pattern as Students page). Also call `setActiveActionMenu(null)` when the drawer opens to ensure both don't show simultaneously.
+
+Add `cursor-pointer` to table rows to indicate clickability.
 
 ## 5. Sidebar Drawer (Detailed Class View)
 
@@ -164,7 +175,7 @@ Clicking a table row opens the drawer. Uses existing `Drawer` component from `co
 const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 ```
 
-Row click sets `selectedClassId`. The drawer calls `useClass(selectedClassId)` to fetch detail.
+Row click sets `selectedClassId`. The drawer calls `useClass(selectedClassId)` to fetch detail. While loading, show the already-available data from the list (name, subject, fee, schedule, tutor name) immediately, and show a loading spinner only for the enrollments section.
 
 ### Backend Changes
 
@@ -197,7 +208,7 @@ return {
   tutor: classRecord.tutor
     ? { id: classRecord.tutor.id, name: classRecord.tutor.user.name, email: classRecord.tutor.user.email }
     : null,
-  enrolled_count: enrolledCount,
+  enrolled_count: classRecord.enrollments.length, // derive from included enrollments, remove separate count query
   enrollments: classRecord.enrollments.map(e => ({
     id: e.id,
     status: e.status,
@@ -216,7 +227,7 @@ export interface ClassDetail extends Class {
   enrollments: {
     id: string;
     status: string;
-    student: { id: string; name: string; grade: string; status: string };
+    student: { id: string; name: string; grade: string | null; status: string };
   }[];
 }
 ```
@@ -235,7 +246,7 @@ Following the Students drawer pattern:
 3. **Tutor section** — Section header "Tutor", card with tutor name and email
 4. **Schedule section** — Section header "Schedule", day badges + time range
 5. **Enrolled students section** — Section header "Enrolled Students ({count})", list of student cards with name, grade, and status badge. Empty state if none.
-6. **Action buttons** — Edit + Delete buttons at bottom
+6. **Action buttons** — Edit + Delete buttons at bottom. Delete opens the delete confirmation modal on top of the drawer (z-index handles this naturally since Modal is z-50). On successful delete, both the modal and drawer close (`setDeleteTarget(null)` + `setSelectedClassId(null)`).
 
 ### Translation Keys
 
@@ -280,7 +291,7 @@ Following the Students drawer pattern:
 ### Backend
 | File | Change |
 |------|--------|
-| `sinaloka-backend/src/modules/class/class.service.ts` | Add tutor include to `findAll`, extend `findOne` with tutor + enrollments include, map `fee` to Number |
+| `sinaloka-backend/src/modules/class/class.service.ts` | Add tutor include to `findAll`, extend `findOne` with tutor + enrollments include, map `fee` to Number in all methods (`findAll`, `findOne`, `create`, `update`) |
 
 ### Frontend
 | File | Change |
