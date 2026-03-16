@@ -31,8 +31,8 @@ export class ClassService {
     return {
       ...record,
       fee: Number(record.fee),
-      package_fee: record.package_fee ? Number(record.package_fee) : null,
-      tutor_fee: record.tutor_fee ? Number(record.tutor_fee) : null,
+      package_fee: record.package_fee != null ? Number(record.package_fee) : null,
+      tutor_fee: record.tutor_fee != null ? Number(record.tutor_fee) : null,
     };
   }
 
@@ -79,8 +79,8 @@ export class ClassService {
       data: data.map(({ _count, ...c }) => ({
         ...c,
         fee: Number(c.fee),
-        package_fee: c.package_fee ? Number(c.package_fee) : null,
-        tutor_fee: c.tutor_fee ? Number(c.tutor_fee) : null,
+        package_fee: c.package_fee != null ? Number(c.package_fee) : null,
+        tutor_fee: c.tutor_fee != null ? Number(c.tutor_fee) : null,
         tutor: c.tutor ? { id: c.tutor.id, name: c.tutor.user.name } : null,
         enrolled_count: _count.enrollments,
       })),
@@ -108,8 +108,8 @@ export class ClassService {
     return {
       ...classRecord,
       fee: Number(classRecord.fee),
-      package_fee: classRecord.package_fee ? Number(classRecord.package_fee) : null,
-      tutor_fee: classRecord.tutor_fee ? Number(classRecord.tutor_fee) : null,
+      package_fee: classRecord.package_fee != null ? Number(classRecord.package_fee) : null,
+      tutor_fee: classRecord.tutor_fee != null ? Number(classRecord.tutor_fee) : null,
       tutor: classRecord.tutor ? { id: classRecord.tutor.id, name: classRecord.tutor.user.name, email: classRecord.tutor.user.email } : null,
       enrolled_count: classRecord.enrollments.length,
       enrollments: classRecord.enrollments.map((e) => ({ id: e.id, status: e.status, student: e.student })),
@@ -132,8 +132,8 @@ export class ClassService {
     return {
       ...record,
       fee: Number(record.fee),
-      package_fee: record.package_fee ? Number(record.package_fee) : null,
-      tutor_fee: record.tutor_fee ? Number(record.tutor_fee) : null,
+      package_fee: record.package_fee != null ? Number(record.package_fee) : null,
+      tutor_fee: record.tutor_fee != null ? Number(record.tutor_fee) : null,
     };
   }
 
