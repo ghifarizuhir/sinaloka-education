@@ -7,6 +7,15 @@ export const CreateInstitutionSchema = z.object({
   email: z.string().email('Invalid email address').optional(),
   logo_url: z.string().url('Invalid URL').optional(),
   settings: z.record(z.string(), z.unknown()).optional(),
+  timezone: z.string().optional(),
+  default_language: z.string().optional(),
+  admin: z
+    .object({
+      name: z.string().min(1),
+      email: z.string().email(),
+      password: z.string().min(8),
+    })
+    .optional(),
 });
 
 export type CreateInstitutionDto = z.infer<typeof CreateInstitutionSchema>;
@@ -18,6 +27,9 @@ export const UpdateInstitutionSchema = z.object({
   email: z.string().email('Invalid email address').optional().nullable(),
   logo_url: z.string().url('Invalid URL').optional().nullable(),
   settings: z.record(z.string(), z.unknown()).optional().nullable(),
+  timezone: z.string().optional().nullable(),
+  default_language: z.string().optional().nullable(),
+  is_active: z.boolean().optional(),
 });
 
 export type UpdateInstitutionDto = z.infer<typeof UpdateInstitutionSchema>;
