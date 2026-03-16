@@ -26,6 +26,7 @@ import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
 import { cn } from '../lib/utils';
+import ImpersonationBanner from './ImpersonationBanner';
 
 const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any, label: string, href: string, active: boolean, minimized: boolean }) => (
   <Link
@@ -255,6 +256,7 @@ export const Layout = () => {
         "flex-1 min-h-screen flex flex-col transition-all duration-300",
         isSidebarMinimized ? "ml-20" : "ml-64"
       )}>
+        <ImpersonationBanner />
         <Header
           title={title}
           isDarkMode={isDarkMode}
