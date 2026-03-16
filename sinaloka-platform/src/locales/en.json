@@ -478,7 +478,8 @@
       "sessionsGenerated": "Sessions generated successfully",
       "generateError": "Failed to generate sessions",
       "rescheduleApproved": "Reschedule approved",
-      "rescheduleError": "Failed to approve reschedule"
+      "rescheduleError": "Failed to approve reschedule",
+      "rescheduleRejected": "Reschedule rejected"
     },
     "modal": {
       "scheduleTitle": "Schedule New Session",
@@ -526,6 +527,28 @@
       "thu": "Thu",
       "fri": "Fri",
       "sat": "Sat"
+    },
+    "drawer": {
+      "title": "Session Details",
+      "dateTime": "Date & Time",
+      "tutor": "Tutor",
+      "sessionContent": "Session Content",
+      "topicCovered": "Topic Covered",
+      "sessionSummary": "Session Summary",
+      "noContent": "No content recorded yet",
+      "rescheduleInfo": "Reschedule Request",
+      "proposedDateTime": "Proposed",
+      "reason": "Reason",
+      "approve": "Approve",
+      "reject": "Reject",
+      "attendance": "Attendance",
+      "noAttendance": "No attendance recorded",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "homework": "HW",
+      "markAttendance": "Mark Attendance",
+      "cancelSession": "Cancel Session"
     }
   },
 
@@ -899,6 +922,11 @@
       "supportEmail": "Support Email",
       "timezone": "Timezone",
       "language": "Language",
+      "phone": "Phone",
+      "address": "Address",
+      "addressPlaceholder": "123 Education Street",
+      "saveSuccess": "Settings saved successfully",
+      "saveFailed": "Failed to save settings",
       "dangerZone": "Danger Zone",
       "dangerZoneDesc": "Permanently delete your institution data. This action is irreversible.",
       "deleteInstitution": "Delete Institution"
@@ -921,7 +949,14 @@
       "addCategory": "Add Category",
       "categoriesNote": "These categories will appear in the Operating Expenses menu.",
       "bankAccounts": "Bank Accounts (Self-Method)",
-      "addAccount": "Add Account"
+      "addAccount": "Add Account",
+      "saveSuccess": "Billing settings saved successfully",
+      "saveFailed": "Failed to save billing settings",
+      "addCategoryPlaceholder": "New category name",
+      "bankNamePlaceholder": "e.g. BCA",
+      "accountNumberPlaceholder": "1234567890",
+      "accountHolderPlaceholder": "Account holder name",
+      "addBankAccount": "Add"
     },
     "branding": {
       "whiteLabelingTitle": "White-Labeling & Branding",

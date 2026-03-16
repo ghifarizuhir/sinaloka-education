@@ -478,7 +478,8 @@
       "sessionsGenerated": "Sesi berhasil dibuat otomatis",
       "generateError": "Gagal membuat sesi otomatis",
       "rescheduleApproved": "Penjadwalan ulang disetujui",
-      "rescheduleError": "Gagal menyetujui penjadwalan ulang"
+      "rescheduleError": "Gagal menyetujui penjadwalan ulang",
+      "rescheduleRejected": "Jadwal ulang ditolak"
     },
     "modal": {
       "scheduleTitle": "Jadwalkan Sesi Baru",
@@ -526,6 +527,28 @@
       "thu": "Kam",
       "fri": "Jum",
       "sat": "Sab"
+    },
+    "drawer": {
+      "title": "Detail Sesi",
+      "dateTime": "Tanggal & Waktu",
+      "tutor": "Tutor",
+      "sessionContent": "Konten Sesi",
+      "topicCovered": "Topik Dibahas",
+      "sessionSummary": "Ringkasan Sesi",
+      "noContent": "Belum ada konten yang dicatat",
+      "rescheduleInfo": "Permintaan Jadwal Ulang",
+      "proposedDateTime": "Diusulkan",
+      "reason": "Alasan",
+      "approve": "Setujui",
+      "reject": "Tolak",
+      "attendance": "Kehadiran",
+      "noAttendance": "Belum ada kehadiran dicatat",
+      "present": "Hadir",
+      "absent": "Tidak Hadir",
+      "late": "Terlambat",
+      "homework": "PR",
+      "markAttendance": "Catat Kehadiran",
+      "cancelSession": "Batalkan Sesi"
     }
   },
 
@@ -899,6 +922,11 @@
       "supportEmail": "Email Dukungan",
       "timezone": "Zona Waktu",
       "language": "Bahasa",
+      "phone": "Telepon",
+      "address": "Alamat",
+      "addressPlaceholder": "Jl. Pendidikan No. 1",
+      "saveSuccess": "Pengaturan berhasil disimpan",
+      "saveFailed": "Gagal menyimpan pengaturan",
       "dangerZone": "Zona Berbahaya",
       "dangerZoneDesc": "Hapus data institusi Anda secara permanen. Tindakan ini tidak dapat dibatalkan.",
       "deleteInstitution": "Hapus Institusi"
@@ -921,7 +949,14 @@
       "addCategory": "Tambah Kategori",
       "categoriesNote": "Kategori ini akan muncul di menu Biaya Operasional.",
       "bankAccounts": "Rekening Bank (Metode Mandiri)",
-      "addAccount": "Tambah Rekening"
+      "addAccount": "Tambah Rekening",
+      "saveSuccess": "Pengaturan penagihan berhasil disimpan",
+      "saveFailed": "Gagal menyimpan pengaturan penagihan",
+      "addCategoryPlaceholder": "Nama kategori baru",
+      "bankNamePlaceholder": "contoh: BCA",
+      "accountNumberPlaceholder": "1234567890",
+      "accountHolderPlaceholder": "Nama pemilik rekening",
+      "addBankAccount": "Tambah"
     },
     "branding": {
       "whiteLabelingTitle": "White-Labeling & Branding",
