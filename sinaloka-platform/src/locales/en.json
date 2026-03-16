@@ -672,7 +672,13 @@
       "deleteError": "Failed to delete enrollment",
       "importSuccess": "Successfully imported {{count}} enrollment(s)",
       "importPartial": "Imported {{created}} enrollment(s) with {{errors}} error(s)",
-      "importError": "Failed to import enrollments"
+      "importError": "Failed to import enrollments",
+      "exportSuccess": "Enrollments exported successfully",
+      "exportError": "Failed to export enrollments",
+      "bulkStatusUpdated": "{{count}} enrollment(s) updated to {{status}}",
+      "bulkStatusError": "Failed to update enrollment statuses",
+      "bulkDeleted": "{{count}} enrollment(s) deleted",
+      "bulkDeleteError": "Failed to delete enrollments"
     },
     "modal": {
       "newTitle": "New Student Enrollment",
@@ -687,6 +693,12 @@
       "drop": "Drop",
       "deleteRecord": "Delete Record",
       "sendReminder": "Send Reminder"
+    },
+    "bulk": {
+      "changeStatus": "Change Status...",
+      "confirmDeleteTitle": "Delete Enrollments",
+      "confirmDeleteMessage": "This will permanently delete {{count}} enrollment(s). This action cannot be undone.",
+      "confirmDelete": "Delete {{count}} Enrollment(s)"
     },
     "confirm": {
       "deleteEnrollment": "Are you sure you want to delete this enrollment?"

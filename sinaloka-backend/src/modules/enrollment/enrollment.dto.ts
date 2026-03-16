@@ -36,6 +36,18 @@ export const CheckConflictSchema = z.object({
 });
 export type CheckConflictDto = z.infer<typeof CheckConflictSchema>;
 
+export const BulkUpdateEnrollmentSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+  status: EnrollmentStatus.optional(),
+  payment_status: PaymentStatus.optional(),
+});
+export type BulkUpdateEnrollmentDto = z.infer<typeof BulkUpdateEnrollmentSchema>;
+
+export const BulkDeleteEnrollmentSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+});
+export type BulkDeleteEnrollmentDto = z.infer<typeof BulkDeleteEnrollmentSchema>;
+
 export const ImportEnrollmentRowSchema = z.object({
   student_id: z.string().uuid(),
   class_id: z.string().uuid(),

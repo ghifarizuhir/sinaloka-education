@@ -672,7 +672,13 @@
       "deleteError": "Gagal menghapus pendaftaran",
       "importSuccess": "Berhasil mengimpor {{count}} pendaftaran",
       "importPartial": "Mengimpor {{created}} pendaftaran dengan {{errors}} kesalahan",
-      "importError": "Gagal mengimpor pendaftaran"
+      "importError": "Gagal mengimpor pendaftaran",
+      "exportSuccess": "Pendaftaran berhasil diekspor",
+      "exportError": "Gagal mengekspor pendaftaran",
+      "bulkStatusUpdated": "{{count}} pendaftaran diperbarui menjadi {{status}}",
+      "bulkStatusError": "Gagal memperbarui status pendaftaran",
+      "bulkDeleted": "{{count}} pendaftaran dihapus",
+      "bulkDeleteError": "Gagal menghapus pendaftaran"
     },
     "modal": {
       "newTitle": "Pendaftaran Siswa Baru",
@@ -687,6 +693,12 @@
       "drop": "Keluarkan",
       "deleteRecord": "Hapus Data",
       "sendReminder": "Kirim Pengingat"
+    },
+    "bulk": {
+      "changeStatus": "Ubah Status...",
+      "confirmDeleteTitle": "Hapus Pendaftaran",
+      "confirmDeleteMessage": "Ini akan menghapus {{count}} pendaftaran secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "confirmDelete": "Hapus {{count}} Pendaftaran"
     },
     "confirm": {
       "deleteEnrollment": "Apakah Anda yakin ingin menghapus pendaftaran ini?"

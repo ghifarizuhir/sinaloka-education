@@ -12,7 +12,9 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -25,12 +27,16 @@ import {
   UpdateEnrollmentSchema,
   EnrollmentQuerySchema,
   CheckConflictSchema,
+  BulkUpdateEnrollmentSchema,
+  BulkDeleteEnrollmentSchema,
 } from './enrollment.dto.js';
 import type {
   CreateEnrollmentDto,
   UpdateEnrollmentDto,
   EnrollmentQueryDto,
   CheckConflictDto,
+  BulkUpdateEnrollmentDto,
+  BulkDeleteEnrollmentDto,
 } from './enrollment.dto.js';
 
 @Controller('admin/enrollments')
@@ -64,6 +70,20 @@ export class EnrollmentController {
     return this.enrollmentService.findAll(user.institutionId!, query);
   }
 
+  @Get('export')
+  async exportCsv(
+    @Query() query: any,
+    @CurrentUser() user: JwtPayload,
+    @Res() res: Response,
+  ) {
+    const csv = await this.enrollmentService.exportToCsv(query, user.institutionId!);
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename=enrollments_${new Date().toISOString().split('T')[0]}.csv`,
+    });
+    res.send(csv);
+  }
+
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
   async importCsv(
@@ -75,6 +95,22 @@ export class EnrollmentController {
       throw new BadRequestException('File must be a CSV');
     }
     return this.enrollmentService.importFromCsv(file.buffer, user.institutionId!);
+  }
+
+  @Patch('bulk')
+  async bulkUpdate(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(BulkUpdateEnrollmentSchema)) dto: BulkUpdateEnrollmentDto,
+  ) {
+    return this.enrollmentService.bulkUpdate(user.institutionId!, dto);
+  }
+
+  @Delete('bulk')
+  async bulkDelete(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(BulkDeleteEnrollmentSchema)) dto: BulkDeleteEnrollmentDto,
+  ) {
+    return this.enrollmentService.bulkDelete(user.institutionId!, dto.ids);
   }
 
   @Get(':id')

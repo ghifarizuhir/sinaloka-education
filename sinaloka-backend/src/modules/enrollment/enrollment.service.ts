@@ -5,6 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
+import { stringify } from 'csv-stringify/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js';
 import {
@@ -17,6 +18,7 @@ import {
   EnrollmentQueryDto,
   CheckConflictDto,
   ImportEnrollmentRowSchema,
+  BulkUpdateEnrollmentDto,
 } from './enrollment.dto.js';
 
 @Injectable()
@@ -264,6 +266,50 @@ export class EnrollmentService {
     return this.prisma.enrollment.delete({
       where: { id },
     });
+  }
+
+  async exportToCsv(query: Record<string, any>, institutionId: string): Promise<string> {
+    const where: any = { institution_id: institutionId };
+    if (query.status) where.status = query.status;
+    if (query.class_id) where.class_id = query.class_id;
+    if (query.student_id) where.student_id = query.student_id;
+    if (query.payment_status) where.payment_status = query.payment_status;
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where,
+      include: {
+        student: { select: { name: true } },
+        class: { select: { name: true } },
+      },
+      orderBy: { enrolled_at: 'desc' },
+    });
+
+    return stringify(
+      enrollments.map((e) => ({
+        student_name: e.student?.name ?? '',
+        class_name: e.class?.name ?? '',
+        status: e.status,
+        payment_status: e.payment_status,
+        enrolled_at: e.enrolled_at?.toISOString().split('T')[0] ?? '',
+      })),
+      { header: true },
+    );
+  }
+
+  async bulkUpdate(institutionId: string, dto: BulkUpdateEnrollmentDto) {
+    const { ids, ...data } = dto;
+    const result = await this.prisma.enrollment.updateMany({
+      where: { id: { in: ids }, institution_id: institutionId },
+      data,
+    });
+    return { updated: result.count };
+  }
+
+  async bulkDelete(institutionId: string, ids: string[]) {
+    const result = await this.prisma.enrollment.deleteMany({
+      where: { id: { in: ids }, institution_id: institutionId },
+    });
+    return { deleted: result.count };
   }
 
   async importFromCsv(buffer: Buffer, institutionId: string) {

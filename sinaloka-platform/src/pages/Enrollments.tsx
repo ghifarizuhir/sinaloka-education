@@ -43,7 +43,7 @@ import {
 } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
 import { toast } from 'sonner';
-import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict, useImportEnrollments } from '@/src/hooks/useEnrollments';
+import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict, useImportEnrollments, useExportEnrollments, useBulkUpdateEnrollment, useBulkDeleteEnrollment } from '@/src/hooks/useEnrollments';
 import { useStudents } from '@/src/hooks/useStudents';
 import { useClasses } from '@/src/hooks/useClasses';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
@@ -130,6 +130,7 @@ export const Enrollments = () => {
 
   // Import state
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
   // Mutations
   const createEnrollment = useCreateEnrollment();
@@ -137,6 +138,9 @@ export const Enrollments = () => {
   const deleteEnrollment = useDeleteEnrollment();
   const checkConflict = useCheckConflict();
   const importEnrollments = useImportEnrollments();
+  const exportEnrollments = useExportEnrollments();
+  const bulkUpdate = useBulkUpdateEnrollment();
+  const bulkDelete = useBulkDeleteEnrollment();
 
   const filteredEnrollments = useMemo(() => {
     return enrollments.filter(e => {
@@ -225,6 +229,50 @@ export const Enrollments = () => {
     });
   };
 
+  const handleExportCsv = () => {
+    const params: Record<string, string> = {};
+    if (filterStatus) params.status = filterStatus;
+    if (filterStudentId) params.student_id = filterStudentId;
+    if (filterClassId) params.class_id = filterClassId;
+    exportEnrollments.mutate(params, {
+      onSuccess: (data: Blob) => {
+        const url = URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `enrollments_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(t('enrollments.toast.exportSuccess'));
+      },
+      onError: () => toast.error(t('enrollments.toast.exportError')),
+    });
+  };
+
+  const handleBulkStatusChange = (status: EnrollmentStatus) => {
+    bulkUpdate.mutate({ ids: selectedEnrollmentIds, status }, {
+      onSuccess: (data: { updated: number }) => {
+        toast.success(t('enrollments.toast.bulkStatusUpdated', { count: data.updated, status: STATUS_LABEL[status] }));
+        setSelectedEnrollmentIds([]);
+      },
+      onError: () => toast.error(t('enrollments.toast.bulkStatusError')),
+    });
+  };
+
+  const handleBulkDelete = () => {
+    setBulkDeleteConfirm(true);
+  };
+
+  const confirmBulkDelete = () => {
+    bulkDelete.mutate(selectedEnrollmentIds, {
+      onSuccess: (data: { deleted: number }) => {
+        toast.success(t('enrollments.toast.bulkDeleted', { count: data.deleted }));
+        setSelectedEnrollmentIds([]);
+        setBulkDeleteConfirm(false);
+      },
+      onError: () => toast.error(t('enrollments.toast.bulkDeleteError')),
+    });
+  };
+
   return (
     <div className="space-y-6 pb-20">
       {/* Sticky Header */}
@@ -290,7 +338,7 @@ export const Enrollments = () => {
             <option value="WAITLISTED">{t('enrollments.status.waitlisted')}</option>
             <option value="DROPPED">{t('enrollments.status.dropped')}</option>
           </select>
-          <Button variant="outline" size="sm" className="ml-auto">
+          <Button variant="outline" size="sm" className="ml-auto" onClick={handleExportCsv} disabled={exportEnrollments.isPending}>
             <Download size={14} />
             {t('enrollments.exportCsv')}
           </Button>
@@ -710,6 +758,92 @@ export const Enrollments = () => {
               disabled={!importFile || importEnrollments.isPending}
             >
               {importEnrollments.isPending ? t('common.processing') : t('enrollments.import.processImport')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Bulk Actions Floating Bar */}
+      <AnimatePresence>
+        {selectedEnrollmentIds.length > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40"
+          >
+            <div className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 border border-white/10 dark:border-black/10">
+              <div className="flex items-center gap-2 border-r border-white/20 dark:border-black/20 pr-6">
+                <span className="text-sm font-bold">{selectedEnrollmentIds.length}</span>
+                <span className="text-xs text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider">{t('common.selected')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  className="h-8 px-2 rounded-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 text-xs font-medium focus:outline-none"
+                  defaultValue=""
+                  onChange={(e) => {
+                    if (e.target.value) handleBulkStatusChange(e.target.value as EnrollmentStatus);
+                    e.target.value = '';
+                  }}
+                >
+                  <option value="" disabled>{t('enrollments.bulk.changeStatus')}</option>
+                  <option value="ACTIVE">{t('enrollments.status.active')}</option>
+                  <option value="TRIAL">{t('enrollments.status.trial')}</option>
+                  <option value="WAITLISTED">{t('enrollments.status.waitlisted')}</option>
+                  <option value="DROPPED">{t('enrollments.status.dropped')}</option>
+                </select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
+                  onClick={handleBulkDelete}
+                >
+                  <Trash2 size={14} />
+                  {t('common.delete')}
+                </Button>
+              </div>
+              <button
+                onClick={() => setSelectedEnrollmentIds([])}
+                className="p-1 hover:bg-white/10 dark:hover:bg-black/5 rounded-full transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bulk Delete Confirmation Modal */}
+      <Modal
+        isOpen={bulkDeleteConfirm}
+        onClose={() => setBulkDeleteConfirm(false)}
+        title={t('enrollments.bulk.confirmDeleteTitle')}
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 shrink-0">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-rose-900 dark:text-rose-200">{t('enrollments.bulk.confirmDeleteMessage', { count: selectedEnrollmentIds.length })}</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 pt-2">
+            <Button
+              variant="outline"
+              className="flex-1 justify-center"
+              onClick={() => setBulkDeleteConfirm(false)}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              className="flex-1 justify-center bg-rose-600 hover:bg-rose-700 text-white"
+              onClick={confirmBulkDelete}
+              disabled={bulkDelete.isPending}
+            >
+              {bulkDelete.isPending ? t('common.deleting') : t('enrollments.bulk.confirmDelete', { count: selectedEnrollmentIds.length })}
             </Button>
           </div>
         </div>
