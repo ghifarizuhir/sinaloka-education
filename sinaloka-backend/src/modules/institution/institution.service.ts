@@ -82,7 +82,7 @@ export class InstitutionService {
             institution_id: institution.id,
           },
         });
-        return tx.institution.findUnique({
+        const created = await tx.institution.findUnique({
           where: { id: institution.id },
           include: {
             users: {
@@ -91,6 +91,7 @@ export class InstitutionService {
             },
           },
         });
+        return created!;
       });
     }
 
