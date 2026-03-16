@@ -1,6 +1,7 @@
 import {
   Injectable,
   UnauthorizedException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -33,6 +34,7 @@ export class AuthService {
   async login(dto: LoginDto): Promise<TokenResponse> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
+      include: { institution: true },
     });
 
     if (!user) {
@@ -45,6 +47,12 @@ export class AuthService {
 
     if (!user.is_active) {
       throw new UnauthorizedException('User account is inactive');
+    }
+
+    if (user.institution && !user.institution.is_active) {
+      throw new ForbiddenException(
+        'Your institution has been deactivated. Contact support.',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password_hash);
@@ -94,7 +102,7 @@ export class AuthService {
   async refresh(dto: RefreshTokenDto): Promise<TokenResponse> {
     const refreshToken = await this.prisma.refreshToken.findUnique({
       where: { token: dto.refresh_token },
-      include: { user: true },
+      include: { user: { include: { institution: true } } },
     });
 
     if (!refreshToken) {
@@ -111,6 +119,12 @@ export class AuthService {
 
     if (!refreshToken.user.is_active) {
       throw new UnauthorizedException('User account is inactive');
+    }
+
+    if (refreshToken.user.institution && !refreshToken.user.institution.is_active) {
+      throw new ForbiddenException(
+        'Your institution has been deactivated. Contact support.',
+      );
     }
 
     // Revoke old refresh token
@@ -183,6 +197,8 @@ export class AuthService {
             name: true,
             slug: true,
             logo_url: true,
+            timezone: true,
+            default_language: true,
           },
         },
       },
