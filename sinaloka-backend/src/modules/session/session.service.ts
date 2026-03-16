@@ -152,11 +152,24 @@ export class SessionService {
   }
 
   async update(institutionId: string, id: string, dto: UpdateSessionDto) {
-    await this.findOne(institutionId, id);
+    const existing = await this.findOne(institutionId, id);
+
+    const data: any = { ...dto };
+
+    // Copy tutor fee when session is marked COMPLETED
+    if (dto.status === 'COMPLETED' && existing.status !== 'COMPLETED') {
+      const sessionClass = await this.prisma.class.findUnique({
+        where: { id: existing.class?.id ?? '' },
+        select: { tutor_fee: true },
+      });
+      if (sessionClass?.tutor_fee) {
+        data.tutor_fee_amount = sessionClass.tutor_fee;
+      }
+    }
 
     const session = await this.prisma.session.update({
       where: { id, institution_id: institutionId },
-      data: dto,
+      data,
       include: this.sessionInclude,
     });
 
@@ -499,12 +512,19 @@ export class SessionService {
       );
     }
 
+    // Copy tutor fee from class
+    const classForFee = await this.prisma.class.findUnique({
+      where: { id: session.class_id },
+      select: { tutor_fee: true },
+    });
+
     const updated = await this.prisma.session.update({
       where: { id: sessionId },
       data: {
         status: 'COMPLETED',
         topic_covered: dto.topic_covered,
         session_summary: dto.session_summary ?? null,
+        ...(classForFee?.tutor_fee ? { tutor_fee_amount: classForFee.tutor_fee } : {}),
       },
       include: this.sessionInclude,
     });

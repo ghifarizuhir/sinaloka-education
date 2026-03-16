@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Download, FileText, Loader2 } from 'lucide-react';
 import { Modal, Button, Label, Input, Skeleton } from './UI';
 import { cn } from '../lib/utils';
@@ -14,6 +15,7 @@ interface ReportPreviewModalProps {
 }
 
 export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewModalProps) {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<ReportType>('finance');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -102,13 +104,13 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
   };
 
   const tabs: { id: ReportType; label: string }[] = [
-    { id: 'attendance', label: 'Attendance' },
-    { id: 'finance', label: 'Finance' },
-    { id: 'student_progress', label: 'Student Progress' },
+    { id: 'attendance', label: t('report.tabs.attendance') },
+    { id: 'finance', label: t('report.tabs.finance') },
+    { id: 'student_progress', label: t('report.tabs.studentProgress') },
   ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Generate Report" className="max-w-4xl">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('report.title')} className="max-w-4xl">
       <div className="space-y-6">
         {/* Tabs */}
         <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg w-fit">
@@ -131,7 +133,7 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Date From {activeTab !== 'student_progress' && <span className="text-rose-500">*</span>}</Label>
+            <Label>{t('report.dateFrom')} {activeTab !== 'student_progress' && <span className="text-rose-500">*</span>}</Label>
             <Input
               type="date"
               value={dateFrom}
@@ -139,7 +141,7 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Date To {activeTab !== 'student_progress' && <span className="text-rose-500">*</span>}</Label>
+            <Label>{t('report.dateTo')} {activeTab !== 'student_progress' && <span className="text-rose-500">*</span>}</Label>
             <Input
               type="date"
               value={dateTo}
@@ -149,13 +151,13 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
 
           {activeTab === 'attendance' && (
             <div className="space-y-1.5">
-              <Label>Class (optional)</Label>
+              <Label>{t('report.classOptional')}</Label>
               <select
                 value={selectedClassId}
                 onChange={(e) => { setSelectedClassId(e.target.value); setGenerateEnabled(false); }}
                 className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
               >
-                <option value="">All Classes</option>
+                <option value="">{t('report.allClasses')}</option>
                 {classes.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
@@ -165,13 +167,13 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
 
           {activeTab === 'student_progress' && (
             <div className="space-y-1.5">
-              <Label>Student <span className="text-rose-500">*</span></Label>
+              <Label>{t('report.student')} <span className="text-rose-500">*</span></Label>
               <select
                 value={selectedStudentId}
                 onChange={(e) => { setSelectedStudentId(e.target.value); setGenerateEnabled(false); }}
                 className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
               >
-                <option value="">Select student...</option>
+                <option value="">{t('report.selectStudent')}</option>
                 {students.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -190,12 +192,12 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
             {isActiveLoading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Generating...
+                {t('report.generating')}
               </>
             ) : (
               <>
                 <FileText size={16} />
-                Generate
+                {t('report.generate')}
               </>
             )}
           </Button>
@@ -203,7 +205,7 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
           {blobUrl && (
             <Button variant="outline" onClick={handleDownload} className="gap-2">
               <Download size={16} />
-              Download PDF
+              {t('report.downloadPdf')}
             </Button>
           )}
         </div>
@@ -228,8 +230,8 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
         {!blobUrl && !isActiveLoading && (
           <div className="flex flex-col items-center justify-center h-48 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-400">
             <FileText size={32} className="mb-3" />
-            <p className="text-sm font-medium">Select filters and click Generate</p>
-            <p className="text-xs mt-1">PDF preview will appear here</p>
+            <p className="text-sm font-medium">{t('report.selectFiltersHint')}</p>
+            <p className="text-xs mt-1">{t('report.pdfPreviewHint')}</p>
           </div>
         )}
       </div>

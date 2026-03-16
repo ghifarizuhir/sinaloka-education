@@ -218,7 +218,7 @@ export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean, 
               <X size={20} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
             {children}
           </div>
         </motion.div>

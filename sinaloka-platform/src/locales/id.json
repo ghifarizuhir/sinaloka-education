@@ -804,6 +804,8 @@
     "revenueAnalytics": "Analitik Pendapatan",
     "noPaymentsFound": "Tidak ada pembayaran ditemukan.",
     "totalRecords": "Total Data",
+    "overdueCount": "Jumlah Terlambat",
+    "overdueAmount": "Total Terlambat",
     "flaggedStudents": "Siswa Bermasalah",
     "daysOverdue": "{{count}} hari terlambat",
     "form": {

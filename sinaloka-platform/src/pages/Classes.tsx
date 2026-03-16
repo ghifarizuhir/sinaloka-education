@@ -69,6 +69,8 @@ export const Classes = () => {
   const [formTutorId, setFormTutorId] = useState('');
   const [formCapacity, setFormCapacity] = useState('25');
   const [formFee, setFormFee] = useState('500000');
+  const [formPackageFee, setFormPackageFee] = useState('');
+  const [formTutorFee, setFormTutorFee] = useState('');
   const [formScheduleDays, setFormScheduleDays] = useState<ScheduleDay[]>([]);
   const [formStartTime, setFormStartTime] = useState('14:00');
   const [formEndTime, setFormEndTime] = useState('15:30');
@@ -112,6 +114,8 @@ export const Classes = () => {
     setFormTutorId(tutors[0]?.id ?? '');
     setFormCapacity('25');
     setFormFee('500000');
+    setFormPackageFee('');
+    setFormTutorFee('');
     setFormScheduleDays([]);
     setFormStartTime('14:00');
     setFormEndTime('15:30');
@@ -131,6 +135,8 @@ export const Classes = () => {
     setFormStartTime(cls.schedule_start_time);
     setFormEndTime(cls.schedule_end_time);
     setFormRoom(cls.room ?? '');
+    setFormPackageFee(cls.package_fee ? String(cls.package_fee) : '');
+    setFormTutorFee(cls.tutor_fee ? String(cls.tutor_fee) : '');
     setFormStatus(cls.status);
     setShowModal(true);
   };
@@ -161,6 +167,8 @@ export const Classes = () => {
       schedule_start_time: formStartTime,
       schedule_end_time: formEndTime,
       room: formRoom || undefined,
+      package_fee: formPackageFee ? Number(formPackageFee) : null,
+      tutor_fee: formTutorFee ? Number(formTutorFee) : null,
       status: formStatus,
     };
 
@@ -605,6 +613,25 @@ export const Classes = () => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormFee(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>{t('classes.form.packageFee')}</Label>
+            <Input
+              type="number"
+              placeholder="700000"
+              value={formPackageFee}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPackageFee(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t('classes.form.tutorFee')}</Label>
+            <Input
+              type="number"
+              placeholder="200000"
+              value={formTutorFee}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFee(e.target.value)}
+            />
           </div>
 
           <div className="space-y-1.5">

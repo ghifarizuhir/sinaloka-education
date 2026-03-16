@@ -47,5 +47,33 @@
   .dark .sidebar-item-active {
     @apply bg-zinc-800 text-zinc-100;
   }
+
+  /* Minimal scrollbar — thin, auto-hiding, rounded */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scrollbar-thin:hover {
+    scrollbar-color: #d4d4d8 transparent;
+  }
+  .dark .scrollbar-thin:hover {
+    scrollbar-color: #3f3f46 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 9999px;
+  }
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: #d4d4d8;
+  }
+  .dark .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+  }
 }
 

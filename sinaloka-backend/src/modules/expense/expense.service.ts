@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { buildPaginationMeta } from '../../common/dto/pagination.dto.js';
 import type {
   CreateExpenseDto,
   UpdateExpenseDto,
@@ -36,7 +37,7 @@ export class ExpenseService {
       this.prisma.expense.count({ where }),
     ]);
 
-    return { data, total, page, limit };
+    return { data, meta: buildPaginationMeta(total, page, limit) };
   }
 
   async findOne(institutionId: string, id: string) {

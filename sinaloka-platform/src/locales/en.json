@@ -804,6 +804,8 @@
     "revenueAnalytics": "Revenue Analytics",
     "noPaymentsFound": "No payments found.",
     "totalRecords": "Total Records",
+    "overdueCount": "Overdue Count",
+    "overdueAmount": "Overdue Amount",
     "flaggedStudents": "Flagged Students",
     "daysOverdue": "{{count}} days overdue",
     "form": {

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import {
   Users,
   Calendar as CalendarIcon,
@@ -27,17 +28,11 @@ import {
 import { format, isSameDay, isBefore, startOfDay, addDays, subDays, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Card, Button, Badge, Switch, Input, Label } from '../components/UI';
-import { cn } from '../lib/utils';
+import { cn, formatDate } from '../lib/utils';
 import { useAttendanceBySession, useAttendanceSummary, useUpdateAttendance } from '@/src/hooks/useAttendance';
 import { useSessions } from '@/src/hooks/useSessions';
 import type { Attendance as AttendanceRecord, AttendanceStatus, UpdateAttendanceDto } from '@/src/types/attendance';
 import type { Session } from '@/src/types/session';
-
-const STATUS_LABEL: Record<AttendanceStatus, string> = {
-  PRESENT: 'Present',
-  ABSENT: 'Absent',
-  LATE: 'Late',
-};
 
 const SESSION_STATUS_COLOR: Record<string, string> = {
   SCHEDULED: 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400',
@@ -47,6 +42,14 @@ const SESSION_STATUS_COLOR: Record<string, string> = {
 };
 
 export const Attendance = () => {
+  const { t, i18n } = useTranslation();
+
+  const STATUS_LABEL: Record<AttendanceStatus, string> = {
+    PRESENT: t('attendance.present'),
+    ABSENT: t('attendance.absent'),
+    LATE: t('attendance.late'),
+  };
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [focusedAttendanceId, setFocusedAttendanceId] = useState<string | null>(null);
@@ -132,9 +135,9 @@ export const Attendance = () => {
     try {
       await Promise.all(entries.map(([id, data]) => updateAttendance.mutateAsync({ id, data })));
       setPendingChanges({});
-      toast.success('Attendance saved');
+      toast.success(t('attendance.toast.saved'));
     } catch {
-      toast.error('Failed to save some attendance records');
+      toast.error(t('attendance.toast.saveError'));
     }
   };
 
@@ -145,12 +148,12 @@ export const Attendance = () => {
     <div className="space-y-6 pb-24">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Attendance Management</h2>
-          <p className="text-zinc-500 text-sm">Automated tracking, parent notifications, and session reporting.</p>
+          <h2 className="text-2xl font-bold tracking-tight">{t('attendance.title')}</h2>
+          <p className="text-zinc-500 text-sm">{t('attendance.subtitle')}</p>
         </div>
         <Button variant="outline" className="gap-2">
           <History size={18} />
-          View History
+          {t('attendance.viewHistory')}
         </Button>
       </div>
 
@@ -160,7 +163,7 @@ export const Attendance = () => {
           {/* Date Picker */}
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold">Select Date</h3>
+              <h3 className="text-sm font-bold">{t('attendance.selectDate')}</h3>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setSelectedDate(subDays(selectedDate, 1))}
@@ -172,7 +175,7 @@ export const Attendance = () => {
                   onClick={() => setSelectedDate(new Date())}
                   className="px-2 py-1 text-[10px] font-bold bg-zinc-100 dark:bg-zinc-800 rounded-md"
                 >
-                  Today
+                  {t('common.today')}
                 </button>
                 <button
                   onClick={() => setSelectedDate(addDays(selectedDate, 1))}
@@ -184,12 +187,12 @@ export const Attendance = () => {
             </div>
             <div className="flex items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
               <CalendarIcon size={18} className="text-zinc-400" />
-              <span className="text-sm font-medium">{format(selectedDate, 'EEEE, MMM d, yyyy')}</span>
+              <span className="text-sm font-medium">{formatDate(format(selectedDate, 'yyyy-MM-dd'), i18n.language)}</span>
             </div>
           </Card>
 
           <div className="space-y-4">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">Sessions</h3>
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">{t('attendance.sessions')}</h3>
 
             {sessionsQuery.isLoading ? (
               <div className="space-y-3">
@@ -199,7 +202,7 @@ export const Attendance = () => {
               </div>
             ) : sessions.length === 0 ? (
               <Card className="py-12 text-center border-dashed border-2">
-                <p className="text-sm text-zinc-500">No sessions scheduled for this date.</p>
+                <p className="text-sm text-zinc-500">{t('attendance.noSessionsForDate')}</p>
               </Card>
             ) : (
               <div className="space-y-3">
@@ -255,7 +258,7 @@ export const Attendance = () => {
                           {tutorName}
                         </p>
                         {isIncomplete && (
-                          <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Incomplete</span>
+                          <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">{t('attendance.incomplete')}</span>
                         )}
                       </div>
                     </button>
@@ -292,10 +295,7 @@ export const Attendance = () => {
                         <div className="flex items-center gap-1.5">
                           <CalendarIcon size={14} />
                           <span>
-                            {(() => {
-                              try { return format(parseISO(selectedSession.date), 'EEEE, MMM d, yyyy'); }
-                              catch { return selectedSession.date; }
-                            })()}
+                            {formatDate(selectedSession.date, i18n.language)}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -311,7 +311,7 @@ export const Attendance = () => {
                           <span className="text-zinc-300 dark:text-zinc-700 mx-1">/</span>
                           {attendanceRecords.length}
                         </span>
-                        <span className="text-xs font-medium text-zinc-500">Present</span>
+                        <span className="text-xs font-medium text-zinc-500">{t('attendance.present')}</span>
                       </div>
                     </div>
                   </div>
@@ -321,10 +321,10 @@ export const Attendance = () => {
                 <div className="p-6 space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <h4 className="text-sm font-bold">Student List</h4>
+                      <h4 className="text-sm font-bold">{t('attendance.studentList')}</h4>
                       <div className="flex items-center gap-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded text-[10px] font-bold text-zinc-500">
                         <Info size={10} />
-                        Use P, A, L keys to mark
+                        {t('attendance.keyboardHint')}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -334,7 +334,7 @@ export const Attendance = () => {
                         className="text-[10px] h-8"
                         onClick={() => bulkMarkAll('PRESENT')}
                       >
-                        Mark All Present
+                        {t('attendance.markAllPresent')}
                       </Button>
                     </div>
                   </div>
@@ -347,17 +347,17 @@ export const Attendance = () => {
                     </div>
                   ) : attendanceRecords.length === 0 ? (
                     <div className="py-8 text-center text-zinc-400 text-sm">
-                      No attendance records for this session.
+                      {t('attendance.noRecords')}
                     </div>
                   ) : (
                     <div className="border border-zinc-100 dark:border-zinc-800 rounded-xl overflow-hidden">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Student</th>
-                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Status</th>
-                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center">HW</th>
-                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Notes</th>
+                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('attendance.table.student')}</th>
+                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('attendance.table.status')}</th>
+                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center">{t('attendance.table.hw')}</th>
+                            <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('attendance.table.notes')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -415,7 +415,7 @@ export const Attendance = () => {
                                 <td className="px-6 py-4">
                                   <Input
                                     className="h-8 text-xs w-32"
-                                    placeholder="Note..."
+                                    placeholder={t('attendance.notePlaceholder')}
                                     value={effectiveNotes}
                                     onChange={(e) => setLocalNotes(record.id, e.target.value)}
                                   />
@@ -435,7 +435,7 @@ export const Attendance = () => {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 text-zinc-400 font-bold text-xs">
                     <Unlock size={14} />
-                    Editing Enabled
+                    {t('attendance.editingEnabled')}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -451,7 +451,7 @@ export const Attendance = () => {
                       ) : (
                         <Save size={16} />
                       )}
-                      Save Attendance
+                      {t('attendance.saveAttendance')}
                     </Button>
                   )}
                 </div>
@@ -462,8 +462,8 @@ export const Attendance = () => {
               <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
                 <ClipboardCheck size={32} className="text-zinc-300" />
               </div>
-              <h3 className="font-bold text-lg mb-1">No Session Selected</h3>
-              <p className="text-sm text-zinc-500 max-w-xs">Select a session from the list on the left to start taking attendance.</p>
+              <h3 className="font-bold text-lg mb-1">{t('attendance.noSessionSelected')}</h3>
+              <p className="text-sm text-zinc-500 max-w-xs">{t('attendance.noSessionSelectedHint')}</p>
             </Card>
           )}
         </div>
@@ -481,9 +481,9 @@ export const Attendance = () => {
             <div className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-2xl p-4 shadow-2xl flex items-center justify-between border border-white/10 dark:border-black/10">
               <div className="flex items-center gap-4">
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold uppercase tracking-wider opacity-60">Unsaved Changes</span>
+                  <span className="text-xs font-bold uppercase tracking-wider opacity-60">{t('attendance.unsavedChanges')}</span>
                   <span className="text-sm font-bold">
-                    {presentCount} Present, {absentCount} Absent
+                    {t('attendance.presentCount', { present: presentCount, absent: absentCount })}
                   </span>
                 </div>
               </div>
@@ -494,7 +494,7 @@ export const Attendance = () => {
                   className="bg-white/10 hover:bg-white/20 border-none text-white dark:text-zinc-900"
                   onClick={() => setPendingChanges({})}
                 >
-                  Discard
+                  {t('common.discard')}
                 </Button>
                 <Button
                   size="sm"
@@ -507,7 +507,7 @@ export const Attendance = () => {
                   ) : (
                     <Save size={16} />
                   )}
-                  Save Attendance
+                  {t('attendance.saveAttendance')}
                 </Button>
               </div>
             </div>

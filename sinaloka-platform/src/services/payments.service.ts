@@ -1,6 +1,6 @@
 import api from '@/src/lib/api';
 import type { PaginatedResponse } from '@/src/types/common';
-import type { Payment, CreatePaymentDto, UpdatePaymentDto, PaymentQueryParams } from '@/src/types/payment';
+import type { Payment, CreatePaymentDto, UpdatePaymentDto, PaymentQueryParams, OverdueSummary } from '@/src/types/payment';
 
 export const paymentsService = {
   getAll: (params?: PaymentQueryParams) =>
@@ -13,4 +13,8 @@ export const paymentsService = {
     api.patch<Payment>(`/api/admin/payments/${id}`, data).then((r) => r.data),
   remove: (id: string) =>
     api.delete(`/api/admin/payments/${id}`),
+  getOverdueSummary: () =>
+    api.get<OverdueSummary>('/api/admin/payments/overdue-summary').then((r) => r.data),
+  generateInvoice: (id: string) =>
+    api.post<Payment>(`/api/admin/payments/${id}/generate-invoice`).then((r) => r.data),
 };

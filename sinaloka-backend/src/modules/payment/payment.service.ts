@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { buildPaginationMeta } from '../../common/dto/pagination.dto.js';
+import { SettingsService } from '../settings/settings.service.js';
 import type {
   CreatePaymentDto,
   UpdatePaymentDto,
@@ -8,7 +10,10 @@ import type {
 
 @Injectable()
 export class PaymentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly settingsService: SettingsService,
+  ) {}
 
   async create(institutionId: string, dto: CreatePaymentDto) {
     return this.prisma.payment.create({
@@ -17,6 +22,9 @@ export class PaymentService {
   }
 
   async findAll(institutionId: string, query: PaymentQueryDto) {
+    // Auto-detect overdue payments
+    await this.refreshOverdueStatus(institutionId);
+
     const { page, limit, status, student_id, sort_by, sort_order } = query;
     const where: any = { institution_id: institutionId };
     if (status) where.status = status;
@@ -28,18 +36,18 @@ export class PaymentService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sort_by]: sort_order },
-        include: { student: true, enrollment: true },
+        include: { student: true, enrollment: { include: { class: true } } },
       }),
       this.prisma.payment.count({ where }),
     ]);
 
-    return { data, total, page, limit };
+    return { data, meta: buildPaginationMeta(total, page, limit) };
   }
 
   async findOne(institutionId: string, id: string) {
     const payment = await this.prisma.payment.findFirst({
       where: { id, institution_id: institutionId },
-      include: { student: true, enrollment: true },
+      include: { student: true, enrollment: { include: { class: true } } },
     });
 
     if (!payment) {
@@ -57,5 +65,63 @@ export class PaymentService {
   async delete(institutionId: string, id: string) {
     await this.findOne(institutionId, id);
     return this.prisma.payment.delete({ where: { id } });
+  }
+
+  async refreshOverdueStatus(institutionId: string): Promise<number> {
+    const result = await this.prisma.payment.updateMany({
+      where: {
+        institution_id: institutionId,
+        status: 'PENDING',
+        due_date: { lt: new Date() },
+      },
+      data: { status: 'OVERDUE' },
+    });
+    return result.count;
+  }
+
+  async getOverdueSummary(institutionId: string) {
+    await this.refreshOverdueStatus(institutionId);
+
+    const billing = await this.settingsService.getBilling(institutionId);
+
+    const overdueByStudent = await this.prisma.payment.groupBy({
+      by: ['student_id'],
+      where: { institution_id: institutionId, status: 'OVERDUE' },
+      _sum: { amount: true },
+      _count: { id: true },
+    });
+
+    const overdue_count = overdueByStudent.reduce((sum, s) => sum + s._count.id, 0);
+    const total_overdue_amount = overdueByStudent.reduce(
+      (sum, s) => sum + Number(s._sum.amount ?? 0), 0,
+    );
+
+    let flaggedStudentIds = overdueByStudent.map(s => s.student_id);
+    if (billing.late_payment_auto_lock && billing.late_payment_threshold > 0) {
+      flaggedStudentIds = overdueByStudent
+        .filter(s => Number(s._sum.amount ?? 0) >= billing.late_payment_threshold)
+        .map(s => s.student_id);
+    }
+
+    const students = flaggedStudentIds.length > 0
+      ? await this.prisma.student.findMany({
+          where: { id: { in: flaggedStudentIds } },
+          select: { id: true, name: true },
+        })
+      : [];
+
+    const studentMap = new Map(students.map(s => [s.id, s.name]));
+
+    const flagged_students = overdueByStudent
+      .filter(s => flaggedStudentIds.includes(s.student_id))
+      .map(s => ({
+        student_id: s.student_id,
+        student_name: studentMap.get(s.student_id) ?? 'Unknown',
+        total_debt: Number(s._sum.amount ?? 0),
+        overdue_payments: s._count.id,
+      }))
+      .sort((a, b) => b.total_debt - a.total_debt);
+
+    return { overdue_count, total_overdue_amount, flagged_students };
   }
 }

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const ExpenseCategory = z.enum(['RENT', 'UTILITIES', 'SUPPLIES', 'MARKETING', 'OTHER']);
+const ExpenseCategory = z.string().min(1).max(50);
 
 export const CreateExpenseSchema = z.object({
   category: ExpenseCategory,

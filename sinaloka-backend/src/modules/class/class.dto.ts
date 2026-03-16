@@ -23,6 +23,8 @@ export const CreateClassSchema = z
     schedule_start_time: TimeString,
     schedule_end_time: TimeString,
     room: z.string().max(100).optional().nullable(),
+    package_fee: z.number().min(0).optional().nullable(),
+    tutor_fee: z.number().min(0).optional().nullable(),
     status: ClassStatus.default('ACTIVE'),
   })
   .refine((data) => data.schedule_start_time < data.schedule_end_time, {
@@ -42,6 +44,8 @@ export const UpdateClassSchema = z
     schedule_start_time: TimeString.optional(),
     schedule_end_time: TimeString.optional(),
     room: z.string().max(100).optional().nullable(),
+    package_fee: z.number().min(0).optional().nullable(),
+    tutor_fee: z.number().min(0).optional().nullable(),
     status: ClassStatus.optional(),
   })
   .refine(

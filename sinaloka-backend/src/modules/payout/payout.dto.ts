@@ -8,6 +8,8 @@ export const CreatePayoutSchema = z.object({
   date: z.coerce.date(),
   status: PayoutStatus.default('PENDING'),
   description: z.string().max(500).optional().nullable(),
+  period_start: z.coerce.date().optional().nullable(),
+  period_end: z.coerce.date().optional().nullable(),
 });
 export type CreatePayoutDto = z.infer<typeof CreatePayoutSchema>;
 
@@ -16,6 +18,8 @@ export const UpdatePayoutSchema = z.object({
   date: z.coerce.date().optional(),
   status: PayoutStatus.optional(),
   description: z.string().max(500).optional().nullable(),
+  period_start: z.coerce.date().optional().nullable(),
+  period_end: z.coerce.date().optional().nullable(),
 });
 export type UpdatePayoutDto = z.infer<typeof UpdatePayoutSchema>;
 
@@ -28,3 +32,10 @@ export const PayoutQuerySchema = z.object({
   sort_order: z.enum(['asc', 'desc']).default('desc'),
 });
 export type PayoutQueryDto = z.infer<typeof PayoutQuerySchema>;
+
+export const CalculatePayoutSchema = z.object({
+  tutor_id: z.string().uuid(),
+  period_start: z.coerce.date(),
+  period_end: z.coerce.date(),
+});
+export type CalculatePayoutDto = z.infer<typeof CalculatePayoutSchema>;

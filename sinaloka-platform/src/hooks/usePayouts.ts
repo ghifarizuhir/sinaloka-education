@@ -20,3 +20,8 @@ export function useDeletePayout() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: payoutsService.remove, onSuccess: () => { qc.invalidateQueries({ queryKey: ['payouts'] }); qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] }); } });
 }
+export function useCalculatePayout() {
+  return useMutation({
+    mutationFn: payoutsService.calculatePayout,
+  });
+}

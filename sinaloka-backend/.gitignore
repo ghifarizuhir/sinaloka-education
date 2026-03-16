@@ -4,3 +4,6 @@ dist
 .env
 
 /generated/prisma
+
+# Runtime upload directory (user-generated files)
+uploads/

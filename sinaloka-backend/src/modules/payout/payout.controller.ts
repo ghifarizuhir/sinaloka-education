@@ -19,11 +19,13 @@ import {
   CreatePayoutSchema,
   UpdatePayoutSchema,
   PayoutQuerySchema,
+  CalculatePayoutSchema,
 } from './payout.dto.js';
 import type {
   CreatePayoutDto,
   UpdatePayoutDto,
   PayoutQueryDto,
+  CalculatePayoutDto,
 } from './payout.dto.js';
 
 @Controller('admin/payouts')
@@ -45,6 +47,14 @@ export class PayoutController {
     @Query(new ZodValidationPipe(PayoutQuerySchema)) query: PayoutQueryDto,
   ) {
     return this.payoutService.findAll(user.institutionId!, query);
+  }
+
+  @Get('calculate')
+  calculate(
+    @CurrentUser() user: JwtPayload,
+    @Query(new ZodValidationPipe(CalculatePayoutSchema)) query: CalculatePayoutDto,
+  ) {
+    return this.payoutService.calculatePayout(user.institutionId!, query);
   }
 
   @Get(':id')

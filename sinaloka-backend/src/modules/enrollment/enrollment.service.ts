@@ -4,6 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js';
 import {
   buildPaginationMeta,
   PaginatedResponse,
@@ -17,7 +18,10 @@ import {
 
 @Injectable()
 export class EnrollmentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly invoiceGenerator: InvoiceGeneratorService,
+  ) {}
 
   private timeRangesOverlap(
     startA: string,
@@ -126,7 +130,7 @@ export class EnrollmentService {
       );
     }
 
-    return this.prisma.enrollment.create({
+    const enrollment = await this.prisma.enrollment.create({
       data: {
         institution_id: institutionId,
         student_id: dto.student_id,
@@ -140,6 +144,17 @@ export class EnrollmentService {
         class: { select: { id: true, name: true } },
       },
     });
+
+    // Auto-generate package payment
+    await this.invoiceGenerator.generatePackagePayment({
+      institutionId,
+      studentId: dto.student_id,
+      enrollmentId: enrollment.id,
+      classId: dto.class_id,
+      enrolledAt: enrollment.enrolled_at,
+    });
+
+    return enrollment;
   }
 
   async findAll(

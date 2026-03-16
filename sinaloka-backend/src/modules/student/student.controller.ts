@@ -54,32 +54,6 @@ export class StudentController {
     return this.studentService.findAll(user.institutionId!, query);
   }
 
-  @Get(':id')
-  async findOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
-    return this.studentService.findOne(user.institutionId!, id);
-  }
-
-  @Patch(':id')
-  async update(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-    @Body(new ZodValidationPipe(UpdateStudentSchema)) dto: UpdateStudentDto,
-  ) {
-    return this.studentService.update(user.institutionId!, id, dto);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
-    await this.studentService.delete(user.institutionId!, id);
-  }
-
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
   async importCsv(
@@ -111,5 +85,31 @@ export class StudentController {
       'Content-Disposition': 'attachment; filename=students.csv',
     });
     res.send(csv);
+  }
+
+  @Get(':id')
+  async findOne(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+  ) {
+    return this.studentService.findOne(user.institutionId!, id);
+  }
+
+  @Patch(':id')
+  async update(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(UpdateStudentSchema)) dto: UpdateStudentDto,
+  ) {
+    return this.studentService.update(user.institutionId!, id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+  ) {
+    await this.studentService.delete(user.institutionId!, id);
   }
 }
