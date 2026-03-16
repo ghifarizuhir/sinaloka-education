@@ -18,11 +18,12 @@ List WhatsApp messages for the institution, paginated.
 
 ### `GET /api/admin/whatsapp/stats`
 
-Monthly summary stats for the institution.
+Summary stats for the institution. Supports optional `date_from`/`date_to` query params (defaults to current month). Also returns `configured: boolean` indicating whether WhatsApp API credentials are set.
 
 **Response:**
 ```json
 {
+  "configured": true,
   "total": 142,
   "sent": 130,
   "delivered": 120,
@@ -48,6 +49,8 @@ Returns the institution's WhatsApp-related settings extracted from `Institution.
 
 Defaults: `auto_reminders: true`, `remind_days_before: 1`.
 
+**Storage:** These map to `whatsapp_auto_reminders` and `whatsapp_remind_days_before` in the `Institution.settings` JSON (prefixed to avoid collisions). The GET/PATCH endpoints handle the mapping — API uses short names, storage uses prefixed names.
+
 ### `PATCH /api/admin/whatsapp/settings`
 
 Updates WhatsApp settings in the institution's `settings` JSON field.
@@ -60,7 +63,9 @@ Updates WhatsApp settings in the institution's `settings` JSON field.
 }
 ```
 
-Merges into existing `Institution.settings` JSON (doesn't overwrite other settings).
+Merges into existing `Institution.settings` JSON (doesn't overwrite other settings). Maps `auto_reminders` → `whatsapp_auto_reminders`, `remind_days_before` → `whatsapp_remind_days_before`.
+
+**Fix required:** The existing `sendPaymentReminder` controller has a null-assertion `message!.id` that can crash if the dedup check returns an existing message. Add a null check: `return { success: true, message_id: message?.id ?? null }`.
 
 ### `POST /api/admin/whatsapp/payment-reminder/:paymentId`
 
@@ -118,7 +123,7 @@ export interface WhatsappMessage {
   institution_id: string;
   phone: string;
   template_name: string;
-  template_params: string[];
+  template_params: (string | number)[]; // Prisma Json field, currently always string[]
   wa_message_id: string | null;
   status: 'PENDING' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED';
   error: string | null;
@@ -180,7 +185,11 @@ export function useSendPaymentReminder() { ... }  // mutation, invalidates ['wha
 
 ## 7. Page Component (`pages/WhatsApp.tsx`)
 
-Single page with 3 tabs managed by local state.
+Single page with 3 tabs managed by local state: **Messages**, **Payment Reminders**, **Settings**.
+
+**"Not configured" state:** If `stats.configured === false`, show a banner at the top: "WhatsApp is not configured. Contact your system administrator to set up API credentials." The Payment Reminders and Settings tabs are disabled.
+
+**Empty state for Messages tab:** When no messages exist, show centered empty state with MessageSquare icon: "No messages sent yet."
 
 ### 7.1 Messages Tab (default)
 
@@ -209,7 +218,7 @@ Pagination at bottom (same pattern as other pages).
 
 **Row click** → Drawer with full message detail:
 - Phone, template name, template params
-- Status with delivery timeline (created → sent → delivered → read)
+- Current status badge (no timeline — model lacks per-transition timestamps)
 - Error details if failed
 - Related entity link
 - Retry count
@@ -255,7 +264,7 @@ Uses `useWhatsappSettings()` to load, `useUpdateWhatsappSettings()` to save. Toa
 "whatsapp": {
   "tabs": {
     "messages": "Messages",
-    "send": "Send",
+    "paymentReminders": "Payment Reminders",
     "settings": "Settings"
   },
   "stats": {
@@ -283,11 +292,13 @@ Uses `useWhatsappSettings()` to load, `useUpdateWhatsappSettings()` to save. Toa
     "phone": "Phone",
     "templateName": "Template",
     "templateParams": "Parameters",
-    "deliveryTimeline": "Delivery Timeline",
+    "currentStatus": "Current Status",
     "errorDetails": "Error Details",
     "retryCount": "Retry Count",
     "relatedEntity": "Related Entity"
   },
+  "notConfigured": "WhatsApp is not configured. Contact your system administrator to set up API credentials.",
+  "noMessages": "No messages sent yet.",
   "send": {
     "title": "Send Payment Reminder",
     "searchPlaceholder": "Search student name...",
@@ -312,12 +323,12 @@ Uses `useWhatsappSettings()` to load, `useUpdateWhatsappSettings()` to save. Toa
 }
 ```
 
-**id.json:** Matching Indonesian translations:
+**id.json:** Matching Indonesian translations (also add `nav.messaging: "Perpesanan"`, `nav.whatsapp: "WhatsApp"`, `layout.pageTitle.whatsapp: "WhatsApp"` to existing nav/layout sections):
 ```json
 "whatsapp": {
   "tabs": {
     "messages": "Pesan",
-    "send": "Kirim",
+    "paymentReminders": "Pengingat Pembayaran",
     "settings": "Pengaturan"
   },
   "stats": {
@@ -345,11 +356,13 @@ Uses `useWhatsappSettings()` to load, `useUpdateWhatsappSettings()` to save. Toa
     "phone": "Telepon",
     "templateName": "Template",
     "templateParams": "Parameter",
-    "deliveryTimeline": "Timeline Pengiriman",
+    "currentStatus": "Status Saat Ini",
     "errorDetails": "Detail Error",
     "retryCount": "Jumlah Percobaan",
     "relatedEntity": "Entitas Terkait"
   },
+  "notConfigured": "WhatsApp belum dikonfigurasi. Hubungi administrator sistem untuk mengatur kredensial API.",
+  "noMessages": "Belum ada pesan yang dikirim.",
   "send": {
     "title": "Kirim Pengingat Pembayaran",
     "searchPlaceholder": "Cari nama siswa...",
