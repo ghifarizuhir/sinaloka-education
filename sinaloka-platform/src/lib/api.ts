@@ -29,6 +29,15 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  try {
+    const impersonated = sessionStorage.getItem('impersonatedInstitution');
+    if (impersonated) {
+      const { id } = JSON.parse(impersonated);
+      config.params = { ...config.params, institution_id: id };
+    }
+  } catch {
+    // ignore malformed sessionStorage data
+  }
   return config;
 });
 
