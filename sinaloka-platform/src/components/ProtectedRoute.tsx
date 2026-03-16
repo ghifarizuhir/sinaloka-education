@@ -3,7 +3,7 @@ import { useAuth } from '@/src/hooks/useAuth';
 import { Skeleton } from '@/src/components/UI';
 
 export function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, isImpersonating } = useAuth();
 
   if (isLoading) {
     return (
@@ -18,5 +18,10 @@ export function ProtectedRoute() {
   }
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  if (user?.role === 'SUPER_ADMIN' && !isImpersonating) {
+    return <Navigate to="/super/institutions" replace />;
+  }
+
   return <Outlet />;
 }

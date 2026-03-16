@@ -8,6 +8,8 @@ import {
 // --- Components ---
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import SuperAdminRoute from './components/SuperAdminRoute';
+import SuperAdminLayout from './components/SuperAdminLayout';
 
 // --- Pages ---
 import { Login } from './pages/Login';
@@ -26,11 +28,25 @@ import { SettingsPage } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
 import { WhatsApp } from './pages/WhatsApp';
 
+// --- Super Admin Pages ---
+import Institutions from './pages/SuperAdmin/Institutions';
+import InstitutionForm from './pages/SuperAdmin/InstitutionForm';
+import InstitutionDetail from './pages/SuperAdmin/InstitutionDetail';
+import SuperAdminUsers from './pages/SuperAdmin/Users';
+
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/super" element={<SuperAdminRoute />}>
+          <Route element={<SuperAdminLayout />}>
+            <Route path="institutions" element={<Institutions />} />
+            <Route path="institutions/new" element={<InstitutionForm />} />
+            <Route path="institutions/:id" element={<InstitutionDetail />} />
+            <Route path="users" element={<SuperAdminUsers />} />
+          </Route>
+        </Route>
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
