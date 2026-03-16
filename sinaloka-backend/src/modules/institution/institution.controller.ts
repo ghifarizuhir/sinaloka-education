@@ -38,6 +38,11 @@ export class InstitutionController {
     return this.institutionService.findAll(query);
   }
 
+  @Get(':id/summary')
+  async getSummary(@Param('id') id: string) {
+    return this.institutionService.getSummary(id);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.institutionService.findOne(id);
