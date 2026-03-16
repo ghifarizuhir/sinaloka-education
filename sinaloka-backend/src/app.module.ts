@@ -24,6 +24,9 @@ import { UploadModule } from './modules/upload/upload.module.js';
 import { ParentModule } from './modules/parent/parent.module.js';
 import { EmailModule } from './modules/email/email.module.js';
 import { InvitationModule } from './modules/invitation/invitation.module.js';
+import { SettingsModule } from './modules/settings/settings.module.js';
+import { ScheduleModule } from '@nestjs/schedule';
+import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
 
 @Module({
   imports: [
@@ -47,6 +50,9 @@ import { InvitationModule } from './modules/invitation/invitation.module.js';
     ReportModule,
     UploadModule,
     ParentModule,
+    SettingsModule,
+    ScheduleModule.forRoot(),
+    WhatsappModule,
   ],
   providers: [
     {
