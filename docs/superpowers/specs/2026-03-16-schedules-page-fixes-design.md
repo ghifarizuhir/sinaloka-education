@@ -35,7 +35,34 @@ data: data.map((s) => ({
 })),
 ```
 
-Apply the same include+flatten pattern to `findOne`, `create`, `update`, `generateSessions`, and `approveReschedule` — all methods that return session(s) with `include: { class: true }`.
+Apply the same include+flatten pattern to all methods that return session(s) with `include: { class: true }`: `findOne`, `create`, `update`, `approveReschedule`, `requestReschedule`, `cancelSession`, and `completeSession`.
+
+**Not** `generateSessions` — it uses `createMany` which returns `{ count }`, not full records.
+
+**DRY approach**: Extract a private helper to avoid 14-location duplication:
+
+```typescript
+private readonly sessionInclude = {
+  class: {
+    include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
+  },
+};
+
+private flattenSession(session: any) {
+  return {
+    ...session,
+    class: session.class ? {
+      ...session.class,
+      fee: Number(session.class.fee),
+      tutor: session.class.tutor
+        ? { id: session.class.tutor.id, name: session.class.tutor.user.name }
+        : null,
+    } : null,
+  };
+}
+```
+
+Use `this.sessionInclude` in all Prisma queries and `this.flattenSession()` on all returned sessions. `findOne` uses an extended include (adds `attendances`) and extended flatten (adds `email` to tutor, maps attendances).
 
 ## 2. Session Detail Sidebar Drawer
 
@@ -114,7 +141,15 @@ export interface SessionDetail extends Session {
 }
 ```
 
-Update `sessionsService.getById` return type to `SessionDetail`. Update `useSession` to accept `string | null`.
+Update `sessionsService.getById` return type to `SessionDetail`. Update `useSession` to accept `string | null` with non-null assertion in queryFn:
+
+```typescript
+export function useSession(id: string | null) {
+  return useQuery({ queryKey: ['sessions', id], queryFn: () => sessionsService.getById(id!), enabled: !!id });
+}
+```
+
+Note: only `getById`/`useSession` return `SessionDetail`; list endpoint still returns `Session[]`.
 
 ### Drawer Layout
 
@@ -127,6 +162,16 @@ Using existing `Drawer` component:
 5. **Reschedule Info** (if RESCHEDULE_REQUESTED) — Orange warning box with proposed date/time, reason, and Approve/Reject buttons
 6. **Attendance** (from detail query) — Student list with attendance status badges (Present/Absent/Late), homework checkbox. Loading skeleton while fetching.
 7. **Action buttons** — Mark Attendance (navigates to attendance page), Cancel Session (if not cancelled)
+
+### Click Handlers
+
+- **Table row**: `onClick={() => setSelectedSessionId(session.id)}` on `<tr>`, with `stopPropagation` on action menu `<td>`
+- **Month calendar session block** (line ~468): `onClick={() => setSelectedSessionId(s.id)}` on the session `<div>`
+- **Day calendar session block** (line ~513): `onClick={() => setSelectedSessionId(s.id)}` on the session `<div>`
+
+### Reschedule Reject Handler
+
+The Approve button calls `approveReschedule.mutate({ id, data: { approved: true } })`. The Reject button calls `approveReschedule.mutate({ id, data: { approved: false } })`. Both close the drawer on success.
 
 ### Translation Keys
 
@@ -157,6 +202,11 @@ Using existing `Drawer` component:
 }
 ```
 
+Also add to existing `schedules.toast`:
+```json
+"rescheduleRejected": "Reschedule rejected"
+```
+
 **id.json** — matching Indonesian translations:
 
 ```json
@@ -182,6 +232,11 @@ Using existing `Drawer` component:
   "markAttendance": "Catat Kehadiran",
   "cancelSession": "Batalkan Sesi"
 }
+```
+
+Also add to existing `schedules.toast`:
+```json
+"rescheduleRejected": "Jadwal ulang ditolak"
 ```
 
 ## 3. Action Menu: Click Instead of Hover
