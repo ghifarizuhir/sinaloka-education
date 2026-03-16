@@ -32,6 +32,27 @@ const DAY_MAP: Record<string, number> = {
 export class SessionService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private readonly sessionInclude = {
+    class: {
+      include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
+    },
+  };
+
+  private flattenSession(session: any) {
+    return {
+      ...session,
+      class: session.class
+        ? {
+            ...session.class,
+            fee: Number(session.class.fee),
+            tutor: session.class.tutor
+              ? { id: session.class.tutor.id, name: session.class.tutor.user.name }
+              : null,
+          }
+        : null,
+    };
+  }
+
   async create(institutionId: string, userId: string, dto: CreateSessionDto) {
     const classRecord = await this.prisma.class.findUnique({
       where: { id: dto.class_id, institution_id: institutionId },
@@ -41,14 +62,16 @@ export class SessionService {
       throw new NotFoundException(`Class with id ${dto.class_id} not found`);
     }
 
-    return this.prisma.session.create({
+    const session = await this.prisma.session.create({
       data: {
         ...dto,
         institution_id: institutionId,
         created_by: userId,
       },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(session);
   }
 
   async findAll(institutionId: string, query: SessionQueryDto) {
@@ -76,13 +99,13 @@ export class SessionService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sort_by]: sort_order },
-        include: { class: true },
+        include: this.sessionInclude,
       }),
       this.prisma.session.count({ where }),
     ]);
 
     return {
-      data,
+      data: data.map((s) => this.flattenSession(s)),
       total,
       page,
       limit,
@@ -92,24 +115,52 @@ export class SessionService {
   async findOne(institutionId: string, id: string) {
     const session = await this.prisma.session.findUnique({
       where: { id, institution_id: institutionId },
-      include: { class: true },
+      include: {
+        class: {
+          include: { tutor: { include: { user: { select: { id: true, name: true, email: true } } } } },
+        },
+        attendances: {
+          include: { student: { select: { id: true, name: true, grade: true } } },
+          orderBy: { created_at: 'desc' },
+        },
+      },
     });
 
     if (!session) {
       throw new NotFoundException(`Session with id ${id} not found`);
     }
 
-    return session;
+    return {
+      ...session,
+      class: session.class
+        ? {
+            ...session.class,
+            fee: Number(session.class.fee),
+            tutor: session.class.tutor
+              ? { id: session.class.tutor.id, name: session.class.tutor.user.name, email: session.class.tutor.user.email }
+              : null,
+          }
+        : null,
+      attendances: session.attendances.map((a) => ({
+        id: a.id,
+        status: a.status,
+        homework_done: a.homework_done,
+        notes: a.notes,
+        student: a.student,
+      })),
+    };
   }
 
   async update(institutionId: string, id: string, dto: UpdateSessionDto) {
     await this.findOne(institutionId, id);
 
-    return this.prisma.session.update({
+    const session = await this.prisma.session.update({
       where: { id, institution_id: institutionId },
       data: dto,
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(session);
   }
 
   async delete(institutionId: string, id: string) {
@@ -235,13 +286,13 @@ export class SessionService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sort_by]: sort_order },
-        include: { class: true },
+        include: this.sessionInclude,
       }),
       this.prisma.session.count({ where }),
     ]);
 
     return {
-      data,
+      data: data.map((s) => this.flattenSession(s)),
       total,
       page,
       limit,
@@ -255,7 +306,7 @@ export class SessionService {
   ) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -276,7 +327,7 @@ export class SessionService {
       );
     }
 
-    return this.prisma.session.update({
+    const updated = await this.prisma.session.update({
       where: { id: sessionId },
       data: {
         status: 'RESCHEDULE_REQUESTED',
@@ -285,8 +336,10 @@ export class SessionService {
         proposed_end_time: dto.proposed_end_time,
         reschedule_reason: dto.reschedule_reason,
       },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(updated);
   }
 
   async approveReschedule(
@@ -304,7 +357,7 @@ export class SessionService {
     }
 
     if (dto.approved) {
-      return this.prisma.session.update({
+      const updated = await this.prisma.session.update({
         where: { id: sessionId, institution_id: institutionId },
         data: {
           date: session.proposed_date!,
@@ -317,10 +370,12 @@ export class SessionService {
           proposed_end_time: null,
           reschedule_reason: null,
         },
-        include: { class: true },
+        include: this.sessionInclude,
       });
+
+      return this.flattenSession(updated);
     } else {
-      return this.prisma.session.update({
+      const updated = await this.prisma.session.update({
         where: { id: sessionId, institution_id: institutionId },
         data: {
           status: 'SCHEDULED',
@@ -329,15 +384,17 @@ export class SessionService {
           proposed_end_time: null,
           reschedule_reason: null,
         },
-        include: { class: true },
+        include: this.sessionInclude,
       });
+
+      return this.flattenSession(updated);
     }
   }
 
   async cancelSession(userId: string, sessionId: string) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -352,17 +409,19 @@ export class SessionService {
       throw new ForbiddenException('You can only cancel your own sessions');
     }
 
-    return this.prisma.session.update({
+    const updated = await this.prisma.session.update({
       where: { id: sessionId },
       data: { status: 'CANCELLED' },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(updated);
   }
 
   async getSessionStudents(userId: string, sessionId: string) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -419,7 +478,7 @@ export class SessionService {
   async completeSession(userId: string, sessionId: string, dto: CompleteSessionDto) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -440,14 +499,16 @@ export class SessionService {
       );
     }
 
-    return this.prisma.session.update({
+    const updated = await this.prisma.session.update({
       where: { id: sessionId },
       data: {
         status: 'COMPLETED',
         topic_covered: dto.topic_covered,
         session_summary: dto.session_summary ?? null,
       },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(updated);
   }
 }

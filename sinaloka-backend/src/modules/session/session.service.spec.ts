@@ -32,6 +32,12 @@ describe('SessionService', () => {
   const institutionId = 'inst-uuid-1';
   const userId = 'user-uuid-1';
 
+  const expectedSessionInclude = {
+    class: {
+      include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
+    },
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -60,6 +66,11 @@ describe('SessionService', () => {
         institution_id: institutionId,
         created_by: userId,
         ...dto,
+        class: {
+          id: 'class-uuid-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: 'user-uuid-2', name: 'Tutor A' } },
+        },
       };
 
       mockPrisma.class.findUnique.mockResolvedValue({
@@ -70,7 +81,9 @@ describe('SessionService', () => {
 
       const result = await service.create(institutionId, userId, dto);
 
-      expect(result).toEqual(createdSession);
+      expect(result.id).toBe('session-uuid-1');
+      expect(result.class.fee).toBe(100000);
+      expect(result.class.tutor).toEqual({ id: 'tutor-uuid-1', name: 'Tutor A' });
       expect(mockPrisma.session.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           institution_id: institutionId,
@@ -80,7 +93,7 @@ describe('SessionService', () => {
           end_time: dto.end_time,
           created_by: userId,
         }),
-        include: { class: true },
+        include: expectedSessionInclude,
       });
     });
 
@@ -101,7 +114,16 @@ describe('SessionService', () => {
   describe('findAll', () => {
     it('should return paginated sessions for institution', async () => {
       const sessions = [
-        { id: 'session-1', institution_id: institutionId, date: new Date() },
+        {
+          id: 'session-1',
+          institution_id: institutionId,
+          date: new Date(),
+          class: {
+            id: 'class-1',
+            fee: 100000n,
+            tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A' } },
+          },
+        },
       ];
       mockPrisma.session.findMany.mockResolvedValue(sessions);
       mockPrisma.session.count.mockResolvedValue(1);
@@ -113,7 +135,8 @@ describe('SessionService', () => {
         sort_order: 'asc',
       });
 
-      expect(result.data).toEqual(sessions);
+      expect(result.data[0].class.fee).toBe(100000);
+      expect(result.data[0].class.tutor).toEqual({ id: 'tutor-1', name: 'Tutor A' });
       expect(result.total).toBe(1);
     });
 
@@ -194,15 +217,40 @@ describe('SessionService', () => {
         id: 'session-1',
         institution_id: institutionId,
         date: new Date(),
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' } },
+        },
+        attendances: [
+          {
+            id: 'att-1',
+            status: 'PRESENT',
+            homework_done: true,
+            notes: 'Good',
+            student: { id: 'student-1', name: 'Student A', grade: '10' },
+            created_at: new Date(),
+          },
+        ],
       };
       mockPrisma.session.findUnique.mockResolvedValue(session);
 
       const result = await service.findOne(institutionId, 'session-1');
 
-      expect(result).toEqual(session);
+      expect(result.class.fee).toBe(100000);
+      expect(result.class.tutor).toEqual({ id: 'tutor-1', name: 'Tutor A', email: 'tutor@test.com' });
+      expect(result.attendances[0].student).toEqual({ id: 'student-1', name: 'Student A', grade: '10' });
       expect(mockPrisma.session.findUnique).toHaveBeenCalledWith({
         where: { id: 'session-1', institution_id: institutionId },
-        include: { class: true },
+        include: {
+          class: {
+            include: { tutor: { include: { user: { select: { id: true, name: true, email: true } } } } },
+          },
+          attendances: {
+            include: { student: { select: { id: true, name: true, grade: true } } },
+            orderBy: { created_at: 'desc' },
+          },
+        },
       });
     });
 
@@ -221,10 +269,24 @@ describe('SessionService', () => {
         id: 'session-1',
         institution_id: institutionId,
         status: 'SCHEDULED',
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' } },
+        },
+        attendances: [],
       };
       mockPrisma.session.findUnique.mockResolvedValue(existing);
 
-      const updated = { ...existing, topic_covered: 'Algebra' };
+      const updated = {
+        ...existing,
+        topic_covered: 'Algebra',
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A' } },
+        },
+      };
       mockPrisma.session.update.mockResolvedValue(updated);
 
       const result = await service.update(institutionId, 'session-1', {
@@ -250,13 +312,19 @@ describe('SessionService', () => {
       const existing = {
         id: 'session-1',
         institution_id: institutionId,
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' } },
+        },
+        attendances: [],
       };
       mockPrisma.session.findUnique.mockResolvedValue(existing);
-      mockPrisma.session.delete.mockResolvedValue(existing);
+      mockPrisma.session.delete.mockResolvedValue({ id: 'session-1', institution_id: institutionId });
 
       const result = await service.delete(institutionId, 'session-1');
 
-      expect(result).toEqual(existing);
+      expect(result.id).toBe('session-1');
     });
 
     it('should throw NotFoundException if session not found', async () => {
@@ -405,7 +473,7 @@ describe('SessionService', () => {
         institution_id: institutionId,
         class_id: 'class-uuid-1',
         status: 'SCHEDULED',
-        class: { tutor_id: 'tutor-uuid-1' },
+        class: { tutor_id: 'tutor-uuid-1', fee: 100000n, tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } } },
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -441,7 +509,7 @@ describe('SessionService', () => {
           proposed_end_time: '17:30',
           reschedule_reason: 'Personal conflict',
         },
-        include: { class: true },
+        include: expectedSessionInclude,
       });
     });
 
@@ -451,7 +519,7 @@ describe('SessionService', () => {
         institution_id: institutionId,
         class_id: 'class-uuid-1',
         status: 'SCHEDULED',
-        class: { tutor_id: 'tutor-uuid-other' },
+        class: { tutor_id: 'tutor-uuid-other', fee: 100000n, tutor: { id: 'tutor-uuid-other', user: { id: 'other', name: 'Other' } } },
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -476,7 +544,7 @@ describe('SessionService', () => {
         institution_id: institutionId,
         class_id: 'class-uuid-1',
         status: 'CANCELLED',
-        class: { tutor_id: 'tutor-uuid-1' },
+        class: { tutor_id: 'tutor-uuid-1', fee: 100000n, tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } } },
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -506,6 +574,12 @@ describe('SessionService', () => {
         proposed_start_time: '16:00',
         proposed_end_time: '17:30',
         reschedule_reason: 'Personal conflict',
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' } },
+        },
+        attendances: [],
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -546,7 +620,7 @@ describe('SessionService', () => {
           proposed_end_time: null,
           reschedule_reason: null,
         },
-        include: { class: true },
+        include: expectedSessionInclude,
       });
     });
 
@@ -559,6 +633,12 @@ describe('SessionService', () => {
         proposed_start_time: '16:00',
         proposed_end_time: '17:30',
         reschedule_reason: 'Personal conflict',
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' } },
+        },
+        attendances: [],
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -590,7 +670,7 @@ describe('SessionService', () => {
           proposed_end_time: null,
           reschedule_reason: null,
         },
-        include: { class: true },
+        include: expectedSessionInclude,
       });
     });
 
@@ -599,6 +679,12 @@ describe('SessionService', () => {
         id: 'session-1',
         institution_id: institutionId,
         status: 'SCHEDULED',
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' } },
+        },
+        attendances: [],
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -617,7 +703,7 @@ describe('SessionService', () => {
         id: 'session-1',
         institution_id: institutionId,
         status: 'SCHEDULED',
-        class: { tutor_id: 'tutor-uuid-1' },
+        class: { tutor_id: 'tutor-uuid-1', fee: 100000n, tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } } },
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -635,7 +721,7 @@ describe('SessionService', () => {
       expect(mockPrisma.session.update).toHaveBeenCalledWith({
         where: { id: 'session-1' },
         data: { status: 'CANCELLED' },
-        include: { class: true },
+        include: expectedSessionInclude,
       });
     });
 
@@ -644,7 +730,7 @@ describe('SessionService', () => {
         id: 'session-1',
         institution_id: institutionId,
         status: 'SCHEDULED',
-        class: { tutor_id: 'tutor-uuid-other' },
+        class: { tutor_id: 'tutor-uuid-other', fee: 100000n, tutor: { id: 'tutor-uuid-other', user: { id: 'other', name: 'Other' } } },
       };
 
       mockPrisma.session.findUnique.mockResolvedValue(session);
@@ -667,7 +753,14 @@ describe('SessionService', () => {
       });
 
       const sessions = [
-        { id: 'session-1', class: { tutor_id: 'tutor-uuid-1' } },
+        {
+          id: 'session-1',
+          class: {
+            tutor_id: 'tutor-uuid-1',
+            fee: 100000n,
+            tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+          },
+        },
       ];
       mockPrisma.session.findMany.mockResolvedValue(sessions);
       mockPrisma.session.count.mockResolvedValue(1);
@@ -679,7 +772,8 @@ describe('SessionService', () => {
         sort_order: 'asc',
       });
 
-      expect(result.data).toEqual(sessions);
+      expect(result.data[0].class.fee).toBe(100000);
+      expect(result.data[0].class.tutor).toEqual({ id: 'tutor-uuid-1', name: 'Tutor A' });
       expect(mockPrisma.session.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
