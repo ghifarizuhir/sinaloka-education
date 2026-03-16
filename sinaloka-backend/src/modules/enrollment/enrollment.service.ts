@@ -314,7 +314,7 @@ export class EnrollmentService {
 
         // 4. Check duplicate enrollment (student+class)
         const existing = await this.prisma.enrollment.findFirst({
-          where: { student_id, class_id },
+          where: { student_id, class_id, institution_id: institutionId },
         });
         if (existing) {
           skipped++;
