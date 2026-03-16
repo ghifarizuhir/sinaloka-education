@@ -354,10 +354,10 @@ export const Classes = () => {
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1.5 w-32">
                           <div className="flex items-center justify-between text-[10px] font-bold">
-                            <span className="text-zinc-500">0/{cls.capacity}</span>
-                            <span className="text-zinc-400">0%</span>
+                            <span className="text-zinc-500">{cls.enrolled_count ?? 0}/{cls.capacity}</span>
+                            <span className="text-zinc-400">{cls.capacity > 0 ? Math.round(((cls.enrolled_count ?? 0) / cls.capacity) * 100) : 0}%</span>
                           </div>
-                          <Progress value={0} max={cls.capacity} />
+                          <Progress value={cls.enrolled_count ?? 0} max={cls.capacity} />
                         </div>
                       </td>
                       <td className="px-6 py-4">

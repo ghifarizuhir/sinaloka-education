@@ -31,6 +31,8 @@ describe('ClassService', () => {
     subject: 'Mathematics',
     capacity: 30,
     fee: '500000',
+    package_fee: '700000',
+    tutor_fee: '200000',
     schedule_days: ['Monday', 'Wednesday'],
     schedule_start_time: '14:00',
     schedule_end_time: '15:30',
@@ -39,6 +41,11 @@ describe('ClassService', () => {
     created_at: new Date(),
     updated_at: new Date(),
     tutor: { id: 'tutor-1', user: { id: 'user-1', name: 'John Doe', email: 'john@example.com' } },
+  };
+
+  const mockClassWithCount = {
+    ...mockClass,
+    _count: { enrollments: 5 },
   };
 
   const mockClassWithRelations = {
@@ -93,6 +100,8 @@ describe('ClassService', () => {
       });
 
       expect(result.fee).toBe(500000);
+      expect(result.package_fee).toBe(700000);
+      expect(result.tutor_fee).toBe(200000);
       expect(prisma.class.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -101,11 +110,37 @@ describe('ClassService', () => {
         }),
       );
     });
+
+    it('should pass package_fee and tutor_fee to prisma create', async () => {
+      prisma.class.create.mockResolvedValue(mockClass);
+
+      await service.create('inst-1', {
+        tutor_id: 'tutor-1',
+        name: 'Math 101',
+        subject: 'Mathematics',
+        capacity: 30,
+        fee: 500000,
+        package_fee: 700000,
+        tutor_fee: 200000,
+        schedule_days: ['Monday', 'Wednesday'],
+        schedule_start_time: '14:00',
+        schedule_end_time: '15:30',
+      });
+
+      expect(prisma.class.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            package_fee: 700000,
+            tutor_fee: 200000,
+          }),
+        }),
+      );
+    });
   });
 
   describe('findAll', () => {
-    it('should return paginated classes with tutor and numeric fee', async () => {
-      prisma.class.findMany.mockResolvedValue([mockClass]);
+    it('should return paginated classes with tutor, numeric fee, and enrolled_count', async () => {
+      prisma.class.findMany.mockResolvedValue([mockClassWithCount]);
       prisma.class.count.mockResolvedValue(1);
 
       const result = await service.findAll('inst-1', {
@@ -117,18 +152,24 @@ describe('ClassService', () => {
 
       expect(result.data).toHaveLength(1);
       expect(result.data[0].fee).toBe(500000);
+      expect(result.data[0].package_fee).toBe(700000);
+      expect(result.data[0].tutor_fee).toBe(200000);
       expect(result.data[0].tutor).toEqual({ id: 'tutor-1', name: 'John Doe' });
+      expect(result.data[0].enrolled_count).toBe(5);
       expect(result.meta.total).toBe(1);
       expect(prisma.class.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ institution_id: 'inst-1' }),
-          include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
+          include: expect.objectContaining({
+            tutor: { include: { user: { select: { id: true, name: true } } } },
+            _count: { select: { enrollments: { where: { status: { in: ['ACTIVE', 'TRIAL'] } } } } } },
+          ),
         }),
       );
     });
 
     it('should filter by subject', async () => {
-      prisma.class.findMany.mockResolvedValue([mockClass]);
+      prisma.class.findMany.mockResolvedValue([mockClassWithCount]);
       prisma.class.count.mockResolvedValue(1);
 
       await service.findAll('inst-1', {
@@ -166,7 +207,7 @@ describe('ClassService', () => {
     });
 
     it('should search by name', async () => {
-      prisma.class.findMany.mockResolvedValue([mockClass]);
+      prisma.class.findMany.mockResolvedValue([mockClassWithCount]);
       prisma.class.count.mockResolvedValue(1);
 
       await service.findAll('inst-1', {
@@ -194,6 +235,8 @@ describe('ClassService', () => {
       prisma.class.findFirst.mockResolvedValue(mockClassWithRelations);
       const result = await service.findOne('inst-1', 'class-1');
       expect(result.fee).toBe(500000);
+      expect(result.package_fee).toBe(700000);
+      expect(result.tutor_fee).toBe(200000);
       expect(result.tutor).toEqual({ id: 'tutor-1', name: 'John Doe', email: 'john@example.com' });
       expect(result.enrolled_count).toBe(1);
       expect(result.enrollments).toHaveLength(1);
@@ -218,6 +261,8 @@ describe('ClassService', () => {
       const result = await service.update('inst-1', 'class-1', { name: 'Updated Math' });
       expect(result.name).toBe('Updated Math');
       expect(result.fee).toBe(500000);
+      expect(result.package_fee).toBe(700000);
+      expect(result.tutor_fee).toBe(200000);
     });
     it('should throw NotFoundException if class not found', async () => {
       prisma.class.findFirst.mockResolvedValue(null);

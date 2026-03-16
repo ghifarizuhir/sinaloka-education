@@ -16,6 +16,7 @@ export interface Class {
   room: string | null;
   status: 'ACTIVE' | 'ARCHIVED';
   tutor_id: string;
+  enrolled_count?: number;
   tutor?: { id: string; name: string };
   institution_id: string;
   created_at: string;

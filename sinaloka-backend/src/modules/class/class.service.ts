@@ -19,6 +19,8 @@ export class ClassService {
         subject: dto.subject,
         capacity: dto.capacity,
         fee: dto.fee,
+        package_fee: dto.package_fee ?? null,
+        tutor_fee: dto.tutor_fee ?? null,
         schedule_days: dto.schedule_days,
         schedule_start_time: dto.schedule_start_time,
         schedule_end_time: dto.schedule_end_time,
@@ -26,7 +28,12 @@ export class ClassService {
         status: dto.status ?? 'ACTIVE',
       },
     });
-    return { ...record, fee: Number(record.fee) };
+    return {
+      ...record,
+      fee: Number(record.fee),
+      package_fee: record.package_fee ? Number(record.package_fee) : null,
+      tutor_fee: record.tutor_fee ? Number(record.tutor_fee) : null,
+    };
   }
 
   async findAll(
@@ -60,16 +67,22 @@ export class ClassService {
         skip,
         take: limit,
         orderBy: { [sort_by]: sort_order },
-        include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
+        include: {
+          tutor: { include: { user: { select: { id: true, name: true } } } },
+          _count: { select: { enrollments: { where: { status: { in: ['ACTIVE', 'TRIAL'] } } } } },
+        },
       }),
       this.prisma.class.count({ where }),
     ]);
 
     return {
-      data: data.map((c) => ({
+      data: data.map(({ _count, ...c }) => ({
         ...c,
         fee: Number(c.fee),
+        package_fee: c.package_fee ? Number(c.package_fee) : null,
+        tutor_fee: c.tutor_fee ? Number(c.tutor_fee) : null,
         tutor: c.tutor ? { id: c.tutor.id, name: c.tutor.user.name } : null,
+        enrolled_count: _count.enrollments,
       })),
       meta: buildPaginationMeta(total, page, limit),
     };
@@ -95,6 +108,8 @@ export class ClassService {
     return {
       ...classRecord,
       fee: Number(classRecord.fee),
+      package_fee: classRecord.package_fee ? Number(classRecord.package_fee) : null,
+      tutor_fee: classRecord.tutor_fee ? Number(classRecord.tutor_fee) : null,
       tutor: classRecord.tutor ? { id: classRecord.tutor.id, name: classRecord.tutor.user.name, email: classRecord.tutor.user.email } : null,
       enrolled_count: classRecord.enrollments.length,
       enrollments: classRecord.enrollments.map((e) => ({ id: e.id, status: e.status, student: e.student })),
@@ -114,7 +129,12 @@ export class ClassService {
       where: { id },
       data: dto,
     });
-    return { ...record, fee: Number(record.fee) };
+    return {
+      ...record,
+      fee: Number(record.fee),
+      package_fee: record.package_fee ? Number(record.package_fee) : null,
+      tutor_fee: record.tutor_fee ? Number(record.tutor_fee) : null,
+    };
   }
 
   async delete(institutionId: string, id: string) {
