@@ -22,6 +22,7 @@
     "processing": "Memproses...",
     "deleting": "Menghapus...",
     "noResults": "Tidak ada hasil ditemukan",
+    "noData": "Tidak ada data tersedia",
     "actions": "Aksi",
     "status": "Status",
     "active": "Aktif",
@@ -38,6 +39,7 @@
     "to": "sampai",
     "results": "hasil",
     "allStatuses": "Semua Status",
+    "comingSoon": "Segera hadir",
     "allSubjects": "Semua Mata Pelajaran",
     "allClasses": "Semua Kelas",
     "allCategories": "Semua Kategori",
@@ -778,6 +780,7 @@
     "amount": "Jumlah",
     "action": "Aksi",
     "remind": "Ingatkan",
+    "overduePayments": "pembayaran jatuh tempo",
     "batchReady": "Siap Batch",
     "sessionsLabel": "Sesi",
     "approve": "Setujui",
@@ -801,6 +804,7 @@
     "revenueAnalytics": "Analitik Pendapatan",
     "noPaymentsFound": "Tidak ada pembayaran ditemukan.",
     "totalRecords": "Total Data",
+    "flaggedStudents": "Siswa Bermasalah",
     "daysOverdue": "{{count}} hari terlambat",
     "form": {
       "paymentAmount": "Jumlah Pembayaran (Rp)",
@@ -856,13 +860,20 @@
       "totalDebt": "Total {{amount}}",
       "viewDetails": "Lihat Detail",
       "warning": "Terlambat"
-    }
+    },
+    "generateInvoice": "Buat Faktur",
+    "downloadInvoice": "Unduh Faktur",
+    "invoiceGenerated": "Faktur berhasil dibuat",
+    "invoiceExists": "Faktur sudah ada untuk pembayaran ini",
+    "invoiceNumber": "No. Faktur",
+    "generatingInvoice": "Membuat faktur..."
   },
 
   "payouts": {
     "title": "Inteligensi Pembayaran Tutor",
     "subtitle": "Model verifikasi-pertama untuk pendapatan tutor dan jejak audit.",
     "searchPlaceholder": "Cari tutor...",
+    "allStatuses": "Semua Status",
     "newPayout": "Pembayaran Baru",
     "noPayoutsFound": "Tidak ada pembayaran ditemukan.",
     "backToPayouts": "Kembali ke Pembayaran",
@@ -984,6 +995,13 @@
     },
     "confirm": {
       "deleteExpense": "Apakah Anda yakin ingin menghapus pengeluaran ini?"
+    },
+    "categoryLabel": {
+      "RENT": "Sewa",
+      "UTILITIES": "Utilitas",
+      "SUPPLIES": "Perlengkapan",
+      "MARKETING": "Pemasaran",
+      "OTHER": "Lainnya"
     }
   },
 
@@ -1090,6 +1108,104 @@
       "connected": "Terhubung",
       "notConnected": "Belum Terhubung"
     }
+  },
+
+  "superAdmin": {
+    "institutions": "Institusi",
+    "institutionsSubtitle": "Kelola semua institusi bimbingan belajar",
+    "createInstitution": "Buat Institusi",
+    "createInstitutionSubtitle": "Siapkan institusi bimbingan belajar baru beserta admin pertamanya.",
+    "searchPlaceholder": "Cari institusi...",
+    "enter": "Masuk",
+    "table": {
+      "name": "Nama",
+      "admins": "Admin",
+      "created": "Dibuat"
+    },
+    "tabs": {
+      "general": "Umum",
+      "admins": "Admin",
+      "overview": "Ringkasan"
+    },
+    "addAdmin": "Tambah Admin",
+    "form": {
+      "institutionDetails": "Detail Institusi",
+      "name": "Nama",
+      "namePlaceholder": "contoh: Sinaloka Academy",
+      "slug": "Slug",
+      "email": "Email",
+      "emailPlaceholder": "info@academy.com",
+      "phone": "Telepon",
+      "phonePlaceholder": "+62 21 1234 5678",
+      "address": "Alamat",
+      "addressPlaceholder": "Jl. Pendidikan No. 1",
+      "timezone": "Zona Waktu",
+      "defaultLanguage": "Bahasa Default",
+      "firstAdmin": "Admin Pertama",
+      "adminName": "Nama",
+      "adminNamePlaceholder": "contoh: John Doe",
+      "adminEmail": "Email",
+      "adminEmailPlaceholder": "admin@academy.com",
+      "adminPassword": "Kata Sandi",
+      "nameRequired": "Nama institusi wajib diisi",
+      "adminRequired": "Semua kolom admin wajib diisi"
+    },
+    "dangerZone": "Zona Berbahaya",
+    "deactivateWarning": "Menonaktifkan institusi ini akan mencegah semua pengguna mengaksesnya.",
+    "activateInfo": "Institusi ini saat ini tidak aktif. Aktifkan untuk memulihkan akses.",
+    "confirmToggle": "Apakah Anda yakin?",
+    "deactivateInstitution": "Nonaktifkan Institusi",
+    "activateInstitution": "Aktifkan Institusi",
+    "overview": {
+      "students": "Siswa",
+      "tutors": "Tutor",
+      "admins": "Admin",
+      "activeClasses": "Kelas Aktif"
+    },
+    "toast": {
+      "created": "Institusi berhasil dibuat",
+      "createError": "Gagal membuat institusi",
+      "updated": "Institusi berhasil diperbarui",
+      "updateError": "Gagal memperbarui institusi",
+      "deactivated": "Institusi dinonaktifkan",
+      "activated": "Institusi diaktifkan",
+      "adminCreated": "Admin berhasil dibuat",
+      "adminCreateError": "Gagal membuat admin",
+      "userUpdated": "Pengguna berhasil diperbarui",
+      "userUpdateError": "Gagal memperbarui pengguna"
+    },
+    "users": "Pengguna",
+    "usersSubtitle": "Kelola pengguna di semua institusi",
+    "createAdmin": "Buat Admin",
+    "searchUsersPlaceholder": "Cari berdasarkan nama atau email...",
+    "allRoles": "Semua Peran",
+    "allInstitutions": "Semua Institusi",
+    "allStatuses": "Semua Status",
+    "userTable": {
+      "name": "Nama",
+      "email": "Email",
+      "role": "Peran",
+      "institution": "Institusi",
+      "status": "Status",
+      "lastLogin": "Login Terakhir"
+    },
+    "createAdminModal": {
+      "title": "Buat Admin",
+      "name": "Nama",
+      "namePlaceholder": "cth. John Doe",
+      "email": "Email",
+      "emailPlaceholder": "admin@institusi.com",
+      "password": "Kata Sandi",
+      "institution": "Institusi",
+      "selectInstitution": "Pilih institusi",
+      "fieldsRequired": "Semua kolom wajib diisi"
+    },
+    "editUserModal": {
+      "title": "Edit Pengguna",
+      "active": "Aktif"
+    },
+    "noInstitution": "Tanpa institusi",
+    "neverLoggedIn": "Belum pernah"
   },
 
   "notFound": {

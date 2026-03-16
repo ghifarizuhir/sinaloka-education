@@ -22,6 +22,7 @@
     "processing": "Processing...",
     "deleting": "Deleting...",
     "noResults": "No results found",
+    "noData": "No data available",
     "actions": "Actions",
     "status": "Status",
     "active": "Active",
@@ -38,6 +39,7 @@
     "to": "to",
     "results": "results",
     "allStatuses": "All Statuses",
+    "comingSoon": "Coming soon",
     "allSubjects": "All Subjects",
     "allClasses": "All Classes",
     "allCategories": "All Categories",
@@ -778,6 +780,7 @@
     "amount": "Amount",
     "action": "Action",
     "remind": "Remind",
+    "overduePayments": "overdue payments",
     "batchReady": "Batch Ready",
     "sessionsLabel": "Sessions",
     "approve": "Approve",
@@ -801,6 +804,7 @@
     "revenueAnalytics": "Revenue Analytics",
     "noPaymentsFound": "No payments found.",
     "totalRecords": "Total Records",
+    "flaggedStudents": "Flagged Students",
     "daysOverdue": "{{count}} days overdue",
     "form": {
       "paymentAmount": "Payment Amount (Rp)",
@@ -856,13 +860,20 @@
       "totalDebt": "Total {{amount}}",
       "viewDetails": "View Details",
       "warning": "Overdue"
-    }
+    },
+    "generateInvoice": "Generate Invoice",
+    "downloadInvoice": "Download Invoice",
+    "invoiceGenerated": "Invoice generated successfully",
+    "invoiceExists": "Invoice already exists for this payment",
+    "invoiceNumber": "Invoice No.",
+    "generatingInvoice": "Generating invoice..."
   },
 
   "payouts": {
     "title": "Tutor Payouts Intelligence",
     "subtitle": "Verification-first model for tutor earnings and audit trails.",
     "searchPlaceholder": "Search tutors...",
+    "allStatuses": "All Statuses",
     "newPayout": "New Payout",
     "noPayoutsFound": "No payouts found.",
     "backToPayouts": "Back to Payouts",
@@ -984,6 +995,13 @@
     },
     "confirm": {
       "deleteExpense": "Are you sure you want to delete this expense?"
+    },
+    "categoryLabel": {
+      "RENT": "Rent",
+      "UTILITIES": "Utilities",
+      "SUPPLIES": "Supplies",
+      "MARKETING": "Marketing",
+      "OTHER": "Other"
     }
   },
 
@@ -1090,6 +1108,104 @@
       "connected": "Connected",
       "notConnected": "Not Connected"
     }
+  },
+
+  "superAdmin": {
+    "institutions": "Institutions",
+    "institutionsSubtitle": "Manage all tutoring institutions",
+    "createInstitution": "Create Institution",
+    "createInstitutionSubtitle": "Set up a new tutoring institution and its first admin.",
+    "searchPlaceholder": "Search institutions...",
+    "enter": "Enter",
+    "table": {
+      "name": "Name",
+      "admins": "Admin(s)",
+      "created": "Created"
+    },
+    "tabs": {
+      "general": "General",
+      "admins": "Admins",
+      "overview": "Overview"
+    },
+    "addAdmin": "Add Admin",
+    "form": {
+      "institutionDetails": "Institution Details",
+      "name": "Name",
+      "namePlaceholder": "e.g. Sinaloka Academy",
+      "slug": "Slug",
+      "email": "Email",
+      "emailPlaceholder": "info@academy.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+62 21 1234 5678",
+      "address": "Address",
+      "addressPlaceholder": "123 Education Street",
+      "timezone": "Timezone",
+      "defaultLanguage": "Default Language",
+      "firstAdmin": "First Admin",
+      "adminName": "Name",
+      "adminNamePlaceholder": "e.g. John Doe",
+      "adminEmail": "Email",
+      "adminEmailPlaceholder": "admin@academy.com",
+      "adminPassword": "Password",
+      "nameRequired": "Institution name is required",
+      "adminRequired": "All admin fields are required"
+    },
+    "dangerZone": "Danger Zone",
+    "deactivateWarning": "Deactivating this institution will prevent all users from accessing it.",
+    "activateInfo": "This institution is currently inactive. Activate it to restore access.",
+    "confirmToggle": "Are you sure?",
+    "deactivateInstitution": "Deactivate Institution",
+    "activateInstitution": "Activate Institution",
+    "overview": {
+      "students": "Students",
+      "tutors": "Tutors",
+      "admins": "Admins",
+      "activeClasses": "Active Classes"
+    },
+    "toast": {
+      "created": "Institution created successfully",
+      "createError": "Failed to create institution",
+      "updated": "Institution updated successfully",
+      "updateError": "Failed to update institution",
+      "deactivated": "Institution deactivated",
+      "activated": "Institution activated",
+      "adminCreated": "Admin created successfully",
+      "adminCreateError": "Failed to create admin",
+      "userUpdated": "User updated successfully",
+      "userUpdateError": "Failed to update user"
+    },
+    "users": "Users",
+    "usersSubtitle": "Manage users across all institutions",
+    "createAdmin": "Create Admin",
+    "searchUsersPlaceholder": "Search by name or email...",
+    "allRoles": "All Roles",
+    "allInstitutions": "All Institutions",
+    "allStatuses": "All Statuses",
+    "userTable": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "institution": "Institution",
+      "status": "Status",
+      "lastLogin": "Last Login"
+    },
+    "createAdminModal": {
+      "title": "Create Admin",
+      "name": "Name",
+      "namePlaceholder": "e.g. John Doe",
+      "email": "Email",
+      "emailPlaceholder": "admin@institution.com",
+      "password": "Password",
+      "institution": "Institution",
+      "selectInstitution": "Select an institution",
+      "fieldsRequired": "All fields are required"
+    },
+    "editUserModal": {
+      "title": "Edit User",
+      "active": "Active"
+    },
+    "noInstitution": "No institution",
+    "neverLoggedIn": "Never"
   },
 
   "notFound": {
