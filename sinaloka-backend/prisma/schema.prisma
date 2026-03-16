@@ -63,13 +63,8 @@ enum PayoutStatus {
   PAID
 }
 
-enum ExpenseCategory {
-  RENT
-  UTILITIES
-  SUPPLIES
-  MARKETING
-  OTHER
-}
+// ExpenseCategory enum removed — categories are now custom strings per institution
+// Kept as comment for reference: RENT, UTILITIES, SUPPLIES, MARKETING, OTHER
 
 enum InvitationStatus {
   PENDING
@@ -86,8 +81,10 @@ model Institution {
   phone      String?
   email      String?
   logo_url   String?
-  settings   Json?
-  created_at DateTime @default(now())
+  settings         Json?
+  timezone         String   @default("Asia/Jakarta")
+  default_language String   @default("id")
+  created_at       DateTime @default(now())
   updated_at DateTime @updatedAt
 
   users       User[]
@@ -102,7 +99,8 @@ model Institution {
   expenses        Expense[]
   parents         Parent[]
   parent_invites  ParentInvite[]
-  invitations     Invitation[]
+  invitations         Invitation[]
+  whatsapp_messages   WhatsappMessage[]
 
   @@map("institutions")
 }
@@ -245,6 +243,8 @@ model Class {
   subject             String
   capacity            Int
   fee                 Decimal
+  package_fee         Decimal?
+  tutor_fee           Decimal?
   schedule_days       String[]
   schedule_start_time String
   schedule_end_time   String
@@ -291,6 +291,7 @@ model Session {
   status               SessionStatus @default(SCHEDULED)
   topic_covered        String?
   session_summary      String?
+  tutor_fee_amount     Decimal?
   created_by           String
   approved_by          String?
   proposed_date        DateTime?     @db.Date
@@ -370,7 +371,7 @@ model Payout {
 model Expense {
   id              String          @id @default(uuid())
   institution_id  String
-  category        ExpenseCategory
+  category        String
   amount          Decimal
   date            DateTime        @db.Date
   description     String?
@@ -408,4 +409,27 @@ model PasswordResetToken {
   user User @relation(fields: [user_id], references: [id])
 
   @@map("password_reset_tokens")
+}
+
+model WhatsappMessage {
+  id              String   @id @default(uuid())
+  institution_id  String
+  phone           String
+  template_name   String
+  template_params Json
+  wa_message_id   String?
+  status          String   @default("PENDING")
+  error           String?
+  retry_count     Int      @default(0)
+  related_type    String?
+  related_id      String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  institution     Institution @relation(fields: [institution_id], references: [id])
+
+  @@index([related_type, related_id, created_at])
+  @@index([wa_message_id])
+  @@index([institution_id, created_at])
+  @@map("whatsapp_messages")
 }
