@@ -33,6 +33,7 @@ enum EnrollmentStatus {
 }
 
 enum PaymentStatus {
+  NEW
   PAID
   PENDING
   OVERDUE
@@ -245,7 +246,7 @@ model Class {
   capacity            Int
   fee                 Decimal
   package_fee         Decimal?
-  tutor_fee           Decimal?
+  tutor_fee           Decimal   @default(0)
   schedule_days       String[]
   schedule_start_time String
   schedule_end_time   String
@@ -268,7 +269,7 @@ model Enrollment {
   student_id      String
   class_id        String
   status          EnrollmentStatus @default(ACTIVE)
-  payment_status  PaymentStatus    @default(PENDING)
+  payment_status  PaymentStatus    @default(NEW)
   enrolled_at     DateTime         @default(now())
   created_at      DateTime         @default(now())
   updated_at      DateTime         @updatedAt

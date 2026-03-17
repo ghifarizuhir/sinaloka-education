@@ -3,7 +3,9 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
+import { isBefore, startOfDay } from 'date-fns';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js';
 import type {
@@ -109,6 +111,19 @@ export class AttendanceService {
 
     if (!attendance) {
       throw new NotFoundException(`Attendance record with id ${id} not found`);
+    }
+
+    if (attendance.session.status === 'COMPLETED') {
+      throw new BadRequestException(
+        'Cannot edit attendance for a completed session',
+      );
+    }
+
+    const sessionDate = new Date(attendance.session.date);
+    if (isBefore(sessionDate, startOfDay(new Date()))) {
+      throw new BadRequestException(
+        'Cannot edit attendance for a session whose date has already passed',
+      );
     }
 
     const result = await this.prisma.attendance.update({

@@ -364,6 +364,14 @@
       "cancelInvite": "Cancel this invitation? The tutor record will be deleted.",
       "deleteTutor": "Are you sure you want to delete this tutor?"
     },
+    "confirmDialog": {
+      "cancelTitle": "Cancel Invitation",
+      "cancelDescription": "This will revoke the invitation and remove the tutor record. This action cannot be undone.",
+      "cancelConfirm": "Cancel Invitation",
+      "deleteTitle": "Delete Tutor",
+      "deleteDescription": "This will permanently delete this tutor and all associated data. This action cannot be undone.",
+      "deleteConfirm": "Delete Tutor"
+    },
     "card": {
       "experience": "Experience",
       "rating": "Rating",
@@ -517,7 +525,9 @@
     "menu": {
       "markAttendance": "Mark Attendance",
       "approveReschedule": "Approve Reschedule",
-      "cancelSession": "Cancel Session"
+      "cancelSession": "Cancel Session",
+      "completedLocked": "Session completed — locked",
+      "pastLocked": "Date passed — locked"
     },
     "calendar": {
       "month": "MONTH",
@@ -659,6 +669,7 @@
       "dropped": "Dropped"
     },
     "paymentStatus": {
+      "new": "New",
       "paid": "Paid",
       "pending": "Pending",
       "overdue": "Overdue"
@@ -733,6 +744,8 @@
     "notes": "Notes",
     "notePlaceholder": "Note...",
     "editingEnabled": "Editing Enabled",
+    "completedLocked": "Session completed — editing locked",
+    "pastLocked": "Session date passed — editing locked",
     "saveAttendance": "Save Attendance",
     "unsavedChanges": "Unsaved Changes",
     "presentCount": "{{present}} Present, {{absent}} Absent",

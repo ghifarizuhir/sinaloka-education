@@ -29,7 +29,8 @@ import {
   SearchInput,
   Switch,
   Slider,
-  Skeleton
+  Skeleton,
+  ConfirmDialog
 } from '../components/UI';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -181,6 +182,7 @@ export const Tutors = () => {
   const [filterSubject, setFilterSubject] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingTutor, setEditingTutor] = useState<Tutor | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'cancel' | 'delete'; tutorId: string } | null>(null);
 
   const { data, isLoading } = useTutors({ page, limit });
   const createTutor = useCreateTutor();
@@ -218,12 +220,8 @@ export const Tutors = () => {
     inviteTutor.mutate(
       { email: data.email, name: data.name, subjects: data.subjects, experience_years: data.experience_years },
       {
-        onSuccess: (result: any) => {
-          if (result.email_sent) {
-            toast.success(t('tutors.toast.inviteSent'));
-          } else {
-            toast.success(t('tutors.toast.inviteSentNoEmail'));
-          }
+        onSuccess: () => {
+          toast.success(t('tutors.toast.inviteSent'));
           setShowForm(false);
         },
         onError: (err: any) => {
@@ -235,20 +233,13 @@ export const Tutors = () => {
 
   const handleResendInvite = (tutorId: string) => {
     resendInvite.mutate(tutorId, {
-      onSuccess: (result: any) => {
-        if (result.email_sent) toast.success(t('tutors.toast.inviteResent'));
-        else toast.success(t('tutors.toast.inviteResentNoEmail'));
-      },
+      onSuccess: () => toast.success(t('tutors.toast.inviteResent')),
       onError: () => toast.error(t('tutors.toast.resendError')),
     });
   };
 
   const handleCancelInvite = (tutorId: string) => {
-    if (!confirm(t('tutors.confirm.cancelInvite'))) return;
-    cancelInvite.mutate(tutorId, {
-      onSuccess: () => toast.success(t('tutors.toast.inviteCancelled')),
-      onError: () => toast.error(t('tutors.toast.cancelError')),
-    });
+    setConfirmAction({ type: 'cancel', tutorId });
   };
 
   const handleEditTutor = (formData: any) => {
@@ -267,11 +258,28 @@ export const Tutors = () => {
   };
 
   const handleDeleteTutor = (id: string) => {
-    if (!confirm(t('tutors.confirm.deleteTutor'))) return;
-    deleteTutor.mutate(id, {
-      onSuccess: () => toast.success(t('tutors.toast.deleted')),
-      onError: () => toast.error(t('tutors.toast.deleteError')),
-    });
+    setConfirmAction({ type: 'delete', tutorId: id });
+  };
+
+  const handleConfirmAction = () => {
+    if (!confirmAction) return;
+    if (confirmAction.type === 'cancel') {
+      cancelInvite.mutate(confirmAction.tutorId, {
+        onSuccess: () => {
+          toast.success(t('tutors.toast.inviteCancelled'));
+          setConfirmAction(null);
+        },
+        onError: () => toast.error(t('tutors.toast.cancelError')),
+      });
+    } else {
+      deleteTutor.mutate(confirmAction.tutorId, {
+        onSuccess: () => {
+          toast.success(t('tutors.toast.deleted'));
+          setConfirmAction(null);
+        },
+        onError: () => toast.error(t('tutors.toast.deleteError')),
+      });
+    }
   };
 
   const getAvailabilityBadge = (tutor: Tutor) => {
@@ -569,6 +577,18 @@ export const Tutors = () => {
           onCancel={() => { setShowForm(false); setEditingTutor(null); }}
         />
       </Modal>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={handleConfirmAction}
+        title={confirmAction?.type === 'cancel' ? t('tutors.confirmDialog.cancelTitle') : t('tutors.confirmDialog.deleteTitle')}
+        description={confirmAction?.type === 'cancel' ? t('tutors.confirmDialog.cancelDescription') : t('tutors.confirmDialog.deleteDescription')}
+        confirmLabel={confirmAction?.type === 'cancel' ? t('tutors.confirmDialog.cancelConfirm') : t('tutors.confirmDialog.deleteConfirm')}
+        cancelLabel={t('common.cancel')}
+        isLoading={cancelInvite.isPending || deleteTutor.isPending}
+      />
     </div>
   );
 };

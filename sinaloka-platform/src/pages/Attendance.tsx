@@ -76,13 +76,23 @@ export const Attendance = () => {
   // Selected session object
   const selectedSession = useMemo(() => sessions.find(s => s.id === selectedSessionId), [sessions, selectedSessionId]);
 
+  // Determine if editing is locked (completed or past date)
+  const isSessionLocked = useMemo(() => {
+    if (!selectedSession) return false;
+    if (selectedSession.status === 'COMPLETED') return true;
+    try {
+      const sessionDate = parseISO(selectedSession.date);
+      return isBefore(startOfDay(sessionDate), startOfDay(new Date()));
+    } catch { return false; }
+  }, [selectedSession]);
+
   // Mutation
   const updateAttendance = useUpdateAttendance();
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!focusedAttendanceId) return;
+      if (!focusedAttendanceId || isSessionLocked) return;
       const key = e.key.toLowerCase();
       if (!['p', 'a', 'l'].includes(key)) return;
 
@@ -331,14 +341,16 @@ export const Attendance = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-[10px] h-8"
-                        onClick={() => bulkMarkAll('PRESENT')}
-                      >
-                        {t('attendance.markAllPresent')}
-                      </Button>
+                      {!isSessionLocked && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-[10px] h-8"
+                          onClick={() => bulkMarkAll('PRESENT')}
+                        >
+                          {t('attendance.markAllPresent')}
+                        </Button>
+                      )}
                     </div>
                   </div>
 
@@ -400,14 +412,16 @@ export const Attendance = () => {
                                       {(['PRESENT', 'ABSENT', 'LATE'] as AttendanceStatus[]).map((status) => (
                                         <button
                                           key={status}
-                                          onClick={() => setLocalStatus(student.attendance_id!, status)}
+                                          onClick={() => !isSessionLocked && setLocalStatus(student.attendance_id!, status)}
+                                          disabled={isSessionLocked}
                                           className={cn(
                                             "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
                                             effectiveStatus === status
                                               ? status === 'PRESENT' ? "bg-emerald-500 text-white shadow-sm" :
                                                 status === 'ABSENT' ? "bg-rose-500 text-white shadow-sm" :
                                                 "bg-amber-500 text-white shadow-sm"
-                                              : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                              : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300",
+                                            isSessionLocked && "cursor-not-allowed opacity-60"
                                           )}
                                         >
                                           {STATUS_LABEL[status][0]}
@@ -422,8 +436,9 @@ export const Attendance = () => {
                                   {hasAttendance ? (
                                     <input
                                       type="checkbox"
-                                      className="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                                      className={cn("w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900", isSessionLocked && "cursor-not-allowed opacity-60")}
                                       checked={effectiveHw}
+                                      disabled={isSessionLocked}
                                       onChange={(e) => setLocalHomework(student.attendance_id!, e.target.checked)}
                                     />
                                   ) : (
@@ -436,6 +451,7 @@ export const Attendance = () => {
                                       className="h-8 text-xs w-32"
                                       placeholder={t('attendance.notePlaceholder')}
                                       value={effectiveNotes}
+                                      disabled={isSessionLocked}
                                       onChange={(e) => setLocalNotes(student.attendance_id!, e.target.value)}
                                     />
                                   ) : (
@@ -455,10 +471,17 @@ export const Attendance = () => {
               {/* Action Bar */}
               <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2 text-zinc-400 font-bold text-xs">
-                    <Unlock size={14} />
-                    {t('attendance.editingEnabled')}
-                  </div>
+                  {isSessionLocked ? (
+                    <div className="flex items-center gap-2 text-amber-500 font-bold text-xs">
+                      <Lock size={14} />
+                      {selectedSession?.status === 'COMPLETED' ? t('attendance.completedLocked') : t('attendance.pastLocked')}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-zinc-400 font-bold text-xs">
+                      <Unlock size={14} />
+                      {t('attendance.editingEnabled')}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   {hasUnsavedChanges && (

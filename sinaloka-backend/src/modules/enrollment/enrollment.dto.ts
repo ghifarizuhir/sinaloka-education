@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
 const EnrollmentStatus = z.enum(['ACTIVE', 'TRIAL', 'WAITLISTED', 'DROPPED']);
-const PaymentStatus = z.enum(['PAID', 'PENDING', 'OVERDUE']);
+const PaymentStatus = z.enum(['NEW', 'PAID', 'PENDING', 'OVERDUE']);
 
 export const CreateEnrollmentSchema = z.object({
   student_id: z.string().uuid(),
   class_id: z.string().uuid(),
   status: EnrollmentStatus.default('ACTIVE'),
-  payment_status: PaymentStatus.default('PENDING'),
+  payment_status: PaymentStatus.default('NEW'),
   enrolled_at: z.coerce.date().optional(),
 });
 export type CreateEnrollmentDto = z.infer<typeof CreateEnrollmentSchema>;

@@ -9,7 +9,7 @@ export interface Class {
   capacity: number;
   fee: number;
   package_fee: number | null;
-  tutor_fee: number | null;
+  tutor_fee: number;
   schedule_days: ScheduleDay[];
   schedule_start_time: string;
   schedule_end_time: string;
@@ -30,7 +30,7 @@ export interface CreateClassDto {
   capacity: number;
   fee: number;
   package_fee?: number | null;
-  tutor_fee?: number | null;
+  tutor_fee: number;
   schedule_days: ScheduleDay[];
   schedule_start_time: string;
   schedule_end_time: string;

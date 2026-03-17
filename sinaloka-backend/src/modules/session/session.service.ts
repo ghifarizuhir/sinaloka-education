@@ -16,7 +16,8 @@ import type {
   CompleteSessionDto,
 } from './session.dto.js';
 import { SessionStatus } from '../../../generated/prisma/client.js';
-import { addDays, getDay, isAfter, isBefore, isEqual } from 'date-fns';
+import { PayoutService } from '../payout/payout.service.js';
+import { addDays, getDay, isAfter, isBefore, isEqual, startOfDay } from 'date-fns';
 
 const DAY_MAP: Record<string, number> = {
   Sunday: 0,
@@ -30,7 +31,10 @@ const DAY_MAP: Record<string, number> = {
 
 @Injectable()
 export class SessionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly payoutService: PayoutService,
+  ) {}
 
   private readonly sessionInclude = {
     class: {
@@ -53,14 +57,40 @@ export class SessionService {
     };
   }
 
-  async create(institutionId: string, userId: string, dto: CreateSessionDto) {
+  private async validateClassForSession(classId: string, institutionId: string) {
     const classRecord = await this.prisma.class.findUnique({
-      where: { id: dto.class_id, institution_id: institutionId },
+      where: { id: classId, institution_id: institutionId },
     });
 
     if (!classRecord) {
-      throw new NotFoundException(`Class with id ${dto.class_id} not found`);
+      throw new NotFoundException(`Class with id ${classId} not found`);
     }
+
+    if (classRecord.status !== 'ACTIVE') {
+      throw new BadRequestException(
+        'Cannot create sessions for an archived class',
+      );
+    }
+
+    const enrollmentCount = await this.prisma.enrollment.count({
+      where: {
+        class_id: classId,
+        institution_id: institutionId,
+        status: { in: ['ACTIVE', 'TRIAL'] },
+      },
+    });
+
+    if (enrollmentCount === 0) {
+      throw new BadRequestException(
+        'Cannot create sessions for a class with no enrolled students',
+      );
+    }
+
+    return classRecord;
+  }
+
+  async create(institutionId: string, userId: string, dto: CreateSessionDto) {
+    await this.validateClassForSession(dto.class_id, institutionId);
 
     const session = await this.prisma.session.create({
       data: {
@@ -154,17 +184,55 @@ export class SessionService {
   async update(institutionId: string, id: string, dto: UpdateSessionDto) {
     const existing = await this.findOne(institutionId, id);
 
+    if (existing.status === 'COMPLETED') {
+      throw new BadRequestException(
+        'Cannot edit a completed session',
+      );
+    }
+
+    const sessionDate = new Date(existing.date);
+    if (isBefore(sessionDate, startOfDay(new Date())) && dto.status !== 'COMPLETED') {
+      throw new BadRequestException(
+        'Cannot edit a session whose date has already passed',
+      );
+    }
+
     const data: any = { ...dto };
 
     // Copy tutor fee when session is marked COMPLETED
-    if (dto.status === 'COMPLETED' && existing.status !== 'COMPLETED') {
+    if (dto.status === 'COMPLETED') {
       const sessionClass = await this.prisma.class.findUnique({
         where: { id: existing.class?.id ?? '' },
-        select: { tutor_fee: true },
+        select: { tutor_fee: true, tutor_id: true, name: true },
       });
       if (sessionClass?.tutor_fee) {
         data.tutor_fee_amount = sessionClass.tutor_fee;
       }
+
+      const session = await this.prisma.session.update({
+        where: { id, institution_id: institutionId },
+        data,
+        include: this.sessionInclude,
+      });
+
+      // Auto-create payout for tutor
+      if (sessionClass?.tutor_fee && sessionClass.tutor_id) {
+        const tutorFee = Number(sessionClass.tutor_fee);
+        if (tutorFee > 0) {
+          const sessionDate = new Date(existing.date);
+          await this.payoutService.create(institutionId, {
+            tutor_id: sessionClass.tutor_id,
+            amount: tutorFee,
+            date: sessionDate,
+            status: 'PENDING',
+            description: `Session: ${sessionClass.name} - ${sessionDate.toISOString().split('T')[0]}`,
+            period_start: sessionDate,
+            period_end: sessionDate,
+          });
+        }
+      }
+
+      return this.flattenSession(session);
     }
 
     const session = await this.prisma.session.update({
@@ -177,7 +245,11 @@ export class SessionService {
   }
 
   async delete(institutionId: string, id: string) {
-    await this.findOne(institutionId, id);
+    const existing = await this.findOne(institutionId, id);
+
+    if (existing.status === 'COMPLETED') {
+      throw new BadRequestException('Cannot delete a completed session');
+    }
 
     return this.prisma.session.delete({
       where: { id, institution_id: institutionId },
@@ -189,13 +261,10 @@ export class SessionService {
     userId: string,
     dto: GenerateSessionsDto,
   ) {
-    const classRecord = await this.prisma.class.findUnique({
-      where: { id: dto.class_id, institution_id: institutionId },
-    });
-
-    if (!classRecord) {
-      throw new NotFoundException(`Class with id ${dto.class_id} not found`);
-    }
+    const classRecord = await this.validateClassForSession(
+      dto.class_id,
+      institutionId,
+    );
 
     if (isAfter(dto.date_from, dto.date_to)) {
       throw new BadRequestException('date_from must be before or equal to date_to');
@@ -561,8 +630,11 @@ export class SessionService {
     // Copy tutor fee from class
     const classForFee = await this.prisma.class.findUnique({
       where: { id: session.class_id },
-      select: { tutor_fee: true },
+      select: { tutor_fee: true, name: true },
     });
+
+    const tutorFee = Number(classForFee?.tutor_fee ?? 0);
+    console.log(`[completeSession] class="${classForFee?.name}" tutor_fee_raw=${classForFee?.tutor_fee} tutorFee=${tutorFee}`);
 
     const updated = await this.prisma.session.update({
       where: { id: sessionId },
@@ -570,10 +642,26 @@ export class SessionService {
         status: 'COMPLETED',
         topic_covered: dto.topic_covered,
         session_summary: dto.session_summary ?? null,
-        ...(classForFee?.tutor_fee ? { tutor_fee_amount: classForFee.tutor_fee } : {}),
+        ...(tutorFee > 0 ? { tutor_fee_amount: classForFee!.tutor_fee } : {}),
       },
       include: this.sessionInclude,
     });
+
+    // Auto-create payout record for this session
+    console.log(`[completeSession] tutorFee=${tutorFee}, will create payout: ${tutorFee > 0}`);
+    if (tutorFee > 0) {
+      const sessionDate = new Date(session.date);
+      console.log(`[completeSession] Creating payout: tutor_id=${tutor.id}, amount=${tutorFee}, date=${sessionDate.toISOString()}`);
+      await this.payoutService.create(session.institution_id, {
+        tutor_id: tutor.id,
+        amount: tutorFee,
+        date: sessionDate,
+        status: 'PENDING',
+        description: `Session: ${session.class.name} - ${sessionDate.toISOString().split('T')[0]}`,
+        period_start: sessionDate,
+        period_end: sessionDate,
+      });
+    }
 
     return this.flattenSession(updated);
   }

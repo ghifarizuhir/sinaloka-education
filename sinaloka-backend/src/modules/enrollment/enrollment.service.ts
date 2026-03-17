@@ -142,7 +142,7 @@ export class EnrollmentService {
         student_id: dto.student_id,
         class_id: dto.class_id,
         status: dto.status ?? 'ACTIVE',
-        payment_status: dto.payment_status ?? 'PENDING',
+        payment_status: dto.payment_status ?? 'NEW',
         enrolled_at: dto.enrolled_at ?? new Date(),
       },
       include: {
@@ -400,7 +400,7 @@ export class EnrollmentService {
             student_id,
             class_id,
             status,
-            payment_status: 'PENDING',
+            payment_status: 'NEW',
             enrolled_at: new Date(),
           },
         });

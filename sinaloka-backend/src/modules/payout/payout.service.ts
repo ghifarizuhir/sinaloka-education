@@ -14,10 +14,12 @@ export class PayoutService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(institutionId: string, dto: CreatePayoutDto) {
+    console.log(`[PayoutService.create] institutionId=${institutionId}, dto=${JSON.stringify(dto)}`);
     const payout = await this.prisma.payout.create({
       data: { ...dto, institution_id: institutionId },
       include: { tutor: { include: { user: { select: { name: true } } } } },
     });
+    console.log(`[PayoutService.create] SUCCESS payout.id=${payout.id}`);
     return this.flattenPayoutTutor(payout);
   }
 
@@ -39,6 +41,8 @@ export class PayoutService {
     ]);
 
     const data = rawData.map((p) => this.flattenPayoutTutor(p));
+
+    console.log(`[PayoutService.findAll] institutionId=${institutionId}, total=${total}, returned=${data.length}, where=${JSON.stringify(where)}`);
 
     return { data, meta: buildPaginationMeta(total, page, limit) };
   }

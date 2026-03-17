@@ -16,7 +16,8 @@ import {
   Calendar as CalendarIcon,
   LayoutGrid,
   Info,
-  Zap
+  Zap,
+  Lock
 } from 'lucide-react';
 import {
   format,
@@ -31,7 +32,9 @@ import {
   subMonths,
   isValid,
   addDays,
-  parseISO
+  parseISO,
+  isBefore,
+  startOfDay
 } from 'date-fns';
 import { toast } from 'sonner';
 import { Card, Button, Badge, Modal, Drawer, Input, Label, Switch, Skeleton } from '../components/UI';
@@ -301,7 +304,10 @@ export const Schedules = () => {
                 )}
                 {sessions.map((session) => {
                   const isCancelled = session.status === 'CANCELLED';
+                  const isCompleted = session.status === 'COMPLETED';
                   const sessionDate = getSessionDate(session);
+                  const isPast = isValid(sessionDate) && isBefore(startOfDay(sessionDate), startOfDay(new Date()));
+                  const isLocked = isCompleted || isPast;
                   const subject = session.class?.subject;
                   const tutorName = session.class?.tutor?.name ?? '—';
                   const className = session.class?.name ?? '—';
@@ -369,27 +375,35 @@ export const Schedules = () => {
                                   transition={{ duration: 0.1 }}
                                   className="absolute right-0 top-full mt-1 w-52 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1 text-left"
                                 >
-                                  <button
-                                    onClick={() => { handleMarkAttendance(session.id); setActiveActionMenu(null); }}
-                                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-indigo-600"
-                                  >
-                                    {t('schedules.menu.markAttendance')} <ArrowUpRight size={14} />
-                                  </button>
-                                  {session.status === 'RESCHEDULE_REQUESTED' && (
-                                    <button
-                                      onClick={() => { handleApproveReschedule(session.id); setActiveActionMenu(null); }}
-                                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-emerald-600"
-                                    >
-                                      <CheckCircle2 size={14} /> {t('schedules.menu.approveReschedule')}
-                                    </button>
-                                  )}
-                                  {!isCancelled && (
-                                    <button
-                                      onClick={() => { handleCancelSession(session.id); setActiveActionMenu(null); }}
-                                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-red-500"
-                                    >
-                                      {t('schedules.menu.cancelSession')}
-                                    </button>
+                                  {isLocked ? (
+                                    <div className="px-3 py-2 text-xs text-zinc-400 flex items-center gap-2">
+                                      <Lock size={12} /> {isCompleted ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={() => { handleMarkAttendance(session.id); setActiveActionMenu(null); }}
+                                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-indigo-600"
+                                      >
+                                        {t('schedules.menu.markAttendance')} <ArrowUpRight size={14} />
+                                      </button>
+                                      {session.status === 'RESCHEDULE_REQUESTED' && (
+                                        <button
+                                          onClick={() => { handleApproveReschedule(session.id); setActiveActionMenu(null); }}
+                                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-emerald-600"
+                                        >
+                                          <CheckCircle2 size={14} /> {t('schedules.menu.approveReschedule')}
+                                        </button>
+                                      )}
+                                      {!isCancelled && (
+                                        <button
+                                          onClick={() => { handleCancelSession(session.id); setActiveActionMenu(null); }}
+                                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-red-500"
+                                        >
+                                          {t('schedules.menu.cancelSession')}
+                                        </button>
+                                      )}
+                                    </>
                                   )}
                                 </motion.div>
                               </>
@@ -876,23 +890,35 @@ export const Schedules = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-              <Button
-                variant="outline"
-                className="flex-1 justify-center"
-                onClick={() => { handleMarkAttendance(selectedSession.id); setSelectedSessionId(null); }}
-              >
-                {t('schedules.drawer.markAttendance')}
-              </Button>
-              {selectedSession.status !== 'CANCELLED' && (
-                <Button
-                  className="flex-1 justify-center bg-rose-600 hover:bg-rose-700 text-white"
-                  onClick={() => { handleCancelSession(selectedSession.id); setSelectedSessionId(null); }}
-                >
-                  {t('schedules.drawer.cancelSession')}
-                </Button>
-              )}
-            </div>
+            {(() => {
+              const drawerSessionDate = getSessionDate(selectedSession);
+              const drawerIsPast = isValid(drawerSessionDate) && isBefore(startOfDay(drawerSessionDate), startOfDay(new Date()));
+              const drawerIsLocked = selectedSession.status === 'COMPLETED' || drawerIsPast;
+              return drawerIsLocked ? (
+                <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800 text-zinc-400 text-sm">
+                  <Lock size={14} />
+                  {selectedSession.status === 'COMPLETED' ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                  <Button
+                    variant="outline"
+                    className="flex-1 justify-center"
+                    onClick={() => { handleMarkAttendance(selectedSession.id); setSelectedSessionId(null); }}
+                  >
+                    {t('schedules.drawer.markAttendance')}
+                  </Button>
+                  {selectedSession.status !== 'CANCELLED' && (
+                    <Button
+                      className="flex-1 justify-center bg-rose-600 hover:bg-rose-700 text-white"
+                      onClick={() => { handleCancelSession(selectedSession.id); setSelectedSessionId(null); }}
+                    >
+                      {t('schedules.drawer.cancelSession')}
+                    </Button>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
       </Drawer>

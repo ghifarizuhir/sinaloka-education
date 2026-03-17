@@ -23,10 +23,14 @@ import { useAttendance } from './hooks/useAttendance';
 function MainAppContent() {
   const { profile, logout } = useAuth();
   const { data: schedule, isLoading: scheduleLoading, activeFilter, setFilter, refetch: refetchSchedule, cancelSession, requestReschedule } = useSchedule();
-  const { data: payouts } = usePayouts();
+  const { data: payouts, refetch: refetchPayouts } = usePayouts();
   const { students, setStudents, fetchStudents, submitAttendance } = useAttendance();
 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTabRaw] = useState('dashboard');
+  const setActiveTab = (tab: string) => {
+    setActiveTabRaw(tab);
+    if (tab === 'payouts') refetchPayouts();
+  };
   const [selectedProof, setSelectedProof] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
@@ -94,6 +98,7 @@ function MainAppContent() {
       setSelectedClassId(null);
       triggerNotification('Absensi kelas berhasil disimpan!');
       refetchSchedule();
+      refetchPayouts();
     } catch (err: any) {
       triggerNotification(err?.response?.data?.message || 'Gagal menyimpan absensi');
     }

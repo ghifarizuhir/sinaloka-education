@@ -136,7 +136,7 @@ export const Classes = () => {
     setFormEndTime(cls.schedule_end_time);
     setFormRoom(cls.room ?? '');
     setFormPackageFee(cls.package_fee ? String(cls.package_fee) : '');
-    setFormTutorFee(cls.tutor_fee ? String(cls.tutor_fee) : '');
+    setFormTutorFee(String(cls.tutor_fee ?? 0));
     setFormStatus(cls.status);
     setShowModal(true);
   };
@@ -168,7 +168,7 @@ export const Classes = () => {
       schedule_end_time: formEndTime,
       room: formRoom || undefined,
       package_fee: formPackageFee ? Number(formPackageFee) : null,
-      tutor_fee: formTutorFee ? Number(formTutorFee) : null,
+      tutor_fee: Number(formTutorFee),
       status: formStatus,
     };
 
@@ -629,6 +629,7 @@ export const Classes = () => {
             <Input
               type="number"
               placeholder="200000"
+              required
               value={formTutorFee}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFee(e.target.value)}
             />

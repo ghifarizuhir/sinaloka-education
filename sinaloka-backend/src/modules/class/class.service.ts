@@ -32,7 +32,7 @@ export class ClassService {
         capacity: dto.capacity,
         fee: dto.fee,
         package_fee: dto.package_fee ?? null,
-        tutor_fee: dto.tutor_fee ?? null,
+        tutor_fee: dto.tutor_fee,
         schedule_days: dto.schedule_days,
         schedule_start_time: dto.schedule_start_time,
         schedule_end_time: dto.schedule_end_time,
@@ -44,7 +44,7 @@ export class ClassService {
       ...record,
       fee: Number(record.fee),
       package_fee: record.package_fee != null ? Number(record.package_fee) : null,
-      tutor_fee: record.tutor_fee != null ? Number(record.tutor_fee) : null,
+      tutor_fee: Number(record.tutor_fee),
     };
   }
 
@@ -159,7 +159,7 @@ export class ClassService {
       ...record,
       fee: Number(record.fee),
       package_fee: record.package_fee != null ? Number(record.package_fee) : null,
-      tutor_fee: record.tutor_fee != null ? Number(record.tutor_fee) : null,
+      tutor_fee: Number(record.tutor_fee),
     };
   }
 

@@ -188,7 +188,31 @@ export class InvitationService {
     }
 
     await this.prisma.$transaction(async (tx) => {
+      // Delete classes assigned to this tutor (and their dependent records)
+      const classes = await tx.class.findMany({
+        where: { tutor_id: tutorId },
+        select: { id: true },
+      });
+
+      if (classes.length > 0) {
+        const classIds = classes.map((c) => c.id);
+        await tx.attendance.deleteMany({
+          where: { session: { class_id: { in: classIds } } },
+        });
+        await tx.session.deleteMany({
+          where: { class_id: { in: classIds } },
+        });
+        await tx.payment.deleteMany({
+          where: { enrollment: { class_id: { in: classIds } } },
+        });
+        await tx.enrollment.deleteMany({
+          where: { class_id: { in: classIds } },
+        });
+        await tx.class.deleteMany({ where: { tutor_id: tutorId } });
+      }
+
       await tx.invitation.deleteMany({ where: { tutor_id: tutorId } });
+      await tx.payout.deleteMany({ where: { tutor_id: tutorId } });
       await tx.tutor.delete({ where: { id: tutorId } });
       await tx.refreshToken.deleteMany({
         where: { user_id: tutor.user_id },

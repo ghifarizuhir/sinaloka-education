@@ -364,6 +364,14 @@
       "cancelInvite": "Batalkan undangan ini? Data tutor akan dihapus.",
       "deleteTutor": "Apakah Anda yakin ingin menghapus tutor ini?"
     },
+    "confirmDialog": {
+      "cancelTitle": "Batalkan Undangan",
+      "cancelDescription": "Undangan akan dicabut dan data tutor akan dihapus. Tindakan ini tidak dapat dibatalkan.",
+      "cancelConfirm": "Batalkan Undangan",
+      "deleteTitle": "Hapus Tutor",
+      "deleteDescription": "Tutor ini akan dihapus secara permanen beserta semua data terkait. Tindakan ini tidak dapat dibatalkan.",
+      "deleteConfirm": "Hapus Tutor"
+    },
     "card": {
       "experience": "Pengalaman",
       "rating": "Rating",
@@ -517,7 +525,9 @@
     "menu": {
       "markAttendance": "Catat Kehadiran",
       "approveReschedule": "Setujui Jadwal Ulang",
-      "cancelSession": "Batalkan Sesi"
+      "cancelSession": "Batalkan Sesi",
+      "completedLocked": "Sesi selesai — terkunci",
+      "pastLocked": "Tanggal berlalu — terkunci"
     },
     "calendar": {
       "month": "BULAN",
@@ -659,6 +669,7 @@
       "dropped": "Keluar"
     },
     "paymentStatus": {
+      "new": "Baru",
       "paid": "Lunas",
       "pending": "Menunggu",
       "overdue": "Terlambat"
@@ -733,6 +744,8 @@
     "notes": "Catatan",
     "notePlaceholder": "Catatan...",
     "editingEnabled": "Pengeditan Diaktifkan",
+    "completedLocked": "Sesi selesai — pengeditan terkunci",
+    "pastLocked": "Tanggal berlalu — pengeditan terkunci",
     "saveAttendance": "Simpan Kehadiran",
     "unsavedChanges": "Perubahan Belum Disimpan",
     "presentCount": "{{present}} Hadir, {{absent}} Tidak Hadir",
