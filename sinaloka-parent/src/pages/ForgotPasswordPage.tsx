@@ -1,22 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Mail, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Mail, AlertCircle, CheckCircle2, ArrowLeft, RefreshCw } from 'lucide-react';
 import axios from 'axios';
+
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
+
+  const startCooldown = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setCooldown(60);
+    intervalRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          intervalRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
+    if (!isValidEmail(email)) {
+      setError('Format email tidak valid');
+      setLoading(false);
+      return;
+    }
+
     try {
       await axios.post('/api/auth/forgot-password', { email });
       setSent(true);
+      startCooldown();
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Terjadi kesalahan. Coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await axios.post('/api/auth/forgot-password', { email });
+      startCooldown();
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Terjadi kesalahan. Coba lagi.');
     } finally {
@@ -40,11 +83,26 @@ export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
 
         {sent ? (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
-              <CheckCircle2 className="w-5 h-5 shrink-0" />
-              <span>Link reset password telah dikirim ke email kamu. Periksa inbox atau folder spam.</span>
+            {error && (
+              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-lg text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+            <div className="flex items-start gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
+              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+              <span>Jika <strong>{email}</strong> terdaftar, link reset password akan dikirim. Periksa inbox atau folder spam.</span>
             </div>
             <button
+              onClick={handleResend}
+              disabled={loading || cooldown > 0}
+              className="w-full bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              {cooldown > 0 ? `Kirim Ulang (${cooldown}s)` : 'Kirim Ulang'}
+            </button>
+            <button
+              type="button"
               onClick={onBack}
               className="w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
             >
