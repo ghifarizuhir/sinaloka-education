@@ -488,6 +488,13 @@
       "page": "Page",
       "of": "of",
       "totalClasses": "total classes"
+    },
+    "view": {
+      "table": "Table",
+      "timetable": "Timetable"
+    },
+    "timetable": {
+      "empty": "No classes to display in timetable"
     }
   },
 

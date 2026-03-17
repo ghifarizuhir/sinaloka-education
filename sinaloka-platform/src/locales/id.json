@@ -488,6 +488,13 @@
       "page": "Halaman",
       "of": "dari",
       "totalClasses": "total kelas"
+    },
+    "view": {
+      "table": "Tabel",
+      "timetable": "Jadwal"
+    },
+    "timetable": {
+      "empty": "Tidak ada kelas untuk ditampilkan"
     }
   },
 
