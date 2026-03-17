@@ -23,7 +23,7 @@ Create a new `WeekCalendar` component extracted into its own file, replacing the
 **Layout:** 7-column timeline grid extending the day view pattern:
 
 - **Time column (left):** Hourly labels from 8:00 to 21:00 (14 rows), matching the day view's existing pattern
-- **7 day columns:** One per day of the current week (Mon–Sun)
+- **7 day columns:** One per day of the current week (Sun–Sat, per `date-fns` default `startOfWeek`). To use Monday-start, pass `{ weekStartsOn: 1 }` to `startOfWeek` in Schedules.tsx line 135.
 - **Day headers row:** Above the grid, showing abbreviated day name + date number. Today's date gets a filled circle highlight (same styling as month view's today indicator)
 - **Session blocks:** Positioned in the hour row matching `start_time`, within the correct day column. Each block shows:
   - Class name (bold, truncated)
@@ -39,10 +39,14 @@ Create a new `WeekCalendar` component extracted into its own file, replacing the
 ### Props Interface
 
 ```typescript
+import type { Session, SessionStatus } from '@/src/types/session';
+
 interface WeekCalendarProps {
   sessions: Session[];
   weekDays: Date[];
   onSelectSession: (sessionId: string) => void;
+  getSubjectColor: (subject?: string) => string;
+  getStatusBorder: (status: SessionStatus) => string;
 }
 ```
 
@@ -50,7 +54,7 @@ interface WeekCalendarProps {
 
 1. Replace the placeholder block (lines 575-587) with `<WeekCalendar>` component
 2. Pass existing `sessions`, `weekDays` (already computed at line 136), and `setSelectedSessionId` as `onSelectSession`
-3. Move `getSubjectColor` and `getStatusBorder` helper functions out of the component body (or pass them as props / import from a shared location) so `WeekCalendar` can use them. Recommendation: keep them in `Schedules.tsx` and pass as props to avoid over-extracting.
+3. Pass `getSubjectColor` and `getStatusBorder` as props so `WeekCalendar` can use them without duplicating the logic
 
 ### Navigation
 
@@ -82,7 +86,7 @@ Add an expandable notes input per student card with a toggle button, keeping the
 
 **Location:** Inside each student card, after the homework checkbox row (lines 127-137).
 
-**Toggle button:** Add a `MessageSquare` (Lucide) icon button on the same row as the "HW Done" checkbox:
+**Toggle button:** Add a `MessageSquare` icon (add to existing Lucide import: `Calendar`, `CheckCircle2`, `X`, `Clock`) on the same row as the "HW Done" checkbox:
 - Outline icon when no note exists
 - Filled/highlighted icon when a note is present (e.g., `text-lime-400` instead of `text-zinc-500`)
 - Tapping toggles visibility of the notes input below
@@ -105,7 +109,7 @@ onSetNote: (classId: string, studentId: string, note: string) => void;
 
 ### Hook Changes (useAttendance.ts)
 
-No changes needed in `useAttendance.ts` itself — the `students` state is managed by the parent component and `setStudents` is already exposed. The parent component that renders `AttendancePage` will provide the `onSetNote` callback that updates the student's `note` field in the `students` array state.
+No changes needed in `useAttendance.ts` itself — the `students` state lives inside `useAttendance` but is exposed via `setStudents`. The parent component (`App.tsx`) uses `setStudents` from the hook to define handlers (e.g., `handleToggleAttendance` at line 69, `handleToggleHomework` at line 73). The new `onSetNote` callback follows the same pattern.
 
 ### Data Flow
 
@@ -125,7 +129,7 @@ No backend changes required.
 | `sinaloka-platform/src/components/WeekCalendar.tsx` | **NEW** — Week timeline component |
 | `sinaloka-platform/src/pages/Schedules.tsx` | Replace week placeholder with `<WeekCalendar>`, pass props |
 | `sinaloka-tutors/src/pages/AttendancePage.tsx` | Add expandable notes UI per student, new `onSetNote` prop |
-| `sinaloka-tutors/src/pages/SchedulePage.tsx` (or parent) | Wire `onSetNote` callback to update student state |
+| `sinaloka-tutors/src/App.tsx` | Wire `onSetNote` callback (same pattern as `handleToggleAttendance` line 69) |
 
 ## Files NOT Changed
 
