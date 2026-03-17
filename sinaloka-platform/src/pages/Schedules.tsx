@@ -37,7 +37,7 @@ import { toast } from 'sonner';
 import { Card, Button, Badge, Modal, Drawer, Input, Label, Switch, Skeleton } from '../components/UI';
 import { WeekCalendar } from '../components/WeekCalendar';
 import { cn, formatDate } from '../lib/utils';
-import { useSessions, useSession, useCreateSession, useUpdateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
+import { useSessions, useSession, useSessionStudents, useCreateSession, useUpdateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
 import { useClasses } from '@/src/hooks/useClasses';
 import type { Session, CreateSessionDto, SessionStatus } from '@/src/types/session';
 
@@ -114,6 +114,7 @@ export const Schedules = () => {
   const approveReschedule = useApproveReschedule();
 
   const sessionDetail = useSession(selectedSessionId);
+  const sessionStudentsQuery = useSessionStudents(selectedSessionId);
   const selectedSession = sessions.find((s) => s.id === selectedSessionId) ?? null;
 
   // Auto-set first class when classes load
@@ -831,38 +832,46 @@ export const Schedules = () => {
             {/* Attendance */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
-                {t('schedules.drawer.attendance')} ({sessionDetail.data?.attendances?.length ?? 0})
+                {t('schedules.drawer.attendance')} ({sessionStudentsQuery.data?.students?.filter(s => s.attendance_id !== null).length ?? 0}/{sessionStudentsQuery.data?.students?.length ?? 0})
               </h4>
-              {sessionDetail.isLoading ? (
+              {sessionStudentsQuery.isLoading ? (
                 <div className="space-y-2">
                   {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12" />)}
                 </div>
-              ) : sessionDetail.data?.attendances?.length ? (
+              ) : sessionStudentsQuery.data?.students?.length ? (
                 <div className="space-y-2">
-                  {sessionDetail.data.attendances.map((att) => (
-                    <div key={att.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                  {sessionStudentsQuery.data.students.map((student) => (
+                    <div key={student.id} className={cn("flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50", !student.attendance_id && "opacity-60")}>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-bold">
-                          {att.student.name.charAt(0)}
+                          {student.name.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-sm font-medium dark:text-zinc-200">{att.student.name}</p>
-                          {att.student.grade && <p className="text-[10px] text-zinc-400">{att.student.grade}</p>}
+                          <p className="text-sm font-medium dark:text-zinc-200">{student.name}</p>
+                          {student.grade && <p className="text-[10px] text-zinc-400">{student.grade}</p>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {att.homework_done && (
-                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">{t('schedules.drawer.homework')}</span>
+                        {student.attendance_id !== null ? (
+                          <>
+                            {student.homework_done && (
+                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">{t('schedules.drawer.homework')}</span>
+                            )}
+                            <Badge variant={student.status === 'PRESENT' ? 'success' : student.status === 'LATE' ? 'warning' : 'default'}>
+                              {t(`schedules.drawer.${student.status!.toLowerCase()}`)}
+                            </Badge>
+                          </>
+                        ) : (
+                          <Badge variant="default">
+                            {t('schedules.drawer.pending', 'Pending')}
+                          </Badge>
                         )}
-                        <Badge variant={att.status === 'PRESENT' ? 'success' : att.status === 'LATE' ? 'warning' : 'default'}>
-                          {t(`schedules.drawer.${att.status.toLowerCase()}`)}
-                        </Badge>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500 text-center py-4">{t('schedules.drawer.noAttendance')}</p>
+                <p className="text-sm text-zinc-500 text-center py-4">{t('schedules.drawer.noStudents', 'No students enrolled')}</p>
               )}
             </div>
 
