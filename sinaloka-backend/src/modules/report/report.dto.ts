@@ -20,3 +20,16 @@ export const StudentProgressQuerySchema = z.object({
   date_to: z.coerce.date().optional(),
 });
 export type StudentProgressQueryDto = z.infer<typeof StudentProgressQuerySchema>;
+
+export const ReportPeriodSchema = z.object({
+  period_start: z.coerce.date(),
+  period_end: z.coerce.date(),
+});
+export type ReportPeriodDto = z.infer<typeof ReportPeriodSchema>;
+
+export const ExportCsvSchema = z.object({
+  type: z.enum(['payments', 'payouts', 'expenses']),
+  period_start: z.coerce.date(),
+  period_end: z.coerce.date(),
+});
+export type ExportCsvDto = z.infer<typeof ExportCsvSchema>;

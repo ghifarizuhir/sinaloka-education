@@ -10,11 +10,15 @@ import {
   AttendanceReportQuerySchema,
   FinanceReportQuerySchema,
   StudentProgressQuerySchema,
+  ReportPeriodSchema,
+  ExportCsvSchema,
 } from './report.dto.js';
 import type {
   AttendanceReportQueryDto,
   FinanceReportQueryDto,
   StudentProgressQueryDto,
+  ReportPeriodDto,
+  ExportCsvDto,
 } from './report.dto.js';
 
 @Controller('admin/reports')
@@ -67,5 +71,43 @@ export class ReportController {
       'Content-Disposition': 'inline; filename="student-progress.pdf"',
     });
     res.send(buf);
+  }
+
+  @Get('financial-summary')
+  async financialSummary(
+    @CurrentUser() user: JwtPayload,
+    @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
+  ) {
+    return this.reportService.getFinancialSummary(user.institutionId!, q.period_start, q.period_end);
+  }
+
+  @Get('revenue-breakdown')
+  async revenueBreakdown(
+    @CurrentUser() user: JwtPayload,
+    @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
+  ) {
+    return this.reportService.getRevenueBreakdown(user.institutionId!, q.period_start, q.period_end);
+  }
+
+  @Get('expense-breakdown')
+  async expenseBreakdown(
+    @CurrentUser() user: JwtPayload,
+    @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
+  ) {
+    return this.reportService.getExpenseBreakdown(user.institutionId!, q.period_start, q.period_end);
+  }
+
+  @Get('export-csv')
+  async exportCsv(
+    @CurrentUser() user: JwtPayload,
+    @Query(new ZodValidationPipe(ExportCsvSchema)) q: ExportCsvDto,
+    @Res() res: Response,
+  ) {
+    const csv = await this.reportService.exportCsv(user.institutionId!, q.type, q.period_start, q.period_end);
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="${q.type}_export_${new Date().toISOString().split('T')[0]}.csv"`,
+    });
+    res.send(csv);
   }
 }
