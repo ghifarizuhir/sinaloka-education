@@ -18,28 +18,29 @@ Add a "Generate Sessions" button in the class detail drawer with a confirmation 
 
 1. Admin opens class detail drawer (clicks a class row in the Classes table)
 2. Drawer shows class info including schedule, tutor, enrolled students
-3. A **"Generate Sessions"** button is visible in the drawer
+3. A **"Generate Sessions"** button is visible in the drawer (below the existing action buttons, only for ACTIVE classes)
 4. Admin clicks the button → confirmation popup appears with:
    - Class name and schedule info (days, time)
-   - Duration input: number of days to generate (default: 30, max: 365)
-   - Computed date range: "From [today] to [today + N days]"
-   - Estimated session count preview (calculated from schedule_days × duration)
+   - Duration input: number of days to generate (default: 30, min: 1, max: 365)
+   - Computed date range: "From [today] to [today + duration - 1]" (inclusive, so duration=30 means exactly 30 calendar days)
+   - Estimated session count preview
    - Cancel and Generate buttons
-5. Admin clicks Generate → `POST /api/admin/sessions/generate` is called
-6. Success toast shows count of sessions created
+5. Admin clicks Generate → `POST /api/admin/sessions/generate` is called with `{ class_id, date_from, date_to }`
+6. Success toast shows count of sessions created (from response `count` field)
 7. Popup closes, drawer stays open
 
-### Backend Change
+### Backend Changes
 
 **File:** `sinaloka-backend/src/modules/session/session.service.ts`
 
-Remove the enrolled-students validation in `generateSessions()`. Currently the method:
-1. Checks class exists and is ACTIVE
-2. Checks class has enrolled students (ACTIVE or TRIAL) → **remove this check**
-3. Validates date range
-4. Generates sessions
+The enrolled-students check lives in `validateClassForSession()`, a shared private method called by both `create()` (single session) and `generateSessions()` (bulk).
 
-After the change, step 2 is removed. Sessions can be generated for any ACTIVE class regardless of enrollment status.
+**Change:** Remove the enrollment check from `validateClassForSession()` entirely. This allows both single-session creation and bulk generation without enrolled students. This is intentional — admins should be able to prepare schedules before enrolling students.
+
+The method after the change:
+1. Checks class exists and is ACTIVE → keep
+2. ~~Checks class has enrolled students~~ → **remove**
+3. Returns class record
 
 No new endpoints needed — the existing `POST /api/admin/sessions/generate` with `{ class_id, date_from, date_to }` is sufficient.
 
@@ -47,18 +48,27 @@ No new endpoints needed — the existing `POST /api/admin/sessions/generate` wit
 
 **File:** `sinaloka-platform/src/pages/Classes.tsx`
 
-In the class detail drawer section, add:
-- A "Generate Sessions" button (Calendar icon + text)
-- A confirmation modal/popup that appears on click with:
-  - Class name and schedule summary (read-only display)
-  - Duration input (number field, default 30, min 1, max 365)
-  - Auto-computed `date_from` (today) and `date_to` (today + duration)
-  - Estimated session count: `Math.floor(duration / 7) * schedule_days.length` + remainder calculation
-  - Generate button (disabled during pending, shows loading state)
-  - Cancel button
+In the class detail drawer section (below existing Edit/Delete action buttons), add:
+- A "Generate Sessions" button (Calendar icon + text), only visible when `classDetail.data.status === 'ACTIVE'`
+- Use `classDetail.data` (fetched detail, not the list item) for schedule data to avoid stale data from filtered lists
+
+**Confirmation modal** that appears on click:
+- Class name and schedule summary (read-only display from `classDetail.data`)
+- Duration input (number field, default 30, min 1, max 365)
+- Auto-computed dates:
+  - `date_from`: `format(new Date(), 'yyyy-MM-dd')`
+  - `date_to`: `format(addDays(new Date(), duration - 1), 'yyyy-MM-dd')` (using date-fns, already a dependency)
+- Estimated session count: iterate from `date_from` to `date_to`, count dates whose weekday matches any day in `schedule_days`. Use `getDay()` mapped against the class's `schedule_days` array. This is O(N) where N ≤ 365 — trivial.
+- Generate button (disabled during `generateSessions.isPending`, shows loading state)
+- Cancel button
+
+**Hook usage:**
 - Uses existing `useGenerateSessions()` hook from `useSessions.ts`
-- On success: toast with session count, close popup
-- On error: toast with error message
+- The hook's `sessionsService.generate()` return type needs to be corrected from `Session[]` to `{ count: number; sessions: Session[] }` to match the actual backend response
+
+**Files to update for return type fix:**
+- `sinaloka-platform/src/services/sessions.service.ts` — fix return type of `generate()`
+- `sinaloka-platform/src/types/session.ts` — add `GenerateSessionsResponse` type if needed
 
 **Files:** `sinaloka-platform/src/locales/en.json` and `id.json`
 
@@ -67,10 +77,9 @@ Add i18n keys:
 - `classes.generateModal.title` — modal title
 - `classes.generateModal.duration` — duration label
 - `classes.generateModal.days` — "days" unit
-- `classes.generateModal.dateRange` — date range display
+- `classes.generateModal.dateRange` — date range display template
 - `classes.generateModal.estimatedSessions` — estimated count label
 - `classes.generateModal.confirm` — generate button label
-- `classes.generateModal.description` — confirmation description
 - `classes.toast.generateSuccess` — success message with {{count}}
 - `classes.toast.generateError` — error message
 
@@ -84,7 +93,8 @@ Add i18n keys:
 
 ## Edge Cases
 
-- **Class with no schedule_days:** Button should be disabled or hidden (defensive, shouldn't happen since schedule_days is required)
-- **Duplicate sessions:** Backend already handles this via date comparison + `skipDuplicates: true`
-- **Archived class:** Button should not appear for ARCHIVED classes
-- **Duration of 0:** Prevented by min=1 validation on the input
+- **Class with no schedule_days:** Button should be hidden (defensive, shouldn't happen since schedule_days is required on create)
+- **Duplicate sessions:** Backend already handles this via date comparison + `skipDuplicates: true`. If admin generates twice for overlapping ranges, duplicates are silently skipped and `count` reflects only newly created sessions.
+- **Archived class:** Button does not appear (guarded by `status === 'ACTIVE'` check)
+- **Duration of 0:** Prevented by `min=1` on the number input
+- **Class detail loading:** Button disabled while `classDetail.isLoading`
