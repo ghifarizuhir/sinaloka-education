@@ -437,7 +437,9 @@
       "deleted": "Kelas berhasil dihapus",
       "deleteError": "Gagal menghapus kelas",
       "selectTutor": "Silakan pilih tutor",
-      "selectScheduleDay": "Silakan pilih setidaknya satu hari jadwal"
+      "selectScheduleDay": "Silakan pilih setidaknya satu hari jadwal",
+      "generateSuccess": "{{count}} sesi berhasil dibuat",
+      "generateError": "Gagal membuat sesi"
     },
     "modal": {
       "editTitle": "Edit Kelas",
@@ -471,7 +473,16 @@
       "enrolledStudents": "Siswa Terdaftar",
       "noStudents": "Belum ada siswa terdaftar",
       "editClass": "Edit Kelas",
-      "deleteClass": "Hapus Kelas"
+      "deleteClass": "Hapus Kelas",
+      "generateSessions": "Buat Sesi"
+    },
+    "generateModal": {
+      "title": "Buat Sesi Kelas",
+      "duration": "Durasi",
+      "days": "hari",
+      "dateRange": "Dari {{from}} sampai {{to}}",
+      "estimatedSessions": "Estimasi sesi",
+      "confirm": "Buat Sesi"
     },
     "pagination": {
       "page": "Halaman",

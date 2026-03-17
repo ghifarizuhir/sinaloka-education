@@ -437,7 +437,9 @@
       "deleted": "Class deleted",
       "deleteError": "Failed to delete class",
       "selectTutor": "Please select a tutor",
-      "selectScheduleDay": "Please select at least one schedule day"
+      "selectScheduleDay": "Please select at least one schedule day",
+      "generateSuccess": "{{count}} sessions generated successfully",
+      "generateError": "Failed to generate sessions"
     },
     "modal": {
       "editTitle": "Edit Class",
@@ -471,7 +473,16 @@
       "enrolledStudents": "Enrolled Students",
       "noStudents": "No students enrolled yet",
       "editClass": "Edit Class",
-      "deleteClass": "Delete Class"
+      "deleteClass": "Delete Class",
+      "generateSessions": "Generate Sessions"
+    },
+    "generateModal": {
+      "title": "Generate Sessions",
+      "duration": "Duration",
+      "days": "days",
+      "dateRange": "From {{from}} to {{to}}",
+      "estimatedSessions": "Estimated sessions",
+      "confirm": "Generate"
     },
     "pagination": {
       "page": "Page",
