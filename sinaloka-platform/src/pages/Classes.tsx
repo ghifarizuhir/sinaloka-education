@@ -78,7 +78,7 @@ export const Classes = () => {
   const [formStatus, setFormStatus] = useState<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
 
   const { data, isLoading } = useClasses({ page, limit });
-  const { data: tutorsData } = useTutors({ limit: 100 });
+  const { data: tutorsData } = useTutors({ limit: 100, is_verified: true });
   const createClass = useCreateClass();
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();

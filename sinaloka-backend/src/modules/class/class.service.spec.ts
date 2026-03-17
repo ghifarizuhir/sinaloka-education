@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -20,6 +20,9 @@ describe('ClassService', () => {
       create: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
+    };
+    tutor: {
+      findFirst: jest.Mock;
     };
   };
 
@@ -70,6 +73,9 @@ describe('ClassService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      tutor: {
+        findFirst: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -84,6 +90,7 @@ describe('ClassService', () => {
 
   describe('create', () => {
     it('should create a class with institution scoping and numeric fee', async () => {
+      prisma.tutor.findFirst.mockResolvedValue({ id: 'tutor-1', institution_id: 'inst-1', is_verified: true });
       prisma.class.create.mockResolvedValue(mockClass);
 
       const result = await service.create('inst-1', {
@@ -112,6 +119,7 @@ describe('ClassService', () => {
     });
 
     it('should pass package_fee and tutor_fee to prisma create', async () => {
+      prisma.tutor.findFirst.mockResolvedValue({ id: 'tutor-1', institution_id: 'inst-1', is_verified: true });
       prisma.class.create.mockResolvedValue(mockClass);
 
       await service.create('inst-1', {
@@ -135,6 +143,40 @@ describe('ClassService', () => {
           }),
         }),
       );
+    });
+
+    it('should throw NotFoundException when tutor not found', async () => {
+      prisma.tutor.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.create('inst-1', {
+          tutor_id: 'nonexistent',
+          name: 'Math 101',
+          subject: 'Mathematics',
+          capacity: 30,
+          fee: 500000,
+          schedule_days: ['Monday'],
+          schedule_start_time: '14:00',
+          schedule_end_time: '15:30',
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException when tutor is not verified', async () => {
+      prisma.tutor.findFirst.mockResolvedValue({ id: 'tutor-1', institution_id: 'inst-1', is_verified: false });
+
+      await expect(
+        service.create('inst-1', {
+          tutor_id: 'tutor-1',
+          name: 'Math 101',
+          subject: 'Mathematics',
+          capacity: 30,
+          fee: 500000,
+          schedule_days: ['Monday'],
+          schedule_start_time: '14:00',
+          schedule_end_time: '15:30',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -267,6 +309,24 @@ describe('ClassService', () => {
     it('should throw NotFoundException if class not found', async () => {
       prisma.class.findFirst.mockResolvedValue(null);
       await expect(service.update('inst-1', 'nonexistent', { name: 'New Name' })).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException when new tutor is not verified', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClass);
+      prisma.tutor.findFirst.mockResolvedValue({ id: 'tutor-2', institution_id: 'inst-1', is_verified: false });
+
+      await expect(
+        service.update('inst-1', 'class-1', { tutor_id: 'tutor-2' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should allow update when tutor_id is not provided', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClass);
+      prisma.class.update.mockResolvedValue({ ...mockClass, name: 'New Name' });
+
+      const result = await service.update('inst-1', 'class-1', { name: 'New Name' });
+      expect(result.name).toBe('New Name');
+      expect(prisma.tutor.findFirst).not.toHaveBeenCalled();
     });
   });
 

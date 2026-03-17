@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import {
   buildPaginationMeta,
@@ -11,6 +11,18 @@ export class ClassService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(institutionId: string, dto: CreateClassDto) {
+    const tutor = await this.prisma.tutor.findFirst({
+      where: { id: dto.tutor_id, institution_id: institutionId },
+    });
+
+    if (!tutor) {
+      throw new NotFoundException('Tutor not found');
+    }
+
+    if (!tutor.is_verified) {
+      throw new BadRequestException('Only verified tutors can be assigned to classes');
+    }
+
     const record = await this.prisma.class.create({
       data: {
         institution_id: institutionId,
@@ -123,6 +135,20 @@ export class ClassService {
 
     if (!existing) {
       throw new NotFoundException(`Class with ID "${id}" not found`);
+    }
+
+    if (dto.tutor_id) {
+      const tutor = await this.prisma.tutor.findFirst({
+        where: { id: dto.tutor_id, institution_id: institutionId },
+      });
+
+      if (!tutor) {
+        throw new NotFoundException('Tutor not found');
+      }
+
+      if (!tutor.is_verified) {
+        throw new BadRequestException('Only verified tutors can be assigned to classes');
+      }
     }
 
     const record = await this.prisma.class.update({
