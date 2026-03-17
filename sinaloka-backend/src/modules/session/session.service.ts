@@ -488,6 +488,52 @@ export class SessionService {
     };
   }
 
+  async getAdminSessionStudents(institutionId: string, sessionId: string) {
+    const session = await this.prisma.session.findUnique({
+      where: { id: sessionId, institution_id: institutionId },
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session with id ${sessionId} not found`);
+    }
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        institution_id: institutionId,
+        class_id: session.class_id,
+        status: 'ACTIVE',
+      },
+      include: {
+        student: {
+          select: { id: true, name: true, grade: true },
+        },
+      },
+    });
+
+    const attendances = await this.prisma.attendance.findMany({
+      where: { session_id: sessionId },
+    });
+
+    const attendanceMap = new Map(
+      attendances.map((a) => [a.student_id, a]),
+    );
+
+    return {
+      students: enrollments.map((e) => {
+        const att = attendanceMap.get(e.student.id);
+        return {
+          id: e.student.id,
+          name: e.student.name,
+          grade: e.student.grade,
+          attendance_id: att?.id ?? null,
+          status: att?.status ?? null,
+          homework_done: att?.homework_done ?? false,
+          notes: att?.notes ?? null,
+        };
+      }),
+    };
+  }
+
   async completeSession(userId: string, sessionId: string, dto: CompleteSessionDto) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
