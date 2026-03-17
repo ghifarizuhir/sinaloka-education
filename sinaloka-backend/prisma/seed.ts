@@ -392,6 +392,63 @@ async function main() {
   ]);
   console.log('Payouts created');
 
+  // Parents (2 — one per institution, each linked to 2 students)
+  const parentUser1 = await prisma.user.create({
+    data: {
+      email: 'parent@cerdas.id',
+      password_hash: hash('password'),
+      name: 'Ibu Rina',
+      role: 'PARENT',
+      institution_id: inst1.id,
+    },
+  });
+  const parent1 = await prisma.parent.create({
+    data: {
+      user_id: parentUser1.id,
+      institution_id: inst1.id,
+    },
+  });
+  // Link to first 2 students of inst1 (Rina & Dimas)
+  await prisma.parentStudent.createMany({
+    data: [
+      { parent_id: parent1.id, student_id: students[0].id },
+      { parent_id: parent1.id, student_id: students[1].id },
+    ],
+  });
+  // Update students with parent_email for consistency
+  await prisma.student.updateMany({
+    where: { id: { in: [students[0].id, students[1].id] } },
+    data: { parent_email: 'parent@cerdas.id' },
+  });
+
+  const parentUser2 = await prisma.user.create({
+    data: {
+      email: 'parent@prima.id',
+      password_hash: hash('password'),
+      name: 'Bapak Arief',
+      role: 'PARENT',
+      institution_id: inst2.id,
+    },
+  });
+  const parent2 = await prisma.parent.create({
+    data: {
+      user_id: parentUser2.id,
+      institution_id: inst2.id,
+    },
+  });
+  // Link to first 2 students of inst2 (Arief & Maya)
+  await prisma.parentStudent.createMany({
+    data: [
+      { parent_id: parent2.id, student_id: students[5].id },
+      { parent_id: parent2.id, student_id: students[6].id },
+    ],
+  });
+  await prisma.student.updateMany({
+    where: { id: { in: [students[5].id, students[6].id] } },
+    data: { parent_email: 'parent@prima.id' },
+  });
+  console.log('Parents created');
+
   console.log('Seed completed successfully.');
 }
 
