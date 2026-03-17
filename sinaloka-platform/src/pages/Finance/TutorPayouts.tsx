@@ -14,6 +14,7 @@ import { useTutors } from '@/src/hooks/useTutors';
 import { toast } from 'sonner';
 import type { Payout, CreatePayoutDto, UpdatePayoutDto, PayoutCalculation } from '@/src/types/payout';
 import { getPayoutTutorName, getPayoutBankInfo } from '@/src/types/payout';
+import { payoutsService } from '@/src/services/payouts.service';
 
 export const TutorPayouts = () => {
   const { t, i18n } = useTranslation();
@@ -35,6 +36,9 @@ export const TutorPayouts = () => {
   const [calculation, setCalculation] = useState<PayoutCalculation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'PENDING' | 'PROCESSING' | 'PAID' | ''>('');
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+  const [isGeneratingSlip, setIsGeneratingSlip] = useState(false);
+  const [isExportingAudit, setIsExportingAudit] = useState(false);
   const itemsPerPage = 10;
 
   const { data: payoutsData, isLoading } = usePayouts({
@@ -130,6 +134,70 @@ export const TutorPayouts = () => {
     });
   };
 
+  const handleProofUpload = async (file: File) => {
+    if (!selectedPayout) return;
+    setIsUploadingProof(true);
+    try {
+      const proofUrl = await payoutsService.uploadProof(file);
+      updatePayout.mutate(
+        { id: selectedPayout.id, data: { proof_url: proofUrl } },
+        {
+          onSuccess: (updated) => {
+            setSelectedPayout(updated);
+            toast.success(t('payouts.toast.proofUploaded', { defaultValue: 'Proof uploaded successfully' }));
+          },
+          onError: () => toast.error(t('payouts.toast.proofUploadError', { defaultValue: 'Failed to upload proof' })),
+        },
+      );
+    } catch {
+      toast.error(t('payouts.toast.proofUploadError', { defaultValue: 'Failed to upload proof' }));
+    } finally {
+      setIsUploadingProof(false);
+    }
+  };
+
+  const handleGenerateSlip = async () => {
+    if (!selectedPayout) return;
+    setIsGeneratingSlip(true);
+    try {
+      const updated = await payoutsService.generateSlip(selectedPayout.id);
+      setSelectedPayout(updated);
+      if (updated.slip_url) {
+        const apiUrl = import.meta.env.VITE_API_URL ?? '';
+        window.open(`${apiUrl}/api/uploads/${updated.slip_url}`, '_blank');
+      }
+      toast.success(t('payouts.toast.slipGenerated', { defaultValue: 'Payout slip generated' }));
+    } catch {
+      toast.error(t('payouts.toast.slipError', { defaultValue: 'Failed to generate payout slip' }));
+    } finally {
+      setIsGeneratingSlip(false);
+    }
+  };
+
+  const handleDownloadSlip = () => {
+    if (!selectedPayout?.slip_url) return;
+    const apiUrl = import.meta.env.VITE_API_URL ?? '';
+    window.open(`${apiUrl}/api/uploads/${selectedPayout.slip_url}`, '_blank');
+  };
+
+  const handleExportAudit = async () => {
+    if (!selectedPayout) return;
+    setIsExportingAudit(true);
+    try {
+      const blob = await payoutsService.exportAudit(selectedPayout.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `payout-audit-${selectedPayout.id}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t('payouts.toast.exportError', { defaultValue: 'Failed to export audit' }));
+    } finally {
+      setIsExportingAudit(false);
+    }
+  };
+
   const handleDelete = (id: string) => {
     if (!confirm(t('payouts.confirm.deletePayout'))) return;
     deletePayout.mutate(id, {
@@ -173,15 +241,26 @@ export const TutorPayouts = () => {
             <span className="font-bold">{t('payouts.backToPayouts')}</span>
           </button>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExportAudit} disabled={isExportingAudit}>
               <Download size={16} />
-              {t('payouts.exportAudit')}
+              {isExportingAudit ? t('common.processing') : t('payouts.exportAudit')}
             </Button>
             {selectedPayout.status === 'PAID' ? (
-              <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none">
-                <FileText size={16} />
-                {t('payouts.downloadPayoutSlip')}
-              </Button>
+              selectedPayout.slip_url ? (
+                <Button onClick={handleDownloadSlip} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none">
+                  <FileText size={16} />
+                  {t('payouts.downloadPayoutSlip')}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleGenerateSlip}
+                  disabled={isGeneratingSlip}
+                  className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none"
+                >
+                  <FileText size={16} />
+                  {isGeneratingSlip ? t('common.processing') : t('payouts.downloadPayoutSlip')}
+                </Button>
+              )
             ) : (
               <Button
                 onClick={handleConfirmPayout}
@@ -253,11 +332,17 @@ export const TutorPayouts = () => {
                 className="border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-indigo-400 transition-colors cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-400">
-                  {receiptFile ? <BadgeCheck className="text-emerald-500" size={24} /> : <Upload size={24} />}
+                  {receiptFile || selectedPayout.proof_url ? <BadgeCheck className="text-emerald-500" size={24} /> : <Upload size={24} />}
                 </div>
                 <div>
                   <p className="text-sm font-bold dark:text-zinc-200">
-                    {receiptFile ? receiptFile.name : t('payouts.reconciliation.uploadReceipt')}
+                    {isUploadingProof
+                      ? t('common.processing')
+                      : receiptFile
+                      ? receiptFile.name
+                      : selectedPayout.proof_url
+                      ? t('payouts.reconciliation.proofUploaded', { defaultValue: 'Proof uploaded' })
+                      : t('payouts.reconciliation.uploadReceipt')}
                   </p>
                   <p className="text-xs text-zinc-500">{t('payouts.reconciliation.fileTypes')}</p>
                 </div>
@@ -265,7 +350,12 @@ export const TutorPayouts = () => {
                   type="file"
                   ref={fileInputRef}
                   className="hidden"
-                  onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                  accept="image/*,application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setReceiptFile(file);
+                    if (file) handleProofUpload(file);
+                  }}
                 />
               </div>
             </Card>

@@ -30,4 +30,13 @@ export const payoutsService = {
     api.delete(`/api/admin/payouts/${id}`),
   calculatePayout: (params: { tutor_id: string; period_start: string; period_end: string }) =>
     api.get<PayoutCalculation>('/api/admin/payouts/calculate', { params }).then((r) => r.data),
+  uploadProof: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<{ url: string }>('/api/uploads/proofs', formData).then((r) => r.data.url);
+  },
+  generateSlip: (id: string) =>
+    api.post<Payout>(`/api/admin/payouts/${id}/generate-slip`).then((r) => r.data),
+  exportAudit: (id: string) =>
+    api.get(`/api/admin/payouts/${id}/export-audit`, { responseType: 'blob' }).then((r) => r.data as Blob),
 };

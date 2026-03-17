@@ -16,6 +16,8 @@ export interface Payout {
   };
   period_start: string | null;
   period_end: string | null;
+  proof_url: string | null;
+  slip_url: string | null;
   institution_id: string;
   created_at: string;
   updated_at: string;
@@ -51,6 +53,8 @@ export interface UpdatePayoutDto {
   description?: string;
   period_start?: string;
   period_end?: string;
+  proof_url?: string | null;
+  slip_url?: string | null;
 }
 
 export interface PayoutQueryParams extends PaginationParams {
