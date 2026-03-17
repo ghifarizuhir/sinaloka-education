@@ -59,6 +59,14 @@ export class SessionController {
     return this.sessionService.findOne(user.institutionId!, id);
   }
 
+  @Get(':id/students')
+  getStudents(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.sessionService.getAdminSessionStudents(user.institutionId!, id);
+  }
+
   @Patch(':id')
   update(
     @CurrentUser() user: JwtPayload,
