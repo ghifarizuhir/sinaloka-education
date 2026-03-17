@@ -361,6 +361,7 @@ model Payout {
   date            DateTime     @db.Date
   status          PayoutStatus @default(PENDING)
   proof_url       String?
+  slip_url        String?
   description     String?
   period_start    DateTime?    @db.Date
   period_end      DateTime?    @db.Date
@@ -380,9 +381,12 @@ model Expense {
   amount          Decimal
   date            DateTime        @db.Date
   description     String?
-  receipt_url     String?
-  created_at      DateTime        @default(now())
-  updated_at      DateTime        @updatedAt
+  receipt_url           String?
+  is_recurring          Boolean         @default(false)
+  recurrence_frequency  String?
+  recurrence_end_date   DateTime?       @db.Date
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
 
   institution     Institution @relation(fields: [institution_id], references: [id])
 
