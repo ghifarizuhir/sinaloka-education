@@ -12,6 +12,7 @@ export interface Tutor {
   bank_name: string | null;
   bank_account_number: string | null;
   bank_account_holder: string | null;
+  monthly_salary: number | null;
   user_id: string;
   institution_id: string;
   created_at: string;
@@ -40,6 +41,7 @@ export interface UpdateTutorDto {
   bank_account_holder?: string;
   is_verified?: boolean;
   rating?: number;
+  monthly_salary?: number | null;
 }
 
 export interface TutorQueryParams extends PaginationParams {

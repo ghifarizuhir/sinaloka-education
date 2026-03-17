@@ -71,6 +71,8 @@ export const Classes = () => {
   const [formFee, setFormFee] = useState('500000');
   const [formPackageFee, setFormPackageFee] = useState('');
   const [formTutorFee, setFormTutorFee] = useState('');
+  const [formTutorFeeMode, setFormTutorFeeMode] = useState<'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY'>('FIXED_PER_SESSION');
+  const [formTutorFeePerStudent, setFormTutorFeePerStudent] = useState('');
   const [formScheduleDays, setFormScheduleDays] = useState<ScheduleDay[]>([]);
   const [formStartTime, setFormStartTime] = useState('14:00');
   const [formEndTime, setFormEndTime] = useState('15:30');
@@ -116,6 +118,8 @@ export const Classes = () => {
     setFormFee('500000');
     setFormPackageFee('');
     setFormTutorFee('');
+    setFormTutorFeeMode('FIXED_PER_SESSION');
+    setFormTutorFeePerStudent('');
     setFormScheduleDays([]);
     setFormStartTime('14:00');
     setFormEndTime('15:30');
@@ -137,6 +141,8 @@ export const Classes = () => {
     setFormRoom(cls.room ?? '');
     setFormPackageFee(cls.package_fee ? String(cls.package_fee) : '');
     setFormTutorFee(String(cls.tutor_fee ?? 0));
+    setFormTutorFeeMode(cls.tutor_fee_mode ?? 'FIXED_PER_SESSION');
+    setFormTutorFeePerStudent(cls.tutor_fee_per_student ? String(cls.tutor_fee_per_student) : '');
     setFormStatus(cls.status);
     setShowModal(true);
   };
@@ -169,6 +175,8 @@ export const Classes = () => {
       room: formRoom || undefined,
       package_fee: formPackageFee ? Number(formPackageFee) : null,
       tutor_fee: Number(formTutorFee),
+      tutor_fee_mode: formTutorFeeMode,
+      tutor_fee_per_student: formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' ? Number(formTutorFeePerStudent) : null,
       status: formStatus,
     };
 
@@ -634,6 +642,35 @@ export const Classes = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFee(e.target.value)}
             />
           </div>
+          <div className="space-y-1.5">
+            <Label>{t('classes.form.tutorFeeMode')}</Label>
+            <select
+              className="h-10 w-full px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+              value={formTutorFeeMode}
+              onChange={(e) => setFormTutorFeeMode(e.target.value as any)}
+            >
+              <option value="FIXED_PER_SESSION">{t('classes.form.feeMode.fixedPerSession')}</option>
+              <option value="PER_STUDENT_ATTENDANCE">{t('classes.form.feeMode.perStudentAttendance')}</option>
+              <option value="MONTHLY_SALARY">{t('classes.form.feeMode.monthlySalary')}</option>
+            </select>
+          </div>
+          {formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' && (
+            <div className="space-y-1.5">
+              <Label>{t('classes.form.tutorFeePerStudent')}</Label>
+              <Input
+                type="number"
+                placeholder="30000"
+                required
+                value={formTutorFeePerStudent}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFeePerStudent(e.target.value)}
+              />
+            </div>
+          )}
+          {formTutorFeeMode === 'MONTHLY_SALARY' && (
+            <p className="text-xs text-zinc-500 bg-zinc-50 dark:bg-zinc-900 p-3 rounded-lg">
+              {t('classes.form.monthlySalaryHint')}
+            </p>
+          )}
 
           <div className="space-y-1.5">
             <Label htmlFor="room">{t('classes.form.room')}</Label>

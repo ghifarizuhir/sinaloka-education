@@ -39,4 +39,6 @@ export const payoutsService = {
     api.post<Payout>(`/api/admin/payouts/${id}/generate-slip`).then((r) => r.data),
   exportAudit: (id: string) =>
     api.get(`/api/admin/payouts/${id}/export-audit`, { responseType: 'blob' }).then((r) => r.data as Blob),
+  generateSalaries: () =>
+    api.post<{ created: number }>('/api/admin/payouts/generate-salaries').then((r) => r.data),
 };

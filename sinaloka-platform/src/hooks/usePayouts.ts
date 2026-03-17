@@ -25,3 +25,10 @@ export function useCalculatePayout() {
     mutationFn: payoutsService.calculatePayout,
   });
 }
+export function useGenerateSalaries() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: payoutsService.generateSalaries,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['payouts'] }); },
+  });
+}

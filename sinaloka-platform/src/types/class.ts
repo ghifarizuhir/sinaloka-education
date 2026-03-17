@@ -10,6 +10,8 @@ export interface Class {
   fee: number;
   package_fee: number | null;
   tutor_fee: number;
+  tutor_fee_mode: 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY';
+  tutor_fee_per_student: number | null;
   schedule_days: ScheduleDay[];
   schedule_start_time: string;
   schedule_end_time: string;
@@ -31,6 +33,8 @@ export interface CreateClassDto {
   fee: number;
   package_fee?: number | null;
   tutor_fee: number;
+  tutor_fee_mode?: 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY';
+  tutor_fee_per_student?: number | null;
   schedule_days: ScheduleDay[];
   schedule_start_time: string;
   schedule_end_time: string;

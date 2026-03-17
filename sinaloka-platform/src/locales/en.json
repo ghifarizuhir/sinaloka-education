@@ -317,6 +317,8 @@
       "accountNumberPlaceholder": "1234567890",
       "accountHolder": "Account Holder",
       "accountHolderPlaceholder": "John Doe",
+      "monthlySalary": "Monthly Salary",
+      "monthlySalaryPlaceholder": "e.g., 5000000",
       "sendInvitation": "Send Invitation"
     },
     "table": {
@@ -405,6 +407,14 @@
       "feePerSession": "Fee per Session (Rp)",
       "packageFee": "Monthly Package Fee (Rp)",
       "tutorFee": "Tutor Fee per Session (Rp)",
+      "tutorFeeMode": "Tutor Fee Mode",
+      "tutorFeePerStudent": "Fee Per Student (per session)",
+      "feeMode": {
+        "fixedPerSession": "Fixed Per Session",
+        "perStudentAttendance": "Per Attending Student",
+        "monthlySalary": "Monthly Salary"
+      },
+      "monthlySalaryHint": "Tutor payout comes from their monthly salary. No per-session fee needed.",
       "room": "Room (optional)",
       "roomPlaceholder": "e.g. Room 101"
     },
@@ -922,6 +932,9 @@
     "searchPlaceholder": "Search tutors...",
     "allStatuses": "All Statuses",
     "newPayout": "New Payout",
+    "generateSalaries": "Generate Monthly Salaries",
+    "salariesGenerated": "{{count}} salary payout(s) created",
+    "salariesError": "Failed to generate salaries",
     "noPayoutsFound": "No payouts found.",
     "backToPayouts": "Back to Payouts",
     "exportAudit": "Export Audit",

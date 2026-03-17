@@ -63,6 +63,7 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
     bank_name: initialData?.bank_name ?? '',
     bank_account_number: initialData?.bank_account_number ?? '',
     bank_account_holder: initialData?.bank_account_holder ?? '',
+    monthly_salary: initialData?.monthly_salary ? String(initialData.monthly_salary) : '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -85,6 +86,7 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
       bank_name: formData.bank_name || undefined,
       bank_account_number: formData.bank_account_number || undefined,
       bank_account_holder: formData.bank_account_holder || undefined,
+      monthly_salary: formData.monthly_salary ? Number(formData.monthly_salary) : null,
     });
   };
 
@@ -161,6 +163,10 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
         <div className="space-y-2">
           <Label htmlFor="bank_account_holder">{t('tutors.form.accountHolder')}</Label>
           <Input id="bank_account_holder" name="bank_account_holder" value={formData.bank_account_holder} onChange={handleChange} placeholder={t('tutors.form.accountHolderPlaceholder')} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="monthly_salary">{t('tutors.form.monthlySalary')}</Label>
+          <Input id="monthly_salary" name="monthly_salary" type="number" value={formData.monthly_salary} onChange={handleChange} placeholder={t('tutors.form.monthlySalaryPlaceholder')} />
         </div>
       </div>
 

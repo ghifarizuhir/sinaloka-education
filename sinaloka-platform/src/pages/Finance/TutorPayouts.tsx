@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Badge, Input, Label, Checkbox, Skeleton } from '../../components/UI';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
-import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout } from '@/src/hooks/usePayouts';
+import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout, useGenerateSalaries } from '@/src/hooks/usePayouts';
 import { useTutors } from '@/src/hooks/useTutors';
 import { toast } from 'sonner';
 import type { Payout, CreatePayoutDto, UpdatePayoutDto, PayoutCalculation } from '@/src/types/payout';
@@ -51,6 +51,7 @@ export const TutorPayouts = () => {
   const createPayout = useCreatePayout();
   const deletePayout = useDeletePayout();
   const calculatePayout = useCalculatePayout();
+  const generateSalaries = useGenerateSalaries();
 
   const allPayouts = payoutsData?.data ?? [];
   const payouts = searchQuery
@@ -479,6 +480,20 @@ export const TutorPayouts = () => {
             <option value="PROCESSING">{t('payouts.reconciliation.processing')}</option>
             <option value="PAID">{t('payouts.reconciliation.paid')}</option>
           </select>
+          <Button
+            variant="outline"
+            className="gap-2 h-9"
+            onClick={() => {
+              generateSalaries.mutate(undefined, {
+                onSuccess: (result) => toast.success(t('payouts.salariesGenerated', { count: result.created })),
+                onError: () => toast.error(t('payouts.salariesError')),
+              });
+            }}
+            disabled={generateSalaries.isPending}
+          >
+            <DollarSign size={14} />
+            {t('payouts.generateSalaries')}
+          </Button>
           <Button className="gap-2 h-9" onClick={() => { setFormPeriodStart(''); setFormPeriodEnd(''); setCalculation(null); setShowCreateModal(true); }}>
             <Plus size={14} />
             {t('payouts.newPayout')}
