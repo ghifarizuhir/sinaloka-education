@@ -633,16 +633,6 @@ export const Classes = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>{t('classes.form.tutorFee')}</Label>
-            <Input
-              type="number"
-              placeholder="200000"
-              required
-              value={formTutorFee}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFee(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
             <Label>{t('classes.form.tutorFeeMode')}</Label>
             <select
               className="h-10 w-full px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
@@ -654,6 +644,18 @@ export const Classes = () => {
               <option value="MONTHLY_SALARY">{t('classes.form.feeMode.monthlySalary')}</option>
             </select>
           </div>
+          {formTutorFeeMode === 'FIXED_PER_SESSION' && (
+            <div className="space-y-1.5">
+              <Label>{t('classes.form.tutorFee')}</Label>
+              <Input
+                type="number"
+                placeholder="200000"
+                required
+                value={formTutorFee}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFee(e.target.value)}
+              />
+            </div>
+          )}
           {formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' && (
             <div className="space-y-1.5">
               <Label>{t('classes.form.tutorFeePerStudent')}</Label>
