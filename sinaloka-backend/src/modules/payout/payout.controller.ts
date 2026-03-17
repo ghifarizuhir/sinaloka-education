@@ -86,6 +86,12 @@ export class PayoutController {
     res.send(csv);
   }
 
+  @Post('generate-salaries')
+  @HttpCode(HttpStatus.OK)
+  generateSalaries(@CurrentUser() user: JwtPayload) {
+    return this.payoutService.generateMonthlySalaries(user.institutionId!);
+  }
+
   @Get(':id')
   findOne(
     @CurrentUser() user: JwtPayload,

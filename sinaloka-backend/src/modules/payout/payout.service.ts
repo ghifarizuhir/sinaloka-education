@@ -218,4 +218,45 @@ export class PayoutService {
       overlap_warning,
     };
   }
+
+  async generateMonthlySalaries(institutionId: string) {
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const salaryPrefix = `Salary: ${monthKey}`;
+
+    const tutors = await this.prisma.tutor.findMany({
+      where: {
+        institution_id: institutionId,
+        monthly_salary: { not: null, gt: 0 },
+      },
+      include: { user: { select: { name: true } } },
+    });
+
+    let created = 0;
+    for (const tutor of tutors) {
+      const existing = await this.prisma.payout.findFirst({
+        where: {
+          tutor_id: tutor.id,
+          institution_id: institutionId,
+          description: { startsWith: salaryPrefix },
+        },
+      });
+
+      if (existing) continue;
+
+      await this.prisma.payout.create({
+        data: {
+          institution_id: institutionId,
+          tutor_id: tutor.id,
+          amount: tutor.monthly_salary!,
+          date: now,
+          status: 'PENDING',
+          description: `${salaryPrefix} - ${tutor.user.name}`,
+        },
+      });
+      created++;
+    }
+
+    return { created };
+  }
 }
