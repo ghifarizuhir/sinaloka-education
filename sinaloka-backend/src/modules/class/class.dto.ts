@@ -11,6 +11,7 @@ const ScheduleDay = z.enum([
   'Sunday',
 ]);
 const TimeString = z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:mm format');
+const TutorFeeMode = z.enum(['FIXED_PER_SESSION', 'PER_STUDENT_ATTENDANCE', 'MONTHLY_SALARY']);
 
 export const CreateClassSchema = z
   .object({
@@ -25,12 +26,21 @@ export const CreateClassSchema = z
     room: z.string().max(100).optional().nullable(),
     package_fee: z.number().min(0).optional().nullable(),
     tutor_fee: z.number().min(0),
+    tutor_fee_mode: TutorFeeMode.default('FIXED_PER_SESSION'),
+    tutor_fee_per_student: z.number().min(0).optional().nullable(),
     status: ClassStatus.default('ACTIVE'),
   })
   .refine((data) => data.schedule_start_time < data.schedule_end_time, {
     message: 'schedule_start_time must be before schedule_end_time',
     path: ['schedule_end_time'],
-  });
+  })
+  .refine(
+    (data) => data.tutor_fee_mode !== 'PER_STUDENT_ATTENDANCE' || (data.tutor_fee_per_student != null && data.tutor_fee_per_student > 0),
+    {
+      message: 'tutor_fee_per_student is required when mode is PER_STUDENT_ATTENDANCE',
+      path: ['tutor_fee_per_student'],
+    },
+  );
 export type CreateClassDto = z.infer<typeof CreateClassSchema>;
 
 export const UpdateClassSchema = z
@@ -46,6 +56,8 @@ export const UpdateClassSchema = z
     room: z.string().max(100).optional().nullable(),
     package_fee: z.number().min(0).optional().nullable(),
     tutor_fee: z.number().min(0).optional(),
+    tutor_fee_mode: TutorFeeMode.optional(),
+    tutor_fee_per_student: z.number().min(0).optional().nullable(),
     status: ClassStatus.optional(),
   })
   .refine(

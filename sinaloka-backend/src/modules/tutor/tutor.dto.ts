@@ -23,6 +23,7 @@ export const UpdateTutorSchema = z.object({
   bank_account_holder: z.string().max(255).optional().nullable(),
   is_verified: z.boolean().optional(),
   rating: z.number().min(0).max(5).optional(),
+  monthly_salary: z.number().min(0).optional().nullable(),
 });
 export type UpdateTutorDto = z.infer<typeof UpdateTutorSchema>;
 
