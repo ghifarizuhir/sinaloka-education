@@ -20,6 +20,8 @@ export const UpdatePayoutSchema = z.object({
   description: z.string().max(500).optional().nullable(),
   period_start: z.coerce.date().optional().nullable(),
   period_end: z.coerce.date().optional().nullable(),
+  proof_url: z.string().max(500).optional().nullable(),
+  slip_url: z.string().max(500).optional().nullable(),
 });
 export type UpdatePayoutDto = z.infer<typeof UpdatePayoutSchema>;
 

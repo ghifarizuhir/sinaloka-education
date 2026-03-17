@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { stringify } from 'csv-stringify/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { buildPaginationMeta } from '../../common/dto/pagination.dto.js';
 import type {
@@ -89,6 +90,61 @@ export class PayoutService {
     const data = rawData.map((p) => this.flattenPayoutTutor(p));
 
     return { data, meta: buildPaginationMeta(total, page, limit) };
+  }
+
+  async exportAudit(institutionId: string, payoutId: string): Promise<string> {
+    const payout = await this.prisma.payout.findFirst({
+      where: { id: payoutId, institution_id: institutionId },
+      include: {
+        tutor: { include: { user: { select: { name: true } } } },
+      },
+    });
+
+    if (!payout) {
+      throw new NotFoundException(`Payout with id ${payoutId} not found`);
+    }
+
+    const tutorName = payout.tutor?.user?.name ?? '';
+    const bankName = payout.tutor?.bank_name ?? '';
+    const bankAccount = payout.tutor?.bank_account_number ?? '';
+
+    const sessions =
+      payout.period_start && payout.period_end
+        ? await this.prisma.session.findMany({
+            where: {
+              institution_id: institutionId,
+              class: { tutor_id: payout.tutor_id },
+              status: 'COMPLETED',
+              tutor_fee_amount: { not: null },
+              date: { gte: payout.period_start, lte: payout.period_end },
+            },
+            include: { class: { select: { name: true } } },
+            orderBy: { date: 'asc' },
+          })
+        : [];
+
+    const summaryRows = [
+      ['Payout ID', payout.id],
+      ['Tutor', tutorName],
+      ['Bank', bankName],
+      ['Account', bankAccount],
+      ['Date', payout.date.toISOString().split('T')[0]],
+      ['Period Start', payout.period_start?.toISOString().split('T')[0] ?? ''],
+      ['Period End', payout.period_end?.toISOString().split('T')[0] ?? ''],
+      ['Amount', String(Number(payout.amount))],
+      ['Status', payout.status],
+      ['Description', payout.description ?? ''],
+      [],
+      ['--- Session Breakdown ---', ''],
+      ['Date', 'Class', 'Fee'],
+      ...sessions.map((s) => [
+        s.date.toISOString().split('T')[0],
+        s.class?.name ?? '',
+        String(Number(s.tutor_fee_amount ?? 0)),
+      ]),
+    ];
+
+    return stringify(summaryRows);
   }
 
   /** Flatten nested tutor.user.name into tutor.name for frontend consumption */
