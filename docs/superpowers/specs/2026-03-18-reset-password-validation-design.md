@@ -73,44 +73,64 @@ Add to the success screen:
 **State:**
 ```typescript
 const [cooldown, setCooldown] = useState(60);
+const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 ```
 
-**Countdown effect** (runs when `sent` becomes true):
+Note: `useRef` must be added to the React import.
+
+**Countdown helper** (starts/restarts the timer, clears any existing interval first):
 ```typescript
-useEffect(() => {
-  if (!sent) return;
+const startCooldown = () => {
+  if (intervalRef.current) clearInterval(intervalRef.current);
   setCooldown(60);
-  const interval = setInterval(() => {
+  intervalRef.current = setInterval(() => {
     setCooldown((prev) => {
-      if (prev <= 1) { clearInterval(interval); return 0; }
+      if (prev <= 1) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        return 0;
+      }
       return prev - 1;
     });
   }, 1000);
-  return () => clearInterval(interval);
-}, [sent]);
+};
 ```
+
+**Cleanup on unmount:**
+```typescript
+useEffect(() => {
+  return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+}, []);
+```
+
+The `startCooldown()` function is called both after the initial submit (in `handleSubmit` after `setSent(true)`) and after a successful resend. Using a `useRef` for the interval ensures only one interval runs at a time — resend clears the previous interval before starting a new one.
 
 **Button UI:**
 - During cooldown: disabled, shows "Kirim Ulang (45s)"
 - After cooldown: enabled, shows "Kirim Ulang"
-- On click: calls the same `handleSubmit` flow (re-sends POST with the same email)
-- Resets cooldown to 60 on successful resend
+- On click: calls `handleResend` (re-sends POST with the same email)
 
 **Resend handler:**
+
+Email validation is not needed in `handleResend` because the email was already validated before `sent` became `true`. The user cannot change the email on the success screen.
+
 ```typescript
 const handleResend = async () => {
   setLoading(true);
   try {
     await axios.post('/api/auth/forgot-password', { email });
-    setCooldown(60);
+    startCooldown();
   } catch (err: any) {
     setError(err?.response?.data?.message || 'Terjadi kesalahan. Coba lagi.');
-    setSent(false);
   } finally {
     setLoading(false);
   }
 };
 ```
+
+Note: On resend error, the error is shown on the success screen (above the resend button) rather than reverting to the form. The user stays on the success screen and can retry.
+
+**In handleSubmit**, after `setSent(true)`, call `startCooldown()`.
 
 ### 4. Differences Between Tutor and Parent Versions
 
