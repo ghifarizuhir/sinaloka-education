@@ -33,6 +33,8 @@ export class ClassService {
         fee: dto.fee,
         package_fee: dto.package_fee ?? null,
         tutor_fee: dto.tutor_fee,
+        tutor_fee_mode: dto.tutor_fee_mode ?? 'FIXED_PER_SESSION',
+        tutor_fee_per_student: dto.tutor_fee_per_student ?? null,
         schedule_days: dto.schedule_days,
         schedule_start_time: dto.schedule_start_time,
         schedule_end_time: dto.schedule_end_time,
@@ -45,6 +47,8 @@ export class ClassService {
       fee: Number(record.fee),
       package_fee: record.package_fee != null ? Number(record.package_fee) : null,
       tutor_fee: Number(record.tutor_fee),
+      tutor_fee_mode: record.tutor_fee_mode,
+      tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
     };
   }
 
@@ -93,6 +97,8 @@ export class ClassService {
         fee: Number(c.fee),
         package_fee: c.package_fee != null ? Number(c.package_fee) : null,
         tutor_fee: c.tutor_fee != null ? Number(c.tutor_fee) : null,
+        tutor_fee_mode: c.tutor_fee_mode,
+        tutor_fee_per_student: c.tutor_fee_per_student != null ? Number(c.tutor_fee_per_student) : null,
         tutor: c.tutor ? { id: c.tutor.id, name: c.tutor.user.name } : null,
         enrolled_count: _count.enrollments,
       })),
@@ -122,6 +128,8 @@ export class ClassService {
       fee: Number(classRecord.fee),
       package_fee: classRecord.package_fee != null ? Number(classRecord.package_fee) : null,
       tutor_fee: classRecord.tutor_fee != null ? Number(classRecord.tutor_fee) : null,
+      tutor_fee_mode: classRecord.tutor_fee_mode,
+      tutor_fee_per_student: classRecord.tutor_fee_per_student != null ? Number(classRecord.tutor_fee_per_student) : null,
       tutor: classRecord.tutor ? { id: classRecord.tutor.id, name: classRecord.tutor.user.name, email: classRecord.tutor.user.email } : null,
       enrolled_count: classRecord.enrollments.length,
       enrollments: classRecord.enrollments.map((e) => ({ id: e.id, status: e.status, student: e.student })),
@@ -160,6 +168,8 @@ export class ClassService {
       fee: Number(record.fee),
       package_fee: record.package_fee != null ? Number(record.package_fee) : null,
       tutor_fee: Number(record.tutor_fee),
+      tutor_fee_mode: record.tutor_fee_mode,
+      tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
     };
   }
 
