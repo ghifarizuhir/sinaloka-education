@@ -7,7 +7,7 @@ import {
   MoreVertical, CheckCircle2, Clock, Trash2, Mail,
   FileText, FileDown
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton, ConfirmDialog } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import { usePayments, useUpdatePayment, useDeletePayment, useGenerateInvoice, useOverdueSummary } from '@/src/hooks/usePayments';
 import { useQueryClient } from '@tanstack/react-query';
@@ -35,6 +35,7 @@ export const StudentPayments = () => {
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'TRANSFER' | 'OTHER'>('TRANSFER');
   const [sendReceipt, setSendReceipt] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const itemsPerPage = 10;
 
@@ -89,10 +90,10 @@ export const StudentPayments = () => {
     );
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm(t('payments.confirm.deletePayment'))) return;
-    deletePayment.mutate(id, {
-      onSuccess: () => toast.success(t('payments.toast.deleted')),
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    deletePayment.mutate(deleteTarget, {
+      onSuccess: () => { toast.success(t('payments.toast.deleted')); setDeleteTarget(null); },
       onError: () => toast.error(t('payments.toast.deleteError')),
     });
   };
@@ -334,7 +335,7 @@ export const StudentPayments = () => {
                         <History size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(p.id)}
+                        onClick={() => setDeleteTarget(p.id)}
                         className="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
                         title={t('payments.tooltip.delete')}
                       >
@@ -628,6 +629,16 @@ export const StudentPayments = () => {
           </div>
         )}
       </Drawer>
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title={t('payments.confirm.deleteTitle', 'Delete Payment')}
+        description={t('payments.confirm.deletePayment')}
+        confirmLabel={t('common.delete', 'Delete')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        isLoading={deletePayment.isPending}
+      />
     </div>
   );
 };

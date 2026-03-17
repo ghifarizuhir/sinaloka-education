@@ -7,7 +7,7 @@ import {
   Download, ExternalLink, Search, Filter, MoreVertical,
   ArrowLeft, BadgeCheck, X, AlertTriangle
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Checkbox, Skeleton } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog } from '../../components/UI';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
 import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout, useGenerateSalaries } from '@/src/hooks/usePayouts';
 import { useTutors } from '@/src/hooks/useTutors';
@@ -38,6 +38,7 @@ export const TutorPayouts = () => {
   const [statusFilter, setStatusFilter] = useState<'PENDING' | 'PROCESSING' | 'PAID' | ''>('');
   const [isUploadingProof, setIsUploadingProof] = useState(false);
   const [isGeneratingSlip, setIsGeneratingSlip] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [isExportingAudit, setIsExportingAudit] = useState(false);
   const itemsPerPage = 10;
 
@@ -199,10 +200,10 @@ export const TutorPayouts = () => {
     }
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm(t('payouts.confirm.deletePayout'))) return;
-    deletePayout.mutate(id, {
-      onSuccess: () => toast.success(t('payouts.toast.deleted')),
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    deletePayout.mutate(deleteTarget, {
+      onSuccess: () => { toast.success(t('payouts.toast.deleted')); setDeleteTarget(null); },
       onError: () => toast.error(t('payouts.toast.deleteError')),
     });
   };
@@ -553,7 +554,7 @@ export const TutorPayouts = () => {
                       {p.status === 'PAID' ? t('payouts.viewSlip') : t('payouts.reconcile')}
                     </Button>
                     <button
-                      onClick={() => handleDelete(p.id)}
+                      onClick={() => setDeleteTarget(p.id)}
                       className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-zinc-400 hover:text-rose-600 transition-colors"
                     >
                       <X size={14} />
@@ -712,6 +713,16 @@ export const TutorPayouts = () => {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title={t('payouts.confirm.deleteTitle', 'Delete Payout')}
+        description={t('payouts.confirm.deletePayout')}
+        confirmLabel={t('common.delete', 'Delete')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        isLoading={deletePayout.isPending}
+      />
     </div>
   );
 };

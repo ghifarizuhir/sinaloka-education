@@ -6,7 +6,7 @@ import {
   RefreshCcw, TrendingDown, AlertCircle, CheckCircle2,
   FileText, ExternalLink, Upload
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton, ConfirmDialog } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/src/hooks/useExpenses';
 import { useBillingSettings } from '@/src/hooks/useSettings';
@@ -31,6 +31,7 @@ export const OperatingExpenses = () => {
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   // Form state
   const [formAmount, setFormAmount] = useState(0);
@@ -104,10 +105,10 @@ export const OperatingExpenses = () => {
     setShowDrawer(true);
   };
 
-  const handleDeleteExpense = (id: string) => {
-    if (!confirm(t('expenses.confirm.deleteExpense'))) return;
-    deleteExpense.mutate(id, {
-      onSuccess: () => toast.success(t('expenses.toast.deleted')),
+  const handleDeleteExpense = () => {
+    if (!deleteTarget) return;
+    deleteExpense.mutate(deleteTarget, {
+      onSuccess: () => { toast.success(t('expenses.toast.deleted')); setDeleteTarget(null); },
       onError: () => toast.error(t('expenses.toast.deleteError')),
     });
   };
@@ -357,7 +358,7 @@ export const OperatingExpenses = () => {
                       <FileText size={18} />
                     </button>
                     <button
-                      onClick={() => handleDeleteExpense(e.id)}
+                      onClick={() => setDeleteTarget(e.id)}
                       className="p-2 text-zinc-400 hover:text-rose-600 transition-colors"
                     >
                       <Trash2 size={18} />
@@ -557,6 +558,16 @@ export const OperatingExpenses = () => {
           </div>
         </div>
       </Drawer>
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteExpense}
+        title={t('expenses.confirm.deleteTitle', 'Delete Expense')}
+        description={t('expenses.confirm.deleteExpense')}
+        confirmLabel={t('common.delete', 'Delete')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        isLoading={deleteExpense.isPending}
+      />
     </div>
   );
 };

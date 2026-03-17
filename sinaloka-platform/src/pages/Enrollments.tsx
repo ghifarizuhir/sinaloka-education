@@ -39,7 +39,8 @@ import {
   SearchInput,
   Checkbox,
   Switch,
-  Progress
+  Progress,
+  ConfirmDialog
 } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
 import { toast } from 'sonner';
@@ -133,6 +134,7 @@ export const Enrollments = () => {
   // Import state
   const [importFile, setImportFile] = useState<File | null>(null);
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   // Mutations
   const createEnrollment = useCreateEnrollment();
@@ -194,12 +196,13 @@ export const Enrollments = () => {
     });
   };
 
-  const handleDeleteEnrollment = (id: string) => {
-    if (!confirm(t('enrollments.confirm.deleteEnrollment'))) return;
-    deleteEnrollment.mutate(id, {
+  const handleDeleteEnrollment = () => {
+    if (!deleteTarget) return;
+    deleteEnrollment.mutate(deleteTarget, {
       onSuccess: () => {
         toast.success(t('enrollments.toast.deleted'));
         setActiveActionMenu(null);
+        setDeleteTarget(null);
       },
       onError: () => toast.error(t('enrollments.toast.deleteError')),
     });
@@ -502,7 +505,7 @@ export const Enrollments = () => {
                                 <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
 
                                 <button
-                                  onClick={() => handleDeleteEnrollment(enroll.id)}
+                                  onClick={() => { setDeleteTarget(enroll.id); setActiveActionMenu(null); }}
                                   className="w-full text-left px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg flex items-center gap-2"
                                 >
                                   <Trash2 size={14} /> {t('enrollments.menu.deleteRecord')}
@@ -851,6 +854,16 @@ export const Enrollments = () => {
           </div>
         </div>
       </Modal>
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteEnrollment}
+        title={t('enrollments.confirm.deleteTitle', 'Delete Enrollment')}
+        description={t('enrollments.confirm.deleteEnrollment')}
+        confirmLabel={t('common.delete', 'Delete')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        isLoading={deleteEnrollment.isPending}
+      />
     </div>
   );
 };
