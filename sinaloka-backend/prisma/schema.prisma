@@ -39,6 +39,12 @@ enum PaymentStatus {
   OVERDUE
 }
 
+enum TutorFeeMode {
+  FIXED_PER_SESSION
+  PER_STUDENT_ATTENDANCE
+  MONTHLY_SALARY
+}
+
 enum SessionStatus {
   SCHEDULED
   COMPLETED
@@ -166,6 +172,7 @@ model Tutor {
   bank_name            String?
   bank_account_number  String?
   bank_account_holder  String?
+  monthly_salary       Decimal?
   is_verified          Boolean  @default(false)
   created_at           DateTime @default(now())
   updated_at           DateTime @updatedAt
@@ -246,7 +253,9 @@ model Class {
   capacity            Int
   fee                 Decimal
   package_fee         Decimal?
-  tutor_fee           Decimal   @default(0)
+  tutor_fee           Decimal      @default(0)
+  tutor_fee_mode      TutorFeeMode @default(FIXED_PER_SESSION)
+  tutor_fee_per_student Decimal?
   schedule_days       String[]
   schedule_start_time String
   schedule_end_time   String
