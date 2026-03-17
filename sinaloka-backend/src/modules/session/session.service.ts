@@ -72,20 +72,6 @@ export class SessionService {
       );
     }
 
-    const enrollmentCount = await this.prisma.enrollment.count({
-      where: {
-        class_id: classId,
-        institution_id: institutionId,
-        status: { in: ['ACTIVE', 'TRIAL'] },
-      },
-    });
-
-    if (enrollmentCount === 0) {
-      throw new BadRequestException(
-        'Cannot create sessions for a class with no enrolled students',
-      );
-    }
-
     return classRecord;
   }
 

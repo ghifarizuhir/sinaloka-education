@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionService } from './session.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { PayoutService } from '../payout/payout.service.js';
 import {
   NotFoundException,
   BadRequestException,
@@ -10,6 +11,10 @@ import {
 describe('SessionService', () => {
   let service: SessionService;
   let prisma: PrismaService;
+
+  const mockPayoutService = {
+    create: jest.fn(),
+  };
 
   const mockPrisma = {
     session: {
@@ -43,6 +48,7 @@ describe('SessionService', () => {
       providers: [
         SessionService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: PayoutService, useValue: mockPayoutService },
       ],
     }).compile();
 
@@ -76,6 +82,7 @@ describe('SessionService', () => {
       mockPrisma.class.findUnique.mockResolvedValue({
         id: 'class-uuid-1',
         institution_id: institutionId,
+        status: 'ACTIVE',
       });
       mockPrisma.session.create.mockResolvedValue(createdSession);
 
@@ -341,6 +348,7 @@ describe('SessionService', () => {
       const classRecord = {
         id: 'class-uuid-1',
         institution_id: institutionId,
+        status: 'ACTIVE',
         schedule_days: ['Monday', 'Wednesday'],
         schedule_start_time: '14:00',
         schedule_end_time: '15:30',
@@ -378,6 +386,7 @@ describe('SessionService', () => {
       const classRecord = {
         id: 'class-uuid-1',
         institution_id: institutionId,
+        status: 'ACTIVE',
         schedule_days: ['Monday', 'Wednesday'],
         schedule_start_time: '14:00',
         schedule_end_time: '15:30',
@@ -414,6 +423,7 @@ describe('SessionService', () => {
       const classRecord = {
         id: 'class-uuid-1',
         institution_id: institutionId,
+        status: 'ACTIVE',
         schedule_days: ['Saturday'],
         schedule_start_time: '09:00',
         schedule_end_time: '10:30',
@@ -449,6 +459,7 @@ describe('SessionService', () => {
       const classRecord = {
         id: 'class-uuid-1',
         institution_id: institutionId,
+        status: 'ACTIVE',
         schedule_days: ['Monday'],
         schedule_start_time: '14:00',
         schedule_end_time: '15:30',
