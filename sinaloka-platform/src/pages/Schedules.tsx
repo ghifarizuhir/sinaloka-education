@@ -35,6 +35,7 @@ import {
 } from 'date-fns';
 import { toast } from 'sonner';
 import { Card, Button, Badge, Modal, Drawer, Input, Label, Switch, Skeleton } from '../components/UI';
+import { WeekCalendar } from '../components/WeekCalendar';
 import { cn, formatDate } from '../lib/utils';
 import { useSessions, useSession, useCreateSession, useUpdateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
 import { useClasses } from '@/src/hooks/useClasses';
@@ -572,18 +573,15 @@ export const Schedules = () => {
             </div>
           )}
 
-          {/* Week View Placeholder */}
+          {/* Week View */}
           {calendarMode === 'week' && (
-            <div className="flex-1 flex items-center justify-center p-12 text-center">
-              <div className="max-w-xs">
-                <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-zinc-400">
-                  <LayoutGrid size={32} />
-                </div>
-                <h4 className="font-bold mb-2">{t('schedules.calendar.weeklyOverview')}</h4>
-                <p className="text-sm text-zinc-500">{t('schedules.calendar.weeklyOverviewDesc')}</p>
-                <Button variant="outline" className="mt-4" onClick={() => setCalendarMode('month')}>{t('schedules.calendar.backToMonthView')}</Button>
-              </div>
-            </div>
+            <WeekCalendar
+              sessions={sessions}
+              weekDays={weekDays}
+              onSelectSession={setSelectedSessionId}
+              getSubjectColor={getSubjectColor}
+              getStatusBorder={getStatusBorder}
+            />
           )}
         </Card>
       )}
