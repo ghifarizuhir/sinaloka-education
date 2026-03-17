@@ -39,6 +39,8 @@ import {
 } from '@/src/hooks/useClasses';
 import { useTutors } from '@/src/hooks/useTutors';
 import { useBillingSettings } from '@/src/hooks/useSettings';
+import { useGenerateSessions } from '@/src/hooks/useSessions';
+import { format, addDays, getDay } from 'date-fns';
 import type { Class, CreateClassDto, ScheduleDay } from '@/src/types/class';
 
 const SUBJECT_COLORS: Record<string, string> = {
@@ -63,6 +65,9 @@ export const Classes = () => {
   const [deleteTarget, setDeleteTarget] = useState<Class | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [generateDuration, setGenerateDuration] = useState(30);
+  const generateSessions = useGenerateSessions();
 
   // Form state
   const [formName, setFormName] = useState('');
@@ -222,6 +227,38 @@ export const Classes = () => {
       },
       onError: () => toast.error(t('classes.toast.deleteError')),
     });
+  };
+
+  const estimateSessionCount = (scheduleDays: string[], duration: number): number => {
+    const dayMap: Record<string, number> = {
+      Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
+      Thursday: 4, Friday: 5, Saturday: 6,
+    };
+    const targetDays = new Set(scheduleDays.map(d => dayMap[d]));
+    const today = new Date();
+    let count = 0;
+    for (let i = 0; i < duration; i++) {
+      if (targetDays.has(getDay(addDays(today, i)))) count++;
+    }
+    return count;
+  };
+
+  const handleGenerateSessions = () => {
+    if (!classDetail.data) return;
+    const today = new Date();
+    const dateFrom = format(today, 'yyyy-MM-dd');
+    const dateTo = format(addDays(today, generateDuration - 1), 'yyyy-MM-dd');
+    generateSessions.mutate(
+      { class_id: classDetail.data.id, date_from: dateFrom, date_to: dateTo },
+      {
+        onSuccess: (data) => {
+          toast.success(t('classes.toast.generateSuccess', { count: data.count }));
+          setShowGenerateModal(false);
+          setGenerateDuration(30);
+        },
+        onError: () => toast.error(t('classes.toast.generateError')),
+      },
+    );
   };
 
   const currentPage = page;
@@ -880,6 +917,21 @@ export const Classes = () => {
               )}
             </div>
 
+            {/* Generate Sessions Button */}
+            {classDetail.data?.status === 'ACTIVE' && classDetail.data?.schedule_days?.length > 0 && (
+              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <Button
+                  variant="outline"
+                  className="w-full justify-center gap-2"
+                  onClick={() => setShowGenerateModal(true)}
+                  disabled={classDetail.isLoading}
+                >
+                  <Calendar size={16} />
+                  {t('classes.drawer.generateSessions')}
+                </Button>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
               <Button
@@ -899,6 +951,77 @@ export const Classes = () => {
           </div>
         )}
       </Drawer>
+
+      {/* Generate Sessions Modal */}
+      <Modal
+        isOpen={showGenerateModal}
+        onClose={() => { setShowGenerateModal(false); setGenerateDuration(30); }}
+        title={t('classes.generateModal.title')}
+      >
+        {classDetail.data && (
+          <div className="space-y-5">
+            <div className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 space-y-2">
+              <p className="text-sm font-bold">{classDetail.data.name}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {classDetail.data.schedule_days?.map((day: string) => (
+                  <span key={day} className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full">
+                    {day}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-500">
+                {classDetail.data.schedule_start_time} - {classDetail.data.schedule_end_time}
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>{t('classes.generateModal.duration')}</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={generateDuration}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGenerateDuration(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
+                  className="w-24"
+                />
+                <span className="text-sm text-zinc-500">{t('classes.generateModal.days')}</span>
+              </div>
+            </div>
+
+            <div className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 space-y-2">
+              <p className="text-xs text-zinc-500">
+                {t('classes.generateModal.dateRange', {
+                  from: format(new Date(), 'dd MMM yyyy'),
+                  to: format(addDays(new Date(), generateDuration - 1), 'dd MMM yyyy'),
+                })}
+              </p>
+              <p className="text-lg font-bold">
+                ~{estimateSessionCount(classDetail.data.schedule_days ?? [], generateDuration)}{' '}
+                <span className="text-sm font-normal text-zinc-500">{t('classes.generateModal.estimatedSessions')}</span>
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 justify-center"
+                onClick={() => { setShowGenerateModal(false); setGenerateDuration(30); }}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                className="flex-1 justify-center"
+                onClick={handleGenerateSessions}
+                disabled={generateSessions.isPending}
+              >
+                <Calendar size={16} />
+                {generateSessions.isPending ? t('common.processing') : t('classes.generateModal.confirm')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
