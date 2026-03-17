@@ -1,6 +1,6 @@
 import api from '@/src/lib/api';
 import type { PaginatedResponse } from '@/src/types/common';
-import type { Session, SessionDetail, SessionStudent, CreateSessionDto, UpdateSessionDto, SessionQueryParams, GenerateSessionsDto, ApproveRescheduleDto } from '@/src/types/session';
+import type { Session, SessionDetail, SessionStudent, CreateSessionDto, UpdateSessionDto, SessionQueryParams, GenerateSessionsDto, GenerateSessionsResponse, ApproveRescheduleDto } from '@/src/types/session';
 
 export const sessionsService = {
   getAll: (params?: SessionQueryParams) =>
@@ -14,7 +14,7 @@ export const sessionsService = {
   remove: (id: string) =>
     api.delete(`/api/admin/sessions/${id}`),
   generate: (data: GenerateSessionsDto) =>
-    api.post<Session[]>('/api/admin/sessions/generate', data).then((r) => r.data),
+    api.post<GenerateSessionsResponse>('/api/admin/sessions/generate', data).then((r) => r.data),
   approveReschedule: ({ id, data }: { id: string; data: ApproveRescheduleDto }) =>
     api.patch<Session>(`/api/admin/sessions/${id}/approve`, data).then((r) => r.data),
   getStudents: (sessionId: string) =>

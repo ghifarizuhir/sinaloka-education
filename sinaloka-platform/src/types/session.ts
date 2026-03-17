@@ -69,6 +69,11 @@ export interface SessionStudent {
   notes: string | null;
 }
 
+export interface GenerateSessionsResponse {
+  count: number;
+  sessions: Session[];
+}
+
 export interface SessionDetail extends Session {
   class?: {
     id: string;
