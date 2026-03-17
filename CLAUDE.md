@@ -79,6 +79,66 @@ npm run lint               # TypeScript type-check
 
 Tests in `sinaloka-platform/e2e/`. Uses API mocking (`e2e/helpers/api-mocker.ts`) with mock data in `e2e/mocks/*.json`. Page objects in `e2e/pages/`. Auth fixtures in `e2e/fixtures/`. Config supports light-mode and dark-mode projects.
 
+## CI/CD & Git Workflow
+
+### Branch & Commit Standards
+
+- **Branch naming**: `feat/`, `fix/`, `refactor/`, `docs/`, `ci/`, `chore/` prefixes (e.g. `feat/student-enrollment`)
+- **Commit messages**: Follow [Conventional Commits](https://www.conventionalcommits.org/) — `type(scope): description`
+  - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+  - Scope is optional but recommended (e.g. `feat(backend): add billing endpoint`)
+- **PR titles**: Must follow the same conventional format — enforced by CI
+
+### Before Creating a PR
+
+Run these checks locally in each app you changed:
+
+```bash
+# Backend
+cd sinaloka-backend
+npm run lint                 # ESLint
+npm run test -- --ci         # Unit tests
+npm run build                # Build check
+
+# Frontend (platform / tutors / parent)
+cd sinaloka-platform         # or sinaloka-tutors / sinaloka-parent
+npm run lint                 # TypeScript type-check
+npm run build                # Build check
+```
+
+### CI Pipeline (automatic on every PR)
+
+Each app has its own workflow triggered by path filters — only changed apps are checked:
+
+| App | Workflow | Jobs |
+|-----|----------|------|
+| Backend | `ci-backend.yml` | Lint → Unit Tests (PostgreSQL) → Build → Security Audit |
+| Platform | `ci-platform.yml` | Type Check → Build → E2E Smoke → Security Audit |
+| Tutors | `ci-tutors.yml` | Type Check → Build → Security Audit |
+| Parent | `ci-parent.yml` | Type Check → Build → Security Audit |
+
+### PR Quality Gates (`pr-checks.yml`)
+
+All PRs to `master`/`main` are checked for:
+- **PR title convention** — must be semantic (e.g. `feat: add X`, `fix: resolve Y`)
+- **PR size labels** — auto-labeled xs/s/m/l/xl based on diff size
+- **Secret detection** — TruffleHog scans for leaked credentials
+
+### Deployment
+
+- **Staging**: Auto-deploys on push to `master`/`main` (only changed apps)
+- **Production**: Manual trigger via GitHub Actions `workflow_dispatch` — requires environment approval
+- Deploy workflows use concurrency control to cancel stale in-progress deploys
+- Frontend deploy uses smart change detection (`dorny/paths-filter`) to only deploy affected apps
+
+### CI/CD Rules for Development
+
+1. **Never push directly to `master`/`main`** — always use PRs
+2. **All CI checks must pass** before merging
+3. **No secrets in code** — use GitHub Secrets/Environment variables
+4. **Database migrations**: Include in the PR if Prisma schema changed; CI runs `prisma migrate deploy` against a test database
+5. **New environment variables**: Document in `.env.example` of the affected app and note in the PR description
+
 ## Key Conventions
 
 - Backend API prefix is `/api` — all routes are under this prefix
