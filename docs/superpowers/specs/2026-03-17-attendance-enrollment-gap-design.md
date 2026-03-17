@@ -56,6 +56,7 @@ async getAdminSessionStudents(institutionId: string, sessionId: string) {
 
   const enrollments = await this.prisma.enrollment.findMany({
     where: {
+      institution_id: institutionId,
       class_id: session.class_id,
       status: 'ACTIVE',
     },
@@ -169,6 +170,8 @@ export function useSessionStudents(sessionId: string) {
 6. **Save logic:** Unchanged — still PATCHes by `attendance_id` for modified records. Read-only students are never included in save.
 
 7. **Counts:** `presentCount`, `absentCount` etc. are calculated from students with attendance records only. An additional "enrolled" count can be shown.
+
+8. **Query cache invalidation:** When attendance is updated via the existing PATCH flow, the `useUpdateAttendance` mutation's `onSuccess` should invalidate both `['attendance']` and `['session-students']` query keys so the student list reflects updated statuses.
 
 ---
 
