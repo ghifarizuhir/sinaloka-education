@@ -13,8 +13,10 @@ import {
   ChevronRight,
   ChevronLeft,
   User,
-  Trash2
+  Trash2,
+  Table2
 } from 'lucide-react';
+import ClassTimetable from '../components/ClassTimetable';
 import {
   Card,
   Button,
@@ -67,6 +69,7 @@ export const Classes = () => {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [generateDuration, setGenerateDuration] = useState(30);
+  const [viewMode, setViewMode] = useState<'table' | 'timetable'>('table');
   const generateSessions = useGenerateSessions();
 
   // Form state
@@ -86,6 +89,7 @@ export const Classes = () => {
   const [formStatus, setFormStatus] = useState<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
 
   const { data, isLoading } = useClasses({ page, limit });
+  const { data: allClassesData } = useClasses({ page: 1, limit: 100 });
   const { data: tutorsData } = useTutors({ limit: 100, is_verified: true });
   const { data: billingSettings } = useBillingSettings();
   const billingMode = billingSettings?.billing_mode ?? 'manual';
@@ -110,6 +114,19 @@ export const Classes = () => {
       return matchesSearch && matchesSubject && matchesAvailability;
     });
   }, [classes, searchQuery, filterSubject, showOnlyAvailable]);
+
+  const allClasses = allClassesData?.data ?? [];
+  const filteredTimetableClasses = useMemo(() => {
+    return allClasses.filter(c => {
+      const tutorName = c.tutor?.name ?? '';
+      const matchesSearch =
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tutorName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSubject = !filterSubject || c.subject === filterSubject;
+      const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
+      return matchesSearch && matchesSubject && matchesAvailability;
+    });
+  }, [allClasses, searchQuery, filterSubject, showOnlyAvailable]);
 
   const selectedClass = filteredClasses.find((c) => c.id === selectedClassId) ?? null;
 
@@ -349,9 +366,30 @@ export const Classes = () => {
               setPage(1);
             }} />
           </div>
+
+          {/* View Mode Toggle */}
+          <div className="h-8 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-1" />
+          <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('table')}
+              className={cn('p-1.5 rounded-md transition-all', viewMode === 'table' ? 'bg-white dark:bg-zinc-700 shadow-sm' : 'text-zinc-500')}
+              title={t('classes.view.table')}
+            >
+              <Table2 size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('timetable')}
+              className={cn('p-1.5 rounded-md transition-all', viewMode === 'timetable' ? 'bg-white dark:bg-zinc-700 shadow-sm' : 'text-zinc-500')}
+              title={t('classes.view.timetable')}
+            >
+              <Calendar size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
+      {viewMode === 'table' ? (
+      <>
       {/* Table */}
       <Card className="p-0 overflow-hidden relative">
         {isLoading ? (
@@ -538,6 +576,13 @@ export const Classes = () => {
           </div>
         </div>
       </Card>
+      </>
+      ) : (
+        <ClassTimetable
+          classes={filteredTimetableClasses}
+          onClassClick={(id) => setSelectedClassId(id)}
+        />
+      )}
 
       {/* Modal */}
       <Modal
