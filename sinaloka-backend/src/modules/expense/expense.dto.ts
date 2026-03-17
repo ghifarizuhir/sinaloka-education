@@ -8,6 +8,9 @@ export const CreateExpenseSchema = z.object({
   date: z.coerce.date(),
   description: z.string().max(500).optional().nullable(),
   receipt_url: z.string().max(500).optional().nullable(),
+  is_recurring: z.boolean().default(false),
+  recurrence_frequency: z.enum(['weekly', 'monthly']).optional().nullable(),
+  recurrence_end_date: z.coerce.date().optional().nullable(),
 });
 export type CreateExpenseDto = z.infer<typeof CreateExpenseSchema>;
 
@@ -17,6 +20,9 @@ export const UpdateExpenseSchema = z.object({
   date: z.coerce.date().optional(),
   description: z.string().max(500).optional().nullable(),
   receipt_url: z.string().max(500).optional().nullable(),
+  is_recurring: z.boolean().optional(),
+  recurrence_frequency: z.enum(['weekly', 'monthly']).optional().nullable(),
+  recurrence_end_date: z.coerce.date().optional().nullable(),
 });
 export type UpdateExpenseDto = z.infer<typeof UpdateExpenseSchema>;
 
@@ -26,6 +32,7 @@ export const ExpenseQuerySchema = z.object({
   category: ExpenseCategory.optional(),
   date_from: z.coerce.date().optional(),
   date_to: z.coerce.date().optional(),
+  search: z.string().max(100).optional(),
   sort_by: z.enum(['date', 'amount', 'created_at']).default('date'),
   sort_order: z.enum(['asc', 'desc']).default('desc'),
 });

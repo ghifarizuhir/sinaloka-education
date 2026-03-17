@@ -142,4 +142,56 @@ export class InvoiceGeneratorService {
       this.logger.error(`Failed to generate package payment: ${error}`);
     }
   }
+
+  async generateSubscriptionPayments(params: {
+    institutionId: string;
+  }): Promise<{ created: number }> {
+    const billing = await this.settingsService.getBilling(params.institutionId);
+    if (billing.billing_mode !== 'subscription') return { created: 0 };
+
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        institution_id: params.institutionId,
+        status: { in: ['ACTIVE', 'TRIAL'] },
+      },
+      include: { class: { select: { fee: true } } },
+    });
+
+    let created = 0;
+
+    for (const enrollment of enrollments) {
+      const existing = await this.prisma.payment.findFirst({
+        where: {
+          enrollment_id: enrollment.id,
+          notes: { startsWith: `Auto: Subscription ${monthKey}` },
+        },
+      });
+      if (existing) continue;
+
+      const dueDate = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      await this.prisma.payment.create({
+        data: {
+          institution_id: params.institutionId,
+          student_id: enrollment.student_id,
+          enrollment_id: enrollment.id,
+          amount: enrollment.class.fee,
+          due_date: dueDate,
+          status: 'PENDING',
+          notes: `Auto: Subscription ${monthKey}`,
+        },
+      });
+
+      created++;
+    }
+
+    this.logger.log(
+      `Subscription payments generated for ${params.institutionId}: ${created} created for ${monthKey}`,
+    );
+
+    return { created };
+  }
 }

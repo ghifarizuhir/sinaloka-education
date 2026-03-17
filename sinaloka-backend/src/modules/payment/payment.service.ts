@@ -6,6 +6,7 @@ import type {
   CreatePaymentDto,
   UpdatePaymentDto,
   PaymentQueryDto,
+  BatchRecordPaymentDto,
 } from './payment.dto.js';
 
 @Injectable()
@@ -77,6 +78,46 @@ export class PaymentService {
       data: { status: 'OVERDUE' },
     });
     return result.count;
+  }
+
+  async batchRecord(institutionId: string, dto: BatchRecordPaymentDto) {
+    const count = await this.prisma.payment.count({
+      where: {
+        id: { in: dto.payment_ids },
+        institution_id: institutionId,
+        status: { in: ['PENDING', 'OVERDUE'] },
+      },
+    });
+
+    if (count !== dto.payment_ids.length) {
+      throw new NotFoundException(
+        'One or more payments not found or not eligible for recording',
+      );
+    }
+
+    const result = await this.prisma.payment.updateMany({
+      where: {
+        id: { in: dto.payment_ids },
+        institution_id: institutionId,
+      },
+      data: {
+        status: 'PAID',
+        paid_date: dto.paid_date,
+        method: dto.method,
+      },
+    });
+
+    return { updated: result.count };
+  }
+
+  async remind(institutionId: string, paymentId: string) {
+    const payment = await this.findOne(institutionId, paymentId);
+    return {
+      reminded: true,
+      method: 'logged',
+      payment_id: payment.id,
+      student_id: payment.student_id,
+    };
   }
 
   async getOverdueSummary(institutionId: string) {

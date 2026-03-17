@@ -13,4 +13,9 @@ export const expensesService = {
     api.patch<Expense>(`/api/admin/expenses/${id}`, data).then((r) => r.data),
   remove: (id: string) =>
     api.delete(`/api/admin/expenses/${id}`),
+  uploadReceipt: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<{ url: string }>('/api/uploads/receipts', formData).then((r) => r.data);
+  },
 };

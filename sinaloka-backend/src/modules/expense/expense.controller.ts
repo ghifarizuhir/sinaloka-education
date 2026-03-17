@@ -47,6 +47,11 @@ export class ExpenseController {
     return this.expenseService.findAll(user.institutionId!, query);
   }
 
+  @Post('process-recurring')
+  processRecurring(@CurrentUser() user: JwtPayload) {
+    return this.expenseService.processRecurringExpenses(user.institutionId!);
+  }
+
   @Get(':id')
   findOne(
     @CurrentUser() user: JwtPayload,

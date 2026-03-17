@@ -34,3 +34,10 @@ export const PaymentQuerySchema = z.object({
   sort_order: z.enum(['asc', 'desc']).default('desc'),
 });
 export type PaymentQueryDto = z.infer<typeof PaymentQuerySchema>;
+
+export const BatchRecordPaymentSchema = z.object({
+  payment_ids: z.array(z.string().uuid()).min(1).max(50),
+  paid_date: z.coerce.date(),
+  method: PaymentMethod,
+});
+export type BatchRecordPaymentDto = z.infer<typeof BatchRecordPaymentSchema>;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus, Search, Filter, Download, MoreVertical,
@@ -9,10 +9,12 @@ import {
 import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/src/hooks/useExpenses';
+import { useBillingSettings } from '@/src/hooks/useSettings';
+import { expensesService } from '@/src/services/expenses.service';
 import { toast } from 'sonner';
 import type { ExpenseCategory, CreateExpenseDto, UpdateExpenseDto } from '@/src/types/expense';
 
-const EXPENSE_CATEGORIES: ExpenseCategory[] = ['RENT', 'UTILITIES', 'SUPPLIES', 'MARKETING', 'OTHER'];
+const DEFAULT_EXPENSE_CATEGORIES: ExpenseCategory[] = ['RENT', 'UTILITIES', 'SUPPLIES', 'MARKETING', 'OTHER'];
 
 
 export const OperatingExpenses = () => {
@@ -20,8 +22,15 @@ export const OperatingExpenses = () => {
   const [showDrawer, setShowDrawer] = useState(false);
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState<'weekly' | 'monthly'>('monthly');
+  const [recurringEndDate, setRecurringEndDate] = useState('');
   const [filterCategory, setFilterCategory] = useState<ExpenseCategory | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
   const [formAmount, setFormAmount] = useState(0);
@@ -31,10 +40,27 @@ export const OperatingExpenses = () => {
 
   const itemsPerPage = 20;
 
+  // Dynamic categories from billing settings
+  const { data: billingSettings } = useBillingSettings();
+  const expenseCategories: ExpenseCategory[] =
+    billingSettings?.expense_categories && billingSettings.expense_categories.length > 0
+      ? billingSettings.expense_categories
+      : DEFAULT_EXPENSE_CATEGORIES;
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const { data: expensesData, isLoading } = useExpenses({
     page: currentPage,
     limit: itemsPerPage,
     ...(filterCategory !== 'all' ? { category: filterCategory } : {}),
+    ...(searchQuery ? { search: searchQuery } : {}),
   });
 
   const createExpense = useCreateExpense();
@@ -53,6 +79,9 @@ export const OperatingExpenses = () => {
     setFormCategory('OTHER');
     setFormDescription('');
     setIsRecurring(false);
+    setRecurringFrequency('monthly');
+    setRecurringEndDate('');
+    setReceiptUrl(null);
     setShowDrawer(true);
   };
 
@@ -64,7 +93,14 @@ export const OperatingExpenses = () => {
     setFormDate(expense.date);
     setFormCategory(expense.category);
     setFormDescription(expense.description ?? '');
-    setIsRecurring(false);
+    setIsRecurring(expense.is_recurring ?? false);
+    setRecurringFrequency(expense.recurrence_frequency ?? 'monthly');
+    setRecurringEndDate(
+      expense.recurrence_end_date
+        ? new Date(expense.recurrence_end_date).toISOString().split('T')[0]
+        : ''
+    );
+    setReceiptUrl(expense.receipt_url ?? null);
     setShowDrawer(true);
   };
 
@@ -74,6 +110,34 @@ export const OperatingExpenses = () => {
       onSuccess: () => toast.success(t('expenses.toast.deleted')),
       onError: () => toast.error(t('expenses.toast.deleteError')),
     });
+  };
+
+  const handleReceiptUpload = async (file: File) => {
+    setIsUploadingReceipt(true);
+    try {
+      const result = await expensesService.uploadReceipt(file);
+      setReceiptUrl(result.url);
+      toast.success(t('expenses.toast.receiptUploaded') || 'Receipt uploaded');
+    } catch {
+      toast.error(t('expenses.toast.receiptUploadError') || 'Failed to upload receipt');
+    } finally {
+      setIsUploadingReceipt(false);
+    }
+  };
+
+  const handleDropZoneClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleReceiptUpload(file);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleReceiptUpload(file);
   };
 
   const handleSave = () => {
@@ -88,6 +152,10 @@ export const OperatingExpenses = () => {
         date: formDate,
         category: formCategory,
         description: formDescription || undefined,
+        receipt_url: receiptUrl ?? undefined,
+        is_recurring: isRecurring,
+        recurrence_frequency: isRecurring ? recurringFrequency : null,
+        recurrence_end_date: isRecurring && recurringEndDate ? recurringEndDate : null,
       };
       updateExpense.mutate(
         { id: selectedExpenseId, data: dto },
@@ -105,6 +173,10 @@ export const OperatingExpenses = () => {
         date: formDate,
         category: formCategory,
         description: formDescription || undefined,
+        receipt_url: receiptUrl ?? undefined,
+        is_recurring: isRecurring,
+        recurrence_frequency: isRecurring ? recurringFrequency : null,
+        recurrence_end_date: isRecurring && recurringEndDate ? recurringEndDate : null,
       };
       createExpense.mutate(dto, {
         onSuccess: () => {
@@ -178,7 +250,7 @@ export const OperatingExpenses = () => {
             </div>
             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('expenses.categories')}</p>
           </div>
-          <p className="text-2xl font-bold dark:text-zinc-100">{EXPENSE_CATEGORIES.length}</p>
+          <p className="text-2xl font-bold dark:text-zinc-100">{expenseCategories.length}</p>
           <p className="text-[10px] text-zinc-500 mt-1">{t('expenses.activeExpenseCategories')}</p>
         </Card>
 
@@ -201,7 +273,12 @@ export const OperatingExpenses = () => {
           <div className="flex items-center gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-              <Input placeholder={t('expenses.searchPlaceholder')} className="pl-10 w-64" />
+              <Input
+                placeholder={t('expenses.searchPlaceholder')}
+                className="pl-10 w-64"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
             </div>
             <select
               value={filterCategory}
@@ -209,8 +286,8 @@ export const OperatingExpenses = () => {
               className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
             >
               <option value="all">{t('common.allCategories')}</option>
-              {EXPENSE_CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{t(`expenses.categoryLabel.${cat}`)}</option>
+              {expenseCategories.map(cat => (
+                <option key={cat} value={cat}>{t(`expenses.categoryLabel.${cat}`, cat)}</option>
               ))}
             </select>
           </div>
@@ -248,9 +325,17 @@ export const OperatingExpenses = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <Badge variant="outline" className="bg-zinc-50 dark:bg-zinc-800/50">
-                    {t(`expenses.categoryLabel.${e.category}`)}
-                  </Badge>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="bg-zinc-50 dark:bg-zinc-800/50">
+                      {t(`expenses.categoryLabel.${e.category}`, e.category)}
+                    </Badge>
+                    {e.is_recurring && (
+                      <Badge variant="outline" className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 text-[10px]">
+                        <RefreshCcw size={10} className="mr-1" />
+                        {t('expenses.recurring') || 'Recurring'}
+                      </Badge>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm dark:text-zinc-300">{e.description ?? '-'}</span>
@@ -346,8 +431,8 @@ export const OperatingExpenses = () => {
                   onChange={(e) => setFormCategory(e.target.value as ExpenseCategory)}
                   className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
                 >
-                  {EXPENSE_CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{t(`expenses.categoryLabel.${cat}`)}</option>
+                  {expenseCategories.map(cat => (
+                    <option key={cat} value={cat}>{t(`expenses.categoryLabel.${cat}`, cat)}</option>
                   ))}
                 </select>
               </div>
@@ -373,18 +458,37 @@ export const OperatingExpenses = () => {
                 <Switch checked={isRecurring} onChange={setIsRecurring} />
               </div>
               {isRecurring && (
-                <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                  <Label className="text-[10px] text-zinc-400 uppercase tracking-widest mb-2 block">{t('expenses.form.frequency')}</Label>
-                  <div className="flex gap-2">
-                    {[
-                      { key: 'Monthly', label: t('expenses.form.monthly') },
-                      { key: 'Quarterly', label: t('expenses.form.quarterly') },
-                      { key: 'Yearly', label: t('expenses.form.yearly') },
-                    ].map(freq => (
-                      <button key={freq.key} className="flex-1 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-[10px] font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                        {freq.label}
-                      </button>
-                    ))}
+                <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
+                  <div>
+                    <Label className="text-[10px] text-zinc-400 uppercase tracking-widest mb-2 block">{t('expenses.form.frequency')}</Label>
+                    <div className="flex gap-2">
+                      {[
+                        { key: 'weekly' as const, label: t('expenses.form.weekly') || 'Weekly' },
+                        { key: 'monthly' as const, label: t('expenses.form.monthly') },
+                      ].map(freq => (
+                        <button
+                          key={freq.key}
+                          type="button"
+                          onClick={() => setRecurringFrequency(freq.key)}
+                          className={cn(
+                            'flex-1 py-1.5 rounded-lg border text-[10px] font-bold transition-colors',
+                            recurringFrequency === freq.key
+                              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
+                              : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                          )}
+                        >
+                          {freq.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] text-zinc-400 uppercase tracking-widest">{t('expenses.form.recurrenceEndDate') || 'End Date (optional)'}</Label>
+                    <Input
+                      type="date"
+                      value={recurringEndDate}
+                      onChange={(e) => setRecurringEndDate(e.target.value)}
+                    />
                   </div>
                 </div>
               )}
@@ -392,10 +496,49 @@ export const OperatingExpenses = () => {
 
             <div className="space-y-1.5">
               <Label>{t('expenses.form.receiptInvoice')}</Label>
-              <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-2 hover:border-zinc-400 transition-colors cursor-pointer">
-                <Upload size={24} className="text-zinc-400" />
-                <p className="text-xs text-zinc-500">{t('expenses.form.uploadProof')}</p>
-              </div>
+              {receiptUrl ? (
+                <div className="flex items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                  <Receipt size={16} className="text-indigo-500 shrink-0" />
+                  <a
+                    href={receiptUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline truncate flex-1"
+                  >
+                    {t('expenses.form.viewReceipt')}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setReceiptUrl(null)}
+                    className="text-xs text-zinc-400 hover:text-rose-600 transition-colors"
+                  >
+                    {t('common.remove') || 'Remove'}
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-2 hover:border-zinc-400 transition-colors cursor-pointer"
+                  onClick={handleDropZoneClick}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  {isUploadingReceipt ? (
+                    <p className="text-xs text-zinc-500">{t('common.uploading') || 'Uploading...'}</p>
+                  ) : (
+                    <>
+                      <Upload size={24} className="text-zinc-400" />
+                      <p className="text-xs text-zinc-500">{t('expenses.form.uploadProof')}</p>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

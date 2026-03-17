@@ -17,4 +17,8 @@ export const paymentsService = {
     api.get<OverdueSummary>('/api/admin/payments/overdue-summary').then((r) => r.data),
   generateInvoice: (id: string) =>
     api.post<Payment>(`/api/admin/payments/${id}/generate-invoice`).then((r) => r.data),
+  batchRecord: (data: { payment_ids: string[]; paid_date: string; method: 'CASH' | 'TRANSFER' | 'OTHER' }) =>
+    api.post<{ updated: number }>('/api/admin/payments/batch-record', data).then((r) => r.data),
+  remind: (id: string) =>
+    api.post<{ reminded: boolean }>(`/api/admin/payments/${id}/remind`).then((r) => r.data),
 };

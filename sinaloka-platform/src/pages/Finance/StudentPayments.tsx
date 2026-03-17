@@ -10,13 +10,20 @@ import {
 import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import { usePayments, useUpdatePayment, useDeletePayment, useGenerateInvoice, useOverdueSummary } from '@/src/hooks/usePayments';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { paymentsService } from '@/src/services/payments.service';
 import type { Payment, UpdatePaymentDto } from '@/src/types/payment';
 
 export const StudentPayments = () => {
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [showLedger, setShowLedger] = useState(false);
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [isBatchRecording, setIsBatchRecording] = useState(false);
+  const [batchMethod, setBatchMethod] = useState<'CASH' | 'TRANSFER' | 'OTHER'>('TRANSFER');
+  const [batchDate, setBatchDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [filterStatus, setFilterStatus] = useState<'PAID' | 'PENDING' | 'OVERDUE' | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -90,6 +97,35 @@ export const StudentPayments = () => {
     });
   };
 
+  const handleBatchRecord = async () => {
+    if (selectedIds.length === 0) return;
+    setIsBatchRecording(true);
+    try {
+      const result = await paymentsService.batchRecord({
+        payment_ids: selectedIds,
+        paid_date: batchDate,
+        method: batchMethod,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['payments'] });
+      setSelectedIds([]);
+      setShowBatchModal(false);
+      toast.success(t('payments.toast.batchRecorded', { count: result.updated }));
+    } catch {
+      toast.error(t('payments.toast.batchError'));
+    } finally {
+      setIsBatchRecording(false);
+    }
+  };
+
+  const handleRemind = async (paymentId: string) => {
+    try {
+      await paymentsService.remind(paymentId);
+      toast.success(t('payments.reminderSent'));
+    } catch {
+      toast.error(t('payments.reminderFailed'));
+    }
+  };
+
   const toggleSelect = (id: string) => {
     setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
@@ -135,7 +171,7 @@ export const StudentPayments = () => {
         </div>
         <div className="flex items-center gap-3">
           {selectedIds.length > 0 && (
-            <Button variant="primary" className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={() => toast.info(t('common.comingSoon'))}>
+            <Button variant="primary" className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={() => { setBatchDate(new Date().toISOString().split('T')[0]); setBatchMethod('TRANSFER'); setShowBatchModal(true); }}>
               <CheckCircle2 size={16} />
               {t('payments.recordBatch', { count: selectedIds.length })}
             </Button>
@@ -262,7 +298,7 @@ export const StudentPayments = () => {
                             <DollarSign size={18} />
                           </button>
                           <button
-                            onClick={() => toast.info(t('common.comingSoon'))}
+                            onClick={() => handleRemind(p.id)}
                             className="p-2 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
                             title={t('payments.tooltip.sendReminder')}
                           >
@@ -349,6 +385,56 @@ export const StudentPayments = () => {
           </div>
         </div>
       </Card>
+
+      {/* Batch Record Modal */}
+      <AnimatePresence>
+        {showBatchModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isBatchRecording && setShowBatchModal(false)}
+              className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative z-10 border border-zinc-100 dark:border-zinc-800"
+            >
+              <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
+                <h3 className="text-xl font-bold dark:text-zinc-100">{t('payments.modal.batchRecordTitle')}</h3>
+                <p className="text-xs text-zinc-500 mt-1">{t('payments.modal.batchRecordSubtitle', { count: selectedIds.length })}</p>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="space-y-1.5">
+                  <Label>{t('payments.form.date')}</Label>
+                  <Input type="date" value={batchDate} onChange={(e) => setBatchDate(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t('payments.form.method')}</Label>
+                  <select
+                    value={batchMethod}
+                    onChange={(e) => setBatchMethod(e.target.value as 'CASH' | 'TRANSFER' | 'OTHER')}
+                    className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
+                  >
+                    <option value="TRANSFER">{t('payments.form.bankTransfer')}</option>
+                    <option value="CASH">{t('payments.form.cash')}</option>
+                    <option value="OTHER">{t('payments.form.eWallet')}</option>
+                  </select>
+                </div>
+              </div>
+              <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                <Button variant="outline" className="flex-1 justify-center" onClick={() => setShowBatchModal(false)} disabled={isBatchRecording}>{t('common.cancel')}</Button>
+                <Button className="flex-1 justify-center bg-indigo-600 hover:bg-indigo-700" onClick={handleBatchRecord} disabled={isBatchRecording}>
+                  {isBatchRecording ? t('common.processing') : t('payments.modal.confirmPayment')}
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Record Payment Modal */}
       <AnimatePresence>
