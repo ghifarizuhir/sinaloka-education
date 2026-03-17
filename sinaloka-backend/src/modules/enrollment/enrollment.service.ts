@@ -306,8 +306,13 @@ export class EnrollmentService {
   }
 
   async bulkDelete(institutionId: string, ids: string[]) {
-    const result = await this.prisma.enrollment.deleteMany({
-      where: { id: { in: ids }, institution_id: institutionId },
+    const result = await this.prisma.$transaction(async (tx) => {
+      await tx.payment.deleteMany({
+        where: { enrollment_id: { in: ids }, institution_id: institutionId },
+      });
+      return tx.enrollment.deleteMany({
+        where: { id: { in: ids }, institution_id: institutionId },
+      });
     });
     return { deleted: result.count };
   }

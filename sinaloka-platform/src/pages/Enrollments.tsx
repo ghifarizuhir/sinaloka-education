@@ -781,6 +781,7 @@ export const Enrollments = () => {
                 <select
                   className="h-8 px-2 rounded-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 text-xs font-medium focus:outline-none"
                   defaultValue=""
+                  disabled={bulkUpdate.isPending}
                   onChange={(e) => {
                     if (e.target.value) handleBulkStatusChange(e.target.value as EnrollmentStatus);
                     e.target.value = '';

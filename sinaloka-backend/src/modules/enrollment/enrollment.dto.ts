@@ -40,7 +40,10 @@ export const BulkUpdateEnrollmentSchema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(100),
   status: EnrollmentStatus.optional(),
   payment_status: PaymentStatus.optional(),
-});
+}).refine(
+  (data) => data.status !== undefined || data.payment_status !== undefined,
+  { message: 'At least one of status or payment_status must be provided' },
+);
 export type BulkUpdateEnrollmentDto = z.infer<typeof BulkUpdateEnrollmentSchema>;
 
 export const BulkDeleteEnrollmentSchema = z.object({
