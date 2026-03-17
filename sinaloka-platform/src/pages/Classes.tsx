@@ -38,6 +38,7 @@ import {
   useDeleteClass
 } from '@/src/hooks/useClasses';
 import { useTutors } from '@/src/hooks/useTutors';
+import { useBillingSettings } from '@/src/hooks/useSettings';
 import type { Class, CreateClassDto, ScheduleDay } from '@/src/types/class';
 
 const SUBJECT_COLORS: Record<string, string> = {
@@ -81,6 +82,8 @@ export const Classes = () => {
 
   const { data, isLoading } = useClasses({ page, limit });
   const { data: tutorsData } = useTutors({ limit: 100, is_verified: true });
+  const { data: billingSettings } = useBillingSettings();
+  const billingMode = billingSettings?.billing_mode ?? 'manual';
   const createClass = useCreateClass();
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
@@ -612,7 +615,13 @@ export const Classes = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="fee">{t('classes.form.feePerSession')}</Label>
+              <Label htmlFor="fee">
+                {billingMode === 'subscription'
+                  ? t('classes.form.monthlyFee')
+                  : billingMode === 'manual'
+                    ? t('classes.form.baseFee')
+                    : t('classes.form.feePerSession')}
+              </Label>
               <Input
                 id="fee"
                 type="number"
@@ -623,15 +632,17 @@ export const Classes = () => {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label>{t('classes.form.packageFee')}</Label>
-            <Input
-              type="number"
-              placeholder="700000"
-              value={formPackageFee}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPackageFee(e.target.value)}
-            />
-          </div>
+          {billingMode === 'package' && (
+            <div className="space-y-1.5">
+              <Label>{t('classes.form.packageFee')}</Label>
+              <Input
+                type="number"
+                placeholder="700000"
+                value={formPackageFee}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPackageFee(e.target.value)}
+              />
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label>{t('classes.form.tutorFeeMode')}</Label>
             <select
