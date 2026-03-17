@@ -30,9 +30,9 @@ import { toast } from 'sonner';
 import { Card, Button, Badge, Switch, Input, Label } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
 import { useAttendanceBySession, useAttendanceSummary, useUpdateAttendance } from '@/src/hooks/useAttendance';
-import { useSessions } from '@/src/hooks/useSessions';
+import { useSessions, useSessionStudents } from '@/src/hooks/useSessions';
 import type { Attendance as AttendanceRecord, AttendanceStatus, UpdateAttendanceDto } from '@/src/types/attendance';
-import type { Session } from '@/src/types/session';
+import type { Session, SessionStudent } from '@/src/types/session';
 
 const SESSION_STATUS_COLOR: Record<string, string> = {
   SCHEDULED: 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400',
@@ -67,9 +67,11 @@ export const Attendance = () => {
     date_to: dateStr,
   });
   const attendanceQuery = useAttendanceBySession(selectedSessionId ?? '');
+  const studentsQuery = useSessionStudents(selectedSessionId);
 
   const sessions: Session[] = sessionsQuery.data?.data ?? [];
   const attendanceRecords: AttendanceRecord[] = attendanceQuery.data ?? [];
+  const sessionStudents: SessionStudent[] = studentsQuery.data?.students ?? [];
 
   // Selected session object
   const selectedSession = useMemo(() => sessions.find(s => s.id === selectedSessionId), [sessions, selectedSessionId]);
@@ -124,7 +126,7 @@ export const Attendance = () => {
 
   const bulkMarkAll = (status: AttendanceStatus) => {
     const updates: Record<string, UpdateAttendanceDto> = {};
-    attendanceRecords.forEach(r => { updates[r.id] = { ...(pendingChanges[r.id] ?? {}), status }; });
+    sessionStudents.filter(s => s.attendance_id !== null).forEach(s => { updates[s.attendance_id!] = { ...(pendingChanges[s.attendance_id!] ?? {}), status }; });
     setPendingChanges(prev => ({ ...prev, ...updates }));
   };
 
@@ -141,8 +143,9 @@ export const Attendance = () => {
     }
   };
 
-  const presentCount = attendanceRecords.filter(r => getEffectiveStatus(r) === 'PRESENT').length;
-  const absentCount = attendanceRecords.filter(r => getEffectiveStatus(r) === 'ABSENT').length;
+  const studentsWithAttendance = sessionStudents.filter(s => s.attendance_id !== null);
+  const presentCount = studentsWithAttendance.filter(s => (pendingChanges[s.attendance_id!]?.status ?? s.status) === 'PRESENT').length;
+  const absentCount = studentsWithAttendance.filter(s => (pendingChanges[s.attendance_id!]?.status ?? s.status) === 'ABSENT').length;
 
   return (
     <div className="space-y-6 pb-24">
@@ -309,7 +312,7 @@ export const Attendance = () => {
                         <span className="text-2xl font-bold">
                           {presentCount}
                           <span className="text-zinc-300 dark:text-zinc-700 mx-1">/</span>
-                          {attendanceRecords.length}
+                          {sessionStudents.length}
                         </span>
                         <span className="text-xs font-medium text-zinc-500">{t('attendance.present')}</span>
                       </div>
@@ -339,13 +342,13 @@ export const Attendance = () => {
                     </div>
                   </div>
 
-                  {attendanceQuery.isLoading ? (
+                  {(attendanceQuery.isLoading || studentsQuery.isLoading) ? (
                     <div className="space-y-2">
                       {[...Array(4)].map((_, i) => (
                         <div key={i} className="h-14 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
                       ))}
                     </div>
-                  ) : attendanceRecords.length === 0 ? (
+                  ) : sessionStudents.length === 0 ? (
                     <div className="py-8 text-center text-zinc-400 text-sm">
                       {t('attendance.noRecords')}
                     </div>
@@ -361,64 +364,83 @@ export const Attendance = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                          {attendanceRecords.map((record) => {
-                            const effectiveStatus = getEffectiveStatus(record);
-                            const effectiveHw = getEffectiveHomework(record);
-                            const effectiveNotes = getEffectiveNotes(record);
-                            const studentName = record.student?.name ?? '—';
-                            const studentGrade = record.student?.grade ?? '';
+                          {sessionStudents.map((student) => {
+                            const hasAttendance = student.attendance_id !== null;
+                            const effectiveStatus = hasAttendance
+                              ? (pendingChanges[student.attendance_id!]?.status ?? student.status) as AttendanceStatus
+                              : null;
+                            const effectiveHw = hasAttendance
+                              ? (pendingChanges[student.attendance_id!]?.homework_done ?? student.homework_done)
+                              : false;
+                            const effectiveNotes = hasAttendance
+                              ? (pendingChanges[student.attendance_id!]?.notes ?? student.notes ?? '')
+                              : '';
                             return (
                               <tr
-                                key={record.id}
-                                onFocus={() => setFocusedAttendanceId(record.id)}
+                                key={student.id}
+                                onFocus={() => hasAttendance && setFocusedAttendanceId(student.attendance_id)}
                                 onBlur={() => setFocusedAttendanceId(null)}
-                                tabIndex={0}
+                                tabIndex={hasAttendance ? 0 : undefined}
                                 className={cn(
-                                  "hover:bg-zinc-50/30 dark:hover:bg-zinc-900/30 transition-colors outline-none",
-                                  focusedAttendanceId === record.id && "bg-zinc-50 dark:bg-zinc-900 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700"
+                                  "transition-colors outline-none",
+                                  hasAttendance
+                                    ? cn("hover:bg-zinc-50/30 dark:hover:bg-zinc-900/30", focusedAttendanceId === student.attendance_id && "bg-zinc-50 dark:bg-zinc-900 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700")
+                                    : "opacity-60"
                                 )}
                               >
                                 <td className="px-6 py-4">
                                   <div className="flex flex-col">
-                                    <span className="text-sm font-medium">{studentName}</span>
-                                    {studentGrade && <span className="text-[10px] text-zinc-500">{studentGrade}</span>}
+                                    <span className="text-sm font-medium">{student.name}</span>
+                                    {student.grade && <span className="text-[10px] text-zinc-500">{student.grade}</span>}
                                   </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                  <div className="inline-flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg gap-1">
-                                    {(['PRESENT', 'ABSENT', 'LATE'] as AttendanceStatus[]).map((status) => (
-                                      <button
-                                        key={status}
-                                        onClick={() => setLocalStatus(record.id, status)}
-                                        className={cn(
-                                          "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
-                                          effectiveStatus === status
-                                            ? status === 'PRESENT' ? "bg-emerald-500 text-white shadow-sm" :
-                                              status === 'ABSENT' ? "bg-rose-500 text-white shadow-sm" :
-                                              "bg-amber-500 text-white shadow-sm"
-                                            : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                                        )}
-                                      >
-                                        {STATUS_LABEL[status][0]}
-                                      </button>
-                                    ))}
-                                  </div>
+                                  {hasAttendance ? (
+                                    <div className="inline-flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg gap-1">
+                                      {(['PRESENT', 'ABSENT', 'LATE'] as AttendanceStatus[]).map((status) => (
+                                        <button
+                                          key={status}
+                                          onClick={() => setLocalStatus(student.attendance_id!, status)}
+                                          className={cn(
+                                            "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
+                                            effectiveStatus === status
+                                              ? status === 'PRESENT' ? "bg-emerald-500 text-white shadow-sm" :
+                                                status === 'ABSENT' ? "bg-rose-500 text-white shadow-sm" :
+                                                "bg-amber-500 text-white shadow-sm"
+                                              : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                          )}
+                                        >
+                                          {STATUS_LABEL[status][0]}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{t('attendance.pending', 'Pending')}</span>
+                                  )}
                                 </td>
                                 <td className="px-6 py-4 text-center">
-                                  <input
-                                    type="checkbox"
-                                    className="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
-                                    checked={effectiveHw}
-                                    onChange={(e) => setLocalHomework(record.id, e.target.checked)}
-                                  />
+                                  {hasAttendance ? (
+                                    <input
+                                      type="checkbox"
+                                      className="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                                      checked={effectiveHw}
+                                      onChange={(e) => setLocalHomework(student.attendance_id!, e.target.checked)}
+                                    />
+                                  ) : (
+                                    <span className="text-zinc-300 dark:text-zinc-700">—</span>
+                                  )}
                                 </td>
                                 <td className="px-6 py-4">
-                                  <Input
-                                    className="h-8 text-xs w-32"
-                                    placeholder={t('attendance.notePlaceholder')}
-                                    value={effectiveNotes}
-                                    onChange={(e) => setLocalNotes(record.id, e.target.value)}
-                                  />
+                                  {hasAttendance ? (
+                                    <Input
+                                      className="h-8 text-xs w-32"
+                                      placeholder={t('attendance.notePlaceholder')}
+                                      value={effectiveNotes}
+                                      onChange={(e) => setLocalNotes(student.attendance_id!, e.target.value)}
+                                    />
+                                  ) : (
+                                    <span className="text-zinc-300 dark:text-zinc-700">—</span>
+                                  )}
                                 </td>
                               </tr>
                             );
