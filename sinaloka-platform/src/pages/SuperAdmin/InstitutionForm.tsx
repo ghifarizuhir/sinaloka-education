@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Label } from '../../components/UI';
+import { Card, Button, Input, Label, PasswordInput } from '../../components/UI';
 import { toast } from 'sonner';
 import {
   useCreateInstitution,
@@ -269,9 +269,8 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
                 {t('superAdmin.form.adminPassword')}{' '}
                 <span className="text-red-500">*</span>
               </Label>
-              <Input
+              <PasswordInput
                 id="adminPassword"
-                type="password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="••••••••"

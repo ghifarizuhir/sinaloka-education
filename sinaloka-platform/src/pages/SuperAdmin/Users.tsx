@@ -16,6 +16,7 @@ import {
   Input,
   Label,
   Switch,
+  PasswordInput,
 } from '../../components/UI';
 import { cn, formatDate } from '../../lib/utils';
 import { useUsers, useCreateUser, useUpdateUser } from '@/src/hooks/useUsers';
@@ -374,8 +375,7 @@ export default function SuperAdminUsers() {
           </div>
           <div className="space-y-1.5">
             <Label>{t('superAdmin.createAdminModal.password')}</Label>
-            <Input
-              type="password"
+            <PasswordInput
               value={createPassword}
               onChange={(e) => setCreatePassword(e.target.value)}
             />

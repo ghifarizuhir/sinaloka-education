@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function LoginPage({ onForgotPassword }: { onForgotPassword: () => void }) {
   const { login } = useAuth();
@@ -40,8 +41,7 @@ export function LoginPage({ onForgotPassword }: { onForgotPassword: () => void }
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm" />
+            <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" />
           </div>
           <button type="submit" disabled={loading}
             className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all">

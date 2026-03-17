@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Lock, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -115,13 +116,11 @@ export function ResetPasswordPage() {
             <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
               Password Baru
             </label>
-            <input
-              type="password"
+            <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Minimal 8 karakter"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
           </div>
 
@@ -129,13 +128,11 @@ export function ResetPasswordPage() {
             <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
               Konfirmasi Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               placeholder="Ulangi password baru"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
           </div>
 

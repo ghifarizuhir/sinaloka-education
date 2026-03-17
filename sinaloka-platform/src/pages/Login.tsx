@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
-import { Card, Button, Input, Label } from '@/src/components/UI';
+import { Card, Button, Input, Label, PasswordInput } from '@/src/components/UI';
 
 export function Login() {
   const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
@@ -83,9 +83,8 @@ export function Login() {
 
             <div className="space-y-2">
               <Label htmlFor="password">{t('login.passwordLabel')}</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder={t('login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

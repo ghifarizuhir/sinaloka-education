@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { UserPlus, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { PasswordInput } from '../components/PasswordInput';
 
 interface InvitationInfo {
   name: string;
@@ -190,13 +191,11 @@ export function AcceptInvitePage() {
             <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
               Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Min. 8 karakter"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
           </div>
 
@@ -205,13 +204,11 @@ export function AcceptInvitePage() {
             <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
               Konfirmasi Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               placeholder="Ulangi password"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
           </div>
 

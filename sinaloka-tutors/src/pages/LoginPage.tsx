@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -88,13 +89,11 @@ export function LoginPage() {
             <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
               Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
           </div>
 

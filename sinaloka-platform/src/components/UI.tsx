@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Search, Check } from 'lucide-react';
+import { X, Search, Check, Eye, EyeOff } from 'lucide-react';
 
 export const Card = ({ children, className, ...props }: { children: React.ReactNode, className?: string } & React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl p-6 shadow-sm transition-colors", className)} {...props}>
@@ -46,6 +46,24 @@ export const Input = ({ className, ...props }: React.InputHTMLAttributes<HTMLInp
     {...props}
   />
 );
+
+export function PasswordInput(props: Omit<React.ComponentProps<'input'>, 'type'>) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <Input {...props} type={show ? 'text' : 'password'} className={cn(props.className, 'pr-10')} />
+      <button
+        type="button"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+        onClick={() => setShow(!show)}
+        aria-label={show ? 'Hide password' : 'Show password'}
+        tabIndex={-1}
+      >
+        {show ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  );
+}
 
 export const SearchInput = ({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
   <div className="relative">

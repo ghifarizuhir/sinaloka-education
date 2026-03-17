@@ -10,6 +10,7 @@ import {
   Label,
   Modal,
   Skeleton,
+  PasswordInput,
 } from '../../components/UI';
 import { cn } from '../../lib/utils';
 import { toast } from 'sonner';
@@ -257,9 +258,8 @@ function AdminsTab({
               {t('superAdmin.form.adminPassword')}{' '}
               <span className="text-red-500">*</span>
             </Label>
-            <Input
+            <PasswordInput
               id="newAdminPassword"
-              type="password"
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
               placeholder="••••••••"
