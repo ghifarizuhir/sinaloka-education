@@ -74,6 +74,10 @@ function MainAppContent() {
     setStudents((prev) => prev.map((st) => st.id === studentId ? { ...st, homeworkDone: !st.homeworkDone } : st));
   };
 
+  const handleSetNote = (_classId: string, studentId: string, note: string) => {
+    setStudents((prev) => prev.map((st) => st.id === studentId ? { ...st, note } : st));
+  };
+
   const selectedClass = selectedClassId ? schedule.find((s) => s.id === selectedClassId) ?? null : null;
 
   const handleFinishAttendance = async (classId: string) => {
@@ -130,6 +134,7 @@ function MainAppContent() {
           onSetSessionSummary={setSessionSummary}
           onToggleAttendance={handleToggleAttendance}
           onToggleHomework={handleToggleHomework}
+          onSetNote={handleSetNote}
           onFinish={handleFinishAttendance}
           onClose={() => setSelectedClassId(null)}
         />

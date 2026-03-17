@@ -1,5 +1,5 @@
-import React from 'react';
-import { Calendar as CalendarIcon, CheckCircle2, X, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar as CalendarIcon, CheckCircle2, X, Clock, MessageSquare } from 'lucide-react';
 import type { ClassSchedule, Student } from '../types';
 import { cn } from '../lib/utils';
 import { format } from 'date-fns';
@@ -15,6 +15,7 @@ interface AttendancePageProps {
   onSetSessionSummary: (value: string) => void;
   onToggleAttendance: (classId: string, studentId: string, attendance: 'P' | 'A' | 'L') => void;
   onToggleHomework: (classId: string, studentId: string) => void;
+  onSetNote: (classId: string, studentId: string, note: string) => void;
   onFinish: (classId: string) => void;
   onClose: () => void;
 }
@@ -29,10 +30,25 @@ export function AttendancePage({
   onSetSessionSummary,
   onToggleAttendance,
   onToggleHomework,
+  onSetNote,
   onFinish,
   onClose,
 }: AttendancePageProps) {
   const presentCount = students.filter((s) => s.attendance === 'P').length;
+
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
+
+  const toggleNoteExpanded = (studentId: string) => {
+    setExpandedNotes((prev) => {
+      const next = new Set(prev);
+      if (next.has(studentId)) {
+        next.delete(studentId);
+      } else {
+        next.add(studentId);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-6 pb-24">
@@ -124,16 +140,39 @@ export function AttendancePage({
                   ))}
                 </div>
               </div>
-              <div className="flex items-center pt-4 border-t border-zinc-800">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={student.homeworkDone || false}
-                    onChange={() => onToggleHomework(selectedClass.id, student.id)}
-                    className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-lime-400 focus:ring-lime-400/20"
-                  />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">HW Done</span>
+              <div className="pt-4 border-t border-zinc-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={student.homeworkDone || false}
+                      onChange={() => onToggleHomework(selectedClass.id, student.id)}
+                      className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-lime-400 focus:ring-lime-400/20"
+                    />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">HW Done</span>
+                  </div>
+                  <button
+                    onClick={() => toggleNoteExpanded(student.id)}
+                    className={cn(
+                      'w-8 h-8 rounded-lg flex items-center justify-center transition-all border',
+                      student.note
+                        ? 'text-lime-400 border-lime-400/30 bg-lime-400/10'
+                        : 'text-zinc-500 border-zinc-700 bg-zinc-800'
+                    )}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                  </button>
                 </div>
+                {expandedNotes.has(student.id) && (
+                  <input
+                    type="text"
+                    value={student.note || ''}
+                    onChange={(e) => onSetNote(selectedClass.id, student.id, e.target.value)}
+                    placeholder="Add note..."
+                    maxLength={500}
+                    className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+                  />
+                )}
               </div>
             </div>
           ))}
