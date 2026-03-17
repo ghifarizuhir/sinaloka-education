@@ -28,3 +28,6 @@ export function useApproveReschedule() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: ({ id, data }: { id: string; data: ApproveRescheduleDto }) => sessionsService.approveReschedule({ id, data }), onSuccess: () => qc.invalidateQueries({ queryKey: ['sessions'] }) });
 }
+export function useSessionStudents(sessionId: string | null) {
+  return useQuery({ queryKey: ['session-students', sessionId], queryFn: () => sessionsService.getStudents(sessionId!), enabled: !!sessionId });
+}
