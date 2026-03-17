@@ -1,0 +1,51 @@
+name: Tech Debt
+description: Code quality, refactoring, or cleanup task
+labels: ["type:tech-debt"]
+body:
+  - type: dropdown
+    id: app
+    attributes:
+      label: App
+      description: Which app is affected?
+      options:
+        - Backend
+        - Platform
+        - Tutors
+        - Parent
+        - Multiple / Cross-app
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs improvement?
+      description: Describe the current state and why it needs to change
+      placeholder: |
+        **Current state:**
+        ...
+
+        **Why it matters:**
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Changes
+      description: What should be done?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 - Critical
+        - P1 - High
+        - P2 - Medium
+        - P3 - Low
+    validations:
+      required: true
