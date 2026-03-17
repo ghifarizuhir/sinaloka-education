@@ -2,7 +2,7 @@ import React from 'react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { User } from 'lucide-react';
 import { cn } from '../lib/utils';
-import type { Session, SessionStatus } from '@/src/types/session';
+import type { Session, SessionStatus } from '../types/session';
 
 interface WeekCalendarProps {
   sessions: Session[];
