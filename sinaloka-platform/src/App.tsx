@@ -24,7 +24,7 @@ import { FinanceOverview } from './pages/Finance/FinanceOverview';
 import { StudentPayments } from './pages/Finance/StudentPayments';
 import { TutorPayouts } from './pages/Finance/TutorPayouts';
 import { OperatingExpenses } from './pages/Finance/OperatingExpenses';
-import { SettingsPage } from './pages/Settings';
+import { SettingsPage } from './pages/Settings/index';
 import { NotFound } from './pages/NotFound';
 import { WhatsApp } from './pages/WhatsApp';
 
