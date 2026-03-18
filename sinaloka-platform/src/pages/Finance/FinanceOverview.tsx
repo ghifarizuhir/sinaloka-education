@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import {
   DollarSign, Receipt, Wallet, Banknote,
   Download, AlertTriangle, TrendingUp, TrendingDown,
-  MessageSquare, ChevronRight, ArrowRight, Minus,
+  MessageSquare, ChevronRight, Minus,
   FileText, ChevronDown, Equal
 } from 'lucide-react';
 import { Card, Button, Badge, Skeleton, PageHeader, Tabs, DropdownMenu } from '../../components/UI';
@@ -166,6 +166,25 @@ export const FinanceOverview = () => {
             </div>
           ) : (
             <div className="relative">
+              {/* Shared Expenses card JSX */}
+              {(() => {
+                const expensesCard = (
+                  <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 rounded-lg bg-amber-500/10">
+                        <Receipt size={14} className="text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('finance.totalExpenses')}</span>
+                    </div>
+                    <p className="text-xl md:text-2xl font-bold tracking-tight text-amber-700 dark:text-amber-300">
+                      {formatCurrency(summary?.total_expenses ?? 0, i18n.language)}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {t('finance.expenseCountLabel', { count: summary?.expense_count ?? 0 })}
+                    </p>
+                  </div>
+                );
+                return (<>
               {/* Flow equation: Revenue - Payouts - Expenses = Net */}
               <div className="grid grid-cols-2 md:grid-cols-7 gap-3 items-center">
                 {/* Revenue */}
@@ -223,33 +242,19 @@ export const FinanceOverview = () => {
 
                 {/* Minus operator (for expenses) — hidden on mobile, shown inline */}
                 <div className="hidden md:flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                     <Minus size={14} className="text-muted-foreground" />
-                    <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-wider">OpEx</span>
                   </div>
                 </div>
 
-                {/* Mobile: Expenses label */}
+                {/* Mobile: Expenses */}
                 <motion.div
                   className="col-span-2 md:hidden"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.45 }}
                 >
-                  <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="p-1.5 rounded-lg bg-amber-500/10">
-                        <Receipt size={14} className="text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('finance.totalExpenses')}</span>
-                    </div>
-                    <p className="text-xl font-bold tracking-tight text-amber-700 dark:text-amber-300">
-                      {formatCurrency(summary?.total_expenses ?? 0, i18n.language)}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {t('finance.expenseCountLabel', { count: summary?.expense_count ?? 0 })}
-                    </p>
-                  </div>
+                  {expensesCard}
                 </motion.div>
               </div>
 
@@ -264,20 +269,7 @@ export const FinanceOverview = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.45 }}
                 >
-                  <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="p-1.5 rounded-lg bg-amber-500/10">
-                        <Receipt size={14} className="text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('finance.totalExpenses')}</span>
-                    </div>
-                    <p className="text-xl md:text-2xl font-bold tracking-tight text-amber-700 dark:text-amber-300">
-                      {formatCurrency(summary?.total_expenses ?? 0, i18n.language)}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {t('finance.expenseCountLabel', { count: summary?.expense_count ?? 0 })}
-                    </p>
-                  </div>
+                  {expensesCard}
                 </motion.div>
 
                 {/* Equals */}
@@ -331,6 +323,8 @@ export const FinanceOverview = () => {
                   </div>
                 </div>
               </motion.div>
+            </>);
+              })()}
             </div>
           )}
         </div>
@@ -382,7 +376,7 @@ export const FinanceOverview = () => {
                   <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} />
                   <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} tickFormatter={(v) => formatCurrencyShort(v, i18n.language)} />
                   <Tooltip formatter={(v: number) => formatCurrency(v, i18n.language)} contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--card)' }} />
-                  <Bar dataKey="amount" fill="oklch(0.546 0.245 262.881)" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="amount" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -407,7 +401,7 @@ export const FinanceOverview = () => {
                   <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} />
                   <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} tickFormatter={(v) => formatCurrencyShort(v, i18n.language)} />
                   <Tooltip formatter={(v: number) => formatCurrency(v, i18n.language)} contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--card)' }} />
-                  <Bar dataKey="amount" fill="oklch(0.646 0.222 41.116)" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="amount" fill="var(--chart-4)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
