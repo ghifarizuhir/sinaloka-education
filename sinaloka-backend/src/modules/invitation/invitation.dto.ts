@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const InviteTutorSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1).max(255).optional(),
-  subjects: z.array(z.string().min(1)).min(1),
+  subject_ids: z.array(z.string().uuid()).min(1),
   experience_years: z.number().int().min(0).default(0),
 });
 export type InviteTutorDto = z.infer<typeof InviteTutorSchema>;

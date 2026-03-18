@@ -49,14 +49,27 @@ export class TutorService {
         data: {
           user_id: user.id,
           institution_id: institutionId,
-          subjects: dto.subjects,
           experience_years: dto.experience_years ?? 0,
           availability: dto.availability ?? undefined,
           bank_name: dto.bank_name ?? null,
           bank_account_number: dto.bank_account_number ?? null,
           bank_account_holder: dto.bank_account_holder ?? null,
         },
+      });
+
+      if (dto.subject_ids?.length) {
+        await tx.tutorSubject.createMany({
+          data: dto.subject_ids.map((sid) => ({
+            tutor_id: tutor.id,
+            subject_id: sid,
+          })),
+        });
+      }
+
+      return tx.tutor.findFirst({
+        where: { id: tutor.id },
         include: {
+          tutor_subjects: { include: { subject: true } },
           user: {
             select: {
               id: true,
@@ -68,8 +81,6 @@ export class TutorService {
           },
         },
       });
-
-      return tutor;
     });
 
     return result;
@@ -79,7 +90,7 @@ export class TutorService {
     institutionId: string,
     query: TutorQueryDto,
   ): Promise<PaginatedResponse<any>> {
-    const { page, limit, search, subject, is_verified, sort_by, sort_order } =
+    const { page, limit, search, subject_id, is_verified, sort_by, sort_order } =
       query;
     const skip = (page - 1) * limit;
 
@@ -87,8 +98,8 @@ export class TutorService {
       institution_id: institutionId,
     };
 
-    if (subject) {
-      where.subjects = { has: subject };
+    if (subject_id) {
+      where.tutor_subjects = { some: { subject_id } };
     }
 
     if (is_verified !== undefined) {
@@ -117,6 +128,7 @@ export class TutorService {
         take: limit,
         orderBy,
         include: {
+          tutor_subjects: { include: { subject: true } },
           user: {
             select: {
               id: true,
@@ -141,6 +153,7 @@ export class TutorService {
     const tutor = await this.prisma.tutor.findFirst({
       where: { id, institution_id: institutionId },
       include: {
+        tutor_subjects: { include: { subject: true } },
         user: {
           select: {
             id: true,
@@ -164,7 +177,6 @@ export class TutorService {
     const existing = await this.findOne(institutionId, id);
 
     const tutorData: Record<string, unknown> = {};
-    if (dto.subjects !== undefined) tutorData.subjects = dto.subjects;
     if (dto.experience_years !== undefined)
       tutorData.experience_years = dto.experience_years;
     if (dto.availability !== undefined)
@@ -185,10 +197,18 @@ export class TutorService {
       });
     }
 
+    if (dto.subject_ids !== undefined) {
+      await this.prisma.tutorSubject.deleteMany({ where: { tutor_id: id } });
+      await this.prisma.tutorSubject.createMany({
+        data: dto.subject_ids.map((sid) => ({ tutor_id: id, subject_id: sid })),
+      });
+    }
+
     return this.prisma.tutor.update({
       where: { id },
       data: tutorData,
       include: {
+        tutor_subjects: { include: { subject: true } },
         user: {
           select: {
             id: true,
@@ -218,6 +238,7 @@ export class TutorService {
     const tutor = await this.prisma.tutor.findFirst({
       where: { user_id: userId },
       include: {
+        tutor_subjects: { include: { subject: true } },
         user: {
           select: {
             id: true,
@@ -251,6 +272,7 @@ export class TutorService {
         }),
       },
       include: {
+        tutor_subjects: { include: { subject: true } },
         user: {
           select: {
             id: true,

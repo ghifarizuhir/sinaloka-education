@@ -60,21 +60,18 @@ export class InvitationService {
         data: {
           user_id: user.id,
           institution_id: institutionId,
-          subjects: dto.subjects,
           experience_years: dto.experience_years ?? 0,
         },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-              is_active: true,
-            },
-          },
-        },
       });
+
+      if (dto.subject_ids?.length) {
+        await tx.tutorSubject.createMany({
+          data: dto.subject_ids.map((sid) => ({
+            tutor_id: tutor.id,
+            subject_id: sid,
+          })),
+        });
+      }
 
       await tx.invitation.create({
         data: {
@@ -87,7 +84,21 @@ export class InvitationService {
         },
       });
 
-      return tutor;
+      return tx.tutor.findFirst({
+        where: { id: tutor.id },
+        include: {
+          tutor_subjects: { include: { subject: true } },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              is_active: true,
+            },
+          },
+        },
+      });
     });
 
     await this.emailService.sendTutorInvitation({
