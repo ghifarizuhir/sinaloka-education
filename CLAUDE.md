@@ -133,11 +133,23 @@ All PRs to `master`/`main` are checked for:
 
 ### CI/CD Rules for Development
 
-1. **Never push directly to `master`/`main`** — always use PRs
-2. **All CI checks must pass** before merging
-3. **No secrets in code** — use GitHub Secrets/Environment variables
-4. **Database migrations**: Include in the PR if Prisma schema changed; CI runs `prisma migrate deploy` against a test database
-5. **New environment variables**: Document in `.env.example` of the affected app and note in the PR description
+1. **Use PRs for runtime changes** — any change that could break build, tests, or runtime behavior must go through a PR so CI validates it first
+2. **Direct push to `master` is OK for non-runtime changes** — docs, specs, plans, README, `.gitignore`, config files that don't affect builds
+3. **Rule of thumb**: If `npm run build` or `npm run test` could fail because of your change, use a PR. If it's impossible for the change to break a build or test, direct push is fine.
+4. **All CI checks must pass** before merging PRs
+5. **No secrets in code** — use GitHub Secrets/Environment variables
+6. **Database migrations**: Include in the PR if Prisma schema changed; CI runs `prisma migrate deploy` against a test database
+7. **New environment variables**: Document in `.env.example` of the affected app and note in the PR description
+
+**PR decision guide:**
+
+| Change Type | Approach |
+|---|---|
+| Features, bug fixes, refactors | PR — always |
+| i18n / translation changes | PR — CI confirms no broken keys |
+| Backend API or DB schema changes | PR — always |
+| Docs, specs, plans, README | Direct push OK |
+| Config/tooling (`.gitignore`, etc.) | Direct push OK |
 
 ## Key Conventions
 
