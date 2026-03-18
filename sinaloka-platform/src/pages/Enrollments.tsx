@@ -383,7 +383,15 @@ export const Enrollments = () => {
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {filteredEnrollments.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-zinc-400 text-sm">{t('enrollments.noEnrollmentsFound')}</td>
+                    <td colSpan={7} className="px-6 py-20 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+                          <Search size={32} className="text-zinc-300" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-1">{t('enrollments.noEnrollmentsFound')}</h3>
+                        <p className="text-zinc-500 text-sm mb-6">{t('enrollments.noEnrollmentsHint')}</p>
+                      </div>
+                    </td>
                   </tr>
                 )}
                 {filteredEnrollments.map((enroll) => (
