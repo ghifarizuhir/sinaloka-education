@@ -188,7 +188,7 @@ export const NewEnrollmentModal = ({
           onClick={handleEnroll}
           disabled={createIsPending || selectedStudentIds.length === 0 || !selectedClassId}
         >
-          {createIsPending ? t('common.processing') : t('enrollments.form.enrollStudents', { count: selectedStudentIds.length || '' })}
+          {createIsPending ? t('common.processing') : t('enrollments.form.enrollStudents', { count: selectedStudentIds.length })}
         </Button>
       </div>
     </Modal>
