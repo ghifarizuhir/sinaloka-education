@@ -476,7 +476,11 @@ export const Tutors = () => {
                   <div>
                     <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">{t('tutors.card.rating')}</p>
                     <p className="text-sm font-bold dark:text-zinc-300 flex items-center gap-1">
-                      <Star size={12} className="text-amber-400 fill-amber-400" /> {(tutor.rating ?? 0).toFixed(1)}
+                      {(tutor.rating ?? 0) > 0 ? (
+                        <><Star size={12} className="text-amber-400 fill-amber-400" /> {tutor.rating.toFixed(1)}</>
+                      ) : (
+                        <span className="text-xs text-zinc-400 font-normal">{t('tutors.noRatings')}</span>
+                      )}
                     </p>
                   </div>
                   <div>
@@ -521,9 +525,13 @@ export const Tutors = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">{tutor.experience_years} {t('tutors.card.years')}</td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-                        <Star size={14} fill="currentColor" /> {(tutor.rating ?? 0).toFixed(1)}
-                      </div>
+                      {(tutor.rating ?? 0) > 0 ? (
+                        <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
+                          <Star size={14} fill="currentColor" /> {tutor.rating.toFixed(1)}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-zinc-400">{t('tutors.noRatings')}</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       {getAvailabilityBadge(tutor)}
