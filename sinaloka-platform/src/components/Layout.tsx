@@ -19,7 +19,6 @@ import {
   ClipboardCheck,
   TrendingDown,
   LogOut,
-  Languages,
   MessageSquare
 } from 'lucide-react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
@@ -92,7 +91,7 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
 
       <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-colors relative">
         <Bell size={20} />
-        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+        <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>
       </button>
       <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
         {userInitials}
@@ -241,7 +240,7 @@ export const Layout = () => {
             onClick={handleLogout}
             title={t('layout.logOut')}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-all duration-200 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20",
+              "flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-all duration-200 text-muted-foreground hover:text-destructive hover:bg-destructive/10",
               isSidebarMinimized && "justify-center"
             )}
           >
