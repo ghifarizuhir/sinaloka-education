@@ -44,7 +44,12 @@ interface MultiSelectProps {
 
 ### Data Flow
 
-No backend changes. Still sends `subject_ids: string[]` in the create/update request. The `useSubjects()` hook already provides the subject list.
+No backend changes. Still sends `subject_ids: string[]` in the create/update request. The `useSubjects()` hook returns `{ id: string; name: string }[]` — map to `{ id, label: name }` at the call site.
+
+### Edge Cases
+
+- **Stale subject IDs on edit**: If a previously-assigned subject was deleted, filter `formData.subject_ids` against available options to prevent invisible selections.
+- **Chip overflow**: If many subjects are selected, the chip container should have a reasonable max-height with scroll.
 
 ---
 
@@ -54,11 +59,13 @@ No backend changes. Still sends `subject_ids: string[]` in the create/update req
 
 - **Remove** the rating slider from the TutorForm component entirely (Tutors.tsx lines ~132-150)
 - **Remove** `rating` from `formData` state initialization
+- **Update `handleSubmit`** — the current edit payload explicitly sends `rating: Number(formData.rating)`. Remove `rating` from the spread, only send `is_verified`
 - **Do not send** `rating` in update requests
 
 ### Display Changes
 
-- On tutor cards/table, when `rating === 0`: show "No ratings yet" (gray text, no stars)
+Update BOTH grid view cards and list view table rows:
+- When `rating === 0`: show "No ratings yet" (gray text, no stars)
 - When `rating > 0`: show filled stars as before (this path will only trigger once a scoring module populates it)
 
 ### Database
@@ -79,10 +86,11 @@ Add key `tutors.noRatings`: "No ratings yet" (en) / "Belum ada penilaian" (id)
 
 ### Behavior
 
-- `<Input type="number" min={0} max={50} />`
+- `<Input type="number" min={0} max={50} step={1} />`
 - Placeholder: "e.g. 5"
 - Label: "Years of Experience" (static label, no dynamic value display)
 - User types exact number — no slider imprecision
+- `step={1}` prevents decimal entry at the input level
 - Same backend validation: `z.number().int().min(0)`
 
 ---
@@ -91,15 +99,17 @@ Add key `tutors.noRatings`: "No ratings yet" (en) / "Belum ada penilaian" (id)
 
 | File | Change |
 |---|---|
-| `src/pages/Tutors.tsx` | Replace subjects UI with MultiSelect, remove rating slider, replace experience slider with number input, update rating display on cards |
+| `src/pages/Tutors.tsx` | Replace subjects UI with MultiSelect, remove rating slider, replace experience slider with number input, update handleSubmit, update rating display on cards (grid + list) |
 | `src/components/UI.tsx` | Add `MultiSelect` component |
 | `src/locales/en.json` | Add `tutors.noRatings` key |
 | `src/locales/id.json` | Add `tutors.noRatings` key |
+| `e2e/pages/tutors.page.ts` | Update `TutorFormData` interface (remove `rating`), update subject interaction to work with MultiSelect component |
+| `e2e/specs/crud/tutors.crud.spec.ts` | Update test data if needed to match new form interactions |
 
 ## No Backend Changes
 
 - Prisma schema unchanged (rating field stays with default 0)
-- Tutor DTOs unchanged
+- Tutor DTOs unchanged (rating stays writable for future scoring module API use)
 - API endpoints unchanged
 
 ## Out of Scope
