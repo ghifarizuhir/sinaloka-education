@@ -657,6 +657,18 @@
       "reminderError": "Gagal mengirim pengingat",
       "settingsSaved": "Pengaturan WhatsApp tersimpan",
       "settingsError": "Gagal menyimpan pengaturan"
+    },
+    "statusLabel": {
+      "pending": "Menunggu",
+      "sent": "Terkirim",
+      "delivered": "Diterima",
+      "read": "Dibaca",
+      "failed": "Gagal"
+    },
+    "typeLabel": {
+      "payment": "Pembayaran",
+      "attendance": "Kehadiran",
+      "enrollment": "Pendaftaran"
     }
   },
 

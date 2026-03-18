@@ -107,7 +107,7 @@ export const WhatsApp = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">WhatsApp</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t('layout.pageTitle.whatsapp')}</h2>
         <p className="text-zinc-500 text-sm">{t('whatsapp.send.title')}</p>
       </div>
 
@@ -173,11 +173,11 @@ export const WhatsApp = () => {
                 className="bg-transparent text-xs font-bold px-3 py-1.5 focus:outline-none dark:text-zinc-100"
               >
                 <option value="">{t('whatsapp.filter.allStatuses')}</option>
-                <option value="PENDING">PENDING</option>
-                <option value="SENT">SENT</option>
-                <option value="DELIVERED">DELIVERED</option>
-                <option value="READ">READ</option>
-                <option value="FAILED">FAILED</option>
+                <option value="PENDING">{t('whatsapp.statusLabel.pending')}</option>
+                <option value="SENT">{t('whatsapp.statusLabel.sent')}</option>
+                <option value="DELIVERED">{t('whatsapp.statusLabel.delivered')}</option>
+                <option value="READ">{t('whatsapp.statusLabel.read')}</option>
+                <option value="FAILED">{t('whatsapp.statusLabel.failed')}</option>
               </select>
             </div>
             <Input
@@ -201,9 +201,9 @@ export const WhatsApp = () => {
                 className="bg-transparent text-xs font-bold px-3 py-1.5 focus:outline-none dark:text-zinc-100"
               >
                 <option value="">{t('whatsapp.filter.allTypes')}</option>
-                <option value="payment">Payment</option>
-                <option value="attendance">Attendance</option>
-                <option value="enrollment">Enrollment</option>
+                <option value="payment">{t('whatsapp.typeLabel.payment')}</option>
+                <option value="attendance">{t('whatsapp.typeLabel.attendance')}</option>
+                <option value="enrollment">{t('whatsapp.typeLabel.enrollment')}</option>
               </select>
             </div>
           </div>
@@ -255,10 +255,10 @@ export const WhatsApp = () => {
                               <Badge variant="outline">{msg.template_name}</Badge>
                             </td>
                             <td className="px-6 py-4">
-                              <Badge variant={badge.variant} className={badge.className}>{msg.status}</Badge>
+                              <Badge variant={badge.variant} className={badge.className}>{t(`whatsapp.statusLabel.${msg.status.toLowerCase()}`)}</Badge>
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-xs text-zinc-500">{msg.related_type ? `${msg.related_type}` : '—'}</span>
+                              <span className="text-xs text-zinc-500">{msg.related_type ? t(`whatsapp.typeLabel.${msg.related_type}`) : '—'}</span>
                             </td>
                             <td className="px-6 py-4">
                               <span className="text-sm text-zinc-500 dark:text-zinc-400">{formatDate(msg.created_at, i18n.language)}</span>
@@ -345,7 +345,7 @@ export const WhatsApp = () => {
                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">{t('whatsapp.drawer.currentStatus')}</p>
                   {(() => {
                     const badge = STATUS_BADGE[selectedMessage.status] ?? { variant: 'default' as const };
-                    return <Badge variant={badge.variant} className={badge.className}>{selectedMessage.status}</Badge>;
+                    return <Badge variant={badge.variant} className={badge.className}>{t(`whatsapp.statusLabel.${selectedMessage.status.toLowerCase()}`)}</Badge>;
                   })()}
                 </div>
 
@@ -378,7 +378,7 @@ export const WhatsApp = () => {
                   <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-zinc-800">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">{t('whatsapp.drawer.relatedEntity')}</p>
                     <p className="text-sm dark:text-zinc-200">
-                      {selectedMessage.related_type}
+                      {t(`whatsapp.typeLabel.${selectedMessage.related_type}`)}
                       {selectedMessage.related_id && (
                         <span className="text-xs text-zinc-400 ml-2 font-mono">{selectedMessage.related_id.slice(0, 8)}</span>
                       )}

@@ -657,6 +657,18 @@
       "reminderError": "Failed to send reminder",
       "settingsSaved": "WhatsApp settings saved",
       "settingsError": "Failed to save settings"
+    },
+    "statusLabel": {
+      "pending": "Pending",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed"
+    },
+    "typeLabel": {
+      "payment": "Payment",
+      "attendance": "Attendance",
+      "enrollment": "Enrollment"
     }
   },
 
