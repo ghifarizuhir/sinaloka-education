@@ -835,7 +835,7 @@ export const Classes = () => {
           </div>
         </div>
         <div className="hidden lg:block space-y-3">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Pratinjau Jadwal</label>
+          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('classes.form.schedulePreview')}</label>
           {formTutorId ? (
             <ScheduleWeekPreview
               currentSchedules={formSchedules}
@@ -844,7 +844,7 @@ export const Classes = () => {
             />
           ) : (
             <div className="flex items-center justify-center h-64 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg">
-              <p className="text-sm text-zinc-400">Pilih tutor untuk melihat jadwal</p>
+              <p className="text-sm text-zinc-400">{t('classes.form.selectTutorForPreview')}</p>
             </div>
           )}
         </div>
