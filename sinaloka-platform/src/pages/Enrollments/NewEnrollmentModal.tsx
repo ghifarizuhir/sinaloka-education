@@ -133,7 +133,7 @@ export const NewEnrollmentModal = ({
                     <span className="text-xs font-bold dark:text-zinc-200">{cls.name}</span>
                   </div>
                   <div className="flex items-center gap-3 text-[9px] text-zinc-500 font-medium">
-                    <span>{cls.subject ?? ''}</span>
+                    <span>{typeof cls.subject === 'string' ? cls.subject : cls.subject?.name ?? ''}</span>
                     {cls.tutor_id && <span className="flex items-center gap-1"><User size={10} /> {t('enrollments.form.tutorAssigned')}</span>}
                   </div>
                 </div>
