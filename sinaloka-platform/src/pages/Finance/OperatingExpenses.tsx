@@ -6,7 +6,7 @@ import {
   RefreshCcw, TrendingDown, AlertCircle, CheckCircle2,
   FileText, ExternalLink, Upload
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton, ConfirmDialog } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton, ConfirmDialog, PageHeader, Select } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/src/hooks/useExpenses';
 import { useBillingSettings } from '@/src/hooks/useSettings';
@@ -211,12 +211,10 @@ export const OperatingExpenses = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight dark:text-zinc-100">{t('expenses.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('expenses.subtitle')}</p>
-        </div>
-        <div className="flex items-center gap-3">
+      <PageHeader
+        title={t('expenses.title')}
+        subtitle={t('expenses.subtitle')}
+        actions={<>
           <Button variant="outline" className="gap-2">
             <Download size={16} />
             {t('common.export')}
@@ -225,8 +223,8 @@ export const OperatingExpenses = () => {
             <Plus size={16} />
             {t('expenses.recordExpense')}
           </Button>
-        </div>
-      </div>
+        </>}
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -281,16 +279,14 @@ export const OperatingExpenses = () => {
                 onChange={(e) => setSearchInput(e.target.value)}
               />
             </div>
-            <select
+            <Select
               value={filterCategory}
-              onChange={(e) => { setFilterCategory(e.target.value as any); setCurrentPage(1); }}
-              className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
-            >
-              <option value="all">{t('common.allCategories')}</option>
-              {expenseCategories.map(cat => (
-                <option key={cat} value={cat}>{t(`expenses.categoryLabel.${cat}`, cat)}</option>
-              ))}
-            </select>
+              onChange={(value) => { setFilterCategory(value as any); setCurrentPage(1); }}
+              options={[
+                { value: 'all', label: t('common.allCategories') },
+                ...expenseCategories.map(cat => ({ value: cat, label: t(`expenses.categoryLabel.${cat}`, cat) })),
+              ]}
+            />
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="gap-2">
@@ -433,15 +429,12 @@ export const OperatingExpenses = () => {
               </div>
               <div className="space-y-1.5">
                 <Label>{t('expenses.form.category')}</Label>
-                <select
+                <Select
                   value={formCategory}
-                  onChange={(e) => setFormCategory(e.target.value as ExpenseCategory)}
-                  className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
-                >
-                  {expenseCategories.map(cat => (
-                    <option key={cat} value={cat}>{t(`expenses.categoryLabel.${cat}`, cat)}</option>
-                  ))}
-                </select>
+                  onChange={(value) => setFormCategory(value as ExpenseCategory)}
+                  className="w-full"
+                  options={expenseCategories.map(cat => ({ value: cat, label: t(`expenses.categoryLabel.${cat}`, cat) }))}
+                />
               </div>
             </div>
 
