@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Users,
   GraduationCap,
-  ArrowUpRight,
   ChevronRight,
   Clock,
   AlertTriangle,
@@ -26,7 +25,7 @@ import {
   Moon,
   Sunset
 } from 'lucide-react';
-import { Card, Button, Badge, Skeleton, DropdownMenu } from '../components/UI';
+import { Card, Button, Skeleton } from '../components/UI';
 import { cn, formatCurrencyShort, formatCurrency } from '../lib/utils';
 import { useDashboardStats, useDashboardActivity } from '@/src/hooks/useDashboard';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
@@ -34,9 +33,9 @@ import { AuthContext } from '@/src/contexts/AuthContext';
 
 const getGreeting = () => {
   const h = new Date().getHours();
-  if (h < 12) return { text: 'Good Morning', icon: Sun, gradient: 'from-amber-200 via-orange-100 to-yellow-50 dark:from-amber-950/40 dark:via-orange-950/20 dark:to-transparent' };
-  if (h < 17) return { text: 'Good Afternoon', icon: Sunset, gradient: 'from-sky-200 via-blue-100 to-indigo-50 dark:from-sky-950/40 dark:via-blue-950/20 dark:to-transparent' };
-  return { text: 'Good Evening', icon: Moon, gradient: 'from-indigo-200 via-purple-100 to-violet-50 dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-transparent' };
+  if (h < 12) return { key: 'morning' as const, icon: Sun, gradient: 'from-amber-200 via-orange-100 to-yellow-50 dark:from-amber-950/40 dark:via-orange-950/20 dark:to-transparent' };
+  if (h < 17) return { key: 'afternoon' as const, icon: Sunset, gradient: 'from-sky-200 via-blue-100 to-indigo-50 dark:from-sky-950/40 dark:via-blue-950/20 dark:to-transparent' };
+  return { key: 'evening' as const, icon: Moon, gradient: 'from-indigo-200 via-purple-100 to-violet-50 dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-transparent' };
 };
 
 const getActivityIcon = (type: string) => {
@@ -115,7 +114,7 @@ export const Dashboard = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-foreground/60">
                 <greeting.icon size={16} />
-                <span className="text-xs font-semibold uppercase tracking-widest">{greeting.text}</span>
+                <span className="text-xs font-semibold uppercase tracking-widest">{t(`dashboard.greeting_${greeting.key}`)}</span>
               </div>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
                 {userName ? `${userName} 👋` : t('dashboard.greeting')}
@@ -189,7 +188,7 @@ export const Dashboard = () => {
             icon: GraduationCap,
             accent: 'text-emerald-600 dark:text-emerald-400',
             accentBg: 'bg-emerald-500/10',
-            sub: 'verified',
+            sub: t('tutors.status.verified'),
           },
           {
             label: t('dashboard.attendanceRate'),
@@ -205,7 +204,7 @@ export const Dashboard = () => {
             icon: TrendingUp,
             accent: 'text-violet-600 dark:text-violet-400',
             accentBg: 'bg-violet-500/10',
-            sub: t('dashboard.thisMonth') ?? 'this month',
+            sub: t('finance.thisMonth'),
           },
         ].map((stat, i) => (
           <motion.div
@@ -252,13 +251,7 @@ export const Dashboard = () => {
                 <p className="text-3xl font-bold tracking-tight text-foreground">
                   {stats?.total_revenue != null ? formatCurrency(stats.total_revenue, i18n.language) : '—'}
                 </p>
-                <div className="flex items-center gap-1.5 mt-2">
-                  <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                    <ArrowUpRight size={14} />
-                    <span className="text-xs font-bold">+12%</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">vs last month</span>
-                </div>
+                <p className="text-xs text-muted-foreground mt-2">{t('finance.basedOnTotalRevenue')}</p>
               </div>
             </Card>
 
@@ -289,7 +282,7 @@ export const Dashboard = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-foreground">{t('dashboard.recentActivity')}</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Live feed</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{t('dashboard.liveFeed')}</p>
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={() => navigate('/attendance')}>
