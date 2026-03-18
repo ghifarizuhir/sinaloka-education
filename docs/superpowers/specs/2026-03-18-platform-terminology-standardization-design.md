@@ -16,8 +16,8 @@ The platform's i18n files contain inconsistent terminology across pages:
 - **Empty state format variance** (some with periods, some without; some with hints, some without)
 - **Delete confirmation patterns** range from ultra-short to multi-step type-to-confirm
 - **Subtitle style** mixes imperative "Manage..." with marketing noun phrases
-- **Hardcoded strings** in WhatsApp.tsx bypass i18n entirely
-- **Duplicate key** `common.allStatus` vs `common.allStatuses`
+- **Untranslated enum values** in WhatsApp.tsx (status badges, filter dropdowns show raw API values)
+- **Duplicate key** `common.allStatus` vs `common.allStatuses` (dead key, zero code references)
 
 ---
 
@@ -78,6 +78,11 @@ The platform's i18n files contain inconsistent terminology across pages:
 | `expenses.drawer.createTitle` | "Record New Expense" | "Record Expense" |
 | `expenses.drawer.saveExpense` | "Save Expense" | "Record Expense" |
 | `expenses.drawer.updateExpense` | "Update Expense" | "Save Changes" |
+| `superAdmin.createInstitution` | "Create Institution" | "Add Institution" |
+| `superAdmin.createAdmin` | "Create Admin" | "Add Admin" |
+| `superAdmin.createAdminModal.title` | "Create Admin" | "Add Admin" |
+
+> **Note on "Save Changes"**: The key `common.saveChanges` already exists with value "Save Changes". During implementation, consider replacing page-specific submit keys (`students.modal.updateStudent`, `classes.modal.updateClass`, `expenses.drawer.updateExpense`) with direct usage of `common.saveChanges` in code to prevent future drift.
 
 ---
 
@@ -105,6 +110,13 @@ The platform's i18n files contain inconsistent terminology across pages:
 | `superAdmin.toast.userUpdated` | "User updated successfully" | "User updated" |
 | `settings.general.saveSuccess` | "Settings saved successfully" | "Settings saved" |
 | `settings.billing.saveSuccess` | "Billing settings saved successfully" | "Billing settings saved" |
+| `students.toast.importSuccess` | "Students imported successfully" | "Students imported" |
+| `schedules.toast.sessionsGenerated` | "Sessions generated successfully" | "Sessions generated" |
+| `enrollments.toast.enrolled` | "{{count}} student(s) enrolled successfully" | "{{count}} student(s) enrolled" |
+| `enrollments.toast.importSuccess` | "Successfully imported {{count}} enrollment(s)" | "{{count}} enrollment(s) imported" |
+| `enrollments.toast.exportSuccess` | "Enrollments exported successfully" | "Enrollments exported" |
+| `finance.invoiceGenerated` | "Invoice generated successfully" | "Invoice generated" |
+| `finance.exportedSuccess` | "{{name}} exported successfully to CSV." | "{{name}} exported to CSV" |
 
 ---
 
@@ -134,7 +146,7 @@ Standard hint: `"Try adjusting your search or filters to find what you're lookin
 | `payouts.noPayoutsHint` | **New** |
 | `expenses.noExpensesHint` | **New** |
 
-> Implementation note: Check if page components render hint text. If not, add `{t('[module].no[Entity]Hint')}` rendering to those pages.
+> **Implementation note**: All 5 pages currently use a simple single-line `<td>` empty state pattern. Pages that already render hints (Students, Tutors, Classes) use a card layout with icon, `<h3>`, and `<p>` for the hint. The 5 pages will need structural HTML changes to match the existing hint pattern — not just adding a `t()` call. Follow the existing pattern from Students/Tutors/Classes pages.
 
 ---
 
@@ -159,20 +171,21 @@ All others in Tier 2 already match the standard.
 | Key | Current | Proposed |
 |---|---|---|
 | `attendance.subtitle` | "Automated tracking, parent notifications, and session reporting." | "Manage attendance tracking, notifications, and session reporting." |
-| `finance.subtitle` | "Actionable insights into your school's financial health." | "Monitor your institution's financial health and insights." |
+| `finance.subtitle` | "Actionable insights into your school's financial health." | "Monitor your institution's financial health and insights." (intentionally "Monitor" — Finance Overview is a read-only dashboard) |
 | `payments.subtitle` | "Automated billing and revenue recovery system." | "Manage student billing and payment records." |
 | `payouts.subtitle` | "Verification-first model for tutor earnings and audit trails." | "Manage tutor payout records and audit trails." |
-| `expenses.subtitle` | "Track and manage non-tutor operational costs." | "Manage operational expenses and cost tracking." |
+| `expenses.subtitle` | "Track and manage non-tutor operational costs." | "Manage non-tutor operational expenses." |
 
 ---
 
-## Section 6: WhatsApp.tsx Hardcoded Strings
+## Section 6: WhatsApp.tsx Untranslated Enum Values
+
+WhatsApp.tsx already uses `t()` extensively for tabs, stats, table headers, drawer labels, and toast messages. The remaining gaps are raw enum values displayed without translation:
 
 ### New i18n keys needed
 
 ```json
 "whatsapp": {
-  "title": "WhatsApp",
   "status": {
     "pending": "Pending",
     "sent": "Sent",
@@ -188,21 +201,22 @@ All others in Tier 2 already match the standard.
 }
 ```
 
-> Note: `whatsapp.title` key may already exist — verify before adding. The `status` and `type` sub-keys are new.
+> Note: These are additions to the existing `whatsapp` section. `whatsapp.title` is not needed — the page header can use `layout.pageTitle.whatsapp`.
 
 ### Code changes in WhatsApp.tsx
 
-1. Replace hardcoded `"WhatsApp"` header with `{t('layout.pageTitle.whatsapp')}`
-2. Replace hardcoded status `<option>` values with translated `{t('whatsapp.status.*')}`
-3. Replace hardcoded type `<option>` values with translated `{t('whatsapp.type.*')}`
+1. Replace hardcoded `"WhatsApp"` header (line ~110) with `{t('layout.pageTitle.whatsapp')}`
+2. Replace hardcoded status `<option>` display text with `{t('whatsapp.status.*')}`
+3. Replace hardcoded type `<option>` display text with `{t('whatsapp.type.*')}`
+4. Replace raw `{msg.status}` badge text and `{msg.related_type}` table cell with translated values
 
 ---
 
 ## Section 7: Duplicate Key Cleanup
 
-- **Remove**: `common.allStatus` ("All Status")
+- **Remove**: `common.allStatus` ("All Status") — dead key with zero code references
 - **Keep**: `common.allStatuses` ("All Statuses")
-- **Code change**: Find all `t('common.allStatus')` usages and replace with `t('common.allStatuses')`
+- **No code changes needed** — all code already uses `t('common.allStatuses')`
 
 ---
 
@@ -210,16 +224,14 @@ All others in Tier 2 already match the standard.
 
 | File | Type of Change |
 |---|---|
-| `src/locales/en.json` | ~49 key value updates + 5 new hint keys + WhatsApp status/type keys |
-| `src/locales/id.json` | Same changes, translated to Indonesian |
-| `src/pages/WhatsApp.tsx` | Replace hardcoded strings with t() calls |
+| `src/locales/en.json` | ~57 key value updates + 5 new hint keys + ~8 new WhatsApp keys + 1 key deletion = ~71 key operations |
+| `src/locales/id.json` | Same changes, translated to Indonesian (including trailing period removal on empty states) |
+| `src/pages/WhatsApp.tsx` | Replace raw enum values with t() calls, fix header |
 | `src/pages/Schedules.tsx` | Add hint text rendering (if missing) |
 | `src/pages/Enrollments.tsx` | Add hint text rendering (if missing) |
 | `src/pages/Finance/StudentPayments.tsx` | Add hint text rendering (if missing) |
 | `src/pages/Finance/TutorPayouts.tsx` | Add hint text rendering (if missing) |
 | `src/pages/Finance/OperatingExpenses.tsx` | Add hint text rendering (if missing) |
-| Any file using `t('common.allStatus')` | Replace with `t('common.allStatuses')` |
-
 ---
 
 ## Out of Scope
@@ -228,3 +240,10 @@ All others in Tier 2 already match the standard.
 - i18n key naming convention (camelCase vs snake_case) — separate refactor
 - id.json structural changes beyond translating the same keys
 - New features or UI changes beyond rendering hint text
+
+## Risk Assessment
+
+- **Low risk**: All i18n string changes are cosmetic. No logic changes. Regressions would be visual only.
+- **Medium risk**: Empty state hint rendering touches 5 page component TSX files with structural HTML changes. These should be visually verified.
+- **Low risk**: WhatsApp.tsx changes are straightforward `t()` wrapping.
+- **No risk**: `common.allStatus` deletion has zero code references.
