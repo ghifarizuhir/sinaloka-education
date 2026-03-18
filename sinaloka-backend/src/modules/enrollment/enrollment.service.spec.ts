@@ -57,27 +57,29 @@ describe('EnrollmentService', () => {
     id: 'class-a',
     institution_id: 'inst-1',
     name: 'Class A',
-    schedule_days: ['Monday', 'Wednesday'],
-    schedule_start_time: '14:00',
-    schedule_end_time: '15:30',
+    schedules: [
+      { id: 'sched-a1', day: 'Monday', start_time: '14:00', end_time: '15:30', class_id: 'class-a', created_at: new Date(), updated_at: new Date() },
+      { id: 'sched-a2', day: 'Wednesday', start_time: '14:00', end_time: '15:30', class_id: 'class-a', created_at: new Date(), updated_at: new Date() },
+    ],
   };
 
   const mockClassB = {
     id: 'class-b',
     institution_id: 'inst-1',
     name: 'Class B',
-    schedule_days: ['Monday'],
-    schedule_start_time: '15:00',
-    schedule_end_time: '16:30',
+    schedules: [
+      { id: 'sched-b1', day: 'Monday', start_time: '15:00', end_time: '16:30', class_id: 'class-b', created_at: new Date(), updated_at: new Date() },
+    ],
   };
 
   const mockClassC = {
     id: 'class-c',
     institution_id: 'inst-1',
     name: 'Class C',
-    schedule_days: ['Tuesday', 'Thursday'],
-    schedule_start_time: '14:00',
-    schedule_end_time: '15:30',
+    schedules: [
+      { id: 'sched-c1', day: 'Tuesday', start_time: '14:00', end_time: '15:30', class_id: 'class-c', created_at: new Date(), updated_at: new Date() },
+      { id: 'sched-c2', day: 'Thursday', start_time: '14:00', end_time: '15:30', class_id: 'class-c', created_at: new Date(), updated_at: new Date() },
+    ],
   };
 
   beforeEach(async () => {
@@ -154,9 +156,9 @@ describe('EnrollmentService', () => {
         ...mockClassB,
         id: 'class-d',
         name: 'Class D',
-        schedule_days: ['Monday'],
-        schedule_start_time: '16:00',
-        schedule_end_time: '17:00',
+        schedules: [
+          { id: 'sched-d1', day: 'Monday', start_time: '16:00', end_time: '17:00', class_id: 'class-d', created_at: new Date(), updated_at: new Date() },
+        ],
       };
 
       prisma.class.findFirst.mockResolvedValue(nonOverlappingClass);
@@ -178,9 +180,9 @@ describe('EnrollmentService', () => {
         id: 'class-adj',
         institution_id: 'inst-1',
         name: 'Adjacent',
-        schedule_days: ['Monday'],
-        schedule_start_time: '15:30',
-        schedule_end_time: '17:00',
+        schedules: [
+          { id: 'sched-adj1', day: 'Monday', start_time: '15:30', end_time: '17:00', class_id: 'class-adj', created_at: new Date(), updated_at: new Date() },
+        ],
       };
 
       prisma.class.findFirst.mockResolvedValue(adjacentClass);

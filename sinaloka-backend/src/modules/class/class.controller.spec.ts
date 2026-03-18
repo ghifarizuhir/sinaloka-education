@@ -18,6 +18,7 @@ describe('ClassController (integration)', () => {
   let testInstitutionId: string;
   let testTutorId: string;
   let createdClassId: string;
+  let testSubjectIds: { math: string; physics: string; chemistry: string; temp: string };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -46,7 +47,13 @@ describe('ClassController (integration)', () => {
     await prisma.class.deleteMany({
       where: { institution: { slug: 'class-ctrl-inst' } },
     });
+    await prisma.tutorSubject.deleteMany({
+      where: { tutor: { institution: { slug: 'class-ctrl-inst' } } },
+    });
     await prisma.tutor.deleteMany({
+      where: { institution: { slug: 'class-ctrl-inst' } },
+    });
+    await prisma.subject.deleteMany({
       where: { institution: { slug: 'class-ctrl-inst' } },
     });
     await prisma.refreshToken.deleteMany({
@@ -94,10 +101,39 @@ describe('ClassController (integration)', () => {
       data: {
         user_id: tutorUser.id,
         institution_id: testInstitutionId,
-        subjects: ['Mathematics'],
+        is_verified: true,
       },
     });
     testTutorId = tutor.id;
+
+    // Create subjects and tutor-subject links
+    const subjectMath = await prisma.subject.create({
+      data: { name: 'Mathematics', institution_id: testInstitutionId },
+    });
+    const subjectPhysics = await prisma.subject.create({
+      data: { name: 'Physics', institution_id: testInstitutionId },
+    });
+    const subjectChemistry = await prisma.subject.create({
+      data: { name: 'Chemistry', institution_id: testInstitutionId },
+    });
+    const subjectTemp = await prisma.subject.create({
+      data: { name: 'Temp', institution_id: testInstitutionId },
+    });
+    await prisma.tutorSubject.createMany({
+      data: [
+        { tutor_id: testTutorId, subject_id: subjectMath.id },
+        { tutor_id: testTutorId, subject_id: subjectPhysics.id },
+        { tutor_id: testTutorId, subject_id: subjectChemistry.id },
+        { tutor_id: testTutorId, subject_id: subjectTemp.id },
+      ],
+    });
+
+    testSubjectIds = {
+      math: subjectMath.id,
+      physics: subjectPhysics.id,
+      chemistry: subjectChemistry.id,
+      temp: subjectTemp.id,
+    };
 
     // Login as admin
     const loginRes = await request(app.getHttpServer())
@@ -114,7 +150,13 @@ describe('ClassController (integration)', () => {
       await prisma.class.deleteMany({
         where: { institution_id: testInstitutionId },
       });
+      await prisma.tutorSubject.deleteMany({
+        where: { tutor: { institution_id: testInstitutionId } },
+      });
       await prisma.tutor.deleteMany({
+        where: { institution_id: testInstitutionId },
+      });
+      await prisma.subject.deleteMany({
         where: { institution_id: testInstitutionId },
       });
       await prisma.refreshToken.deleteMany({
@@ -140,18 +182,19 @@ describe('ClassController (integration)', () => {
         .send({
           tutor_id: testTutorId,
           name: 'Math 101',
-          subject: 'Mathematics',
+          subject_id: testSubjectIds.math,
           capacity: 30,
           fee: 500000,
-          schedule_days: ['Monday', 'Wednesday'],
-          schedule_start_time: '14:00',
-          schedule_end_time: '15:30',
+          tutor_fee: 200000,
+          schedules: [
+            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
+            { day: 'Wednesday', start_time: '14:00', end_time: '15:30' },
+          ],
           room: 'Room A',
         })
         .expect(201);
 
       expect(response.body.name).toBe('Math 101');
-      expect(response.body.subject).toBe('Mathematics');
       expect(response.body.institution_id).toBe(testInstitutionId);
       createdClassId = response.body.id;
     });
@@ -162,12 +205,13 @@ describe('ClassController (integration)', () => {
         .send({
           tutor_id: testTutorId,
           name: 'Fail Class',
-          subject: 'Math',
+          subject_id: testSubjectIds.math,
           capacity: 10,
           fee: 100,
-          schedule_days: ['Monday'],
-          schedule_start_time: '09:00',
-          schedule_end_time: '10:00',
+          tutor_fee: 50,
+          schedules: [
+            { day: 'Monday', start_time: '09:00', end_time: '10:00' },
+          ],
         })
         .expect(401);
     });
@@ -179,12 +223,13 @@ describe('ClassController (integration)', () => {
         .send({
           tutor_id: testTutorId,
           name: 'Bad Time Class',
-          subject: 'Math',
+          subject_id: testSubjectIds.math,
           capacity: 10,
           fee: 100,
-          schedule_days: ['Monday'],
-          schedule_start_time: '15:00',
-          schedule_end_time: '14:00',
+          tutor_fee: 50,
+          schedules: [
+            { day: 'Monday', start_time: '15:00', end_time: '14:00' },
+          ],
         })
         .expect(400);
     });
@@ -192,33 +237,38 @@ describe('ClassController (integration)', () => {
 
   describe('GET /admin/classes', () => {
     beforeAll(async () => {
-      await prisma.class.createMany({
-        data: [
-          {
-            institution_id: testInstitutionId,
-            tutor_id: testTutorId,
-            name: 'Physics 101',
-            subject: 'Physics',
-            capacity: 25,
-            fee: 400000,
-            schedule_days: ['Tuesday', 'Thursday'],
-            schedule_start_time: '10:00',
-            schedule_end_time: '11:30',
-            status: 'ACTIVE',
+      await prisma.class.create({
+        data: {
+          institution_id: testInstitutionId,
+          tutor_id: testTutorId,
+          name: 'Physics 101',
+          subject_id: testSubjectIds.physics,
+          capacity: 25,
+          fee: 400000,
+          schedules: {
+            create: [
+              { day: 'Tuesday', start_time: '10:00', end_time: '11:30' },
+              { day: 'Thursday', start_time: '10:00', end_time: '11:30' },
+            ],
           },
-          {
-            institution_id: testInstitutionId,
-            tutor_id: testTutorId,
-            name: 'Old Chemistry',
-            subject: 'Chemistry',
-            capacity: 20,
-            fee: 350000,
-            schedule_days: ['Friday'],
-            schedule_start_time: '09:00',
-            schedule_end_time: '10:30',
-            status: 'ARCHIVED',
+          status: 'ACTIVE',
+        },
+      });
+      await prisma.class.create({
+        data: {
+          institution_id: testInstitutionId,
+          tutor_id: testTutorId,
+          name: 'Old Chemistry',
+          subject_id: testSubjectIds.chemistry,
+          capacity: 20,
+          fee: 350000,
+          schedules: {
+            create: [
+              { day: 'Friday', start_time: '09:00', end_time: '10:30' },
+            ],
           },
-        ],
+          status: 'ARCHIVED',
+        },
       });
     });
 
@@ -284,12 +334,14 @@ describe('ClassController (integration)', () => {
           institution_id: testInstitutionId,
           tutor_id: testTutorId,
           name: 'To Delete',
-          subject: 'Temp',
+          subject_id: testSubjectIds.temp,
           capacity: 10,
           fee: 100,
-          schedule_days: ['Monday'],
-          schedule_start_time: '08:00',
-          schedule_end_time: '09:00',
+          schedules: {
+            create: [
+              { day: 'Monday', start_time: '08:00', end_time: '09:00' },
+            ],
+          },
         },
       });
 

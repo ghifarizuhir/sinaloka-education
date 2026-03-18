@@ -349,9 +349,10 @@ describe('SessionService', () => {
         id: 'class-uuid-1',
         institution_id: institutionId,
         status: 'ACTIVE',
-        schedule_days: ['Monday', 'Wednesday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: [
+          { id: 'sched-1', day: 'Monday', start_time: '14:00', end_time: '15:30', class_id: 'class-uuid-1', created_at: new Date(), updated_at: new Date() },
+          { id: 'sched-2', day: 'Wednesday', start_time: '14:00', end_time: '15:30', class_id: 'class-uuid-1', created_at: new Date(), updated_at: new Date() },
+        ],
       };
 
       mockPrisma.class.findUnique.mockResolvedValue(classRecord);
@@ -387,9 +388,10 @@ describe('SessionService', () => {
         id: 'class-uuid-1',
         institution_id: institutionId,
         status: 'ACTIVE',
-        schedule_days: ['Monday', 'Wednesday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: [
+          { id: 'sched-1', day: 'Monday', start_time: '14:00', end_time: '15:30', class_id: 'class-uuid-1', created_at: new Date(), updated_at: new Date() },
+          { id: 'sched-2', day: 'Wednesday', start_time: '14:00', end_time: '15:30', class_id: 'class-uuid-1', created_at: new Date(), updated_at: new Date() },
+        ],
       };
 
       mockPrisma.class.findUnique.mockResolvedValue(classRecord);
@@ -424,9 +426,9 @@ describe('SessionService', () => {
         id: 'class-uuid-1',
         institution_id: institutionId,
         status: 'ACTIVE',
-        schedule_days: ['Saturday'],
-        schedule_start_time: '09:00',
-        schedule_end_time: '10:30',
+        schedules: [
+          { id: 'sched-sat', day: 'Saturday', start_time: '09:00', end_time: '10:30', class_id: 'class-uuid-1', created_at: new Date(), updated_at: new Date() },
+        ],
       };
 
       mockPrisma.class.findUnique.mockResolvedValue(classRecord);
@@ -460,9 +462,9 @@ describe('SessionService', () => {
         id: 'class-uuid-1',
         institution_id: institutionId,
         status: 'ACTIVE',
-        schedule_days: ['Monday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: [
+          { id: 'sched-mon', day: 'Monday', start_time: '14:00', end_time: '15:30', class_id: 'class-uuid-1', created_at: new Date(), updated_at: new Date() },
+        ],
       };
 
       mockPrisma.class.findUnique.mockResolvedValue(classRecord);

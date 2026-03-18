@@ -56,7 +56,13 @@ describe('EnrollmentController (integration)', () => {
     await prisma.student.deleteMany({
       where: { institution: { slug: 'enroll-ctrl-inst' } },
     });
+    await prisma.tutorSubject.deleteMany({
+      where: { tutor: { institution: { slug: 'enroll-ctrl-inst' } } },
+    });
     await prisma.tutor.deleteMany({
+      where: { institution: { slug: 'enroll-ctrl-inst' } },
+    });
+    await prisma.subject.deleteMany({
       where: { institution: { slug: 'enroll-ctrl-inst' } },
     });
     await prisma.refreshToken.deleteMany({
@@ -104,10 +110,27 @@ describe('EnrollmentController (integration)', () => {
       data: {
         user_id: tutorUser.id,
         institution_id: testInstitutionId,
-        subjects: ['Math', 'Physics'],
       },
     });
     testTutorId = tutor.id;
+
+    // Create subjects and tutor-subject links
+    const subjectMath = await prisma.subject.create({
+      data: { name: 'Math', institution_id: testInstitutionId },
+    });
+    const subjectPhysics = await prisma.subject.create({
+      data: { name: 'Physics', institution_id: testInstitutionId },
+    });
+    const subjectChemistry = await prisma.subject.create({
+      data: { name: 'Chemistry', institution_id: testInstitutionId },
+    });
+    await prisma.tutorSubject.createMany({
+      data: [
+        { tutor_id: testTutorId, subject_id: subjectMath.id },
+        { tutor_id: testTutorId, subject_id: subjectPhysics.id },
+        { tutor_id: testTutorId, subject_id: subjectChemistry.id },
+      ],
+    });
 
     // Create student
     const student = await prisma.student.create({
@@ -125,12 +148,15 @@ describe('EnrollmentController (integration)', () => {
         institution_id: testInstitutionId,
         tutor_id: testTutorId,
         name: 'Class A',
-        subject: 'Math',
+        subject_id: subjectMath.id,
         capacity: 30,
         fee: 500000,
-        schedule_days: ['Monday', 'Wednesday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: {
+          create: [
+            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
+            { day: 'Wednesday', start_time: '14:00', end_time: '15:30' },
+          ],
+        },
       },
     });
     classAId = classA.id;
@@ -140,12 +166,14 @@ describe('EnrollmentController (integration)', () => {
         institution_id: testInstitutionId,
         tutor_id: testTutorId,
         name: 'Class B',
-        subject: 'Physics',
+        subject_id: subjectPhysics.id,
         capacity: 25,
         fee: 400000,
-        schedule_days: ['Monday'],
-        schedule_start_time: '15:00',
-        schedule_end_time: '16:30',
+        schedules: {
+          create: [
+            { day: 'Monday', start_time: '15:00', end_time: '16:30' },
+          ],
+        },
       },
     });
     classBId = classB.id;
@@ -155,12 +183,15 @@ describe('EnrollmentController (integration)', () => {
         institution_id: testInstitutionId,
         tutor_id: testTutorId,
         name: 'Class C',
-        subject: 'Chemistry',
+        subject_id: subjectChemistry.id,
         capacity: 20,
         fee: 350000,
-        schedule_days: ['Tuesday', 'Thursday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: {
+          create: [
+            { day: 'Tuesday', start_time: '14:00', end_time: '15:30' },
+            { day: 'Thursday', start_time: '14:00', end_time: '15:30' },
+          ],
+        },
       },
     });
     classCId = classC.id;
@@ -187,6 +218,9 @@ describe('EnrollmentController (integration)', () => {
         where: { institution_id: testInstitutionId },
       });
       await prisma.tutor.deleteMany({
+        where: { institution_id: testInstitutionId },
+      });
+      await prisma.subject.deleteMany({
         where: { institution_id: testInstitutionId },
       });
       await prisma.refreshToken.deleteMany({

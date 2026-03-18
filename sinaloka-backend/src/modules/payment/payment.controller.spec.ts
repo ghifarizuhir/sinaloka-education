@@ -51,7 +51,13 @@ describe('PaymentController (integration)', () => {
     await prisma.class.deleteMany({
       where: { institution: { slug: 'pay-ctrl-inst' } },
     });
+    await prisma.tutorSubject.deleteMany({
+      where: { tutor: { institution: { slug: 'pay-ctrl-inst' } } },
+    });
     await prisma.tutor.deleteMany({
+      where: { institution: { slug: 'pay-ctrl-inst' } },
+    });
+    await prisma.subject.deleteMany({
       where: { institution: { slug: 'pay-ctrl-inst' } },
     });
     await prisma.student.deleteMany({
@@ -102,8 +108,15 @@ describe('PaymentController (integration)', () => {
       data: {
         user_id: tutorUser.id,
         institution_id: testInstitutionId,
-        subjects: ['Math'],
       },
+    });
+
+    // Create subject and tutor-subject link
+    const subject = await prisma.subject.create({
+      data: { name: 'Math', institution_id: testInstitutionId },
+    });
+    await prisma.tutorSubject.create({
+      data: { tutor_id: tutor.id, subject_id: subject.id },
     });
 
     // Seed student
@@ -124,12 +137,14 @@ describe('PaymentController (integration)', () => {
         institution_id: testInstitutionId,
         tutor_id: tutor.id,
         name: 'Payment Class',
-        subject: 'Math',
+        subject_id: subject.id,
         capacity: 20,
         fee: 100000,
-        schedule_days: ['Monday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: {
+          create: [
+            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
+          ],
+        },
         status: 'ACTIVE',
       },
     });
@@ -179,6 +194,9 @@ describe('PaymentController (integration)', () => {
       await prisma.tutor.deleteMany({
         where: { institution_id: testInstitutionId },
       });
+      await prisma.subject.deleteMany({
+        where: { institution_id: testInstitutionId },
+      });
       await prisma.student.deleteMany({
         where: { institution_id: testInstitutionId },
       });
@@ -204,9 +222,10 @@ describe('PaymentController (integration)', () => {
       .expect(200);
 
     expect(res.body.data).toBeDefined();
-    expect(res.body.total).toBeDefined();
-    expect(res.body.page).toBeDefined();
-    expect(res.body.limit).toBeDefined();
+    expect(res.body.meta).toBeDefined();
+    expect(res.body.meta.total).toBeDefined();
+    expect(res.body.meta.page).toBeDefined();
+    expect(res.body.meta.limit).toBeDefined();
   });
 
   it('POST /admin/payments — should create a payment', async () => {
