@@ -28,7 +28,9 @@ import {
   SearchInput,
   Progress,
   Switch,
-  Skeleton
+  Skeleton,
+  PageHeader,
+  Select
 } from '../components/UI';
 import { cn, formatCurrency } from '../lib/utils';
 import { toast } from 'sonner';
@@ -317,16 +319,16 @@ export const Classes = () => {
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('classes.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('classes.subtitle')}</p>
-        </div>
-        <Button onClick={openAddModal}>
-          <Plus size={18} />
-          {t('classes.registerNewClass')}
-        </Button>
-      </div>
+      <PageHeader
+        title={t('classes.title')}
+        subtitle={t('classes.subtitle')}
+        actions={
+          <Button onClick={openAddModal}>
+            <Plus size={18} />
+            {t('classes.registerNewClass')}
+          </Button>
+        }
+      />
 
       {/* Stats Overview */}
       {isLoading ? (
@@ -377,19 +379,17 @@ export const Classes = () => {
           }}
         />
         <div className="flex items-center gap-4 w-full sm:w-auto">
-          <select
-            className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+          <Select
             value={filterSubject}
-            onChange={(e) => {
-              setFilterSubject(e.target.value);
+            onChange={(val) => {
+              setFilterSubject(val);
               setPage(1);
             }}
-          >
-            <option value="">{t('common.allSubjects')}</option>
-            {(subjectsList ?? []).map(s => (
-              <option key={s.id} value={s.name}>{s.name}</option>
-            ))}
-          </select>
+            options={[
+              { value: '', label: t('common.allSubjects') },
+              ...(subjectsList ?? []).map(s => ({ value: s.name, label: s.name })),
+            ]}
+          />
 
           <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
             <span className="text-xs font-medium text-zinc-500">{t('classes.activeOnly')}</span>
@@ -634,44 +634,42 @@ export const Classes = () => {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="subject">{t('classes.form.subject')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+              <Select
+                className="w-full"
                 value={formSubjectId}
-                onChange={(e) => { setFormSubjectId(e.target.value); setFormTutorId(''); }}
-              >
-                <option value="">{t('classes.form.selectSubject')}</option>
-                {(subjectsList ?? []).map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+                onChange={(val) => { setFormSubjectId(val); setFormTutorId(''); }}
+                options={(subjectsList ?? []).map(s => ({ value: s.id, label: s.name }))}
+                placeholder={t('classes.form.selectSubject')}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="tutor">{t('classes.form.assignTutor')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100 disabled:opacity-50"
+              <Select
+                className="w-full"
                 value={formTutorId}
-                onChange={(e) => setFormTutorId(e.target.value)}
+                onChange={(val) => setFormTutorId(val)}
                 disabled={!formSubjectId}
-              >
-                <option value="">{t('classes.form.selectTutor')}</option>
-                {(subjectTutors ?? []).map((tutor: { id: string; name?: string; user?: { name: string } }) => (
-                  <option key={tutor.id} value={tutor.id}>{tutor.user?.name ?? tutor.name}</option>
-                ))}
-              </select>
+                options={(subjectTutors ?? []).map((tutor: { id: string; name?: string; user?: { name: string } }) => ({
+                  value: tutor.id,
+                  label: tutor.user?.name ?? tutor.name ?? '',
+                }))}
+                placeholder={t('classes.form.selectTutor')}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="status">{t('classes.form.status')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+              <Select
+                className="w-full"
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as 'ACTIVE' | 'ARCHIVED')}
-              >
-                <option value="ACTIVE">{t('common.active')}</option>
-                <option value="ARCHIVED">{t('common.archived')}</option>
-              </select>
+                onChange={(val) => setFormStatus(val as 'ACTIVE' | 'ARCHIVED')}
+                options={[
+                  { value: 'ACTIVE', label: t('common.active') },
+                  { value: 'ARCHIVED', label: t('common.archived') },
+                ]}
+              />
             </div>
           </div>
 
@@ -767,15 +765,16 @@ export const Classes = () => {
           )}
           <div className="space-y-1.5">
             <Label>{t('classes.form.tutorFeeMode')}</Label>
-            <select
-              className="h-10 w-full px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+            <Select
+              className="w-full"
               value={formTutorFeeMode}
-              onChange={(e) => setFormTutorFeeMode(e.target.value as any)}
-            >
-              <option value="FIXED_PER_SESSION">{t('classes.form.feeMode.fixedPerSession')}</option>
-              <option value="PER_STUDENT_ATTENDANCE">{t('classes.form.feeMode.perStudentAttendance')}</option>
-              <option value="MONTHLY_SALARY">{t('classes.form.feeMode.monthlySalary')}</option>
-            </select>
+              onChange={(val) => setFormTutorFeeMode(val as 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY')}
+              options={[
+                { value: 'FIXED_PER_SESSION', label: t('classes.form.feeMode.fixedPerSession') },
+                { value: 'PER_STUDENT_ATTENDANCE', label: t('classes.form.feeMode.perStudentAttendance') },
+                { value: 'MONTHLY_SALARY', label: t('classes.form.feeMode.monthlySalary') },
+              ]}
+            />
           </div>
           {formTutorFeeMode === 'FIXED_PER_SESSION' && (
             <div className="space-y-1.5">
