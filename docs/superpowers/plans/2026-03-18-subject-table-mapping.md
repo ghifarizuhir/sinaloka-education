@@ -10,6 +10,10 @@
 
 **Spec:** `docs/superpowers/specs/2026-03-18-tutor-bank-required-subject-mapping-design.md` (Part 2)
 
+**Dependency:** Execute Plan 1 (required-bank-info) first. This plan modifies the same files (`tutor.dto.ts`, `invitation.dto.ts`) — use content matching (not line numbers) when editing.
+
+**Important:** Tasks 1-3 follow a staged migration pattern: Task 1 ADDS new columns alongside old ones, Task 2 migrates data, Task 3 DROPS old columns. Do NOT skip or reorder these tasks.
+
 ---
 
 ### Task 1: Add Prisma schema — subject model, tutor_subject join, class FK
@@ -49,32 +53,26 @@ model TutorSubject {
 }
 ```
 
-- [ ] **Step 2: Update Tutor model**
+- [ ] **Step 2: Add new relation to Tutor model (keep old column)**
 
-In the Tutor model, find:
+In the Tutor model, **keep** the existing `subjects String[]` column and **add** the new relation alongside it:
 ```prisma
-  subjects          String[]
-```
-Replace with:
-```prisma
-  tutor_subjects    TutorSubject[]
+  subjects          String[]         // KEEP — will be removed in Task 3 after data migration
+  tutor_subjects    TutorSubject[]   // ADD
 ```
 
 Keep the existing `classes Class[]` relation.
 
-- [ ] **Step 3: Update Class model**
+- [ ] **Step 3: Add subject_id to Class model (keep old column)**
 
-In the Class model, find:
+In the Class model, **keep** the existing `subject String` column and **add** the new FK alongside it:
 ```prisma
-  subject           String
-```
-Replace with:
-```prisma
+  subject_old       String    @map("subject")   // KEEP — rename to avoid Prisma relation conflict, will be removed in Task 3
   subject_id        String?
-  subject           Subject? @relation(fields: [subject_id], references: [id])
+  subject           Subject?  @relation(fields: [subject_id], references: [id])
 ```
 
-Note: `subject_id` starts nullable for migration. Task 3 will make it NOT NULL after data is populated.
+Note: The old `subject` DB column is preserved via `@map("subject")` with a renamed Prisma field to avoid naming conflict with the new Subject relation. `subject_id` starts nullable for migration. Task 3 will drop old columns and make `subject_id` NOT NULL.
 
 - [ ] **Step 4: Add Subject relation to Institution model**
 
@@ -221,15 +219,27 @@ git commit -m "feat(backend): add data migration script for subjects"
 **Files:**
 - Modify: `sinaloka-backend/prisma/schema.prisma`
 
-- [ ] **Step 1: Make subject_id required and drop old columns**
+- [ ] **Step 1: Drop old columns and make subject_id required**
 
-In `prisma/schema.prisma`, update Class model:
+In `prisma/schema.prisma`:
+
+In the Tutor model, remove the old `subjects` line:
+```prisma
+  subjects          String[]         // REMOVE this line
+```
+
+In the Class model, remove the old `subject_old` line and make `subject_id` required:
+```prisma
+  subject_old       String    @map("subject")   // REMOVE this line
+  subject_id        String?                      // CHANGE to: subject_id String
+  subject           Subject?                     // CHANGE to: subject Subject @relation(...)
+```
+
+Final Class model subject fields should be:
 ```prisma
   subject_id        String
   subject           Subject @relation(fields: [subject_id], references: [id])
 ```
-
-Remove the `subjects String[]` field from Tutor model if not already done.
 
 - [ ] **Step 2: Create migration**
 
@@ -444,33 +454,44 @@ if (data.subject_ids) {
 }
 ```
 
-- [ ] **Step 4: Update tutor.service.ts findAll subject filter**
+- [ ] **Step 4: Update TutorQuerySchema subject filter param**
+
+In `tutor.dto.ts`, find the `TutorQuerySchema` and change the `subject` field from a name string to a UUID:
+```typescript
+  subject: z.string().optional(),
+```
+Change to:
+```typescript
+  subject_id: z.string().uuid().optional(),
+```
+
+- [ ] **Step 5: Update tutor.service.ts findAll subject filter**
 
 Replace the `subjects: { has: subject }` filter with:
 
 ```typescript
-if (subject) {
-  where.tutor_subjects = { some: { subject_id: subject } };
+if (subject_id) {
+  where.tutor_subjects = { some: { subject_id } };
 }
 ```
 
-- [ ] **Step 5: Update tutor includes to return tutor_subjects with subject**
+- [ ] **Step 6: Update tutor includes to return tutor_subjects with subject**
 
 In all find queries, include:
 ```typescript
 include: { tutor_subjects: { include: { subject: true } } }
 ```
 
-- [ ] **Step 6: Update invitation service**
+- [ ] **Step 7: Update invitation service**
 
 In `invitation.service.ts`, update the invite method to use `subject_ids` with the join table instead of `subjects` array.
 
-- [ ] **Step 7: Verify backend compiles**
+- [ ] **Step 8: Verify backend compiles**
 
 Run: `cd sinaloka-backend && npm run build`
 Expected: Build succeeds
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add sinaloka-backend/src/modules/tutor/ sinaloka-backend/src/modules/invitation/
