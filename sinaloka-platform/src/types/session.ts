@@ -58,3 +58,35 @@ export interface SessionQueryParams extends PaginationParams {
   date_from?: string;
   date_to?: string;
 }
+
+export interface SessionStudent {
+  id: string;
+  name: string;
+  grade: string | null;
+  attendance_id: string | null;
+  status: 'PRESENT' | 'ABSENT' | 'LATE' | null;
+  homework_done: boolean;
+  notes: string | null;
+}
+
+export interface GenerateSessionsResponse {
+  count: number;
+  sessions: Session[];
+}
+
+export interface SessionDetail extends Session {
+  class?: {
+    id: string;
+    name: string;
+    subject: string;
+    fee: number;
+    tutor?: { id: string; name: string; email?: string };
+  };
+  attendances?: {
+    id: string;
+    status: 'PRESENT' | 'ABSENT' | 'LATE';
+    homework_done: boolean;
+    notes: string | null;
+    student: { id: string; name: string; grade: string };
+  }[];
+}

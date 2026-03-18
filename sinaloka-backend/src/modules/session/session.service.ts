@@ -16,7 +16,8 @@ import type {
   CompleteSessionDto,
 } from './session.dto.js';
 import { SessionStatus } from '../../../generated/prisma/client.js';
-import { addDays, getDay, isAfter, isBefore, isEqual } from 'date-fns';
+import { PayoutService } from '../payout/payout.service.js';
+import { addDays, getDay, isAfter, isBefore, isEqual, startOfDay } from 'date-fns';
 
 const DAY_MAP: Record<string, number> = {
   Sunday: 0,
@@ -30,25 +31,63 @@ const DAY_MAP: Record<string, number> = {
 
 @Injectable()
 export class SessionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly payoutService: PayoutService,
+  ) {}
 
-  async create(institutionId: string, userId: string, dto: CreateSessionDto) {
+  private readonly sessionInclude = {
+    class: {
+      include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
+    },
+  };
+
+  private flattenSession(session: any) {
+    return {
+      ...session,
+      class: session.class
+        ? {
+            ...session.class,
+            fee: Number(session.class.fee),
+            tutor: session.class.tutor
+              ? { id: session.class.tutor.id, name: session.class.tutor.user.name }
+              : null,
+          }
+        : null,
+    };
+  }
+
+  private async validateClassForSession(classId: string, institutionId: string) {
     const classRecord = await this.prisma.class.findUnique({
-      where: { id: dto.class_id, institution_id: institutionId },
+      where: { id: classId, institution_id: institutionId },
     });
 
     if (!classRecord) {
-      throw new NotFoundException(`Class with id ${dto.class_id} not found`);
+      throw new NotFoundException(`Class with id ${classId} not found`);
     }
 
-    return this.prisma.session.create({
+    if (classRecord.status !== 'ACTIVE') {
+      throw new BadRequestException(
+        'Cannot create sessions for an archived class',
+      );
+    }
+
+    return classRecord;
+  }
+
+  async create(institutionId: string, userId: string, dto: CreateSessionDto) {
+    await this.validateClassForSession(dto.class_id, institutionId);
+
+    const session = await this.prisma.session.create({
       data: {
         ...dto,
         institution_id: institutionId,
         created_by: userId,
       },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(session);
   }
 
   async findAll(institutionId: string, query: SessionQueryDto) {
@@ -76,13 +115,13 @@ export class SessionService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sort_by]: sort_order },
-        include: { class: true },
+        include: this.sessionInclude,
       }),
       this.prisma.session.count({ where }),
     ]);
 
     return {
-      data,
+      data: data.map((s) => this.flattenSession(s)),
       total,
       page,
       limit,
@@ -92,28 +131,133 @@ export class SessionService {
   async findOne(institutionId: string, id: string) {
     const session = await this.prisma.session.findUnique({
       where: { id, institution_id: institutionId },
-      include: { class: true },
+      include: {
+        class: {
+          include: { tutor: { include: { user: { select: { id: true, name: true, email: true } } } } },
+        },
+        attendances: {
+          include: { student: { select: { id: true, name: true, grade: true } } },
+          orderBy: { created_at: 'desc' },
+        },
+      },
     });
 
     if (!session) {
       throw new NotFoundException(`Session with id ${id} not found`);
     }
 
-    return session;
+    return {
+      ...session,
+      class: session.class
+        ? {
+            ...session.class,
+            fee: Number(session.class.fee),
+            tutor: session.class.tutor
+              ? { id: session.class.tutor.id, name: session.class.tutor.user.name, email: session.class.tutor.user.email }
+              : null,
+          }
+        : null,
+      attendances: session.attendances.map((a) => ({
+        id: a.id,
+        status: a.status,
+        homework_done: a.homework_done,
+        notes: a.notes,
+        student: a.student,
+      })),
+    };
   }
 
   async update(institutionId: string, id: string, dto: UpdateSessionDto) {
-    await this.findOne(institutionId, id);
+    const existing = await this.findOne(institutionId, id);
 
-    return this.prisma.session.update({
+    if (existing.status === 'COMPLETED') {
+      throw new BadRequestException(
+        'Cannot edit a completed session',
+      );
+    }
+
+    const sessionDate = new Date(existing.date);
+    if (isBefore(sessionDate, startOfDay(new Date())) && dto.status !== 'COMPLETED') {
+      throw new BadRequestException(
+        'Cannot edit a session whose date has already passed',
+      );
+    }
+
+    const data: any = { ...dto };
+
+    // Copy tutor fee when session is marked COMPLETED
+    if (dto.status === 'COMPLETED') {
+      const sessionClass = await this.prisma.class.findUnique({
+        where: { id: existing.class?.id ?? '' },
+        select: { tutor_fee: true, tutor_fee_mode: true, tutor_fee_per_student: true, tutor_id: true, name: true },
+      });
+      if (sessionClass?.tutor_fee) {
+        data.tutor_fee_amount = sessionClass.tutor_fee;
+      }
+
+      const session = await this.prisma.session.update({
+        where: { id, institution_id: institutionId },
+        data,
+        include: this.sessionInclude,
+      });
+
+      // Auto-create payout based on tutor fee mode
+      const feeMode = sessionClass?.tutor_fee_mode ?? 'FIXED_PER_SESSION';
+
+      if (feeMode === 'FIXED_PER_SESSION' && sessionClass?.tutor_id) {
+        const tutorFee = Number(sessionClass.tutor_fee ?? 0);
+        if (tutorFee > 0) {
+          const sessionDate = new Date(existing.date);
+          await this.payoutService.create(institutionId, {
+            tutor_id: sessionClass.tutor_id,
+            amount: tutorFee,
+            date: sessionDate,
+            status: 'PENDING',
+            description: `Session: ${sessionClass.name} - ${sessionDate.toISOString().split('T')[0]}`,
+            period_start: sessionDate,
+            period_end: sessionDate,
+          });
+        }
+      } else if (feeMode === 'PER_STUDENT_ATTENDANCE' && sessionClass?.tutor_id) {
+        const feePerStudent = Number(sessionClass.tutor_fee_per_student ?? 0);
+        if (feePerStudent > 0) {
+          const attendingCount = await this.prisma.attendance.count({
+            where: { session_id: id, status: { in: ['PRESENT', 'LATE'] } },
+          });
+          if (attendingCount > 0) {
+            const sessionDate = new Date(existing.date);
+            await this.payoutService.create(institutionId, {
+              tutor_id: sessionClass.tutor_id,
+              amount: feePerStudent * attendingCount,
+              date: sessionDate,
+              status: 'PENDING',
+              description: `Session: ${sessionClass.name} - ${sessionDate.toISOString().split('T')[0]} (${attendingCount} students)`,
+              period_start: sessionDate,
+              period_end: sessionDate,
+            });
+          }
+        }
+      }
+      // MONTHLY_SALARY: no per-session payout
+
+      return this.flattenSession(session);
+    }
+
+    const session = await this.prisma.session.update({
       where: { id, institution_id: institutionId },
-      data: dto,
-      include: { class: true },
+      data,
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(session);
   }
 
   async delete(institutionId: string, id: string) {
-    await this.findOne(institutionId, id);
+    const existing = await this.findOne(institutionId, id);
+
+    if (existing.status === 'COMPLETED') {
+      throw new BadRequestException('Cannot delete a completed session');
+    }
 
     return this.prisma.session.delete({
       where: { id, institution_id: institutionId },
@@ -125,13 +269,10 @@ export class SessionService {
     userId: string,
     dto: GenerateSessionsDto,
   ) {
-    const classRecord = await this.prisma.class.findUnique({
-      where: { id: dto.class_id, institution_id: institutionId },
-    });
-
-    if (!classRecord) {
-      throw new NotFoundException(`Class with id ${dto.class_id} not found`);
-    }
+    const classRecord = await this.validateClassForSession(
+      dto.class_id,
+      institutionId,
+    );
 
     if (isAfter(dto.date_from, dto.date_to)) {
       throw new BadRequestException('date_from must be before or equal to date_to');
@@ -235,13 +376,13 @@ export class SessionService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sort_by]: sort_order },
-        include: { class: true },
+        include: this.sessionInclude,
       }),
       this.prisma.session.count({ where }),
     ]);
 
     return {
-      data,
+      data: data.map((s) => this.flattenSession(s)),
       total,
       page,
       limit,
@@ -255,7 +396,7 @@ export class SessionService {
   ) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -276,7 +417,7 @@ export class SessionService {
       );
     }
 
-    return this.prisma.session.update({
+    const updated = await this.prisma.session.update({
       where: { id: sessionId },
       data: {
         status: 'RESCHEDULE_REQUESTED',
@@ -285,8 +426,10 @@ export class SessionService {
         proposed_end_time: dto.proposed_end_time,
         reschedule_reason: dto.reschedule_reason,
       },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(updated);
   }
 
   async approveReschedule(
@@ -304,7 +447,7 @@ export class SessionService {
     }
 
     if (dto.approved) {
-      return this.prisma.session.update({
+      const updated = await this.prisma.session.update({
         where: { id: sessionId, institution_id: institutionId },
         data: {
           date: session.proposed_date!,
@@ -317,10 +460,12 @@ export class SessionService {
           proposed_end_time: null,
           reschedule_reason: null,
         },
-        include: { class: true },
+        include: this.sessionInclude,
       });
+
+      return this.flattenSession(updated);
     } else {
-      return this.prisma.session.update({
+      const updated = await this.prisma.session.update({
         where: { id: sessionId, institution_id: institutionId },
         data: {
           status: 'SCHEDULED',
@@ -329,15 +474,17 @@ export class SessionService {
           proposed_end_time: null,
           reschedule_reason: null,
         },
-        include: { class: true },
+        include: this.sessionInclude,
       });
+
+      return this.flattenSession(updated);
     }
   }
 
   async cancelSession(userId: string, sessionId: string) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -352,17 +499,19 @@ export class SessionService {
       throw new ForbiddenException('You can only cancel your own sessions');
     }
 
-    return this.prisma.session.update({
+    const updated = await this.prisma.session.update({
       where: { id: sessionId },
       data: { status: 'CANCELLED' },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    return this.flattenSession(updated);
   }
 
   async getSessionStudents(userId: string, sessionId: string) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -416,10 +565,56 @@ export class SessionService {
     };
   }
 
+  async getAdminSessionStudents(institutionId: string, sessionId: string) {
+    const session = await this.prisma.session.findUnique({
+      where: { id: sessionId, institution_id: institutionId },
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session with id ${sessionId} not found`);
+    }
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        institution_id: institutionId,
+        class_id: session.class_id,
+        status: 'ACTIVE',
+      },
+      include: {
+        student: {
+          select: { id: true, name: true, grade: true },
+        },
+      },
+    });
+
+    const attendances = await this.prisma.attendance.findMany({
+      where: { session_id: sessionId },
+    });
+
+    const attendanceMap = new Map(
+      attendances.map((a) => [a.student_id, a]),
+    );
+
+    return {
+      students: enrollments.map((e) => {
+        const att = attendanceMap.get(e.student.id);
+        return {
+          id: e.student.id,
+          name: e.student.name,
+          grade: e.student.grade,
+          attendance_id: att?.id ?? null,
+          status: att?.status ?? null,
+          homework_done: att?.homework_done ?? false,
+          notes: att?.notes ?? null,
+        };
+      }),
+    };
+  }
+
   async completeSession(userId: string, sessionId: string, dto: CompleteSessionDto) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: { class: true },
+      include: this.sessionInclude,
     });
 
     if (!session) {
@@ -440,14 +635,67 @@ export class SessionService {
       );
     }
 
-    return this.prisma.session.update({
+    // Copy tutor fee from class
+    const classForFee = await this.prisma.class.findUnique({
+      where: { id: session.class_id },
+      select: { tutor_fee: true, tutor_fee_mode: true, tutor_fee_per_student: true, name: true },
+    });
+
+    const tutorFee = Number(classForFee?.tutor_fee ?? 0);
+
+    const updated = await this.prisma.session.update({
       where: { id: sessionId },
       data: {
         status: 'COMPLETED',
         topic_covered: dto.topic_covered,
         session_summary: dto.session_summary ?? null,
+        ...(tutorFee > 0 ? { tutor_fee_amount: classForFee!.tutor_fee } : {}),
       },
-      include: { class: true },
+      include: this.sessionInclude,
     });
+
+    // Auto-create payout based on tutor fee mode
+    const feeMode = classForFee?.tutor_fee_mode ?? 'FIXED_PER_SESSION';
+
+    if (feeMode === 'FIXED_PER_SESSION') {
+      if (tutorFee > 0) {
+        const sessionDate = new Date(session.date);
+        await this.payoutService.create(session.institution_id, {
+          tutor_id: tutor.id,
+          amount: tutorFee,
+          date: sessionDate,
+          status: 'PENDING',
+          description: `Session: ${classForFee!.name} - ${sessionDate.toISOString().split('T')[0]}`,
+          period_start: sessionDate,
+          period_end: sessionDate,
+        });
+      }
+    } else if (feeMode === 'PER_STUDENT_ATTENDANCE') {
+      const feePerStudent = Number(classForFee?.tutor_fee_per_student ?? 0);
+      if (feePerStudent > 0) {
+        const attendingCount = await this.prisma.attendance.count({
+          where: {
+            session_id: sessionId,
+            status: { in: ['PRESENT', 'LATE'] },
+          },
+        });
+        if (attendingCount > 0) {
+          const totalFee = feePerStudent * attendingCount;
+          const sessionDate = new Date(session.date);
+          await this.payoutService.create(session.institution_id, {
+            tutor_id: tutor.id,
+            amount: totalFee,
+            date: sessionDate,
+            status: 'PENDING',
+            description: `Session: ${classForFee!.name} - ${sessionDate.toISOString().split('T')[0]} (${attendingCount} students)`,
+            period_start: sessionDate,
+            period_end: sessionDate,
+          });
+        }
+      }
+    }
+    // MONTHLY_SALARY: no per-session payout — handled by cron/manual endpoint
+
+    return this.flattenSession(updated);
   }
 }

@@ -1,0 +1,4 @@
+{"type":"server-started","port":49333,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:49333","screen_dir":"/home/zet/Project/sinaloka/.superpowers/brainstorm/277875-1773587292"}
+{"type":"screen-added","file":"/home/zet/Project/sinaloka/.superpowers/brainstorm/277875-1773587292/comparison.html"}
+{"type":"screen-added","file":"/home/zet/Project/sinaloka/.superpowers/brainstorm/277875-1773587292/waiting.html"}
+{"type":"server-stopped","reason":"owner process exited"}

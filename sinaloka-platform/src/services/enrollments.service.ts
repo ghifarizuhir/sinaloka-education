@@ -15,4 +15,15 @@ export const enrollmentsService = {
     api.delete(`/api/admin/enrollments/${id}`),
   checkConflict: (data: CheckConflictDto) =>
     api.post('/api/admin/enrollments/check-conflict', data).then((r) => r.data),
+  exportCsv: (params?: Record<string, string>) =>
+    api.get('/api/admin/enrollments/export', { params, responseType: 'blob' }).then((r) => r.data),
+  bulkUpdate: (data: { ids: string[]; status?: string; payment_status?: string }) =>
+    api.patch('/api/admin/enrollments/bulk', data).then((r) => r.data),
+  bulkDelete: (ids: string[]) =>
+    api.delete('/api/admin/enrollments/bulk', { data: { ids } }).then((r) => r.data),
+  importCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/admin/enrollments/import', formData).then((r) => r.data);
+  },
 };

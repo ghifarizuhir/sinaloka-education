@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
-import { Card, Button, Input, Label } from '@/src/components/UI';
+import { Card, Button, Input, Label, PasswordInput } from '@/src/components/UI';
 
 export function Login() {
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +15,9 @@ export function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!authLoading && isAuthenticated) {
+    if (user?.role === 'SUPER_ADMIN') {
+      return <Navigate to="/super/institutions" replace />;
+    }
     return <Navigate to="/" replace />;
   }
 
@@ -21,12 +26,16 @@ export function Login() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await login(email, password);
-      navigate('/', { replace: true });
+      const profile = await login(email, password);
+      if (profile.role === 'SUPER_ADMIN') {
+        navigate('/super/institutions', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Invalid email or password. Please try again.';
+        t('login.defaultError');
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -48,10 +57,10 @@ export function Login() {
             <div className="w-6 h-6 bg-white dark:bg-zinc-900 rounded-sm rotate-45" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            Sinaloka
+            {t('login.title')}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Sign in to your account
+            {t('login.subtitle')}
           </p>
         </div>
 
@@ -59,11 +68,11 @@ export function Login() {
         <Card className="px-8 py-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">{t('login.emailLabel')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@sinaloka.com"
+                placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -73,11 +82,10 @@ export function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
+              <Label htmlFor="password">{t('login.passwordLabel')}</Label>
+              <PasswordInput
                 id="password"
-                type="password"
-                placeholder="••••••••"
+                placeholder={t('login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -101,17 +109,17 @@ export function Login() {
               {isSubmitting ? (
                 <>
                   <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  Signing in...
+                  {t('login.signingIn')}
                 </>
               ) : (
-                'Sign in'
+                t('login.signIn')
               )}
             </Button>
           </form>
         </Card>
 
         <p className="text-center text-xs text-zinc-400 dark:text-zinc-600 mt-6">
-          &copy; {new Date().getFullYear()} Sinaloka. All rights reserved.
+          {t('login.copyright', { year: new Date().getFullYear() })}
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Plus,
   MoreHorizontal,
@@ -28,7 +29,8 @@ import {
   SearchInput,
   Switch,
   Slider,
-  Skeleton
+  Skeleton,
+  ConfirmDialog
 } from '../components/UI';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -36,8 +38,12 @@ import {
   useTutors,
   useCreateTutor,
   useUpdateTutor,
-  useDeleteTutor
+  useDeleteTutor,
+  useInviteTutor,
+  useResendInvite,
+  useCancelInvite,
 } from '@/src/hooks/useTutors';
+import { useSubjects } from '@/src/hooks/useSubjects';
 import type { Tutor } from '@/src/types/tutor';
 
 const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
@@ -46,17 +52,20 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
   onCancel: () => void;
   isEditing: boolean;
 }) => {
+  const { t } = useTranslation();
+  const { data: subjectsList } = useSubjects();
   const [formData, setFormData] = useState({
     name: initialData?.name ?? '',
     email: initialData?.email ?? '',
     password: '',
-    subjects: initialData?.subjects?.join(', ') ?? '',
+    subject_ids: initialData?.tutor_subjects?.map(ts => ts.subject.id) ?? [],
     experience_years: initialData?.experience_years ?? 0,
     rating: initialData?.rating ?? 4.5,
     is_verified: initialData?.is_verified ?? false,
     bank_name: initialData?.bank_name ?? '',
     bank_account_number: initialData?.bank_account_number ?? '',
     bank_account_holder: initialData?.bank_account_holder ?? '',
+    monthly_salary: initialData?.monthly_salary ? String(initialData.monthly_salary) : '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -66,21 +75,16 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const subjectsArr = formData.subjects
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
     onSubmit({
       name: formData.name,
       email: formData.email,
-      ...(isEditing ? {} : { password: formData.password }),
-      subjects: subjectsArr,
+      subject_ids: formData.subject_ids,
       experience_years: Number(formData.experience_years),
-      rating: Number(formData.rating),
-      is_verified: formData.is_verified,
-      bank_name: formData.bank_name || undefined,
-      bank_account_number: formData.bank_account_number || undefined,
-      bank_account_holder: formData.bank_account_holder || undefined,
+      ...(isEditing ? { rating: Number(formData.rating), is_verified: formData.is_verified } : {}),
+      bank_name: isEditing ? formData.bank_name : (formData.bank_name || undefined),
+      bank_account_number: isEditing ? formData.bank_account_number : (formData.bank_account_number || undefined),
+      bank_account_holder: isEditing ? formData.bank_account_holder : (formData.bank_account_holder || undefined),
+      monthly_salary: formData.monthly_salary ? Number(formData.monthly_salary) : null,
     });
   };
 
@@ -88,45 +92,64 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
-          <Input id="name" name="name" value={formData.name} onChange={handleChange} required placeholder="Dr. John Doe" />
+          <Label htmlFor="name">{t('tutors.form.fullName')}</Label>
+          <Input id="name" name="name" value={formData.name} onChange={handleChange} required placeholder={t('tutors.form.namePlaceholder')} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
-          <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="john@academy.com" />
+          <Label htmlFor="email">{t('tutors.form.emailAddress')}</Label>
+          <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder={t('tutors.form.emailPlaceholder')} />
         </div>
-        {!isEditing && (
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" value={formData.password} onChange={handleChange} required placeholder="••••••••" />
+        <div className="space-y-2">
+          <Label>{t('tutors.form.subjects')}</Label>
+          <div className="flex flex-wrap gap-2 p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg min-h-[42px]">
+            {(subjectsList ?? []).map(subject => (
+              <label key={subject.id} className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm cursor-pointer transition-colors border",
+                formData.subject_ids.includes(subject.id)
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100"
+                  : "bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400"
+              )}>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={formData.subject_ids.includes(subject.id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFormData(prev => ({ ...prev, subject_ids: [...prev.subject_ids, subject.id] }));
+                    } else {
+                      setFormData(prev => ({ ...prev, subject_ids: prev.subject_ids.filter(id => id !== subject.id) }));
+                    }
+                  }}
+                />
+                {subject.name}
+              </label>
+            ))}
           </div>
-        )}
-        <div className="space-y-2">
-          <Label htmlFor="subjects">Subjects (comma-separated)</Label>
-          <Input id="subjects" name="subjects" value={formData.subjects} onChange={handleChange} required placeholder="e.g. Math, Physics" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label>Rating ({Number(formData.rating).toFixed(1)})</Label>
-            <div className="flex text-amber-400">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} size={14} fill={i < Math.floor(formData.rating) ? 'currentColor' : 'none'} />
-              ))}
+        {isEditing && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>{t('tutors.form.rating', { value: Number(formData.rating).toFixed(1) })}</Label>
+              <div className="flex text-amber-400">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} size={14} fill={i < Math.floor(formData.rating) ? 'currentColor' : 'none'} />
+                ))}
+              </div>
             </div>
+            <Slider
+              value={formData.rating}
+              min={0}
+              max={5}
+              step={0.1}
+              onChange={(val: number) => setFormData(prev => ({ ...prev, rating: val }))}
+            />
           </div>
-          <Slider
-            value={formData.rating}
-            min={0}
-            max={5}
-            step={0.1}
-            onChange={(val: number) => setFormData(prev => ({ ...prev, rating: val }))}
-          />
-        </div>
+        )}
         <div className="space-y-3">
-          <Label htmlFor="experience_years">Years of Experience ({formData.experience_years})</Label>
+          <Label htmlFor="experience_years">{t('tutors.form.yearsOfExperience', { value: formData.experience_years })}</Label>
           <Slider
             value={formData.experience_years}
             min={0}
@@ -136,41 +159,48 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
-        <div className="flex flex-col">
-          <span className="text-sm font-bold dark:text-zinc-200">Verified Status</span>
-          <span className="text-xs text-zinc-500">Mark this tutor as verified</span>
+      {isEditing && (
+        <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold dark:text-zinc-200">{t('tutors.form.verifiedStatus')}</span>
+            <span className="text-xs text-zinc-500">{t('tutors.form.markVerified')}</span>
+          </div>
+          <Switch
+            checked={formData.is_verified}
+            onChange={(checked: boolean) => setFormData(prev => ({ ...prev, is_verified: checked }))}
+          />
         </div>
-        <Switch
-          checked={formData.is_verified}
-          onChange={(checked: boolean) => setFormData(prev => ({ ...prev, is_verified: checked }))}
-        />
-      </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="bank_name">Bank Name</Label>
-          <Input id="bank_name" name="bank_name" value={formData.bank_name} onChange={handleChange} placeholder="BCA" />
+          <Label htmlFor="bank_name">{t('tutors.form.bankName')}</Label>
+          <Input id="bank_name" name="bank_name" value={formData.bank_name} onChange={handleChange} placeholder={t('tutors.form.bankNamePlaceholder')} required={isEditing} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bank_account_number">Account Number</Label>
-          <Input id="bank_account_number" name="bank_account_number" value={formData.bank_account_number} onChange={handleChange} placeholder="1234567890" />
+          <Label htmlFor="bank_account_number">{t('tutors.form.accountNumber')}</Label>
+          <Input id="bank_account_number" name="bank_account_number" value={formData.bank_account_number} onChange={handleChange} placeholder={t('tutors.form.accountNumberPlaceholder')} required={isEditing} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bank_account_holder">Account Holder</Label>
-          <Input id="bank_account_holder" name="bank_account_holder" value={formData.bank_account_holder} onChange={handleChange} placeholder="John Doe" />
+          <Label htmlFor="bank_account_holder">{t('tutors.form.accountHolder')}</Label>
+          <Input id="bank_account_holder" name="bank_account_holder" value={formData.bank_account_holder} onChange={handleChange} placeholder={t('tutors.form.accountHolderPlaceholder')} required={isEditing} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="monthly_salary">{t('tutors.form.monthlySalary')}</Label>
+          <Input id="monthly_salary" name="monthly_salary" type="number" value={formData.monthly_salary} onChange={handleChange} placeholder={t('tutors.form.monthlySalaryPlaceholder')} />
         </div>
       </div>
 
       <div className="flex items-center justify-end gap-3 pt-6 border-t border-zinc-100 dark:border-zinc-800">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit">{isEditing ? 'Save Changes' : 'Register Tutor'}</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>{t('common.cancel')}</Button>
+        <Button type="submit">{isEditing ? t('common.saveChanges') : t('tutors.form.sendInvitation')}</Button>
       </div>
     </form>
   );
 };
 
 export const Tutors = () => {
+  const { t, i18n } = useTranslation();
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -179,43 +209,88 @@ export const Tutors = () => {
   const [filterSubject, setFilterSubject] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingTutor, setEditingTutor] = useState<Tutor | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'cancel' | 'delete'; tutorId: string } | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const toggleMenu = useCallback((id: string) => {
+    setOpenMenuId(prev => prev === id ? null : id);
+  }, []);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenMenuId(null);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [openMenuId]);
 
   const { data, isLoading } = useTutors({ page, limit });
   const createTutor = useCreateTutor();
   const updateTutor = useUpdateTutor();
   const deleteTutor = useDeleteTutor();
+  const inviteTutor = useInviteTutor();
+  const resendInvite = useResendInvite();
+  const cancelInvite = useCancelInvite();
 
   const tutors = data?.data ?? [];
 
   const filteredTutors = useMemo(() => {
     return tutors
       .filter(t => {
+        const subs = t.tutor_subjects.map(ts => ts.subject.name);
         const matchesSearch =
           t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          t.subjects.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+          subs.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesSubject =
           !filterSubject ||
-          t.subjects.some(s => s.toLowerCase() === filterSubject.toLowerCase());
+          subs.some(s => s.toLowerCase() === filterSubject.toLowerCase());
         return matchesSearch && matchesSubject;
       })
       .sort((a, b) => {
-        if (sortBy === 'rating') return b.rating - a.rating;
-        if (sortBy === 'experience_years') return b.experience_years - a.experience_years;
+        if (sortBy === 'rating') return (b.rating ?? 0) - (a.rating ?? 0);
+        if (sortBy === 'experience_years') return (b.experience_years ?? 0) - (a.experience_years ?? 0);
         return a.name.localeCompare(b.name);
       });
   }, [tutors, searchQuery, filterSubject, sortBy]);
 
   // collect unique subjects
-  const subjects = Array.from(new Set(tutors.flatMap(t => t.subjects)));
+  const subjects = Array.from(new Set(tutors.flatMap(t => t.tutor_subjects.map(ts => ts.subject.name))));
 
   const handleAddTutor = (data: any) => {
-    createTutor.mutate(data, {
-      onSuccess: () => {
-        toast.success('Tutor registered successfully');
-        setShowForm(false);
-      },
-      onError: () => toast.error('Failed to register tutor'),
+    inviteTutor.mutate(
+      { email: data.email, name: data.name, subject_ids: data.subject_ids, experience_years: data.experience_years },
+      {
+        onSuccess: () => {
+          toast.success(t('tutors.toast.inviteSent'));
+          setShowForm(false);
+        },
+        onError: (err: any) => {
+          toast.error(err?.response?.data?.message || t('tutors.toast.inviteError'));
+        },
+      }
+    );
+  };
+
+  const handleResendInvite = (tutorId: string) => {
+    resendInvite.mutate(tutorId, {
+      onSuccess: () => toast.success(t('tutors.toast.inviteResent')),
+      onError: () => toast.error(t('tutors.toast.resendError')),
     });
+  };
+
+  const handleCancelInvite = (tutorId: string) => {
+    setConfirmAction({ type: 'cancel', tutorId });
   };
 
   const handleEditTutor = (formData: any) => {
@@ -224,47 +299,68 @@ export const Tutors = () => {
       { id: editingTutor.id, data: formData },
       {
         onSuccess: () => {
-          toast.success('Tutor updated successfully');
+          toast.success(t('tutors.toast.updated'));
           setShowForm(false);
           setEditingTutor(null);
         },
-        onError: () => toast.error('Failed to update tutor'),
+        onError: () => toast.error(t('tutors.toast.updateError')),
       }
     );
   };
 
   const handleDeleteTutor = (id: string) => {
-    if (!confirm('Are you sure you want to delete this tutor?')) return;
-    deleteTutor.mutate(id, {
-      onSuccess: () => toast.success('Tutor deleted'),
-      onError: () => toast.error('Failed to delete tutor'),
-    });
+    setConfirmAction({ type: 'delete', tutorId: id });
+  };
+
+  const handleConfirmAction = () => {
+    if (!confirmAction) return;
+    if (confirmAction.type === 'cancel') {
+      cancelInvite.mutate(confirmAction.tutorId, {
+        onSuccess: () => {
+          toast.success(t('tutors.toast.inviteCancelled'));
+          setConfirmAction(null);
+        },
+        onError: () => toast.error(t('tutors.toast.cancelError')),
+      });
+    } else {
+      deleteTutor.mutate(confirmAction.tutorId, {
+        onSuccess: () => {
+          toast.success(t('tutors.toast.deleted'));
+          setConfirmAction(null);
+        },
+        onError: () => toast.error(t('tutors.toast.deleteError')),
+      });
+    }
   };
 
   const getAvailabilityBadge = (tutor: Tutor) => {
-    if (!tutor.is_verified) {
-      return <Badge variant="default" className="flex items-center gap-1"><XCircle size={10} /> Unverified</Badge>;
+    const isActive = (tutor as any).user?.is_active !== false;
+    if (!isActive) {
+      return <Badge variant="warning" className="flex items-center gap-1"><Clock size={10} /> {t('tutors.status.pendingInvite')}</Badge>;
     }
-    return <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 size={10} /> Verified</Badge>;
+    if (!tutor.is_verified) {
+      return <Badge variant="default" className="flex items-center gap-1"><XCircle size={10} /> {t('tutors.status.unverified')}</Badge>;
+    }
+    return <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 size={10} /> {t('tutors.status.verified')}</Badge>;
   };
 
   return (
     <div className="space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Tutors</h2>
-          <p className="text-zinc-500 text-sm">Manage your academic staff and their performance.</p>
+          <h2 className="text-2xl font-bold tracking-tight">{t('tutors.title')}</h2>
+          <p className="text-zinc-500 text-sm">{t('tutors.subtitle')}</p>
         </div>
         <Button onClick={() => { setEditingTutor(null); setShowForm(true); }}>
           <Plus size={18} />
-          Add Tutor
+          {t('tutors.addTutor')}
         </Button>
       </div>
 
       {/* Filter & Sort Bar */}
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <SearchInput
-          placeholder="Search tutors..."
+          placeholder={t('tutors.searchPlaceholder')}
           className="w-full sm:max-w-xs"
           value={searchQuery}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
@@ -275,7 +371,7 @@ export const Tutors = () => {
             value={filterSubject}
             onChange={(e) => setFilterSubject(e.target.value)}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <select
@@ -283,20 +379,20 @@ export const Tutors = () => {
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
           >
-            <option value="rating">Sort by Rating</option>
-            <option value="experience_years">Sort by Experience</option>
-            <option value="name">Sort by Name</option>
+            <option value="rating">{t('tutors.sort.byRating')}</option>
+            <option value="experience_years">{t('tutors.sort.byExperience')}</option>
+            <option value="name">{t('tutors.sort.byName')}</option>
           </select>
           <div className="h-8 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-1" />
           <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
             <button
-              onClick={() => setViewMode('grid')}
+              onClick={() => { setOpenMenuId(null); setViewMode('grid'); }}
               className={cn('p-1.5 rounded-md transition-all', viewMode === 'grid' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-500')}
             >
               <Grid size={16} />
             </button>
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => { setOpenMenuId(null); setViewMode('list'); }}
               className={cn('p-1.5 rounded-md transition-all', viewMode === 'list' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-500')}
             >
               <List size={16} />
@@ -308,7 +404,7 @@ export const Tutors = () => {
       {/* Filter Chips */}
       {(searchQuery || filterSubject) && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-zinc-400 uppercase mr-2">Filters:</span>
+          <span className="text-xs font-bold text-zinc-400 uppercase mr-2">{t('tutors.filtersLabel')}</span>
           {searchQuery && (
             <Badge variant="outline" className="flex items-center gap-1 normal-case font-medium">
               "{searchQuery}"
@@ -317,7 +413,7 @@ export const Tutors = () => {
           )}
           {filterSubject && (
             <Badge variant="outline" className="flex items-center gap-1 normal-case font-medium">
-              Subject: {filterSubject}
+              {t('students.filter.subject', { subject: filterSubject })}
               <X size={12} className="cursor-pointer" onClick={() => setFilterSubject('')} />
             </Badge>
           )}
@@ -325,7 +421,7 @@ export const Tutors = () => {
             onClick={() => { setSearchQuery(''); setFilterSubject(''); }}
             className="text-xs text-indigo-600 hover:underline font-medium"
           >
-            Clear all
+            {t('common.clearAll')}
           </button>
         </div>
       )}
@@ -341,24 +437,48 @@ export const Tutors = () => {
             {filteredTutors.map((tutor) => (
               <Card key={tutor.id} className="hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4">
-                  <div className="relative group/menu">
-                    <button className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                  <div className="relative" ref={openMenuId === tutor.id ? menuRef : undefined}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleMenu(tutor.id); }}
+                      className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
                       <MoreHorizontal size={18} />
                     </button>
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-10 p-1">
-                      <button
-                        onClick={() => { setEditingTutor(tutor); setShowForm(true); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                      >
-                        <FileText size={14} /> Edit Profile
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTutor(tutor.id)}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
-                      >
-                        <XCircle size={14} /> Delete Tutor
-                      </button>
-                    </div>
+                    {openMenuId === tutor.id && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1">
+                        {(tutor as any).user?.is_active === false ? (
+                          <>
+                            <button
+                              onClick={() => { setOpenMenuId(null); handleResendInvite(tutor.id); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                            >
+                              <Mail size={14} /> {t('tutors.menu.resendInvite')}
+                            </button>
+                            <button
+                              onClick={() => { setOpenMenuId(null); handleCancelInvite(tutor.id); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                            >
+                              <XCircle size={14} /> {t('tutors.menu.cancelInvite')}
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => { setOpenMenuId(null); setEditingTutor(tutor); setShowForm(true); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                            >
+                              <FileText size={14} /> {t('tutors.menu.editProfile')}
+                            </button>
+                            <button
+                              onClick={() => { setOpenMenuId(null); handleDeleteTutor(tutor.id); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                            >
+                              <XCircle size={14} /> {t('tutors.menu.deleteTutor')}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -366,12 +486,12 @@ export const Tutors = () => {
                   <div className="w-16 h-16 rounded-2xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 font-bold text-2xl shadow-lg">
                     {tutor.name.split(' ').pop()?.charAt(0)}
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-lg dark:text-zinc-100">{tutor.name}</h4>
                     </div>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                      {tutor.subjects.slice(0, 2).join(', ')} Specialist
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate" title={`${tutor.tutor_subjects.map(ts => ts.subject.name).slice(0, 2).join(', ')} ${t('tutors.specialist')}`}>
+                      {tutor.tutor_subjects.map(ts => ts.subject.name).slice(0, 2).join(', ')} {t('tutors.specialist')}
                     </p>
                     <div className="mt-1">{getAvailabilityBadge(tutor)}</div>
                   </div>
@@ -383,19 +503,19 @@ export const Tutors = () => {
 
                 <div className="grid grid-cols-3 gap-2 pt-4 border-t border-zinc-50 dark:border-zinc-800">
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">Experience</p>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">{t('tutors.card.experience')}</p>
                     <p className="text-sm font-bold dark:text-zinc-300">{tutor.experience_years}y</p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">Rating</p>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">{t('tutors.card.rating')}</p>
                     <p className="text-sm font-bold dark:text-zinc-300 flex items-center gap-1">
-                      <Star size={12} className="text-amber-400 fill-amber-400" /> {tutor.rating?.toFixed(1)}
+                      <Star size={12} className="text-amber-400 fill-amber-400" /> {(tutor.rating ?? 0).toFixed(1)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">Subjects</p>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">{t('tutors.card.subjects')}</p>
                     <p className="text-sm font-bold dark:text-zinc-300 flex items-center gap-1">
-                      <Users size={12} className="text-zinc-400" /> {tutor.subjects.length}
+                      <Users size={12} className="text-zinc-400" /> {tutor.tutor_subjects.length}
                     </p>
                   </div>
                 </div>
@@ -407,11 +527,11 @@ export const Tutors = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Tutor</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Subjects</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Experience</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Rating</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.tutor')}</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.subjects')}</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.experience')}</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.rating')}</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.status')}</th>
                   <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"></th>
                 </tr>
               </thead>
@@ -430,24 +550,61 @@ export const Tutors = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
-                      {tutor.subjects.join(', ')}
+                      {tutor.tutor_subjects.map(ts => ts.subject.name).join(', ')}
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">{tutor.experience_years} years</td>
+                    <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">{tutor.experience_years} {t('tutors.card.years')}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-                        <Star size={14} fill="currentColor" /> {tutor.rating?.toFixed(1)}
+                        <Star size={14} fill="currentColor" /> {(tutor.rating ?? 0).toFixed(1)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       {getAvailabilityBadge(tutor)}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => { setEditingTutor(tutor); setShowForm(true); }}
-                        className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                      >
-                        <MoreHorizontal size={18} />
-                      </button>
+                      <div className="relative inline-block" ref={openMenuId === tutor.id ? menuRef : undefined}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleMenu(tutor.id); }}
+                          className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        >
+                          <MoreHorizontal size={18} />
+                        </button>
+                        {openMenuId === tutor.id && (
+                          <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1">
+                            {(tutor as any).user?.is_active === false ? (
+                              <>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); handleResendInvite(tutor.id); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                                >
+                                  <Mail size={14} /> {t('tutors.menu.resendInvite')}
+                                </button>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); handleCancelInvite(tutor.id); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                                >
+                                  <XCircle size={14} /> {t('tutors.menu.cancelInvite')}
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); setEditingTutor(tutor); setShowForm(true); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                                >
+                                  <FileText size={14} /> {t('tutors.menu.editProfile')}
+                                </button>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); handleDeleteTutor(tutor.id); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                                >
+                                  <XCircle size={14} /> {t('tutors.menu.deleteTutor')}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -460,10 +617,10 @@ export const Tutors = () => {
           <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
             <Search size={32} className="text-zinc-300" />
           </div>
-          <h3 className="text-lg font-bold mb-1">No tutors found</h3>
-          <p className="text-zinc-500 text-sm mb-6">Try adjusting your search or filters to find what you're looking for.</p>
+          <h3 className="text-lg font-bold mb-1">{t('tutors.noTutorsFound')}</h3>
+          <p className="text-zinc-500 text-sm mb-6">{t('tutors.noTutorsHint')}</p>
           <Button variant="outline" onClick={() => { setSearchQuery(''); setFilterSubject(''); }}>
-            Clear all filters
+            {t('common.clearAllFilters')}
           </Button>
         </div>
       )}
@@ -472,7 +629,7 @@ export const Tutors = () => {
       <Modal
         isOpen={showForm}
         onClose={() => { setShowForm(false); setEditingTutor(null); }}
-        title={editingTutor ? 'Edit Tutor Details' : 'Register New Tutor'}
+        title={editingTutor ? t('tutors.modal.editTitle') : t('tutors.modal.inviteTitle')}
       >
         <TutorForm
           initialData={editingTutor}
@@ -481,6 +638,18 @@ export const Tutors = () => {
           onCancel={() => { setShowForm(false); setEditingTutor(null); }}
         />
       </Modal>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={handleConfirmAction}
+        title={confirmAction?.type === 'cancel' ? t('tutors.confirmDialog.cancelTitle') : t('tutors.confirmDialog.deleteTitle')}
+        description={confirmAction?.type === 'cancel' ? t('tutors.confirmDialog.cancelDescription') : t('tutors.confirmDialog.deleteDescription')}
+        confirmLabel={confirmAction?.type === 'cancel' ? t('tutors.confirmDialog.cancelConfirm') : t('tutors.confirmDialog.deleteConfirm')}
+        cancelLabel={t('common.cancel')}
+        isLoading={cancelInvite.isPending || deleteTutor.isPending}
+      />
     </div>
   );
 };

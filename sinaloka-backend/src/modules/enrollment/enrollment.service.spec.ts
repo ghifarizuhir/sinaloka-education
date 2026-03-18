@@ -7,11 +7,21 @@ jest.mock('../../common/prisma/prisma.service', () => {
   };
 });
 
+jest.mock('../payment/invoice-generator.service', () => {
+  return {
+    InvoiceGeneratorService: jest.fn(),
+  };
+});
+
 import { EnrollmentService } from './enrollment.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js';
 
 describe('EnrollmentService', () => {
   let service: EnrollmentService;
+  let invoiceGenerator: {
+    generatePackagePayment: jest.Mock;
+  };
   let prisma: {
     enrollment: {
       findMany: jest.Mock;
@@ -20,6 +30,9 @@ describe('EnrollmentService', () => {
       create: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
+    };
+    student: {
+      findFirst: jest.Mock;
     };
     class: {
       findFirst: jest.Mock;
@@ -68,6 +81,9 @@ describe('EnrollmentService', () => {
   };
 
   beforeEach(async () => {
+    invoiceGenerator = {
+      generatePackagePayment: jest.fn().mockResolvedValue(undefined),
+    };
     prisma = {
       enrollment: {
         findMany: jest.fn(),
@@ -76,6 +92,9 @@ describe('EnrollmentService', () => {
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+      },
+      student: {
+        findFirst: jest.fn(),
       },
       class: {
         findFirst: jest.fn(),
@@ -86,6 +105,7 @@ describe('EnrollmentService', () => {
       providers: [
         EnrollmentService,
         { provide: PrismaService, useValue: prisma },
+        { provide: InvoiceGeneratorService, useValue: invoiceGenerator },
       ],
     }).compile();
 

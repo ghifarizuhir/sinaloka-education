@@ -1,0 +1,17 @@
+[    3769ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/favicon.ico:0
+[   57508ms] TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at http://localhost:3000/src/pages/Tutors.tsx:367:36
+    at Array.filter (<anonymous>)
+    at http://localhost:3000/src/pages/Tutors.tsx:366:19
+    at updateMemo (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=3f5f1feb:6545:21)
+    at Object.useMemo (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=3f5f1feb:18969:20)
+    at exports.useMemo (http://localhost:3000/node_modules/.vite/deps/chunk-DFQNUVCC.js?v=3f5f1feb:947:36)
+    at Tutors (http://localhost:3000/src/pages/Tutors.tsx:365:26)
+    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=3f5f1feb:18509:20)
+    at renderWithHooks (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=3f5f1feb:5654:24)
+    at updateFunctionComponent (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=3f5f1feb:7475:21)
+[   57508ms] [WARNING] %s
+
+%s
+ An error occurred in the <Tutors> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=3f5f1feb:6965

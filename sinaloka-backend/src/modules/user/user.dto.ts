@@ -20,3 +20,17 @@ export const UpdateUserSchema = z.object({
 });
 
 export type UpdateUserDto = z.infer<typeof UpdateUserSchema>;
+
+export const UserQuerySchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(10),
+  search: z.string().optional(),
+  role: z.enum(['SUPER_ADMIN', 'ADMIN', 'TUTOR', 'PARENT']).optional(),
+  is_active: z
+    .string()
+    .transform((v) => v === 'true')
+    .optional(),
+  institution_id: z.string().uuid().optional(),
+});
+
+export type UserQueryDto = z.infer<typeof UserQuerySchema>;

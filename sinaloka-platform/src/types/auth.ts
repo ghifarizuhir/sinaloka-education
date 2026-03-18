@@ -24,5 +24,7 @@ export interface User {
     name: string;
     slug: string;
     logo_url: string | null;
-  };
+    timezone: string;
+    default_language: string;
+  } | null;
 }

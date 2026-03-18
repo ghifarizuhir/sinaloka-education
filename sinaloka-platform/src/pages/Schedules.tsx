@@ -1,27 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   List,
   CalendarDays,
   CalendarClock,
   ChevronLeft,
   ChevronRight,
-  RotateCcw,
   MoreHorizontal,
-  AlertCircle,
   CheckCircle2,
-  XCircle,
   Clock,
   User,
-  MapPin,
   ArrowUpRight,
   Calendar as CalendarIcon,
   LayoutGrid,
-  Tally3,
-  DoorOpen,
   Info,
-  Zap
+  Zap,
+  Lock,
+  Search
 } from 'lucide-react';
 import {
   format,
@@ -36,12 +33,15 @@ import {
   subMonths,
   isValid,
   addDays,
-  parseISO
+  parseISO,
+  isBefore,
+  startOfDay
 } from 'date-fns';
 import { toast } from 'sonner';
-import { Card, Button, Badge, Modal, Input, Label, Switch } from '../components/UI';
-import { cn } from '../lib/utils';
-import { useSessions, useCreateSession, useUpdateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
+import { Card, Button, Badge, Modal, Drawer, Input, Label, Switch, Skeleton } from '../components/UI';
+import { WeekCalendar } from '../components/WeekCalendar';
+import { cn, formatDate } from '../lib/utils';
+import { useSessions, useSession, useSessionStudents, useCreateSession, useUpdateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
 import { useClasses } from '@/src/hooks/useClasses';
 import type { Session, CreateSessionDto, SessionStatus } from '@/src/types/session';
 
@@ -57,29 +57,32 @@ const TIME_SLOTS = Array.from({ length: 24 * 2 }, (_, i) => {
   return `${hour.toString().padStart(2, '0')}:${min}`;
 });
 
-const STATUS_LABEL: Record<SessionStatus, string> = {
-  SCHEDULED: 'Scheduled',
-  COMPLETED: 'Completed',
-  CANCELLED: 'Cancelled',
-  RESCHEDULE_REQUESTED: 'Reschedule Req.',
-};
-
 function getSessionDate(session: Session): Date {
   return parseISO(session.date);
 }
 
 export const Schedules = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [view, setView] = useState<'list' | 'calendar'>('calendar');
   const [calendarMode, setCalendarMode] = useState<'month' | 'week' | 'day'>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  const STATUS_LABEL: Record<SessionStatus, string> = {
+    SCHEDULED: t('schedules.status.scheduled'),
+    COMPLETED: t('schedules.status.completed'),
+    CANCELLED: t('schedules.status.cancelled'),
+    RESCHEDULE_REQUESTED: t('schedules.status.rescheduleRequested'),
+  };
+
   // Filter state
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
   const [filterClassId, setFilterClassId] = useState('');
   const [filterStatus, setFilterStatus] = useState<SessionStatus | ''>('');
+  const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [page] = useState(1);
 
   // Generate sessions state
@@ -114,6 +117,10 @@ export const Schedules = () => {
   const generateSessions = useGenerateSessions();
   const approveReschedule = useApproveReschedule();
 
+  const sessionDetail = useSession(selectedSessionId);
+  const sessionStudentsQuery = useSessionStudents(selectedSessionId);
+  const selectedSession = sessions.find((s) => s.id === selectedSessionId) ?? null;
+
   // Auto-set first class when classes load
   useEffect(() => {
     if (classes.length > 0 && !selectedClassId) {
@@ -131,7 +138,7 @@ export const Schedules = () => {
   const endDate = endOfWeek(monthEnd);
   const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
 
-  const weekStart = startOfWeek(currentDate);
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const getSubjectColor = (subject?: string) => {
@@ -139,10 +146,18 @@ export const Schedules = () => {
     return SUBJECT_COLORS[subject] || '';
   };
 
+  function getStatusBorder(status: SessionStatus): string {
+    switch (status) {
+      case 'COMPLETED': return 'border-l-2 border-l-emerald-500';
+      case 'RESCHEDULE_REQUESTED': return 'border-l-2 border-l-amber-500';
+      default: return '';
+    }
+  }
+
   const handleCancelSession = (id: string) => {
     deleteSession.mutate(id, {
-      onSuccess: () => toast.success('Session cancelled'),
-      onError: () => toast.error('Failed to cancel session'),
+      onSuccess: () => toast.success(t('schedules.toast.sessionCancelled')),
+      onError: () => toast.error(t('schedules.toast.cancelError')),
     });
   };
 
@@ -152,8 +167,8 @@ export const Schedules = () => {
 
   const handleApproveReschedule = (id: string) => {
     approveReschedule.mutate({ id, data: { approved: true } }, {
-      onSuccess: () => toast.success('Reschedule approved'),
-      onError: () => toast.error('Failed to approve reschedule'),
+      onSuccess: () => toast.success(t('schedules.toast.rescheduleApproved')),
+      onError: () => toast.error(t('schedules.toast.rescheduleError')),
     });
   };
 
@@ -167,10 +182,10 @@ export const Schedules = () => {
     };
     createSession.mutate(dto, {
       onSuccess: () => {
-        toast.success('Session scheduled');
+        toast.success(t('schedules.toast.sessionScheduled'));
         setShowModal(false);
       },
-      onError: () => toast.error('Failed to schedule session'),
+      onError: () => toast.error(t('schedules.toast.scheduleError')),
     });
   };
 
@@ -178,10 +193,10 @@ export const Schedules = () => {
     if (!genClassId) return;
     generateSessions.mutate({ class_id: genClassId, date_from: genDateFrom, date_to: genDateTo }, {
       onSuccess: () => {
-        toast.success('Sessions generated successfully');
+        toast.success(t('schedules.toast.sessionsGenerated'));
         setShowGenerateModal(false);
       },
-      onError: () => toast.error('Failed to generate sessions'),
+      onError: () => toast.error(t('schedules.toast.generateError')),
     });
   };
 
@@ -191,8 +206,8 @@ export const Schedules = () => {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Schedules</h2>
-          <p className="text-zinc-500 text-sm">Manage class sessions, tutor assignments, and room traffic.</p>
+          <h2 className="text-2xl font-bold tracking-tight">{t('schedules.title')}</h2>
+          <p className="text-zinc-500 text-sm">{t('schedules.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
@@ -217,11 +232,11 @@ export const Schedules = () => {
           </div>
           <Button variant="outline" onClick={() => setShowGenerateModal(true)}>
             <Zap size={18} />
-            Auto-Generate
+            {t('schedules.autoGenerate')}
           </Button>
           <Button onClick={() => setShowModal(true)}>
             <CalendarClock size={18} />
-            Schedule Session
+            {t('schedules.scheduleSession')}
           </Button>
         </div>
       </div>
@@ -233,21 +248,21 @@ export const Schedules = () => {
           value={filterDateFrom}
           onChange={(e) => setFilterDateFrom(e.target.value)}
           className="h-9 text-xs w-36"
-          placeholder="Date from"
+          placeholder={t('schedules.form.dateFrom')}
         />
         <Input
           type="date"
           value={filterDateTo}
           onChange={(e) => setFilterDateTo(e.target.value)}
           className="h-9 text-xs w-36"
-          placeholder="Date to"
+          placeholder={t('schedules.form.dateTo')}
         />
         <select
           className="h-9 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
           value={filterClassId}
           onChange={(e) => setFilterClassId(e.target.value)}
         >
-          <option value="">All Classes</option>
+          <option value="">{t('schedules.filter.allClasses')}</option>
           {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <select
@@ -255,11 +270,11 @@ export const Schedules = () => {
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as SessionStatus | '')}
         >
-          <option value="">All Statuses</option>
-          <option value="SCHEDULED">Scheduled</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="CANCELLED">Cancelled</option>
-          <option value="RESCHEDULE_REQUESTED">Reschedule Requested</option>
+          <option value="">{t('schedules.filter.allStatuses')}</option>
+          <option value="SCHEDULED">{t('schedules.filter.scheduled')}</option>
+          <option value="COMPLETED">{t('schedules.filter.completed')}</option>
+          <option value="CANCELLED">{t('schedules.filter.cancelled')}</option>
+          <option value="RESCHEDULE_REQUESTED">{t('schedules.filter.rescheduleRequested')}</option>
         </select>
       </div>
 
@@ -275,30 +290,48 @@ export const Schedules = () => {
             <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
                 <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Class & Subject</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Tutor</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Date & Time</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.classSubject')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.tutor')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.dateTime')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.status')}</th>
                   <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {sessions.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 text-sm">No sessions found.</td>
+                    <td colSpan={5} className="px-6 py-20 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+                          <Search size={32} className="text-zinc-300" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-1">{t('schedules.noSessionsFound')}</h3>
+                        <p className="text-zinc-500 text-sm mb-6">{t('schedules.noSessionsHint')}</p>
+                      </div>
+                    </td>
                   </tr>
                 )}
                 {sessions.map((session) => {
                   const isCancelled = session.status === 'CANCELLED';
+                  const isCompleted = session.status === 'COMPLETED';
                   const sessionDate = getSessionDate(session);
+                  const isPast = isValid(sessionDate) && isBefore(startOfDay(sessionDate), startOfDay(new Date()));
+                  const isLocked = isCompleted || isPast;
                   const subject = session.class?.subject;
                   const tutorName = session.class?.tutor?.name ?? '—';
                   const className = session.class?.name ?? '—';
                   return (
-                    <tr key={session.id} className={cn(
-                      "hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors group",
-                      isCancelled && "opacity-50 grayscale-[0.5]"
-                    )}>
+                    <tr
+                      key={session.id}
+                      className={cn(
+                        "hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer",
+                        isCancelled && "opacity-50 grayscale-[0.5]"
+                      )}
+                      onClick={() => {
+                        setSelectedSessionId(session.id);
+                        setActiveActionMenu(null);
+                      }}
+                    >
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className={cn("text-sm font-bold dark:text-zinc-200", isCancelled && "line-through")}>{className}</span>
@@ -320,7 +353,7 @@ export const Schedules = () => {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="text-sm font-medium dark:text-zinc-200">
-                            {isValid(sessionDate) ? format(sessionDate, 'EEEE, MMM d') : session.date}
+                            {isValid(sessionDate) ? formatDate(session.date, i18n.language) : session.date}
                           </span>
                           <span className="text-xs text-zinc-400 flex items-center gap-1">
                             <Clock size={12} /> {session.start_time} - {session.end_time}
@@ -332,35 +365,59 @@ export const Schedules = () => {
                           {STATUS_LABEL[session.status]}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="relative group/menu">
-                          <button className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                      <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative">
+                          <button
+                            className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            onClick={() => setActiveActionMenu(activeActionMenu === session.id ? null : session.id)}
+                          >
                             <MoreHorizontal size={18} />
                           </button>
-                          <div className="absolute right-0 top-full mt-1 w-52 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-10 p-1 text-left">
-                            <button
-                              onClick={() => handleMarkAttendance(session.id)}
-                              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-indigo-600"
-                            >
-                              Mark Attendance <ArrowUpRight size={14} />
-                            </button>
-                            {session.status === 'RESCHEDULE_REQUESTED' && (
-                              <button
-                                onClick={() => handleApproveReschedule(session.id)}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-emerald-600"
-                              >
-                                <CheckCircle2 size={14} /> Approve Reschedule
-                              </button>
+                          <AnimatePresence>
+                            {activeActionMenu === session.id && (
+                              <>
+                                <div className="fixed inset-0 z-[5]" onClick={() => setActiveActionMenu(null)} />
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0.95 }}
+                                  transition={{ duration: 0.1 }}
+                                  className="absolute right-0 top-full mt-1 w-52 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1 text-left"
+                                >
+                                  {isLocked ? (
+                                    <div className="px-3 py-2 text-xs text-zinc-400 flex items-center gap-2">
+                                      <Lock size={12} /> {isCompleted ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={() => { handleMarkAttendance(session.id); setActiveActionMenu(null); }}
+                                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-indigo-600"
+                                      >
+                                        {t('schedules.menu.markAttendance')} <ArrowUpRight size={14} />
+                                      </button>
+                                      {session.status === 'RESCHEDULE_REQUESTED' && (
+                                        <button
+                                          onClick={() => { handleApproveReschedule(session.id); setActiveActionMenu(null); }}
+                                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-emerald-600"
+                                        >
+                                          <CheckCircle2 size={14} /> {t('schedules.menu.approveReschedule')}
+                                        </button>
+                                      )}
+                                      {!isCancelled && (
+                                        <button
+                                          onClick={() => { handleCancelSession(session.id); setActiveActionMenu(null); }}
+                                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-red-500"
+                                        >
+                                          {t('schedules.menu.cancelSession')}
+                                        </button>
+                                      )}
+                                    </>
+                                  )}
+                                </motion.div>
+                              </>
                             )}
-                            {!isCancelled && (
-                              <button
-                                onClick={() => handleCancelSession(session.id)}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-red-500"
-                              >
-                                Cancel Session
-                              </button>
-                            )}
-                          </div>
+                          </AnimatePresence>
                         </div>
                       </td>
                     </tr>
@@ -377,22 +434,22 @@ export const Schedules = () => {
             <div className="flex items-center gap-4">
               <h3 className="font-bold text-lg min-w-[150px]">
                 {calendarMode === 'month' ? format(currentDate, 'MMMM yyyy') :
-                 calendarMode === 'week' ? `Week of ${format(weekStart, 'MMM d')}` :
+                 calendarMode === 'week' ? t('schedules.calendar.weekOf', { date: format(weekStart, 'MMM d') }) :
                  format(currentDate, 'EEEE, MMM d')}
               </h3>
               <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
                 <button
                   onClick={() => setCalendarMode('month')}
                   className={cn("px-3 py-1 text-[10px] font-bold rounded-md transition-all", calendarMode === 'month' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500")}
-                >MONTH</button>
+                >{t('schedules.calendar.month')}</button>
                 <button
                   onClick={() => setCalendarMode('week')}
                   className={cn("px-3 py-1 text-[10px] font-bold rounded-md transition-all", calendarMode === 'week' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500")}
-                >WEEK</button>
+                >{t('schedules.calendar.week')}</button>
                 <button
                   onClick={() => setCalendarMode('day')}
                   className={cn("px-3 py-1 text-[10px] font-bold rounded-md transition-all", calendarMode === 'day' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500")}
-                >DAY</button>
+                >{t('schedules.calendar.day')}</button>
               </div>
             </div>
 
@@ -407,7 +464,7 @@ export const Schedules = () => {
                 onClick={() => setCurrentDate(new Date())}
                 className="px-3 py-1 text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md"
               >
-                Today
+                {t('common.today')}
               </button>
               <button
                 onClick={() => setCurrentDate(calendarMode === 'month' ? addMonths(currentDate, 1) : calendarMode === 'week' ? addDays(currentDate, 7) : addDays(currentDate, 1))}
@@ -422,7 +479,15 @@ export const Schedules = () => {
           {calendarMode === 'month' && (
             <>
               <div className="grid grid-cols-7 border-b border-zinc-100 dark:border-zinc-800">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                {[
+                  t('schedules.calendar.sun'),
+                  t('schedules.calendar.mon'),
+                  t('schedules.calendar.tue'),
+                  t('schedules.calendar.wed'),
+                  t('schedules.calendar.thu'),
+                  t('schedules.calendar.fri'),
+                  t('schedules.calendar.sat'),
+                ].map((day) => (
                   <div key={day} className="py-2 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                     {day}
                   </div>
@@ -457,9 +522,11 @@ export const Schedules = () => {
                           return (
                             <div
                               key={s.id}
+                              onClick={() => setSelectedSessionId(s.id)}
                               className={cn(
                                 "p-1.5 rounded-md text-[10px] font-medium truncate border transition-all hover:scale-[1.02] cursor-pointer",
-                                isCancelled ? "bg-zinc-50 text-zinc-400 border-zinc-100 line-through" : getSubjectColor(subject)
+                                isCancelled ? "bg-zinc-50 text-zinc-400 border-zinc-100 line-through" : getSubjectColor(subject),
+                                !isCancelled && getStatusBorder(s.status)
                               )}
                               title={`${s.class?.name ?? ''} (${s.start_time} - ${s.end_time})`}
                             >
@@ -503,9 +570,11 @@ export const Schedules = () => {
                               return (
                                 <div
                                   key={s.id}
+                                  onClick={() => setSelectedSessionId(s.id)}
                                   className={cn(
-                                    "rounded-lg p-2 border shadow-sm text-[10px]",
-                                    isCancelled ? "bg-zinc-50 text-zinc-400 border-zinc-100 line-through" : getSubjectColor(s.class?.subject)
+                                    "rounded-lg p-2 border shadow-sm text-[10px] cursor-pointer hover:scale-[1.01] transition-all",
+                                    isCancelled ? "bg-zinc-50 text-zinc-400 border-zinc-100 line-through" : getSubjectColor(s.class?.subject),
+                                    !isCancelled && getStatusBorder(s.status)
                                   )}
                                 >
                                   <div className="font-bold truncate">{s.class?.name ?? '—'}</div>
@@ -528,18 +597,15 @@ export const Schedules = () => {
             </div>
           )}
 
-          {/* Week View Placeholder */}
+          {/* Week View */}
           {calendarMode === 'week' && (
-            <div className="flex-1 flex items-center justify-center p-12 text-center">
-              <div className="max-w-xs">
-                <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-zinc-400">
-                  <LayoutGrid size={32} />
-                </div>
-                <h4 className="font-bold mb-2">Weekly Overview</h4>
-                <p className="text-sm text-zinc-500">The Week view provides a balanced look at tutor availability across the next 7 days.</p>
-                <Button variant="outline" className="mt-4" onClick={() => setCalendarMode('month')}>Back to Month View</Button>
-              </div>
-            </div>
+            <WeekCalendar
+              sessions={sessions}
+              weekDays={weekDays}
+              onSelectSession={setSelectedSessionId}
+              getSubjectColor={getSubjectColor}
+              getStatusBorder={getStatusBorder}
+            />
           )}
         </Card>
       )}
@@ -548,31 +614,31 @@ export const Schedules = () => {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Schedule New Session"
+        title={t('schedules.modal.scheduleTitle')}
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Select Class</Label>
+            <Label>{t('schedules.form.selectClass')}</Label>
             <select
               className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
               value={selectedClassId}
               onChange={(e) => setSelectedClassId(e.target.value)}
             >
-              <option value="">— Select class —</option>
+              <option value="">{t('schedules.form.selectClassPlaceholder')}</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Date</Label>
+              <Label>{t('schedules.form.date')}</Label>
               <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Start Time</Label>
+              <Label>{t('schedules.form.startTime')}</Label>
               <select
                 className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
                 value={startTime}
@@ -582,7 +648,7 @@ export const Schedules = () => {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>End Time</Label>
+              <Label>{t('schedules.form.endTime')}</Label>
               <select
                 className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
                 value={endTime}
@@ -594,13 +660,13 @@ export const Schedules = () => {
           </div>
 
           <div className="flex items-center gap-3 mt-8">
-            <Button variant="outline" className="flex-1 justify-center" onClick={() => setShowModal(false)}>Cancel</Button>
+            <Button variant="outline" className="flex-1 justify-center" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
             <Button
               className="flex-1 justify-center"
               onClick={handleCreateSession}
               disabled={!selectedClassId || createSession.isPending}
             >
-              {createSession.isPending ? 'Scheduling...' : 'Schedule Session'}
+              {createSession.isPending ? t('schedules.form.scheduling') : t('schedules.scheduleSession')}
             </Button>
           </div>
         </div>
@@ -610,51 +676,261 @@ export const Schedules = () => {
       <Modal
         isOpen={showGenerateModal}
         onClose={() => setShowGenerateModal(false)}
-        title="Auto-Generate Sessions"
+        title={t('schedules.modal.generateTitle')}
       >
         <div className="space-y-4">
           <div className="p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl flex gap-3">
             <Info size={18} className="text-blue-600 shrink-0" />
             <p className="text-[10px] text-blue-700 dark:text-blue-400">
-              Auto-generate sessions for a class based on its recurring schedule within the selected date range.
+              {t('schedules.modal.generateInfo')}
             </p>
           </div>
 
           <div className="space-y-1.5">
-            <Label>Select Class</Label>
+            <Label>{t('schedules.form.selectClass')}</Label>
             <select
               className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
               value={genClassId}
               onChange={(e) => setGenClassId(e.target.value)}
             >
-              <option value="">— Select class —</option>
+              <option value="">{t('schedules.form.selectClassPlaceholder')}</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label>Date From</Label>
+              <Label>{t('schedules.form.dateFrom')}</Label>
               <Input type="date" value={genDateFrom} onChange={(e) => setGenDateFrom(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>Date To</Label>
+              <Label>{t('schedules.form.dateTo')}</Label>
               <Input type="date" value={genDateTo} onChange={(e) => setGenDateTo(e.target.value)} />
             </div>
           </div>
 
           <div className="flex items-center gap-3 mt-4">
-            <Button variant="outline" className="flex-1 justify-center" onClick={() => setShowGenerateModal(false)}>Cancel</Button>
+            <Button variant="outline" className="flex-1 justify-center" onClick={() => setShowGenerateModal(false)}>{t('common.cancel')}</Button>
             <Button
               className="flex-1 justify-center"
               onClick={handleGenerate}
               disabled={!genClassId || generateSessions.isPending}
             >
-              {generateSessions.isPending ? 'Generating...' : 'Generate Sessions'}
+              {generateSessions.isPending ? t('schedules.form.generating') : t('schedules.modal.generateSessions')}
             </Button>
           </div>
         </div>
       </Modal>
+
+      {/* Session Detail Drawer */}
+      <Drawer
+        isOpen={!!selectedSessionId}
+        onClose={() => setSelectedSessionId(null)}
+        title={t('schedules.drawer.title')}
+      >
+        {selectedSession && (
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-2xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 text-xl font-bold mb-3 shadow-lg">
+                {(selectedSession.class?.name ?? '?').charAt(0)}
+              </div>
+              <h3 className="text-lg font-bold dark:text-zinc-100">{selectedSession.class?.name ?? '—'}</h3>
+              <div className="mt-2 flex gap-2">
+                {selectedSession.class?.subject && (
+                  <span className={cn('text-[10px] font-bold px-2 py-1 rounded-md border', getSubjectColor(selectedSession.class.subject))}>
+                    {selectedSession.class.subject.toUpperCase()}
+                  </span>
+                )}
+                <Badge variant={selectedSession.status === 'COMPLETED' ? 'success' : selectedSession.status === 'CANCELLED' ? 'default' : 'warning'}>
+                  {STATUS_LABEL[selectedSession.status]}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Date & Time */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.dateTime')}</h4>
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                <div className="flex items-center gap-2 text-sm dark:text-zinc-200">
+                  <CalendarIcon size={14} className="text-zinc-400" />
+                  {isValid(parseISO(selectedSession.date)) ? formatDate(selectedSession.date, i18n.language) : selectedSession.date}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-zinc-500 mt-1">
+                  <Clock size={14} />
+                  {selectedSession.start_time} - {selectedSession.end_time}
+                </div>
+              </div>
+            </div>
+
+            {/* Tutor */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.tutor')}</h4>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 font-bold">
+                  {(selectedSession.class?.tutor?.name ?? '?').charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-bold dark:text-zinc-200">{selectedSession.class?.tutor?.name ?? '—'}</p>
+                  {sessionDetail.data?.class?.tutor?.email && (
+                    <p className="text-xs text-zinc-500">{sessionDetail.data.class.tutor.email}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Session Content (if COMPLETED) */}
+            {selectedSession.status === 'COMPLETED' && (
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.sessionContent')}</h4>
+                <div className="space-y-2">
+                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                    <p className="text-[10px] text-zinc-400 uppercase font-bold mb-1">{t('schedules.drawer.topicCovered')}</p>
+                    <p className="text-sm dark:text-zinc-200">{selectedSession.topic_covered || t('schedules.drawer.noContent')}</p>
+                  </div>
+                  {selectedSession.session_summary && (
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                      <p className="text-[10px] text-zinc-400 uppercase font-bold mb-1">{t('schedules.drawer.sessionSummary')}</p>
+                      <p className="text-sm dark:text-zinc-200">{selectedSession.session_summary}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Reschedule Info (if RESCHEDULE_REQUESTED) */}
+            {selectedSession.status === 'RESCHEDULE_REQUESTED' && (
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.rescheduleInfo')}</h4>
+                <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-amber-700 dark:text-amber-300 font-medium">{t('schedules.drawer.proposedDateTime')}: </span>
+                      <span className="dark:text-amber-200">{selectedSession.proposed_date} {selectedSession.proposed_start_time} - {selectedSession.proposed_end_time}</span>
+                    </div>
+                    {selectedSession.reschedule_reason && (
+                      <div>
+                        <span className="text-amber-700 dark:text-amber-300 font-medium">{t('schedules.drawer.reason')}: </span>
+                        <span className="dark:text-amber-200">{selectedSession.reschedule_reason}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      className="flex-1 justify-center bg-emerald-600 hover:bg-emerald-700 text-white"
+                      onClick={() => {
+                        approveReschedule.mutate(
+                          { id: selectedSession.id, data: { approved: true } },
+                          {
+                            onSuccess: () => { toast.success(t('schedules.toast.rescheduleApproved')); setSelectedSessionId(null); },
+                            onError: () => toast.error(t('schedules.toast.rescheduleError')),
+                          }
+                        );
+                      }}
+                    >
+                      {t('schedules.drawer.approve')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 justify-center text-red-500"
+                      onClick={() => {
+                        approveReschedule.mutate(
+                          { id: selectedSession.id, data: { approved: false } },
+                          {
+                            onSuccess: () => { toast.success(t('schedules.toast.rescheduleRejected')); setSelectedSessionId(null); },
+                            onError: () => toast.error(t('schedules.toast.rescheduleError')),
+                          }
+                        );
+                      }}
+                    >
+                      {t('schedules.drawer.reject')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Attendance */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                {t('schedules.drawer.attendance')} ({sessionStudentsQuery.data?.students?.filter(s => s.attendance_id !== null).length ?? 0}/{sessionStudentsQuery.data?.students?.length ?? 0})
+              </h4>
+              {sessionStudentsQuery.isLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12" />)}
+                </div>
+              ) : sessionStudentsQuery.data?.students?.length ? (
+                <div className="space-y-2">
+                  {sessionStudentsQuery.data.students.map((student) => (
+                    <div key={student.id} className={cn("flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50", !student.attendance_id && "opacity-60")}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-bold">
+                          {student.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium dark:text-zinc-200">{student.name}</p>
+                          {student.grade && <p className="text-[10px] text-zinc-400">{student.grade}</p>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {student.attendance_id !== null ? (
+                          <>
+                            {student.homework_done && (
+                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">{t('schedules.drawer.homework')}</span>
+                            )}
+                            <Badge variant={student.status === 'PRESENT' ? 'success' : student.status === 'LATE' ? 'warning' : 'default'}>
+                              {t(`schedules.drawer.${student.status!.toLowerCase()}`)}
+                            </Badge>
+                          </>
+                        ) : (
+                          <Badge variant="default">
+                            {t('schedules.drawer.pending', 'Pending')}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500 text-center py-4">{t('schedules.drawer.noStudents', 'No students enrolled')}</p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            {(() => {
+              const drawerSessionDate = getSessionDate(selectedSession);
+              const drawerIsPast = isValid(drawerSessionDate) && isBefore(startOfDay(drawerSessionDate), startOfDay(new Date()));
+              const drawerIsLocked = selectedSession.status === 'COMPLETED' || drawerIsPast;
+              return drawerIsLocked ? (
+                <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800 text-zinc-400 text-sm">
+                  <Lock size={14} />
+                  {selectedSession.status === 'COMPLETED' ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                  <Button
+                    variant="outline"
+                    className="flex-1 justify-center"
+                    onClick={() => { handleMarkAttendance(selectedSession.id); setSelectedSessionId(null); }}
+                  >
+                    {t('schedules.drawer.markAttendance')}
+                  </Button>
+                  {selectedSession.status !== 'CANCELLED' && (
+                    <Button
+                      className="flex-1 justify-center bg-rose-600 hover:bg-rose-700 text-white"
+                      onClick={() => { handleCancelSession(selectedSession.id); setSelectedSessionId(null); }}
+                    >
+                      {t('schedules.drawer.cancelSession')}
+                    </Button>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 };

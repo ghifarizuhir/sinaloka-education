@@ -1,0 +1,1368 @@
+{
+  "common": {
+    "cancel": "Batal",
+    "save": "Simpan",
+    "delete": "Hapus",
+    "edit": "Edit",
+    "close": "Tutup",
+    "export": "Ekspor",
+    "import": "Impor",
+    "search": "Cari",
+    "filter": "Filter",
+    "filters": "Filter",
+    "clearAll": "Hapus semua",
+    "clearAllFilters": "Hapus semua filter",
+    "viewAll": "Lihat Semua",
+    "viewDetails": "Lihat Detail",
+    "prev": "Sebelumnya",
+    "next": "Selanjutnya",
+    "today": "Hari Ini",
+    "loading": "Memuat...",
+    "saving": "Menyimpan...",
+    "processing": "Memproses...",
+    "deleting": "Menghapus...",
+    "noResults": "Tidak ada hasil ditemukan",
+    "noData": "Tidak ada data tersedia",
+    "actions": "Aksi",
+    "status": "Status",
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
+    "archived": "Diarsipkan",
+    "pending": "Menunggu",
+    "paid": "Lunas",
+    "overdue": "Terlambat",
+    "selected": "Dipilih",
+    "page": "Halaman",
+    "of": "dari",
+    "total": "total",
+    "showing": "Menampilkan",
+    "to": "sampai",
+    "results": "hasil",
+    "allStatuses": "Semua Status",
+    "comingSoon": "Segera hadir",
+    "allSubjects": "Semua Mata Pelajaran",
+    "allClasses": "Semua Kelas",
+    "allCategories": "Semua Kategori",
+    "perSession": "per sesi",
+    "saveChanges": "Simpan Perubahan",
+    "confirm": "Konfirmasi",
+    "discard": "Buang",
+    "download": "Unduh",
+    "upload": "Unggah",
+    "searchAnything": "Cari apa saja...",
+    "comparison": "Perbandingan",
+    "csv": "CSV",
+    "selectClass": "Pilih kelas",
+    "selectTutor": "Pilih tutor",
+    "selectStudent": "Pilih siswa",
+    "actionRequired": "Perlu Tindakan",
+    "proFeature": "Fitur Pro",
+    "allRecords": "Semua Data",
+    "required": "wajib",
+    "optional": "opsional"
+  },
+
+  "nav": {
+    "general": "Umum",
+    "academics": "Akademik",
+    "operations": "Operasional",
+    "finance": "Keuangan",
+    "system": "Sistem",
+    "dashboard": "Dasbor",
+    "students": "Siswa",
+    "tutors": "Tutor",
+    "classes": "Kelas",
+    "schedules": "Jadwal",
+    "attendance": "Kehadiran",
+    "enrollments": "Pendaftaran",
+    "overview": "Ringkasan",
+    "studentPayments": "Pembayaran Siswa",
+    "tutorPayouts": "Pembayaran Tutor",
+    "operatingExpenses": "Biaya Operasional",
+    "settings": "Pengaturan",
+    "messaging": "Perpesanan",
+    "whatsapp": "WhatsApp"
+  },
+
+  "layout": {
+    "searchPlaceholder": "Cari apa saja...",
+    "proPlan": "Paket Pro",
+    "storageUsage": "Anda menggunakan 80% penyimpanan.",
+    "upgradeNow": "Upgrade Sekarang",
+    "logOut": "Keluar",
+    "pageTitle": {
+      "dashboard": "Dasbor",
+      "students": "Siswa",
+      "tutors": "Tutor",
+      "classes": "Kelas",
+      "schedules": "Jadwal",
+      "enrollments": "Pendaftaran",
+      "attendance": "Kehadiran",
+      "financeOverview": "Ringkasan Keuangan",
+      "studentPayments": "Pembayaran Siswa",
+      "tutorPayouts": "Pembayaran Tutor",
+      "operatingExpenses": "Biaya Operasional",
+      "settings": "Pengaturan",
+      "whatsapp": "WhatsApp"
+    }
+  },
+
+  "login": {
+    "title": "Sinaloka",
+    "subtitle": "Masuk ke akun Anda",
+    "emailLabel": "Alamat email",
+    "emailPlaceholder": "admin@sinaloka.com",
+    "passwordLabel": "Kata sandi",
+    "passwordPlaceholder": "••••••••",
+    "signIn": "Masuk",
+    "signingIn": "Sedang masuk...",
+    "defaultError": "Email atau kata sandi salah. Silakan coba lagi.",
+    "copyright": "© {{year}} Sinaloka. Hak cipta dilindungi."
+  },
+
+  "dashboard": {
+    "greeting": "Selamat Pagi",
+    "subtitle": "Berikut yang terjadi di Sinaloka Platform hari ini.",
+    "schedule": "Jadwal",
+    "quickActions": "Aksi Cepat",
+    "quickEnroll": "Daftar Cepat",
+    "recordPayment": "Catat Pembayaran",
+    "addMakeupClass": "Tambah Kelas Pengganti",
+    "totalStudents": "Total Siswa",
+    "activeTutors": "Tutor Aktif",
+    "attendanceRate": "Tingkat Kehadiran",
+    "monthlyRevenue": "Pendapatan Bulanan",
+    "overview": "Ringkasan",
+    "keyMetrics": "Metrik utama secara sekilas",
+    "fullSchedule": "Jadwal Lengkap",
+    "upcomingSessions": "Sesi Mendatang",
+    "scheduled": "terjadwal",
+    "sessionsPlanned": "Sesi yang direncanakan dalam waktu dekat",
+    "studentAttendance": "Kehadiran Siswa",
+    "rate": "tingkat",
+    "overallAttendance": "Kehadiran keseluruhan di semua sesi",
+    "enrolled": "terdaftar",
+    "registeredStudents": "Siswa terdaftar di platform",
+    "viewStudents": "Lihat Siswa",
+    "revenueSummary": "Ringkasan Pendapatan",
+    "quickLinks": "Tautan Cepat",
+    "viewAllStudents": "Lihat Semua Siswa",
+    "manageFinance": "Kelola Keuangan",
+    "attendanceRecords": "Catatan Kehadiran",
+    "recentActivity": "Aktivitas Terbaru",
+    "noRecentActivity": "Tidak ada aktivitas terbaru",
+    "activityCategory": {
+      "operations": "Operasional",
+      "finance": "Keuangan",
+      "academic": "Akademik",
+      "system": "Sistem"
+    },
+    "timeAgo": {
+      "minutes": "{{count}} menit yang lalu",
+      "hours": "{{count}} jam yang lalu",
+      "days": "{{count}} hari yang lalu"
+    },
+    "commandPalette": {
+      "searchPlaceholder": "Cari siswa, tutor, atau aksi...",
+      "quickActions": "Aksi Cepat",
+      "enrollNewStudent": "Daftarkan Siswa Baru",
+      "recordNewPayment": "Catat Pembayaran Baru",
+      "scheduleMakeupClass": "Jadwalkan Kelas Pengganti",
+      "addNewTutor": "Tambah Tutor Baru",
+      "navigateTo": "Navigasi ke {{path}}",
+      "navigate": "Navigasi",
+      "select": "Pilih",
+      "version": "Sinaloka Platform v1.0"
+    }
+  },
+
+  "students": {
+    "title": "Siswa",
+    "subtitle": "Kelola dan lacak direktori siswa Anda.",
+    "addStudent": "Tambah Siswa",
+    "importing": "Mengimpor...",
+    "noStudentsFound": "Tidak ada siswa ditemukan",
+    "noStudentsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "totalStudents": "Total Siswa",
+    "activeStudents": "Siswa Aktif",
+    "inactive": "Tidak Aktif",
+    "totalAllPages": "Total (Semua Halaman)",
+    "totalStudentsLabel": "total siswa",
+    "searchPlaceholder": "Cari berdasarkan nama atau email...",
+    "activeFilters": "Filter Aktif:",
+    "student": "Siswa",
+    "form": {
+      "fullName": "Nama Lengkap",
+      "namePlaceholder": "contoh: John Doe",
+      "emailAddress": "Alamat Email",
+      "emailPlaceholder": "john@example.com",
+      "phoneNumber": "Nomor Telepon",
+      "phonePlaceholder": "+62 812 3456 7890",
+      "grade": "Kelas",
+      "status": "Status",
+      "parentName": "Nama Orang Tua/Wali",
+      "parentNamePlaceholder": "contoh: Jane Doe",
+      "parentPhone": "Telepon Orang Tua/Wali",
+      "parentPhonePlaceholder": "+62 812 3456 7890",
+      "parentEmail": "Email Orang Tua/Wali",
+      "parentEmailPlaceholder": "orangtua@example.com"
+    },
+    "table": {
+      "name": "Nama",
+      "email": "Email",
+      "grade": "Kelas",
+      "parentGuardian": "Orang Tua/Wali",
+      "status": "Status"
+    },
+    "filter": {
+      "allGrades": "Semua Kelas",
+      "10thGrade": "Kelas 10",
+      "11thGrade": "Kelas 11",
+      "12thGrade": "Kelas 12",
+      "allStatus": "Semua Status",
+      "search": "Cari: {{query}}",
+      "grade": "Kelas: {{grade}}",
+      "status": "Status: {{status}}",
+      "subject": "Mapel: {{subject}}"
+    },
+    "toast": {
+      "created": "Siswa berhasil dibuat",
+      "updated": "Siswa berhasil diperbarui",
+      "deleted": "Siswa berhasil dihapus",
+      "bulkDeleted": "{{count}} siswa berhasil dihapus",
+      "importSuccess": "Siswa diimpor",
+      "importError": "Gagal mengimpor siswa",
+      "exportSuccess": "Siswa berhasil diekspor",
+      "exportError": "Gagal mengekspor siswa",
+      "createError": "Gagal membuat siswa",
+      "updateError": "Gagal memperbarui siswa",
+      "deleteError": "Gagal menghapus siswa",
+      "inviteSent": "Undangan terkirim ke {{email}}",
+      "inviteError": "Gagal mengirim undangan"
+    },
+    "modal": {
+      "addTitle": "Tambah Siswa",
+      "editTitle": "Edit Profil Siswa",
+      "deleteTitle": "Hapus Siswa",
+      "bulkDeleteTitle": "Hapus Beberapa Siswa",
+      "importTitle": "Impor Siswa",
+      "updateStudent": "Simpan Perubahan",
+      "createStudent": "Tambah Siswa",
+      "deleteStudent": "Hapus Siswa",
+      "deleteBulk": "Hapus {{count}} Siswa"
+    },
+    "drawer": {
+      "title": "Profil Siswa",
+      "contactInfo": "Informasi Kontak",
+      "email": "Email",
+      "phone": "Telepon",
+      "enrolledDate": "Tanggal Pendaftaran",
+      "parentGuardian": "Orang Tua/Wali",
+      "primaryContact": "Kontak Utama",
+      "inviteParent": "Undang Orang Tua",
+      "sending": "Mengirim...",
+      "noParentEmail": "Tidak ada email orang tua tercatat"
+    },
+    "delete": {
+      "cannotUndo": "Tindakan ini tidak dapat dibatalkan.",
+      "permanentDelete": "Ini akan menghapus secara permanen <strong>{{name}}</strong> dan semua data terkait termasuk pendaftaran, catatan kehadiran, dan riwayat pembayaran.",
+      "bulkPermanentDelete": "Anda akan menghapus secara permanen <strong>{{count}} siswa</strong> dan semua data terkait mereka.",
+      "typeDelete": "Ketik <strong>delete</strong> untuk konfirmasi"
+    },
+    "import": {
+      "howToImport": "Cara mengimpor siswa",
+      "step1": "Unduh template CSV di bawah",
+      "step2": "Isi data siswa sesuai format",
+      "step3": "Unggah file CSV yang sudah diisi",
+      "step4": "Klik \"Impor\" untuk memproses",
+      "downloadTemplate": "Unduh Template",
+      "templateDesc": "File CSV dengan header dan baris contoh",
+      "csvFormat": "Format CSV",
+      "fieldsRequired": "Kolom <strong>nama</strong> dan <strong>kelas</strong> wajib diisi. Lainnya opsional.",
+      "clickToUpload": "Klik untuk mengunggah CSV",
+      "onlyCsv": "Hanya file .csv yang didukung",
+      "clickToChange": "Klik untuk mengganti file",
+      "importStudents": "Impor Siswa"
+    },
+    "bulk": {
+      "viewEdit": "Lihat / Edit",
+      "inviteParent": "Undang Orang Tua"
+    }
+  },
+
+  "tutors": {
+    "title": "Tutor",
+    "subtitle": "Kelola staf akademik dan kinerja mereka.",
+    "addTutor": "Tambah Tutor",
+    "noTutorsFound": "Tidak ada tutor ditemukan",
+    "noTutorsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "searchPlaceholder": "Cari tutor...",
+    "filtersLabel": "Filter:",
+    "specialist": "Spesialis",
+    "form": {
+      "fullName": "Nama Lengkap",
+      "namePlaceholder": "Dr. John Doe",
+      "emailAddress": "Alamat Email",
+      "emailPlaceholder": "john@academy.com",
+      "subjects": "Mata Pelajaran (pisahkan dengan koma)",
+      "subjectsPlaceholder": "contoh: Matematika, Fisika",
+      "rating": "Rating ({{value}})",
+      "yearsOfExperience": "Tahun Pengalaman ({{value}})",
+      "verifiedStatus": "Status Verifikasi",
+      "markVerified": "Tandai tutor ini sebagai terverifikasi",
+      "bankName": "Nama Bank",
+      "bankNamePlaceholder": "BCA",
+      "accountNumber": "Nomor Rekening",
+      "accountNumberPlaceholder": "1234567890",
+      "accountHolder": "Pemilik Rekening",
+      "accountHolderPlaceholder": "John Doe",
+      "monthlySalary": "Gaji Bulanan",
+      "monthlySalaryPlaceholder": "cth. 5000000",
+      "sendInvitation": "Kirim Undangan"
+    },
+    "table": {
+      "tutor": "Tutor",
+      "subjects": "Mata Pelajaran",
+      "experience": "Pengalaman",
+      "rating": "Rating",
+      "status": "Status"
+    },
+    "sort": {
+      "byRating": "Urutkan Rating",
+      "byExperience": "Urutkan Pengalaman",
+      "byName": "Urutkan Nama"
+    },
+    "status": {
+      "pendingInvite": "Undangan Tertunda",
+      "unverified": "Belum Terverifikasi",
+      "verified": "Terverifikasi"
+    },
+    "toast": {
+      "inviteSent": "Undangan terkirim",
+      "inviteSentNoEmail": "Tutor dibuat tetapi email gagal. Gunakan \"Kirim Ulang Undangan\" untuk mencoba lagi.",
+      "inviteError": "Gagal mengirim undangan",
+      "inviteResent": "Undangan dikirim ulang",
+      "inviteResentNoEmail": "Token diperbarui tetapi email gagal. Coba lagi.",
+      "resendError": "Gagal mengirim ulang undangan",
+      "inviteCancelled": "Undangan dibatalkan",
+      "cancelError": "Gagal membatalkan undangan",
+      "updated": "Tutor diperbarui",
+      "updateError": "Gagal memperbarui tutor",
+      "deleted": "Tutor berhasil dihapus",
+      "deleteError": "Gagal menghapus tutor"
+    },
+    "modal": {
+      "editTitle": "Edit Detail Tutor",
+      "inviteTitle": "Undang Tutor Baru"
+    },
+    "menu": {
+      "resendInvite": "Kirim Ulang Undangan",
+      "cancelInvite": "Batalkan Undangan",
+      "editProfile": "Edit Profil",
+      "deleteTutor": "Hapus Tutor"
+    },
+    "confirm": {
+      "cancelInvite": "Batalkan undangan ini? Data tutor akan dihapus.",
+      "deleteTutor": "Apakah Anda yakin ingin menghapus tutor ini?"
+    },
+    "confirmDialog": {
+      "cancelTitle": "Batalkan Undangan",
+      "cancelDescription": "Undangan akan dicabut dan data tutor akan dihapus. Tindakan ini tidak dapat dibatalkan.",
+      "cancelConfirm": "Batalkan Undangan",
+      "deleteTitle": "Hapus Tutor",
+      "deleteDescription": "Tutor ini akan dihapus secara permanen beserta semua data terkait. Tindakan ini tidak dapat dibatalkan.",
+      "deleteConfirm": "Hapus Tutor"
+    },
+    "card": {
+      "experience": "Pengalaman",
+      "rating": "Rating",
+      "subjects": "Mapel",
+      "years": "tahun"
+    }
+  },
+
+  "classes": {
+    "title": "Kelas",
+    "subtitle": "Kelola katalog kelas dan pendaftaran.",
+    "registerNewClass": "Tambah Kelas",
+    "noClassesFound": "Tidak ada kelas ditemukan",
+    "noClassesHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "searchPlaceholder": "Cari kelas atau tutor...",
+    "activeOnly": "Hanya Aktif",
+    "totalMonthlyFee": "Total Biaya Bulanan",
+    "totalClasses": "Total Kelas",
+    "activeCourses": "Kelas Aktif",
+    "form": {
+      "className": "Nama Kelas",
+      "classNamePlaceholder": "contoh: Fisika Lanjutan",
+      "subject": "Mata Pelajaran",
+      "selectSubject": "Pilih mata pelajaran...",
+      "assignTutor": "Tetapkan Tutor",
+      "selectTutor": "Pilih tutor...",
+      "status": "Status",
+      "scheduleDays": "Hari Jadwal",
+      "startTime": "Waktu Mulai",
+      "endTime": "Waktu Selesai",
+      "capacity": "Kapasitas",
+      "feePerSession": "Biaya per Sesi (Rp)",
+      "monthlyFee": "Biaya Bulanan (Rp)",
+      "baseFee": "Biaya Dasar (Rp)",
+      "packageFee": "Biaya Paket (Rp)",
+      "tutorFee": "Biaya Tutor per Sesi (Rp)",
+      "tutorFeeMode": "Mode Bayar Tutor",
+      "tutorFeePerStudent": "Biaya Per Murid (per sesi)",
+      "feeMode": {
+        "fixedPerSession": "Tetap Per Sesi",
+        "perStudentAttendance": "Per Murid Hadir",
+        "monthlySalary": "Gaji Bulanan"
+      },
+      "monthlySalaryHint": "Payout tutor berasal dari gaji bulanan. Tidak perlu biaya per sesi.",
+      "room": "Ruangan (opsional)",
+      "roomPlaceholder": "contoh: Ruang 101"
+    },
+    "table": {
+      "className": "Nama Kelas",
+      "subject": "Mata Pelajaran",
+      "capacity": "Kapasitas",
+      "tutorSchedule": "Tutor & Jadwal",
+      "fee": "Biaya",
+      "status": "Status",
+      "cap": "Kap: {{count}}"
+    },
+    "toast": {
+      "created": "Kelas dibuat",
+      "createError": "Gagal membuat kelas",
+      "updated": "Kelas diperbarui",
+      "updateError": "Gagal memperbarui kelas",
+      "deleted": "Kelas berhasil dihapus",
+      "deleteError": "Gagal menghapus kelas",
+      "selectTutor": "Silakan pilih tutor",
+      "selectScheduleDay": "Silakan pilih setidaknya satu hari jadwal",
+      "generateSuccess": "{{count}} sesi dibuat",
+      "generateError": "Gagal membuat sesi"
+    },
+    "modal": {
+      "editTitle": "Edit Kelas",
+      "createTitle": "Tambah Kelas",
+      "updateClass": "Simpan Perubahan",
+      "createClass": "Tambah Kelas",
+      "deleteTitle": "Hapus Kelas",
+      "deleteClass": "Hapus Kelas"
+    },
+    "menu": {
+      "editClassDetails": "Edit Detail Kelas",
+      "deleteClass": "Hapus Kelas"
+    },
+    "confirm": {
+      "deleteClass": "Apakah Anda yakin ingin menghapus kelas ini?"
+    },
+    "delete": {
+      "cannotUndo": "Tindakan ini tidak dapat dibatalkan.",
+      "permanentDelete": "Ini akan menghapus <strong>{{name}}</strong> secara permanen beserta semua data terkait termasuk pendaftaran, sesi, dan catatan kehadiran.",
+      "typeDelete": "Ketik <strong>delete</strong> untuk mengonfirmasi"
+    },
+    "drawer": {
+      "title": "Detail Kelas",
+      "enrolled": "Terdaftar",
+      "fee": "Biaya",
+      "room": "Ruangan",
+      "perSession": "per sesi",
+      "noRoom": "Belum ada ruangan",
+      "tutor": "Tutor",
+      "schedule": "Jadwal",
+      "enrolledStudents": "Siswa Terdaftar",
+      "noStudents": "Belum ada siswa terdaftar",
+      "editClass": "Edit Kelas",
+      "deleteClass": "Hapus Kelas",
+      "generateSessions": "Buat Sesi"
+    },
+    "generateModal": {
+      "title": "Buat Sesi Kelas",
+      "duration": "Durasi",
+      "days": "hari",
+      "dateRange": "Dari {{from}} sampai {{to}}",
+      "estimatedSessions": "Estimasi sesi",
+      "confirm": "Buat Sesi"
+    },
+    "pagination": {
+      "page": "Halaman",
+      "of": "dari",
+      "totalClasses": "total kelas"
+    },
+    "view": {
+      "table": "Tabel",
+      "timetable": "Jadwal"
+    },
+    "timetable": {
+      "empty": "Tidak ada kelas untuk ditampilkan"
+    }
+  },
+
+  "schedules": {
+    "title": "Jadwal",
+    "subtitle": "Kelola sesi kelas, penugasan tutor, dan lalu lintas ruangan.",
+    "scheduleSession": "Jadwalkan Sesi",
+    "autoGenerate": "Buat Otomatis",
+    "noSessionsFound": "Tidak ada sesi ditemukan",
+    "noSessionsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "form": {
+      "selectClass": "Pilih Kelas",
+      "selectClassPlaceholder": "— Pilih kelas —",
+      "date": "Tanggal",
+      "startTime": "Waktu Mulai",
+      "endTime": "Waktu Selesai",
+      "dateFrom": "Tanggal Dari",
+      "dateTo": "Tanggal Sampai",
+      "scheduling": "Menjadwalkan...",
+      "generating": "Membuat..."
+    },
+    "toast": {
+      "sessionScheduled": "Sesi dijadwalkan",
+      "scheduleError": "Gagal menjadwalkan sesi",
+      "sessionCancelled": "Sesi dibatalkan",
+      "cancelError": "Gagal membatalkan sesi",
+      "sessionsGenerated": "Sesi dibuat otomatis",
+      "generateError": "Gagal membuat sesi otomatis",
+      "rescheduleApproved": "Penjadwalan ulang disetujui",
+      "rescheduleError": "Gagal menyetujui penjadwalan ulang",
+      "rescheduleRejected": "Jadwal ulang ditolak"
+    },
+    "modal": {
+      "scheduleTitle": "Jadwalkan Sesi Baru",
+      "generateTitle": "Buat Sesi Otomatis",
+      "generateInfo": "Buat sesi otomatis untuk kelas berdasarkan jadwal berulang dalam rentang tanggal yang dipilih.",
+      "generateSessions": "Buat Sesi"
+    },
+    "status": {
+      "scheduled": "Terjadwal",
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan",
+      "rescheduleRequested": "Minta Jadwal Ulang"
+    },
+    "filter": {
+      "allClasses": "Semua Kelas",
+      "allStatuses": "Semua Status",
+      "scheduled": "Terjadwal",
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan",
+      "rescheduleRequested": "Minta Jadwal Ulang"
+    },
+    "table": {
+      "classSubject": "Kelas & Mapel",
+      "tutor": "Tutor",
+      "dateTime": "Tanggal & Waktu",
+      "status": "Status"
+    },
+    "menu": {
+      "markAttendance": "Catat Kehadiran",
+      "approveReschedule": "Setujui Jadwal Ulang",
+      "cancelSession": "Batalkan Sesi",
+      "completedLocked": "Sesi selesai — terkunci",
+      "pastLocked": "Tanggal berlalu — terkunci"
+    },
+    "calendar": {
+      "month": "BULAN",
+      "week": "MINGGU",
+      "day": "HARI",
+      "weekOf": "Minggu dari {{date}}",
+      "weeklyOverview": "Ringkasan Mingguan",
+      "weeklyOverviewDesc": "Tampilan Minggu memberikan pandangan seimbang tentang ketersediaan tutor selama 7 hari ke depan.",
+      "backToMonthView": "Kembali ke Tampilan Bulan",
+      "sun": "Min",
+      "mon": "Sen",
+      "tue": "Sel",
+      "wed": "Rab",
+      "thu": "Kam",
+      "fri": "Jum",
+      "sat": "Sab"
+    },
+    "drawer": {
+      "title": "Detail Sesi",
+      "dateTime": "Tanggal & Waktu",
+      "tutor": "Tutor",
+      "sessionContent": "Konten Sesi",
+      "topicCovered": "Topik Dibahas",
+      "sessionSummary": "Ringkasan Sesi",
+      "noContent": "Belum ada konten yang dicatat",
+      "rescheduleInfo": "Permintaan Jadwal Ulang",
+      "proposedDateTime": "Diusulkan",
+      "reason": "Alasan",
+      "approve": "Setujui",
+      "reject": "Tolak",
+      "attendance": "Kehadiran",
+      "noAttendance": "Belum ada kehadiran dicatat",
+      "present": "Hadir",
+      "absent": "Tidak Hadir",
+      "late": "Terlambat",
+      "homework": "PR",
+      "markAttendance": "Catat Kehadiran",
+      "cancelSession": "Batalkan Sesi"
+    }
+  },
+
+  "whatsapp": {
+    "tabs": {
+      "messages": "Pesan",
+      "paymentReminders": "Pengingat Pembayaran",
+      "settings": "Pengaturan"
+    },
+    "stats": {
+      "totalSent": "Total Terkirim",
+      "delivered": "Terkirim",
+      "read": "Dibaca",
+      "failed": "Gagal"
+    },
+    "filter": {
+      "allStatuses": "Semua Status",
+      "allTypes": "Semua Tipe",
+      "dateFrom": "Dari Tanggal",
+      "dateTo": "Sampai Tanggal"
+    },
+    "table": {
+      "recipient": "Penerima",
+      "template": "Template",
+      "status": "Status",
+      "relatedTo": "Terkait",
+      "date": "Tanggal",
+      "error": "Error"
+    },
+    "drawer": {
+      "title": "Detail Pesan",
+      "phone": "Telepon",
+      "templateName": "Template",
+      "templateParams": "Parameter",
+      "currentStatus": "Status Saat Ini",
+      "errorDetails": "Detail Error",
+      "retryCount": "Jumlah Percobaan",
+      "relatedEntity": "Entitas Terkait"
+    },
+    "notConfigured": "WhatsApp belum dikonfigurasi. Hubungi administrator sistem untuk mengatur kredensial API.",
+    "noMessages": "Belum ada pesan yang dikirim.",
+    "send": {
+      "title": "Kirim Pengingat Pembayaran",
+      "searchPlaceholder": "Cari nama siswa...",
+      "sendReminder": "Kirim Pengingat",
+      "noPhone": "Tidak ada nomor orang tua",
+      "noPayments": "Tidak ada pembayaran yang cocok"
+    },
+    "settings": {
+      "title": "Pengaturan WhatsApp",
+      "autoReminders": "Pengingat Otomatis",
+      "autoRemindersDesc": "Kirim pengingat pembayaran otomatis sebelum jatuh tempo",
+      "remindDaysBefore": "Hari Sebelum Jatuh Tempo",
+      "remindDaysBeforeDesc": "Jumlah hari sebelum jatuh tempo untuk mengirim pengingat",
+      "save": "Simpan Pengaturan"
+    },
+    "toast": {
+      "reminderSent": "Pengingat pembayaran terkirim",
+      "reminderError": "Gagal mengirim pengingat",
+      "settingsSaved": "Pengaturan WhatsApp tersimpan",
+      "settingsError": "Gagal menyimpan pengaturan"
+    },
+    "statusLabel": {
+      "pending": "Menunggu",
+      "sent": "Terkirim",
+      "delivered": "Diterima",
+      "read": "Dibaca",
+      "failed": "Gagal"
+    },
+    "typeLabel": {
+      "payment": "Pembayaran",
+      "attendance": "Kehadiran",
+      "enrollment": "Pendaftaran"
+    }
+  },
+
+  "enrollments": {
+    "title": "Pendaftaran",
+    "subtitle": "Kelola siklus pendaftaran siswa dan status keuangan.",
+    "newEnrollment": "Tambah Pendaftaran",
+    "bulkImport": "Impor Massal",
+    "exportCsv": "Ekspor CSV",
+    "noEnrollmentsFound": "Tidak ada pendaftaran ditemukan",
+    "noEnrollmentsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "totalActive": "Total Aktif",
+    "onTrial": "Percobaan",
+    "waitlisted": "Daftar Tunggu",
+    "overdueInvoices": "Tagihan Terlambat",
+    "searchPlaceholder": "Cari siswa atau kelas...",
+    "form": {
+      "step1": "Langkah 1: Pilih Siswa",
+      "step2": "Langkah 2: Pilih Kelas & Ketentuan",
+      "searchStudents": "Cari siswa...",
+      "loadingStudents": "Memuat siswa...",
+      "loadingClasses": "Memuat kelas...",
+      "studentsSelected": "{{count}} siswa dipilih",
+      "type": "Tipe",
+      "autoInvoice": "Tagihan Otomatis",
+      "tutorAssigned": "Tutor ditugaskan",
+      "enrollStudents": "Daftarkan {{count}} Siswa",
+      "enrollmentStatus": "Status Pendaftaran"
+    },
+    "table": {
+      "student": "Siswa",
+      "class": "Kelas",
+      "enrollmentDate": "Tanggal Pendaftaran",
+      "payment": "Pembayaran",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Aktif",
+      "trial": "Percobaan",
+      "waitlisted": "Daftar Tunggu",
+      "dropped": "Keluar"
+    },
+    "paymentStatus": {
+      "new": "Baru",
+      "paid": "Lunas",
+      "pending": "Menunggu",
+      "overdue": "Terlambat"
+    },
+    "toast": {
+      "enrolled": "{{count}} siswa didaftarkan",
+      "enrollError": "Gagal mendaftarkan beberapa siswa",
+      "statusUpdated": "Status diperbarui menjadi {{status}}",
+      "statusError": "Gagal memperbarui status",
+      "deleted": "Pendaftaran dihapus",
+      "deleteError": "Gagal menghapus pendaftaran",
+      "importSuccess": "{{count}} pendaftaran diimpor",
+      "importPartial": "Mengimpor {{created}} pendaftaran dengan {{errors}} kesalahan",
+      "importError": "Gagal mengimpor pendaftaran",
+      "exportSuccess": "Pendaftaran diekspor",
+      "exportError": "Gagal mengekspor pendaftaran",
+      "bulkStatusUpdated": "{{count}} pendaftaran diperbarui menjadi {{status}}",
+      "bulkStatusError": "Gagal memperbarui status pendaftaran",
+      "bulkDeleted": "{{count}} pendaftaran dihapus",
+      "bulkDeleteError": "Gagal menghapus pendaftaran"
+    },
+    "modal": {
+      "newTitle": "Tambah Pendaftaran",
+      "editTitle": "Edit Pendaftaran",
+      "importTitle": "Impor Pendaftaran Massal"
+    },
+    "menu": {
+      "editEnrollment": "Edit Pendaftaran",
+      "updateStatus": "Perbarui Status",
+      "setActive": "Aktifkan",
+      "convertToFull": "Konversi ke Penuh",
+      "drop": "Keluarkan",
+      "deleteRecord": "Hapus Data",
+      "sendReminder": "Kirim Pengingat"
+    },
+    "bulk": {
+      "changeStatus": "Ubah Status...",
+      "confirmDeleteTitle": "Hapus Pendaftaran",
+      "confirmDeleteMessage": "Ini akan menghapus {{count}} pendaftaran secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "confirmDelete": "Hapus {{count}} Pendaftaran"
+    },
+    "confirm": {
+      "deleteEnrollment": "Apakah Anda yakin ingin menghapus pendaftaran ini?"
+    },
+    "import": {
+      "clickToUpload": "Klik untuk mengunggah CSV",
+      "csvMapDesc": "Petakan Student_ID ke Class_ID dalam satu langkah",
+      "csvFormatGuide": "Panduan Format CSV",
+      "processImport": "Proses Impor",
+      "uuidNote": "Gunakan UUID lengkap untuk kolom student_id dan class_id"
+    }
+  },
+
+  "attendance": {
+    "title": "Manajemen Kehadiran",
+    "subtitle": "Kelola pelacakan kehadiran, notifikasi, dan pelaporan sesi.",
+    "viewHistory": "Lihat Riwayat",
+    "selectDate": "Pilih Tanggal",
+    "sessions": "Sesi",
+    "noSessionsForDate": "Tidak ada sesi terjadwal untuk tanggal ini.",
+    "noSessionSelected": "Tidak Ada Sesi Dipilih",
+    "noSessionSelectedHint": "Pilih sesi dari daftar di sebelah kiri untuk mulai mencatat kehadiran.",
+    "noRecords": "Tidak ada catatan kehadiran untuk sesi ini.",
+    "incomplete": "Belum Lengkap",
+    "studentList": "Daftar Siswa",
+    "keyboardHint": "Gunakan tombol P, A, L untuk menandai",
+    "markAllPresent": "Tandai Semua Hadir",
+    "present": "Hadir",
+    "absent": "Tidak Hadir",
+    "late": "Terlambat",
+    "hw": "PR",
+    "notes": "Catatan",
+    "notePlaceholder": "Catatan...",
+    "editingEnabled": "Pengeditan Diaktifkan",
+    "completedLocked": "Sesi selesai — pengeditan terkunci",
+    "pastLocked": "Tanggal berlalu — pengeditan terkunci",
+    "saveAttendance": "Simpan Kehadiran",
+    "unsavedChanges": "Perubahan Belum Disimpan",
+    "presentCount": "{{present}} Hadir, {{absent}} Tidak Hadir",
+    "toast": {
+      "saved": "Kehadiran tersimpan",
+      "saveError": "Gagal menyimpan beberapa catatan kehadiran"
+    },
+    "table": {
+      "student": "Siswa",
+      "status": "Status",
+      "hw": "PR",
+      "notes": "Catatan"
+    }
+  },
+
+  "finance": {
+    "title": "Inteligensi Keuangan",
+    "subtitle": "Pantau kesehatan keuangan dan wawasan institusi Anda.",
+    "revenueThisMonth": "Pendapatan Bulan Ini",
+    "outstandingPayments": "Pembayaran Tertunggak",
+    "pendingPayouts": "Pembayaran Tutor Tertunda",
+    "netProfit": "Laba Bersih",
+    "basedOnTotalRevenue": "Berdasarkan total pendapatan",
+    "seeStudentPayments": "Lihat Pembayaran Siswa",
+    "seeTutorPayouts": "Lihat Pembayaran Tutor",
+    "formulaRevPayoutsOpex": "Rumus: Pendapatan - Pembayaran Tutor - Biaya Operasional",
+    "netRevenueFormula": "Rumus Pendapatan Bersih",
+    "totalRevenueGross": "Total Pendapatan (Bruto)",
+    "tutorPayoutsDirect": "- Pembayaran Tutor (Biaya Langsung)",
+    "operatingCostsOverhead": "- Biaya Operasional (Overhead)",
+    "netRevenue": "= Pendapatan Bersih",
+    "thisMonth": "Bulan Ini",
+    "thisQuarter": "Kuartal Ini",
+    "yearToDate": "Tahun Berjalan",
+    "custom": "Kustom",
+    "generateReport": "Buat Laporan",
+    "revenueSummary": "Ringkasan Pendapatan",
+    "aggregateRevenue": "Pendapatan agregat dari statistik dasbor backend",
+    "totalRevenue": "Total Pendapatan",
+    "liveFromDashboardApi": "Langsung dari API dasbor",
+    "students": "Siswa",
+    "tutors": "Tutor",
+    "attendanceLabel": "Kehadiran",
+    "financeModules": "Modul Keuangan",
+    "quickAccessFinance": "Akses cepat ke bagian keuangan",
+    "studentPayments": "Pembayaran Siswa",
+    "tutorPayouts": "Pembayaran Tutor",
+    "operatingExpenses": "Biaya Operasional",
+    "generatePdfReport": "Buat Laporan PDF",
+    "revenueThisPeriod": "Pendapatan Periode Ini",
+    "totalRevenueLive": "Total Pendapatan (Langsung)",
+    "fromDashboardApi": "Dari API dasbor",
+    "upcomingSessions": "Sesi Mendatang",
+    "sessionsScheduled": "Sesi terjadwal",
+    "viewAllPayments": "Lihat Semua Pembayaran",
+    "attendanceRate": "Tingkat Kehadiran",
+    "overallAttendance": "Kehadiran keseluruhan",
+    "receivables": "Piutang",
+    "studentClass": "Siswa / Kelas",
+    "dueDate": "Jatuh Tempo",
+    "amount": "Jumlah",
+    "action": "Aksi",
+    "remind": "Ingatkan",
+    "overduePayments": "pembayaran jatuh tempo",
+    "batchReady": "Siap Batch",
+    "sessionsLabel": "Sesi",
+    "approve": "Setujui",
+    "payout": "Bayar",
+    "payoutReconciliation": "Rekonsiliasi Pembayaran: {{tutor}}",
+    "totalPayout": "Total Pembayaran",
+    "period": "Periode",
+    "approveAllSessions": "Setujui Semua Sesi",
+    "payoutApproved": "Pembayaran disetujui dan dijadwalkan.",
+    "exportedSuccess": "{{name}} diekspor ke CSV",
+    "reminderSent": "Pengingat pembayaran dikirim ke orang tua {{student}} via WhatsApp.",
+    "recordsTotal": "total data",
+    "tutor": "Tutor",
+    "sessions": "Sesi",
+    "revenueBreakdown": "Rincian Pendapatan",
+    "byClass": "Per Kelas",
+    "byPaymentMethod": "Per Metode Pembayaran",
+    "byStatus": "Per Status",
+    "expenseBreakdown": "Rincian Pengeluaran",
+    "byCategory": "Per Kategori",
+    "monthlyTrend": "Tren Bulanan",
+    "exportPayments": "Ekspor Pembayaran",
+    "exportPayouts": "Ekspor Pembayaran Tutor",
+    "exportExpenses": "Ekspor Pengeluaran",
+    "exportSuccess": "Ekspor berhasil diunduh",
+    "noDataForPeriod": "Tidak ada data untuk periode ini",
+    "paymentCountLabel": "{{count}} pembayaran",
+    "payoutCountLabel": "{{count}} pembayaran tutor",
+    "expenseCountLabel": "{{count}} catatan",
+    "exportCsv": "Ekspor CSV",
+    "totalPayouts": "Total Pembayaran Tutor",
+    "totalExpenses": "Total Biaya Operasional",
+    "class": "Kelas",
+    "revenueLabel": "Pendapatan",
+    "payments": "Pembayaran",
+    "method": "Metode",
+    "count": "Jumlah",
+    "category": "Kategori",
+    "records": "Catatan",
+    "status": {
+      "NEW": "Baru",
+      "PAID": "Lunas",
+      "PENDING": "Tertunda",
+      "OVERDUE": "Terlambat"
+    },
+    "methodLabel": {
+      "TRANSFER": "Transfer Bank",
+      "CASH": "Tunai",
+      "OTHER": "Lainnya"
+    },
+    "expenseCategory": {
+      "RENT": "Sewa",
+      "SUPPLIES": "Perlengkapan",
+      "UTILITIES": "Utilitas",
+      "SALARY": "Gaji",
+      "MARKETING": "Pemasaran",
+      "OTHER": "Lainnya"
+    }
+  },
+
+  "payments": {
+    "title": "Pembayaran Siswa",
+    "subtitle": "Kelola tagihan siswa dan catatan pembayaran.",
+    "recordBatch": "Catat Batch ({{count}})",
+    "revenueAnalytics": "Analitik Pendapatan",
+    "noPaymentsFound": "Tidak ada pembayaran ditemukan",
+    "noPaymentsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "totalRecords": "Total Data",
+    "overdueCount": "Jumlah Terlambat",
+    "overdueAmount": "Total Terlambat",
+    "flaggedStudents": "Siswa Bermasalah",
+    "daysOverdue": "{{count}} hari terlambat",
+    "form": {
+      "paymentAmount": "Jumlah Pembayaran (Rp)",
+      "discount": "Diskon / Penyesuaian (Rp)",
+      "date": "Tanggal",
+      "method": "Metode",
+      "bankTransfer": "Transfer Bank",
+      "cash": "Tunai",
+      "eWallet": "E-Wallet",
+      "sendReceipt": "Kirim Kuitansi Digital ke Orang Tua"
+    },
+    "table": {
+      "invoiceStudent": "Faktur / Siswa",
+      "class": "Kelas",
+      "dueDate": "Jatuh Tempo",
+      "amount": "Jumlah",
+      "status": "Status",
+      "actions": "Aksi"
+    },
+    "modal": {
+      "recordTitle": "Catat Pembayaran",
+      "amountDue": "Jumlah Tagihan",
+      "afterDiscount": "Setelah Diskon",
+      "confirmPayment": "Konfirmasi Pembayaran",
+      "batchRecordTitle": "Catat Pembayaran Massal",
+      "batchRecordSubtitle": "Catat {{count}} pembayaran terpilih sebagai lunas"
+    },
+    "drawer": {
+      "title": "Detail Pembayaran",
+      "amount": "Jumlah",
+      "dueDate": "Jatuh Tempo",
+      "paidDate": "Tanggal Bayar",
+      "method": "Metode",
+      "exportPdf": "Ekspor PDF",
+      "resendReceipt": "Kirim Ulang Kuitansi"
+    },
+    "toast": {
+      "recorded": "Pembayaran dicatat",
+      "recordError": "Gagal mencatat pembayaran.",
+      "deleted": "Pembayaran dihapus",
+      "deleteError": "Gagal menghapus pembayaran.",
+      "batchRecorded": "{{count}} pembayaran dicatat",
+      "batchError": "Gagal mencatat pembayaran massal"
+    },
+    "confirm": {
+      "deleteTitle": "Hapus Pembayaran",
+      "deletePayment": "Apakah Anda yakin ingin menghapus pembayaran ini?"
+    },
+    "reminderSent": "Pengingat pembayaran terkirim",
+    "reminderFailed": "Gagal mengirim pengingat",
+    "tooltip": {
+      "recordPayment": "Catat Pembayaran",
+      "sendReminder": "Kirim Pengingat",
+      "viewDetails": "Lihat Detail",
+      "delete": "Hapus"
+    },
+    "overdueAlert": {
+      "title": "Pembayaran Terlambat",
+      "students": "{{count}} siswa",
+      "totalDebt": "Total {{amount}}",
+      "viewDetails": "Lihat Detail",
+      "warning": "Terlambat"
+    },
+    "generateInvoice": "Buat Faktur",
+    "downloadInvoice": "Unduh Faktur",
+    "invoiceGenerated": "Faktur dibuat",
+    "invoiceExists": "Faktur sudah ada untuk pembayaran ini",
+    "invoiceNumber": "No. Faktur",
+    "generatingInvoice": "Membuat faktur..."
+  },
+
+  "payouts": {
+    "title": "Inteligensi Pembayaran Tutor",
+    "subtitle": "Kelola catatan pembayaran tutor dan jejak audit.",
+    "searchPlaceholder": "Cari tutor...",
+    "allStatuses": "Semua Status",
+    "newPayout": "Tambah Pembayaran",
+    "generateSalaries": "Generate Gaji Bulanan",
+    "salariesGenerated": "{{count}} payout gaji dibuat",
+    "salariesError": "Gagal membuat gaji",
+    "noPayoutsFound": "Tidak ada pembayaran ditemukan",
+    "noPayoutsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "backToPayouts": "Kembali ke Pembayaran",
+    "exportAudit": "Ekspor Audit",
+    "downloadPayoutSlip": "Unduh Slip Pembayaran",
+    "confirmGenerateSlip": "Konfirmasi & Buat Slip",
+    "viewSlip": "Lihat Slip",
+    "reconcile": "Rekonsiliasi",
+    "noBankInfo": "Tidak ada info bank",
+    "notSet": "Belum diatur",
+    "form": {
+      "tutor": "Tutor",
+      "selectTutor": "Pilih tutor...",
+      "amount": "Jumlah (Rp)",
+      "date": "Tanggal",
+      "description": "Deskripsi (opsional)",
+      "descriptionPlaceholder": "contoh: Pembayaran Maret 2026"
+    },
+    "table": {
+      "tutor": "Tutor",
+      "status": "Status",
+      "date": "Tanggal",
+      "amount": "Jumlah",
+      "action": "Aksi"
+    },
+    "reconciliation": {
+      "payoutDetails": "Detail Pembayaran",
+      "reviewInfo": "Tinjau informasi pembayaran untuk siklus ini",
+      "tutor": "Tutor",
+      "bankAccount": "Rekening Bank",
+      "payoutDate": "Tanggal Pembayaran",
+      "baseAmount": "Jumlah Dasar",
+      "proofOfPayment": "Bukti Pembayaran",
+      "uploadReceipt": "Klik untuk mengunggah bukti transfer bank",
+      "fileTypes": "JPG, PNG atau PDF (Maks 5MB)",
+      "bonuses": "Bonus",
+      "deductions": "Potongan",
+      "calculationFormula": "Rumus Perhitungan",
+      "netPayout": "Pembayaran Bersih",
+      "payoutStatus": "Status Pembayaran",
+      "pending": "Menunggu",
+      "processing": "Diproses",
+      "paid": "Lunas"
+    },
+    "modal": {
+      "createTitle": "Tambah Pembayaran",
+      "createPayout": "Tambah Pembayaran",
+      "creating": "Membuat..."
+    },
+    "toast": {
+      "confirmed": "Pembayaran dikonfirmasi untuk {{tutor}}",
+      "confirmError": "Gagal mengonfirmasi pembayaran.",
+      "created": "Pembayaran dibuat",
+      "createError": "Gagal membuat pembayaran.",
+      "deleted": "Pembayaran dihapus",
+      "deleteError": "Gagal menghapus pembayaran.",
+      "fillRequired": "Silakan isi semua kolom yang wajib."
+    },
+    "confirm": {
+      "deletePayout": "Apakah Anda yakin ingin menghapus pembayaran tutor ini?"
+    },
+    "periodStart": "Periode Mulai",
+    "periodEnd": "Periode Akhir",
+    "calculate": "Hitung",
+    "calculating": "Menghitung...",
+    "sessionBreakdown": "Rincian Sesi",
+    "sessionsCount": "{{count}} sesi",
+    "overlapWarning": "Peringatan: Tumpang tindih dengan pembayaran yang sudah ada",
+    "noSessions": "Tidak ada sesi ditemukan dalam periode ini",
+    "period": "Periode"
+  },
+
+  "expenses": {
+    "title": "Biaya Operasional",
+    "subtitle": "Kelola pengeluaran operasional non-tutor.",
+    "recordExpense": "Catat Pengeluaran",
+    "noExpensesFound": "Tidak ada pengeluaran ditemukan",
+    "noExpensesHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
+    "searchPlaceholder": "Cari pengeluaran...",
+    "totalExpensesPage": "Total Pengeluaran (Halaman)",
+    "categories": "Kategori",
+    "activeExpenseCategories": "Kategori pengeluaran aktif",
+    "recordsShown": "Data Ditampilkan",
+    "form": {
+      "expenseAmount": "Jumlah Pengeluaran (Rp)",
+      "date": "Tanggal",
+      "category": "Kategori",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Untuk apa ini?",
+      "recurringExpense": "Pengeluaran Berulang",
+      "frequency": "Frekuensi",
+      "monthly": "Bulanan",
+      "quarterly": "Kuartalan",
+      "yearly": "Tahunan",
+      "receiptInvoice": "Kuitansi / Faktur",
+      "uploadProof": "Unggah bukti pembayaran",
+      "viewReceipt": "Lihat Kuitansi"
+    },
+    "table": {
+      "dateId": "Tanggal / ID",
+      "category": "Kategori",
+      "description": "Deskripsi",
+      "amount": "Jumlah",
+      "actions": "Aksi"
+    },
+    "drawer": {
+      "editTitle": "Edit Pengeluaran",
+      "createTitle": "Catat Pengeluaran",
+      "updateExpense": "Simpan Perubahan",
+      "saveExpense": "Catat Pengeluaran"
+    },
+    "toast": {
+      "created": "Pengeluaran tercatat",
+      "createError": "Gagal mencatat pengeluaran.",
+      "updated": "Pengeluaran diperbarui",
+      "updateError": "Gagal memperbarui pengeluaran.",
+      "deleted": "Pengeluaran dihapus",
+      "deleteError": "Gagal menghapus pengeluaran.",
+      "fillRequired": "Silakan isi kolom yang wajib."
+    },
+    "confirm": {
+      "deleteExpense": "Apakah Anda yakin ingin menghapus pengeluaran ini?"
+    },
+    "categoryLabel": {
+      "RENT": "Sewa",
+      "UTILITIES": "Utilitas",
+      "SUPPLIES": "Perlengkapan",
+      "MARKETING": "Pemasaran",
+      "OTHER": "Lainnya"
+    }
+  },
+
+  "settings": {
+    "title": "Pengaturan Institusi",
+    "subtitle": "Tentukan aturan global dan branding untuk akademi Anda.",
+    "tabs": {
+      "general": "Umum",
+      "billing": "Penagihan",
+      "branding": "Branding",
+      "academic": "Akademik",
+      "security": "Keamanan",
+      "integrations": "Integrasi"
+    },
+    "general": {
+      "institutionInfo": "Informasi Institusi",
+      "institutionName": "Nama Institusi",
+      "supportEmail": "Email Dukungan",
+      "timezone": "Zona Waktu",
+      "language": "Bahasa",
+      "phone": "Telepon",
+      "address": "Alamat",
+      "addressPlaceholder": "Jl. Pendidikan No. 1",
+      "saveSuccess": "Pengaturan disimpan",
+      "saveFailed": "Gagal menyimpan pengaturan",
+      "dangerZone": "Zona Berbahaya",
+      "dangerZoneDesc": "Hapus data institusi Anda secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "deleteInstitution": "Hapus Institusi"
+    },
+    "billing": {
+      "billingConfig": "Konfigurasi Penagihan",
+      "billingMode": "Mode Penagihan",
+      "payAsYouGo": "Bayar per Sesi",
+      "payAsYouGoDesc": "Tagih setelah kehadiran",
+      "packagePrepaid": "Paket/Prabayar",
+      "packagePrepaidDesc": "Potong dari kredit",
+      "subscription": "Langganan",
+      "subscriptionDesc": "Biaya bulanan tetap",
+      "currency": "Mata Uang",
+      "invoicePrefix": "Awalan Faktur",
+      "latePaymentAutoLock": "Kunci Otomatis Pembayaran Terlambat",
+      "latePaymentAutoLockDesc": "Kunci pendaftaran jika utang melebihi batas",
+      "threshold": "Batas:",
+      "expenseCategories": "Kategori Pengeluaran",
+      "addCategory": "Tambah Kategori",
+      "categoriesNote": "Kategori ini akan muncul di menu Biaya Operasional.",
+      "bankAccounts": "Rekening Bank (Metode Mandiri)",
+      "addAccount": "Tambah Rekening",
+      "saveSuccess": "Pengaturan penagihan disimpan",
+      "saveFailed": "Gagal menyimpan pengaturan penagihan",
+      "addCategoryPlaceholder": "Nama kategori baru",
+      "bankNamePlaceholder": "contoh: BCA",
+      "accountNumberPlaceholder": "1234567890",
+      "accountHolderPlaceholder": "Nama pemilik rekening",
+      "addBankAccount": "Tambah"
+    },
+    "branding": {
+      "whiteLabelingTitle": "White-Labeling & Branding",
+      "institutionLogo": "Logo Institusi",
+      "clickToUploadLogo": "Klik untuk mengunggah logo",
+      "logoUsage": "Digunakan untuk faktur dan sidebar",
+      "primaryBrandColor": "Warna Brand Utama",
+      "colorNote": "Ini memperbarui tombol dan status aktif di seluruh aplikasi.",
+      "customDomain": "Domain Kustom",
+      "customDomainDesc": "Gunakan domain sendiri untuk portal siswa",
+      "connect": "Hubungkan"
+    },
+    "academic": {
+      "regionalSettings": "Pengaturan Regional & Operasional",
+      "workingDays": "Hari Kerja",
+      "workingDaysNote": "Hari yang tidak dipilih akan disembunyikan dari tampilan kalender.",
+      "subjectCategories": "Kategori Mata Pelajaran",
+      "gradeLevels": "Tingkat Kelas",
+      "roomManagement": "Manajemen Ruangan",
+      "roomManagementDesc": "Tentukan ruang fisik dan kapasitas siswa mereka.",
+      "addRoom": "Tambah Ruangan",
+      "roomName": "Nama Ruangan",
+      "type": "Tipe",
+      "capacity": "Kapasitas",
+      "status": "Status",
+      "available": "Tersedia",
+      "maintenance": "Pemeliharaan"
+    },
+    "security": {
+      "securityTitle": "Keamanan & Kontrol Akses",
+      "twoFactorAuth": "Autentikasi Dua Faktor (2FA)",
+      "twoFactorAuthDesc": "Memerlukan kode dari ponsel Anda untuk login",
+      "passwordPolicy": "Kebijakan Kata Sandi",
+      "minChars": "Minimal 8 karakter",
+      "includeNumbers": "Harus menyertakan angka",
+      "includeSpecialChars": "Harus menyertakan karakter khusus",
+      "requirePasswordChange": "Wajibkan perubahan kata sandi setiap 90 hari"
+    },
+    "integrations": {
+      "connectedServices": "Layanan Terhubung",
+      "whatsappApi": "WhatsApp API",
+      "whatsappDesc": "Kirim pengingat otomatis",
+      "midtrans": "Midtrans",
+      "midtransDesc": "Integrasi gateway pembayaran",
+      "sendgrid": "SendGrid",
+      "sendgridDesc": "SMTP email untuk faktur",
+      "googleCalendar": "Google Calendar",
+      "googleCalendarDesc": "Sinkronkan jadwal tutor",
+      "connected": "Terhubung",
+      "notConnected": "Belum Terhubung"
+    }
+  },
+
+  "superAdmin": {
+    "institutions": "Institusi",
+    "institutionsSubtitle": "Kelola semua institusi bimbingan belajar",
+    "createInstitution": "Tambah Institusi",
+    "createInstitutionSubtitle": "Siapkan institusi bimbingan belajar baru beserta admin pertamanya.",
+    "searchPlaceholder": "Cari institusi...",
+    "enter": "Masuk",
+    "table": {
+      "name": "Nama",
+      "admins": "Admin",
+      "created": "Dibuat"
+    },
+    "tabs": {
+      "general": "Umum",
+      "admins": "Admin",
+      "overview": "Ringkasan"
+    },
+    "addAdmin": "Tambah Admin",
+    "form": {
+      "institutionDetails": "Detail Institusi",
+      "name": "Nama",
+      "namePlaceholder": "contoh: Sinaloka Academy",
+      "slug": "Slug",
+      "email": "Email",
+      "emailPlaceholder": "info@academy.com",
+      "phone": "Telepon",
+      "phonePlaceholder": "+62 21 1234 5678",
+      "address": "Alamat",
+      "addressPlaceholder": "Jl. Pendidikan No. 1",
+      "timezone": "Zona Waktu",
+      "defaultLanguage": "Bahasa Default",
+      "firstAdmin": "Admin Pertama",
+      "adminName": "Nama",
+      "adminNamePlaceholder": "contoh: John Doe",
+      "adminEmail": "Email",
+      "adminEmailPlaceholder": "admin@academy.com",
+      "adminPassword": "Kata Sandi",
+      "nameRequired": "Nama institusi wajib diisi",
+      "adminRequired": "Semua kolom admin wajib diisi"
+    },
+    "dangerZone": "Zona Berbahaya",
+    "deactivateWarning": "Menonaktifkan institusi ini akan mencegah semua pengguna mengaksesnya.",
+    "activateInfo": "Institusi ini saat ini tidak aktif. Aktifkan untuk memulihkan akses.",
+    "confirmToggle": "Apakah Anda yakin?",
+    "deactivateInstitution": "Nonaktifkan Institusi",
+    "activateInstitution": "Aktifkan Institusi",
+    "overview": {
+      "students": "Siswa",
+      "tutors": "Tutor",
+      "admins": "Admin",
+      "activeClasses": "Kelas Aktif"
+    },
+    "toast": {
+      "created": "Institusi dibuat",
+      "createError": "Gagal membuat institusi",
+      "updated": "Institusi diperbarui",
+      "updateError": "Gagal memperbarui institusi",
+      "deactivated": "Institusi dinonaktifkan",
+      "activated": "Institusi diaktifkan",
+      "adminCreated": "Admin dibuat",
+      "adminCreateError": "Gagal membuat admin",
+      "userUpdated": "Pengguna diperbarui",
+      "userUpdateError": "Gagal memperbarui pengguna"
+    },
+    "users": "Pengguna",
+    "usersSubtitle": "Kelola pengguna di semua institusi",
+    "createAdmin": "Tambah Admin",
+    "searchUsersPlaceholder": "Cari berdasarkan nama atau email...",
+    "allRoles": "Semua Peran",
+    "allInstitutions": "Semua Institusi",
+    "allStatuses": "Semua Status",
+    "userTable": {
+      "name": "Nama",
+      "email": "Email",
+      "role": "Peran",
+      "institution": "Institusi",
+      "status": "Status",
+      "lastLogin": "Login Terakhir"
+    },
+    "createAdminModal": {
+      "title": "Tambah Admin",
+      "name": "Nama",
+      "namePlaceholder": "cth. John Doe",
+      "email": "Email",
+      "emailPlaceholder": "admin@institusi.com",
+      "password": "Kata Sandi",
+      "institution": "Institusi",
+      "selectInstitution": "Pilih institusi",
+      "fieldsRequired": "Semua kolom wajib diisi"
+    },
+    "editUserModal": {
+      "title": "Edit Pengguna",
+      "active": "Aktif"
+    },
+    "noInstitution": "Tanpa institusi",
+    "neverLoggedIn": "Belum pernah"
+  },
+
+  "notFound": {
+    "title": "404",
+    "message": "Halaman yang Anda cari tidak ditemukan.",
+    "backToDashboard": "Kembali ke Dasbor"
+  },
+
+  "report": {
+    "title": "Buat Laporan",
+    "tabs": {
+      "attendance": "Kehadiran",
+      "finance": "Keuangan",
+      "studentProgress": "Kemajuan Siswa"
+    },
+    "dateFrom": "Tanggal Dari",
+    "dateTo": "Tanggal Sampai",
+    "classOptional": "Kelas (opsional)",
+    "allClasses": "Semua Kelas",
+    "student": "Siswa",
+    "selectStudent": "Pilih siswa...",
+    "generate": "Buat",
+    "generating": "Membuat...",
+    "downloadPdf": "Unduh PDF",
+    "selectFiltersHint": "Pilih filter dan klik Buat",
+    "pdfPreviewHint": "Pratinjau PDF akan muncul di sini"
+  }
+}

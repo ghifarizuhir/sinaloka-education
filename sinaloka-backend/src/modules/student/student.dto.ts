@@ -8,8 +8,8 @@ export const CreateStudentSchema = z.object({
   phone: z.string().max(20).optional().nullable(),
   grade: z.string().min(1, 'Grade is required').max(50),
   status: StudentStatus.default('ACTIVE'),
-  parent_name: z.string().max(255).optional().nullable(),
-  parent_phone: z.string().max(20).optional().nullable(),
+  parent_name: z.string().min(1, 'Parent name is required').max(255),
+  parent_phone: z.string().min(1, 'Parent phone is required').max(20),
   parent_email: z.string().email().optional().nullable(),
   enrolled_at: z.coerce.date().optional(),
 });

@@ -18,20 +18,24 @@ import {
   Banknote,
   ClipboardCheck,
   TrendingDown,
-  LogOut
+  LogOut,
+  Languages,
+  MessageSquare
 } from 'lucide-react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
 import { cn } from '../lib/utils';
+import ImpersonationBanner from './ImpersonationBanner';
 
 const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any, label: string, href: string, active: boolean, minimized: boolean }) => (
-  <Link 
+  <Link
     to={href}
     title={minimized ? label : undefined}
     className={cn(
       "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
-      active 
-        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium" 
+      active
+        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium"
         : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900"
     )}
   >
@@ -40,17 +44,20 @@ const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any
   </Link>
 );
 
-const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMinimized, userInitials }: {
+const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMinimized, userInitials, t, i18n, toggleLanguage }: {
   title: string,
   isDarkMode: boolean,
   toggleDarkMode: () => void,
   toggleSidebar: () => void,
   isSidebarMinimized: boolean,
-  userInitials: string
+  userInitials: string,
+  t: (key: string) => string,
+  i18n: { language: string },
+  toggleLanguage: () => void
 }) => (
   <header className="h-16 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between px-8 sticky top-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md z-10 transition-colors">
     <div className="flex items-center gap-4">
-      <button 
+      <button
         onClick={toggleSidebar}
         className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors"
       >
@@ -61,18 +68,26 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
     <div className="flex items-center gap-4">
       <div className="relative hidden md:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-        <input 
-          type="text" 
-          placeholder="Search anything..." 
+        <input
+          type="text"
+          placeholder={t('layout.searchPlaceholder')}
           className="pl-10 pr-4 py-1.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:focus:ring-zinc-700 w-64 transition-all dark:text-zinc-100"
         />
       </div>
-      
-      <button 
+
+      <button
         onClick={toggleDarkMode}
         className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-full transition-colors"
       >
         {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+
+      <button
+        onClick={toggleLanguage}
+        className="px-2 py-1 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-full transition-colors border border-zinc-200 dark:border-zinc-800"
+        title={i18n.language === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+      >
+        {i18n.language === 'id' ? 'ID' : 'EN'}
       </button>
 
       <button className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-full transition-colors relative">
@@ -90,6 +105,7 @@ export const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useAuth();
+  const { t, i18n } = useTranslation();
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -102,6 +118,13 @@ export const Layout = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'id' ? 'en' : 'id';
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('sinaloka-lang', newLang);
+    document.documentElement.lang = newLang;
   };
 
   const userInitials = auth.user?.name
@@ -119,19 +142,20 @@ export const Layout = () => {
   };
 
   const title = {
-    '/': 'Dashboard',
-    '/students': 'Students',
-    '/tutors': 'Tutors',
-    '/classes': 'Classes',
-    '/schedules': 'Schedules',
-    '/enrollments': 'Enrollments',
-    '/attendance': 'Attendance',
-    '/finance': 'Finance Overview',
-    '/finance/payments': 'Student Payments',
-    '/finance/payouts': 'Tutor Payouts',
-    '/finance/expenses': 'Operating Expenses',
-    '/settings': 'Settings'
-  }[location.pathname] || 'Dashboard';
+    '/': t('layout.pageTitle.dashboard'),
+    '/students': t('layout.pageTitle.students'),
+    '/tutors': t('layout.pageTitle.tutors'),
+    '/classes': t('layout.pageTitle.classes'),
+    '/schedules': t('layout.pageTitle.schedules'),
+    '/enrollments': t('layout.pageTitle.enrollments'),
+    '/attendance': t('layout.pageTitle.attendance'),
+    '/finance': t('layout.pageTitle.financeOverview'),
+    '/finance/payments': t('layout.pageTitle.studentPayments'),
+    '/finance/payouts': t('layout.pageTitle.tutorPayouts'),
+    '/finance/expenses': t('layout.pageTitle.operatingExpenses'),
+    '/settings': t('layout.pageTitle.settings'),
+    '/whatsapp': t('layout.pageTitle.whatsapp')
+  }[location.pathname] || t('layout.pageTitle.dashboard');
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-zinc-950 transition-colors duration-300">
@@ -146,47 +170,55 @@ export const Layout = () => {
           </div>
           {!isSidebarMinimized && <span className="font-bold text-xl tracking-tight dark:text-zinc-100">Sinaloka</span>}
         </div>
-        
-        <nav className="flex-1 px-4 space-y-8 overflow-y-auto overflow-x-hidden">
+
+        <nav className="flex-1 px-4 space-y-8 overflow-y-auto overflow-x-hidden scrollbar-thin">
           <div>
-            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">General</p>}
+            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">{t('nav.general')}</p>}
             <div className="space-y-1">
-              <SidebarItem icon={LayoutDashboard} label="Dashboard" href="/" active={location.pathname === '/'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={LayoutDashboard} label={t('nav.dashboard')} href="/" active={location.pathname === '/'} minimized={isSidebarMinimized} />
             </div>
           </div>
 
           <div>
-            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">Academics</p>}
+            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">{t('nav.academics')}</p>}
             <div className="space-y-1">
-              <SidebarItem icon={Users} label="Students" href="/students" active={location.pathname === '/students'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={GraduationCap} label="Tutors" href="/tutors" active={location.pathname === '/tutors'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={BookOpen} label="Classes" href="/classes" active={location.pathname === '/classes'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={Users} label={t('nav.students')} href="/students" active={location.pathname === '/students'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={GraduationCap} label={t('nav.tutors')} href="/tutors" active={location.pathname === '/tutors'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={BookOpen} label={t('nav.classes')} href="/classes" active={location.pathname === '/classes'} minimized={isSidebarMinimized} />
             </div>
           </div>
 
           <div>
-            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">Operations</p>}
+            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">{t('nav.operations')}</p>}
             <div className="space-y-1">
-              <SidebarItem icon={CalendarClock} label="Schedules" href="/schedules" active={location.pathname === '/schedules'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={ClipboardCheck} label="Attendance" href="/attendance" active={location.pathname === '/attendance'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={UserPlus} label="Enrollments" href="/enrollments" active={location.pathname === '/enrollments'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={CalendarClock} label={t('nav.schedules')} href="/schedules" active={location.pathname === '/schedules'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={ClipboardCheck} label={t('nav.attendance')} href="/attendance" active={location.pathname === '/attendance'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={UserPlus} label={t('nav.enrollments')} href="/enrollments" active={location.pathname === '/enrollments'} minimized={isSidebarMinimized} />
             </div>
           </div>
 
           <div>
-            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">Finance</p>}
+            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">{t('nav.finance')}</p>}
             <div className="space-y-1">
-              <SidebarItem icon={Wallet} label="Overview" href="/finance" active={location.pathname === '/finance'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={Receipt} label="Student Payments" href="/finance/payments" active={location.pathname === '/finance/payments'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={Banknote} label="Tutor Payouts" href="/finance/payouts" active={location.pathname === '/finance/payouts'} minimized={isSidebarMinimized} />
-              <SidebarItem icon={TrendingDown} label="Operating Expenses" href="/finance/expenses" active={location.pathname === '/finance/expenses'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={Wallet} label={t('nav.overview')} href="/finance" active={location.pathname === '/finance'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={Receipt} label={t('nav.studentPayments')} href="/finance/payments" active={location.pathname === '/finance/payments'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={Banknote} label={t('nav.tutorPayouts')} href="/finance/payouts" active={location.pathname === '/finance/payouts'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={TrendingDown} label={t('nav.operatingExpenses')} href="/finance/expenses" active={location.pathname === '/finance/expenses'} minimized={isSidebarMinimized} />
+            </div>
+          </div>
+
+          {/* Messaging */}
+          <div>
+            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">{t('nav.messaging')}</p>}
+            <div className="space-y-1">
+              <SidebarItem icon={MessageSquare} label={t('nav.whatsapp')} href="/whatsapp" active={location.pathname === '/whatsapp'} minimized={isSidebarMinimized} />
             </div>
           </div>
 
           <div>
-            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">System</p>}
+            {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500 mb-4">{t('nav.system')}</p>}
             <div className="space-y-1">
-              <SidebarItem icon={Settings} label="Settings" href="/settings" active={location.pathname === '/settings'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={Settings} label={t('nav.settings')} href="/settings" active={location.pathname === '/settings'} minimized={isSidebarMinimized} />
             </div>
           </div>
         </nav>
@@ -194,12 +226,12 @@ export const Layout = () => {
         {!isSidebarMinimized && (
           <div className="p-4 border-t border-zinc-50 dark:border-zinc-900">
             <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-2xl">
-              <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 mb-1">Pro Plan</p>
-              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-3">You're using 80% of your storage.</p>
+              <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 mb-1">{t('layout.proPlan')}</p>
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-3">{t('layout.storageUsage')}</p>
               <div className="w-full h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden mb-4">
                 <div className="w-4/5 h-full bg-zinc-900 dark:bg-zinc-100"></div>
               </div>
-              <button className="text-[10px] font-bold text-zinc-900 dark:text-zinc-100 hover:underline">Upgrade Now</button>
+              <button className="text-[10px] font-bold text-zinc-900 dark:text-zinc-100 hover:underline">{t('layout.upgradeNow')}</button>
             </div>
           </div>
         )}
@@ -207,14 +239,14 @@ export const Layout = () => {
         <div className={cn("px-4 pb-4", isSidebarMinimized && "px-3")}>
           <button
             onClick={handleLogout}
-            title="Log out"
+            title={t('layout.logOut')}
             className={cn(
               "flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-all duration-200 text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20",
               isSidebarMinimized && "justify-center"
             )}
           >
             <LogOut size={18} className="shrink-0" />
-            {!isSidebarMinimized && <span className="text-sm">Log out</span>}
+            {!isSidebarMinimized && <span className="text-sm">{t('layout.logOut')}</span>}
           </button>
         </div>
       </aside>
@@ -224,6 +256,7 @@ export const Layout = () => {
         "flex-1 min-h-screen flex flex-col transition-all duration-300",
         isSidebarMinimized ? "ml-20" : "ml-64"
       )}>
+        <ImpersonationBanner />
         <Header
           title={title}
           isDarkMode={isDarkMode}
@@ -231,6 +264,9 @@ export const Layout = () => {
           toggleSidebar={toggleSidebar}
           isSidebarMinimized={isSidebarMinimized}
           userInitials={userInitials}
+          t={t}
+          i18n={i18n}
+          toggleLanguage={toggleLanguage}
         />
         <div className="p-8 max-w-7xl mx-auto w-full">
           <Outlet />

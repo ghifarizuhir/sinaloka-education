@@ -1,90 +1,98 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   DollarSign, Receipt, Wallet, Banknote, Info, Download,
   Calendar as CalendarIcon, AlertTriangle, TrendingUp,
-  MessageSquare, ChevronRight, ExternalLink, ArrowUpRight,
-  FileText
+  MessageSquare, ChevronRight, ArrowUpRight,
+  FileText, ChevronDown
 } from 'lucide-react';
-import { Card, Button, Badge, Modal, Skeleton } from '../../components/UI';
-import { cn } from '../../lib/utils';
+import { Card, Button, Badge, Skeleton } from '../../components/UI';
+import { cn, formatCurrencyShort, formatCurrency, formatDate } from '../../lib/utils';
 import { useDashboardStats } from '@/src/hooks/useDashboard';
+import { useOverdueSummary } from '@/src/hooks/usePayments';
+import { usePayouts } from '@/src/hooks/usePayouts';
+import { useFinancialSummary, useRevenueBreakdown, useExpenseBreakdown, useExportCsv } from '@/src/hooks/useReports';
+import { getPayoutTutorName } from '@/src/types/payout';
 import { toast } from 'sonner';
 import ReportPreviewModal from '@/src/components/ReportPreviewModal';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, format } from 'date-fns';
 
 export const FinanceOverview = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const [dateRange, setDateRange] = useState('This Month');
-  const [showSessionModal, setShowSessionModal] = useState(false);
-  const [selectedTutor, setSelectedTutor] = useState<any>(null);
   const [showReportModal, setShowReportModal] = useState(false);
 
-  const { data: stats, isLoading } = useDashboardStats();
+  const [periodStart, setPeriodStart] = useState(() => format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [periodEnd, setPeriodEnd] = useState(() => format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [activePeriod, setActivePeriod] = useState('month');
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [customStart, setCustomStart] = useState('');
+  const [customEnd, setCustomEnd] = useState('');
 
-  const formatRp = (value?: number) => {
-    if (value == null) return 'Rp -';
-    if (value >= 1_000_000) return `Rp ${(value / 1_000_000).toFixed(1)}M`;
-    return `Rp ${value.toLocaleString()}`;
+  const periodParams = { period_start: periodStart, period_end: periodEnd };
+  const { data: summary, isLoading: isLoadingSummary } = useFinancialSummary(periodParams);
+  const { data: revenueBreakdown } = useRevenueBreakdown(periodParams);
+  const { data: expenseBreakdown } = useExpenseBreakdown(periodParams);
+  const exportCsv = useExportCsv();
+
+  const { data: stats, isLoading } = useDashboardStats();
+  const { data: overdueSummary } = useOverdueSummary();
+  const { data: pendingPayoutsData } = usePayouts({ status: 'PENDING', limit: 5 });
+
+  const pendingPayoutsList = pendingPayoutsData?.data ?? [];
+
+  const handlePeriodChange = (period: string) => {
+    setActivePeriod(period);
+    const now = new Date();
+    if (period === 'month') {
+      setPeriodStart(format(startOfMonth(now), 'yyyy-MM-dd'));
+      setPeriodEnd(format(endOfMonth(now), 'yyyy-MM-dd'));
+    } else if (period === 'quarter') {
+      setPeriodStart(format(startOfQuarter(now), 'yyyy-MM-dd'));
+      setPeriodEnd(format(endOfQuarter(now), 'yyyy-MM-dd'));
+    } else if (period === 'year') {
+      setPeriodStart(format(startOfYear(now), 'yyyy-MM-dd'));
+      setPeriodEnd(format(now, 'yyyy-MM-dd'));
+    }
+    // 'custom' — dates are controlled by the date inputs directly
   };
 
-  const statCards = [
-    {
-      label: 'Revenue This Month',
-      value: formatRp(stats?.total_revenue),
-      change: '+12.5%',
-      comparison: 'Based on total revenue',
-      icon: DollarSign,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50 dark:bg-emerald-900/20'
-    },
-    {
-      label: 'Outstanding Payments',
-      value: 'Rp -',
-      change: 'Pending',
-      comparison: 'See Student Payments',
-      icon: Receipt,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50 dark:bg-amber-900/20'
-    },
-    {
-      label: 'Pending Payouts',
-      value: 'Rp -',
-      change: '-',
-      comparison: 'See Tutor Payouts',
-      icon: Wallet,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50 dark:bg-blue-900/20'
-    },
-    {
-      label: 'Net Profit',
-      value: 'Rp -',
-      change: '-',
-      comparison: 'Formula: Rev - Payouts - OpEx',
-      icon: Banknote,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-      hasInfo: true
-    },
-  ];
+  const handleCustomDateChange = (start: string, end: string) => {
+    if (start && end) {
+      setPeriodStart(start);
+      setPeriodEnd(end);
+    }
+  };
 
-  const unpaidStudents = [
-    { id: '1', student: 'Alice Johnson', class: 'Mathematics Grade 9', dueDate: 'Mar 05, 2026', amount: 500000, status: 'OVERDUE' },
-    { id: '2', student: 'Bob Smith', class: 'English Literature', dueDate: 'Mar 08, 2026', amount: 450000, status: 'DUE TODAY' },
-    { id: '3', student: 'Charlie Brown', class: 'Physics Advanced', dueDate: 'Feb 28, 2026', amount: 750000, status: 'CRITICAL' },
-  ];
-
-  const pendingTutors = [
-    { id: '1', tutor: 'Dr. Sarah Wilson', sessions: 12, amount: 3000000, dueDate: 'Mar 15, 2026', status: 'PENDING' },
-    { id: '2', tutor: 'Emily Chen', sessions: 8, amount: 2000000, dueDate: 'Mar 15, 2026', status: 'APPROVED' },
-  ];
-
-  const handleExport = (tableName: string) => {
-    toast.success(`${tableName} exported successfully to CSV.`);
+  const handleExport = (type: 'payments' | 'payouts' | 'expenses') => {
+    exportCsv.mutate({ type, period_start: periodStart, period_end: periodEnd }, {
+      onSuccess: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${type}_export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success(t('finance.exportSuccess'));
+      },
+    });
+    setShowExportMenu(false);
   };
 
   const handleRemind = (student: string) => {
-    toast.success(`Payment reminder sent to ${student}'s parent via WhatsApp.`);
+    toast.success(t('finance.reminderSent', { student }));
   };
+
+  const dateRangeOptions = [
+    { key: 'month', label: t('finance.thisMonth') },
+    { key: 'quarter', label: t('finance.thisQuarter') },
+    { key: 'year', label: t('finance.yearToDate') },
+    { key: 'custom', label: t('finance.custom', 'Custom') },
+  ];
 
   if (isLoading) {
     return (
@@ -97,7 +105,6 @@ export const FinanceOverview = () => {
           </div>
           <div className="flex items-center gap-2">
             <Skeleton className="h-9 w-64" />
-            <Skeleton className="h-9 w-24" />
             <Skeleton className="h-9 w-32" />
           </div>
         </div>
@@ -106,78 +113,26 @@ export const FinanceOverview = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <Skeleton className="w-10 h-10 rounded-xl" />
-                <Skeleton className="w-16 h-5 rounded-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-32" />
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Main Analysis Skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-2 p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-64" />
-              </div>
-              <Skeleton className="h-4 w-32" />
-            </div>
-            <Skeleton className="h-[300px] w-full" />
-          </Card>
-          <Card className="p-6 space-y-6">
-            <div className="space-y-2">
-              <Skeleton className="h-6 w-40" />
-              <Skeleton className="h-4 w-56" />
-            </div>
-            <Skeleton className="h-4 w-full rounded-full" />
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-xl" />
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Forecasting Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="p-6 space-y-4">
-              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-24" />
               <Skeleton className="h-8 w-32" />
-              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-3 w-20" />
             </Card>
           ))}
         </div>
 
-        {/* Tables Skeleton */}
+        {/* Chart Skeleton */}
+        <Card className="p-6">
+          <Skeleton className="h-5 w-40 mb-4" />
+          <Skeleton className="h-[200px] w-full" />
+        </Card>
+
+        {/* Breakdown Skeletons */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {[1, 2].map((i) => (
-            <div key={i} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-6 w-24" />
-              </div>
-              <Card className="p-0 overflow-hidden">
-                <div className="p-6 space-y-4">
-                  {[1, 2, 3].map((j) => (
-                    <div key={j} className="flex items-center justify-between">
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-8 w-20 rounded-lg" />
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
+            <Card key={i} className="p-6 space-y-4">
+              <Skeleton className="h-5 w-48" />
+              <Skeleton className="h-32 w-full" />
+            </Card>
           ))}
         </div>
       </div>
@@ -186,132 +141,338 @@ export const FinanceOverview = () => {
 
   return (
     <div className="space-y-8 relative pb-20">
-      {/* Header with Global Filters */}
+      {/* Header with Period Selector + Export */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Finance Intelligence</h2>
-          <p className="text-zinc-500 text-sm">Actionable insights into your school's financial health.</p>
+          <h2 className="text-2xl font-bold tracking-tight">{t('finance.title')}</h2>
+          <p className="text-zinc-500 text-sm">{t('finance.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
           <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-            {['This Month', 'This Quarter', 'Year to Date'].map((range) => (
+            {dateRangeOptions.map((range) => (
               <button
-                key={range}
-                onClick={() => setDateRange(range)}
+                key={range.key}
+                onClick={() => handlePeriodChange(range.key)}
                 className={cn(
                   "px-3 py-1.5 text-xs font-bold rounded-md transition-all",
-                  dateRange === range ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
+                  activePeriod === range.key ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
                 )}
               >
-                {range}
+                {range.label}
               </button>
             ))}
           </div>
-          <Button variant="outline" size="sm" className="h-9">
-            <CalendarIcon size={14} />
-            Custom
-          </Button>
           <Button variant="primary" size="sm" className="h-9" onClick={() => setShowReportModal(true)}>
             <FileText size={14} />
-            Generate Report
+            {t('finance.generateReport')}
           </Button>
-          <Button variant="outline" size="sm" className="h-9" onClick={() => handleExport('Global Dashboard')}>
-            <Download size={14} />
-            Export
-          </Button>
+          <div className="relative">
+            <Button variant="outline" size="sm" className="h-9" onClick={() => setShowExportMenu(!showExportMenu)}>
+              <Download size={14} />
+              {t('common.export')}
+              <ChevronDown size={12} />
+            </Button>
+            {showExportMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 py-1">
+                  <button
+                    onClick={() => handleExport('payments')}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
+                  >
+                    {t('finance.studentPayments')}
+                  </button>
+                  <button
+                    onClick={() => handleExport('payouts')}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
+                  >
+                    {t('finance.tutorPayouts')}
+                  </button>
+                  <button
+                    onClick={() => handleExport('expenses')}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
+                  >
+                    {t('finance.operatingExpenses')}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          </div>
+          {activePeriod === 'custom' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={customStart}
+                onChange={(e) => {
+                  setCustomStart(e.target.value);
+                  handleCustomDateChange(e.target.value, customEnd);
+                }}
+                className="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              />
+              <span className="text-xs text-zinc-400">—</span>
+              <input
+                type="date"
+                value={customEnd}
+                onChange={(e) => {
+                  setCustomEnd(e.target.value);
+                  handleCustomDateChange(customStart, e.target.value);
+                }}
+                className="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, i) => (
-          <Card key={i} className="p-6 group relative">
-            <div className="flex items-center justify-between mb-4">
-              <div className={cn("p-2 rounded-xl", stat.bg)}>
-                <stat.icon className={stat.color} size={20} />
-              </div>
-              <div className="relative">
-                <span className={cn(
-                  "text-[10px] font-bold uppercase tracking-wider cursor-help px-2 py-0.5 rounded-full",
-                  stat.change.startsWith('+') ? "bg-emerald-50 text-emerald-600" : "bg-zinc-100 text-zinc-500"
-                )}>
-                  {stat.change}
-                </span>
-                {/* Comparison Tooltip */}
-                <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-zinc-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30 shadow-xl border border-zinc-800">
-                  <p className="font-bold mb-1">Comparison</p>
-                  <p className="text-zinc-400">{stat.comparison}</p>
+        {isLoadingSummary ? (
+          [1, 2, 3, 4].map((i) => (
+            <Card key={i} className="p-6 space-y-3">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-8 w-36" />
+              <Skeleton className="h-3 w-20" />
+            </Card>
+          ))
+        ) : (
+          <>
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
+                  <DollarSign className="text-emerald-600" size={20} />
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-1.5 mb-1">
-              <p className="text-sm text-zinc-500">{stat.label}</p>
-              {stat.hasInfo && (
+              <p className="text-sm text-zinc-500 mb-1">{t('finance.totalRevenue')}</p>
+              <h3 className="text-2xl font-bold tracking-tight dark:text-zinc-100">
+                {formatCurrency(summary?.total_revenue ?? 0, i18n.language)}
+              </h3>
+              <p className="text-[10px] text-zinc-400 mt-1">
+                {t('finance.paymentCountLabel', { count: summary?.payment_count ?? 0 })}
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                  <Wallet className="text-blue-600" size={20} />
+                </div>
+              </div>
+              <p className="text-sm text-zinc-500 mb-1">{t('finance.totalPayouts')}</p>
+              <h3 className="text-2xl font-bold tracking-tight dark:text-zinc-100">
+                {formatCurrency(summary?.total_payouts ?? 0, i18n.language)}
+              </h3>
+              <p className="text-[10px] text-zinc-400 mt-1">
+                {t('finance.payoutCountLabel', { count: summary?.payout_count ?? 0 })}
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20">
+                  <Receipt className="text-amber-600" size={20} />
+                </div>
+              </div>
+              <p className="text-sm text-zinc-500 mb-1">{t('finance.totalExpenses')}</p>
+              <h3 className="text-2xl font-bold tracking-tight dark:text-zinc-100">
+                {formatCurrency(summary?.total_expenses ?? 0, i18n.language)}
+              </h3>
+              <p className="text-[10px] text-zinc-400 mt-1">
+                {t('finance.expenseCountLabel', { count: summary?.expense_count ?? 0 })}
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/20">
+                  <Banknote className="text-indigo-600" size={20} />
+                </div>
                 <div className="group/info relative">
                   <Info size={12} className="text-zinc-400 cursor-help" />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-3 bg-zinc-900 text-white text-[10px] rounded-xl opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-30 shadow-xl border border-zinc-800">
-                    <p className="font-bold mb-2 border-b border-zinc-800 pb-1">Net Revenue Formula</p>
+                  <div className="absolute bottom-full right-0 mb-2 w-56 p-3 bg-zinc-900 text-white text-[10px] rounded-xl opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-30 shadow-xl border border-zinc-800">
+                    <p className="font-bold mb-2 border-b border-zinc-800 pb-1">{t('finance.netRevenueFormula')}</p>
                     <div className="space-y-1 text-zinc-400 italic">
-                      <p>Total Revenue (Gross)</p>
-                      <p className="text-red-400">- Tutor Payouts (Direct Cost)</p>
-                      <p className="text-red-400">- Operating Costs (Overhead)</p>
+                      <p>{t('finance.totalRevenueGross')}</p>
+                      <p className="text-red-400">{t('finance.tutorPayoutsDirect')}</p>
+                      <p className="text-red-400">{t('finance.operatingCostsOverhead')}</p>
                       <div className="border-t border-zinc-800 pt-1 mt-1 font-bold text-white not-italic">
-                        = Net Revenue
+                        {t('finance.netRevenue')}
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
-            <h3 className="text-2xl font-bold tracking-tight dark:text-zinc-100">{stat.value}</h3>
-          </Card>
-        ))}
+              </div>
+              <p className="text-sm text-zinc-500 mb-1">{t('finance.netProfit')}</p>
+              <h3 className={cn(
+                "text-2xl font-bold tracking-tight",
+                (summary?.net_profit ?? 0) >= 0 ? "text-emerald-600" : "text-red-600"
+              )}>
+                {formatCurrency(summary?.net_profit ?? 0, i18n.language)}
+              </h3>
+              <p className="text-[10px] text-zinc-400 mt-1">{t('finance.formulaRevPayoutsOpex')}</p>
+            </Card>
+          </>
+        )}
       </div>
 
-      {/* Main Analysis Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Revenue Summary Card */}
-        <Card className="lg:col-span-2 p-6">
-          <div className="flex items-center justify-between mb-6">
+      {/* Revenue Trend Chart */}
+      {summary?.revenue_by_month && summary.revenue_by_month.length > 0 && (
+        <Card className="p-6">
+          <h3 className="text-sm font-bold mb-4 dark:text-zinc-100">{t('finance.revenueSummary')}</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={summary.revenue_by_month}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => formatCurrencyShort(v, i18n.language)} />
+              <Tooltip formatter={(v: number) => formatCurrency(v, i18n.language)} />
+              <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
+      {/* Revenue Breakdown */}
+      {revenueBreakdown && (
+        <Card className="p-6">
+          <h3 className="text-sm font-bold mb-4 dark:text-zinc-100">{t('finance.revenueBreakdown')}</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* By Class */}
             <div>
-              <h3 className="font-bold text-lg dark:text-zinc-100">Revenue Summary</h3>
-              <p className="text-xs text-zinc-500">Aggregate revenue from backend dashboard stats</p>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">{t('finance.byClass')}</p>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-zinc-100 dark:border-zinc-800">
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('finance.class')}</th>
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('finance.revenueLabel')}</th>
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('finance.payments')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
+                  {(revenueBreakdown.by_class ?? []).length === 0 ? (
+                    <tr><td colSpan={3} className="py-4 text-center text-sm text-zinc-400">{t('common.noData')}</td></tr>
+                  ) : (revenueBreakdown.by_class ?? []).map((item: any, idx: number) => (
+                    <tr key={idx}>
+                      <td className="py-2 text-sm dark:text-zinc-200">{item.class_name}</td>
+                      <td className="py-2 text-sm font-medium text-right dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</td>
+                      <td className="py-2 text-sm text-zinc-500 text-right">{item.payment_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
-          <div className="flex flex-col items-center justify-center h-[260px] gap-4">
-            <div className="text-center">
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Total Revenue</p>
-              <p className="text-5xl font-bold text-indigo-600">{formatRp(stats?.total_revenue)}</p>
-              <p className="text-xs text-zinc-500 mt-2">Live from dashboard API</p>
+
+            {/* By Payment Method */}
+            <div>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">{t('finance.byPaymentMethod')}</p>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-zinc-100 dark:border-zinc-800">
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('finance.method')}</th>
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('finance.amount')}</th>
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('finance.count')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
+                  {(revenueBreakdown.by_payment_method ?? []).length === 0 ? (
+                    <tr><td colSpan={3} className="py-4 text-center text-sm text-zinc-400">{t('common.noData')}</td></tr>
+                  ) : (revenueBreakdown.by_payment_method ?? []).map((item: any, idx: number) => (
+                    <tr key={idx}>
+                      <td className="py-2 text-sm dark:text-zinc-200">{t(`finance.methodLabel.${item.method}`, item.method)}</td>
+                      <td className="py-2 text-sm font-medium text-right dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</td>
+                      <td className="py-2 text-sm text-zinc-500 text-right">{item.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="grid grid-cols-3 gap-6 w-full mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-              <div className="text-center">
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Students</p>
-                <p className="text-xl font-bold dark:text-zinc-100">{stats?.total_students ?? '-'}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Tutors</p>
-                <p className="text-xl font-bold dark:text-zinc-100">{stats?.active_tutors ?? '-'}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Attendance</p>
-                <p className="text-xl font-bold dark:text-zinc-100">{stats?.attendance_rate != null ? `${stats.attendance_rate.toFixed(0)}%` : '-'}</p>
+
+            {/* By Status */}
+            <div>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">{t('finance.byStatus')}</p>
+              <div className="space-y-3">
+                {(revenueBreakdown.by_status ?? []).length === 0 ? (
+                  <p className="text-sm text-zinc-400">{t('common.noData')}</p>
+                ) : (revenueBreakdown.by_status ?? []).map((item: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <Badge
+                      variant={item.status === 'PAID' ? 'success' : item.status === 'PENDING' ? 'warning' : 'error'}
+                      className="text-[10px]"
+                    >
+                      {t(`finance.status.${item.status}`, item.status)}
+                    </Badge>
+                    <span className="text-sm font-medium dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </Card>
+      )}
 
-        {/* Quick Links Card */}
-        <Card className="p-6 flex flex-col">
+      {/* Expense Breakdown */}
+      {expenseBreakdown && (
+        <Card className="p-6">
+          <h3 className="text-sm font-bold mb-4 dark:text-zinc-100">{t('finance.expenseBreakdown')}</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* By Category */}
+            <div>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">{t('finance.byCategory')}</p>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-zinc-100 dark:border-zinc-800">
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('finance.category')}</th>
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('finance.amount')}</th>
+                    <th className="pb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('finance.records')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
+                  {(expenseBreakdown.by_category ?? []).length === 0 ? (
+                    <tr><td colSpan={3} className="py-4 text-center text-sm text-zinc-400">{t('common.noData')}</td></tr>
+                  ) : (expenseBreakdown.by_category ?? []).map((item: any, idx: number) => (
+                    <tr key={idx}>
+                      <td className="py-2 text-sm dark:text-zinc-200">{t(`finance.expenseCategory.${item.category}`, item.category)}</td>
+                      <td className="py-2 text-sm font-medium text-right dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</td>
+                      <td className="py-2 text-sm text-zinc-500 text-right">{item.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Monthly Trend */}
+            <div>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">{t('finance.monthlyTrend')}</p>
+              {(expenseBreakdown.monthly_trend ?? []).length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={expenseBreakdown.monthly_trend}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => formatCurrencyShort(v, i18n.language)} />
+                    <Tooltip formatter={(v: number) => formatCurrency(v, i18n.language)} />
+                    <Bar dataKey="amount" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-zinc-400">{t('common.noData')}</p>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Finance Modules Quick Links */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="lg:col-span-1 p-6 flex flex-col">
           <div className="mb-6">
-            <h3 className="font-bold text-lg dark:text-zinc-100">Finance Modules</h3>
-            <p className="text-xs text-zinc-500">Quick access to finance sections</p>
+            <h3 className="font-bold text-lg dark:text-zinc-100">{t('finance.financeModules')}</h3>
+            <p className="text-xs text-zinc-500">{t('finance.quickAccessFinance')}</p>
           </div>
           <div className="flex-1 space-y-3">
             {[
-              { label: 'Student Payments', path: '/finance/payments', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-              { label: 'Tutor Payouts', path: '/finance/payouts', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-              { label: 'Operating Expenses', path: '/finance/expenses', color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+              { label: t('finance.studentPayments'), path: '/finance/payments', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+              { label: t('finance.tutorPayouts'), path: '/finance/payouts', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: t('finance.operatingExpenses'), path: '/finance/expenses', color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
             ].map((item) => (
               <Link
                 key={item.path}
@@ -326,189 +487,57 @@ export const FinanceOverview = () => {
             ))}
             <div className="pt-4 mt-auto">
               <Button variant="secondary" className="w-full justify-center text-xs" onClick={() => setShowReportModal(true)}>
-                Generate PDF Report
+                {t('finance.generatePdfReport')}
               </Button>
             </div>
           </div>
         </Card>
-      </div>
 
-      {/* Forecasting & System Health */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 border-l-4 border-l-indigo-600">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600">
-              <TrendingUp size={18} />
-            </div>
-            <h4 className="font-bold text-sm">Revenue This Period</h4>
-          </div>
-          <div className="space-y-1">
-            <p className="text-2xl font-bold tracking-tight">{formatRp(stats?.total_revenue)}</p>
-            <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Total Revenue (Live)</p>
-          </div>
-          <div className="mt-4 p-2 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg flex items-center gap-2">
-            <ArrowUpRight size={14} className="text-emerald-600" />
-            <span className="text-[10px] font-bold text-emerald-700">From dashboard API</span>
-          </div>
-        </Card>
-
-        <Card className="p-6 border-l-4 border-l-amber-500">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-600">
-              <AlertTriangle size={18} />
-            </div>
-            <h4 className="font-bold text-sm">Upcoming Sessions</h4>
-          </div>
-          <div className="space-y-1">
-            <p className="text-2xl font-bold tracking-tight">{stats?.upcoming_sessions ?? '-'}</p>
-            <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Sessions scheduled</p>
-          </div>
-          <div className="mt-4">
-            <Link to="/finance/payments" className="text-[10px] font-bold text-indigo-600 hover:underline block">View All Payments</Link>
-          </div>
-        </Card>
-
-        <Card className="p-6 border-l-4 border-l-rose-500">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-rose-50 dark:bg-rose-900/20 rounded-lg text-rose-600">
-              <Banknote size={18} />
-            </div>
-            <h4 className="font-bold text-sm">Attendance Rate</h4>
-          </div>
-          <div className="space-y-1">
-            <p className="text-2xl font-bold tracking-tight">
-              {stats?.attendance_rate != null ? `${stats.attendance_rate.toFixed(1)}%` : '-'}
-            </p>
-            <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Overall attendance</p>
-          </div>
-          <div className="mt-4 w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-rose-500 rounded-full"
-              style={{ width: `${stats?.attendance_rate ?? 0}%` }}
-            />
-          </div>
-        </Card>
-      </div>
-
-      {/* Tables Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Receivables Table */}
-        <div className="space-y-4">
+        <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-lg dark:text-zinc-100">Receivables</h3>
-              <Badge variant="error" className="text-[8px]">Action Required</Badge>
+              <h3 className="font-bold text-lg dark:text-zinc-100">{t('finance.receivables')}</h3>
+              <Badge variant="error" className="text-[8px]">{t('common.actionRequired')}</Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => handleExport('Unpaid Students')}>
-                <Download size={12} /> CSV
-              </Button>
-              <Link to="/finance/payments" className="text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:underline">View All</Link>
-            </div>
+            <Link to="/finance/payments" className="text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:underline">{t('common.viewAll')}</Link>
           </div>
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Student / Class</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Due Date</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Amount</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">Action</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('finance.studentClass')}</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('common.status')}</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('finance.amount')}</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('finance.action')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {unpaidStudents.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors">
+                {(overdueSummary?.flagged_students ?? []).length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-sm text-zinc-400">{t('common.noData')}</td>
+                  </tr>
+                ) : (overdueSummary?.flagged_students ?? []).map((item) => (
+                  <tr key={item.student_id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium dark:text-zinc-200">{item.student}</span>
-                        <span className="text-[10px] text-zinc-400">{item.class}</span>
+                        <span className="text-sm font-medium dark:text-zinc-200">{item.student_name}</span>
+                        <span className="text-[10px] text-zinc-400">{item.overdue_payments} {t('finance.overduePayments')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs font-medium dark:text-zinc-300">{item.dueDate}</span>
-                        <span className={cn(
-                          "text-[8px] font-bold uppercase tracking-tighter w-fit px-1.5 rounded",
-                          item.status === 'CRITICAL' ? "bg-red-100 text-red-600" :
-                          item.status === 'OVERDUE' ? "bg-amber-100 text-amber-600" : "bg-zinc-100 text-zinc-500"
-                        )}>
-                          {item.status}
-                        </span>
-                      </div>
+                      <span className="text-[8px] font-bold uppercase tracking-tighter w-fit px-1.5 rounded bg-red-100 text-red-600">
+                        {t('common.overdue')}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 text-sm font-bold dark:text-zinc-100">Rp {item.amount.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-sm font-bold dark:text-zinc-100">{formatCurrency(Number(item.total_debt), i18n.language)}</td>
                     <td className="px-6 py-4 text-right">
                       <button
-                        onClick={() => handleRemind(item.student)}
+                        onClick={() => handleRemind(item.student_name)}
                         className="flex items-center gap-1.5 ml-auto text-[10px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1.5 rounded-lg transition-colors"
                       >
                         <MessageSquare size={12} />
-                        Remind
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        </div>
-
-        {/* Tutor Payouts Table */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-lg dark:text-zinc-100">Tutor Payouts</h3>
-              <Badge variant="success" className="text-[8px]">Batch Ready</Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => handleExport('Tutor Payouts')}>
-                <Download size={12} /> CSV
-              </Button>
-              <Link to="/finance/payouts" className="text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:underline">View All</Link>
-            </div>
-          </div>
-          <Card className="p-0 overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Tutor</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sessions</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Amount</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {pendingTutors.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium dark:text-zinc-200">{item.tutor}</span>
-                        <span className="text-[10px] text-zinc-400">Due: {item.dueDate}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => {
-                          setSelectedTutor(item);
-                          setShowSessionModal(true);
-                        }}
-                        className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:underline"
-                      >
-                        {item.sessions} Sessions
-                        <ExternalLink size={10} />
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-bold dark:text-zinc-100">Rp {item.amount.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => navigate('/finance/payouts')}
-                        className={cn(
-                          "text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors",
-                          item.status === 'APPROVED' ? "bg-emerald-50 text-emerald-600" : "bg-zinc-100 text-zinc-900 dark:text-zinc-100"
-                        )}
-                      >
-                        {item.status === 'APPROVED' ? 'Payout' : 'Approve'}
+                        {t('finance.remind')}
                       </button>
                     </td>
                   </tr>
@@ -518,37 +547,6 @@ export const FinanceOverview = () => {
           </Card>
         </div>
       </div>
-
-      {/* Session Reconciliation Modal */}
-      <Modal
-        isOpen={showSessionModal}
-        onClose={() => setShowSessionModal(false)}
-        title={`Payout Reconciliation: ${selectedTutor?.tutor}`}
-        className="max-w-2xl"
-      >
-        <div className="space-y-6">
-          <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total Payout</p>
-              <p className="text-xl font-bold dark:text-zinc-100">Rp {selectedTutor?.amount.toLocaleString()}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Period</p>
-              <p className="text-sm font-medium dark:text-zinc-200">Feb 15 - Mar 15, 2026</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-            <Button variant="outline" className="flex-1 justify-center" onClick={() => setShowSessionModal(false)}>Close</Button>
-            <Button className="flex-1 justify-center" onClick={() => {
-              toast.success("Payout approved and scheduled.");
-              setShowSessionModal(false);
-            }}>
-              Approve All Sessions
-            </Button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Report Preview Modal */}
       <ReportPreviewModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} />

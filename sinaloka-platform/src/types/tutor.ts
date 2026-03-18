@@ -4,7 +4,7 @@ export interface Tutor {
   id: string;
   name: string;
   email: string;
-  subjects: string[];
+  tutor_subjects: { subject: { id: string; name: string } }[];
   experience_years: number;
   rating: number;
   is_verified: boolean;
@@ -12,6 +12,7 @@ export interface Tutor {
   bank_name: string | null;
   bank_account_number: string | null;
   bank_account_holder: string | null;
+  monthly_salary: number | null;
   user_id: string;
   institution_id: string;
   created_at: string;
@@ -22,7 +23,7 @@ export interface CreateTutorDto {
   name: string;
   email: string;
   password: string;
-  subjects: string[];
+  subject_ids: string[];
   experience_years?: number;
   availability?: Record<string, unknown>;
   bank_name?: string;
@@ -32,7 +33,7 @@ export interface CreateTutorDto {
 
 export interface UpdateTutorDto {
   name?: string;
-  subjects?: string[];
+  subject_ids?: string[];
   experience_years?: number;
   availability?: Record<string, unknown>;
   bank_name?: string;
@@ -40,6 +41,7 @@ export interface UpdateTutorDto {
   bank_account_holder?: string;
   is_verified?: boolean;
   rating?: number;
+  monthly_salary?: number | null;
 }
 
 export interface TutorQueryParams extends PaginationParams {

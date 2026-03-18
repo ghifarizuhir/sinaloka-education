@@ -1,0 +1,5 @@
+{
+  "name": "Sinaloka Tutor Platform",
+  "description": "Platform khusus tutor untuk manajemen jadwal, absensi, dan payout dengan tampilan mobile-first.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,1368 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "export": "Export",
+    "import": "Import",
+    "search": "Search",
+    "filter": "Filter",
+    "filters": "Filters",
+    "clearAll": "Clear all",
+    "clearAllFilters": "Clear all filters",
+    "viewAll": "View All",
+    "viewDetails": "View Details",
+    "prev": "Prev",
+    "next": "Next",
+    "today": "Today",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "processing": "Processing...",
+    "deleting": "Deleting...",
+    "noResults": "No results found",
+    "noData": "No data available",
+    "actions": "Actions",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "archived": "Archived",
+    "pending": "Pending",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "selected": "Selected",
+    "page": "Page",
+    "of": "of",
+    "total": "total",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results",
+    "allStatuses": "All Statuses",
+    "comingSoon": "Coming soon",
+    "allSubjects": "All Subjects",
+    "allClasses": "All Classes",
+    "allCategories": "All Categories",
+    "perSession": "per session",
+    "saveChanges": "Save Changes",
+    "confirm": "Confirm",
+    "discard": "Discard",
+    "download": "Download",
+    "upload": "Upload",
+    "searchAnything": "Search anything...",
+    "comparison": "Comparison",
+    "csv": "CSV",
+    "selectClass": "Select class",
+    "selectTutor": "Select tutor",
+    "selectStudent": "Select student",
+    "actionRequired": "Action Required",
+    "proFeature": "Pro Feature",
+    "allRecords": "All Records",
+    "required": "required",
+    "optional": "optional"
+  },
+
+  "nav": {
+    "general": "General",
+    "academics": "Academics",
+    "operations": "Operations",
+    "finance": "Finance",
+    "system": "System",
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "tutors": "Tutors",
+    "classes": "Classes",
+    "schedules": "Schedules",
+    "attendance": "Attendance",
+    "enrollments": "Enrollments",
+    "overview": "Overview",
+    "studentPayments": "Student Payments",
+    "tutorPayouts": "Tutor Payouts",
+    "operatingExpenses": "Operating Expenses",
+    "settings": "Settings",
+    "messaging": "Messaging",
+    "whatsapp": "WhatsApp"
+  },
+
+  "layout": {
+    "searchPlaceholder": "Search anything...",
+    "proPlan": "Pro Plan",
+    "storageUsage": "You're using 80% of your storage.",
+    "upgradeNow": "Upgrade Now",
+    "logOut": "Log out",
+    "pageTitle": {
+      "dashboard": "Dashboard",
+      "students": "Students",
+      "tutors": "Tutors",
+      "classes": "Classes",
+      "schedules": "Schedules",
+      "enrollments": "Enrollments",
+      "attendance": "Attendance",
+      "financeOverview": "Finance Overview",
+      "studentPayments": "Student Payments",
+      "tutorPayouts": "Tutor Payouts",
+      "operatingExpenses": "Operating Expenses",
+      "settings": "Settings",
+      "whatsapp": "WhatsApp"
+    }
+  },
+
+  "login": {
+    "title": "Sinaloka",
+    "subtitle": "Sign in to your account",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "admin@sinaloka.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "defaultError": "Invalid email or password. Please try again.",
+    "copyright": "© {{year}} Sinaloka. All rights reserved."
+  },
+
+  "dashboard": {
+    "greeting": "Morning Coffee",
+    "subtitle": "Here's what's happening at Sinaloka Platform today.",
+    "schedule": "Schedule",
+    "quickActions": "Quick Actions",
+    "quickEnroll": "Quick Enroll",
+    "recordPayment": "Record Payment",
+    "addMakeupClass": "Add Make-up Class",
+    "totalStudents": "Total Students",
+    "activeTutors": "Active Tutors",
+    "attendanceRate": "Attendance Rate",
+    "monthlyRevenue": "Monthly Revenue",
+    "overview": "Overview",
+    "keyMetrics": "Key metrics at a glance",
+    "fullSchedule": "Full Schedule",
+    "upcomingSessions": "Upcoming Sessions",
+    "scheduled": "scheduled",
+    "sessionsPlanned": "Sessions planned for the near future",
+    "studentAttendance": "Student Attendance",
+    "rate": "rate",
+    "overallAttendance": "Overall attendance across all sessions",
+    "enrolled": "enrolled",
+    "registeredStudents": "Registered students in the platform",
+    "viewStudents": "View Students",
+    "revenueSummary": "Revenue Summary",
+    "quickLinks": "Quick Links",
+    "viewAllStudents": "View All Students",
+    "manageFinance": "Manage Finance",
+    "attendanceRecords": "Attendance Records",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity",
+    "activityCategory": {
+      "operations": "Operations",
+      "finance": "Finance",
+      "academic": "Academic",
+      "system": "System"
+    },
+    "timeAgo": {
+      "minutes": "{{count}} minutes ago",
+      "hours": "{{count}} hours ago",
+      "days": "{{count}} days ago"
+    },
+    "commandPalette": {
+      "searchPlaceholder": "Search for students, tutors, or actions...",
+      "quickActions": "Quick Actions",
+      "enrollNewStudent": "Enroll New Student",
+      "recordNewPayment": "Record New Payment",
+      "scheduleMakeupClass": "Schedule Make-up Class",
+      "addNewTutor": "Add New Tutor",
+      "navigateTo": "Navigate to {{path}}",
+      "navigate": "Navigate",
+      "select": "Select",
+      "version": "Sinaloka Platform v1.0"
+    }
+  },
+
+  "students": {
+    "title": "Students",
+    "subtitle": "Manage and track your student directory.",
+    "addStudent": "Add Student",
+    "importing": "Importing...",
+    "noStudentsFound": "No students found",
+    "noStudentsHint": "Try adjusting your search or filters to find what you're looking for.",
+    "totalStudents": "Total Students",
+    "activeStudents": "Active Students",
+    "inactive": "Inactive",
+    "totalAllPages": "Total (All Pages)",
+    "totalStudentsLabel": "total students",
+    "searchPlaceholder": "Search by name or email...",
+    "activeFilters": "Active Filters:",
+    "student": "Student",
+    "form": {
+      "fullName": "Full Name",
+      "namePlaceholder": "e.g. John Doe",
+      "emailAddress": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "phoneNumber": "Phone Number",
+      "phonePlaceholder": "+62 812 3456 7890",
+      "grade": "Grade",
+      "status": "Status",
+      "parentName": "Parent/Guardian Name",
+      "parentNamePlaceholder": "e.g. Jane Doe",
+      "parentPhone": "Parent/Guardian Phone",
+      "parentPhonePlaceholder": "+62 812 3456 7890",
+      "parentEmail": "Parent/Guardian Email",
+      "parentEmailPlaceholder": "parent@example.com"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "grade": "Grade",
+      "parentGuardian": "Parent/Guardian",
+      "status": "Status"
+    },
+    "filter": {
+      "allGrades": "All Grades",
+      "10thGrade": "10th Grade",
+      "11thGrade": "11th Grade",
+      "12thGrade": "12th Grade",
+      "allStatus": "All Status",
+      "search": "Search: {{query}}",
+      "grade": "Grade: {{grade}}",
+      "status": "Status: {{status}}",
+      "subject": "Subject: {{subject}}"
+    },
+    "toast": {
+      "created": "Student created",
+      "updated": "Student updated",
+      "deleted": "Student deleted",
+      "bulkDeleted": "{{count}} students deleted",
+      "importSuccess": "Students imported",
+      "importError": "Failed to import students",
+      "exportSuccess": "Students exported",
+      "exportError": "Failed to export students",
+      "createError": "Failed to create student",
+      "updateError": "Failed to update student",
+      "deleteError": "Failed to delete student",
+      "inviteSent": "Invitation sent to {{email}}",
+      "inviteError": "Failed to send invitation"
+    },
+    "modal": {
+      "addTitle": "Add Student",
+      "editTitle": "Edit Student Profile",
+      "deleteTitle": "Delete Student",
+      "bulkDeleteTitle": "Delete Multiple Students",
+      "importTitle": "Import Students",
+      "updateStudent": "Save Changes",
+      "createStudent": "Add Student",
+      "deleteStudent": "Delete Student",
+      "deleteBulk": "Delete {{count}} Students"
+    },
+    "drawer": {
+      "title": "Student Profile",
+      "contactInfo": "Contact Information",
+      "email": "Email",
+      "phone": "Phone",
+      "enrolledDate": "Enrolled Date",
+      "parentGuardian": "Parent/Guardian",
+      "primaryContact": "Primary Contact",
+      "inviteParent": "Invite Parent",
+      "sending": "Sending...",
+      "noParentEmail": "No parent email on file"
+    },
+    "delete": {
+      "cannotUndo": "This action cannot be undone.",
+      "permanentDelete": "This will permanently delete <strong>{{name}}</strong> and all associated data including enrollments, attendance records, and payment history.",
+      "bulkPermanentDelete": "You are about to permanently delete <strong>{{count}} students</strong> and all their associated data.",
+      "typeDelete": "Type <strong>delete</strong> to confirm"
+    },
+    "import": {
+      "howToImport": "How to import students",
+      "step1": "Download the CSV template below",
+      "step2": "Fill in student data following the format",
+      "step3": "Upload the completed CSV file",
+      "step4": "Click \"Import\" to process",
+      "downloadTemplate": "Download Template",
+      "templateDesc": "CSV file with headers and example rows",
+      "csvFormat": "CSV Format",
+      "fieldsRequired": "Fields <strong>name</strong> and <strong>grade</strong> are required. Others are optional.",
+      "clickToUpload": "Click to upload CSV",
+      "onlyCsv": "Only .csv files are supported",
+      "clickToChange": "Click to change file",
+      "importStudents": "Import Students"
+    },
+    "bulk": {
+      "viewEdit": "View / Edit",
+      "inviteParent": "Invite Parent"
+    }
+  },
+
+  "tutors": {
+    "title": "Tutors",
+    "subtitle": "Manage your academic staff and their performance.",
+    "addTutor": "Add Tutor",
+    "noTutorsFound": "No tutors found",
+    "noTutorsHint": "Try adjusting your search or filters to find what you're looking for.",
+    "searchPlaceholder": "Search tutors...",
+    "filtersLabel": "Filters:",
+    "specialist": "Specialist",
+    "form": {
+      "fullName": "Full Name",
+      "namePlaceholder": "Dr. John Doe",
+      "emailAddress": "Email Address",
+      "emailPlaceholder": "john@academy.com",
+      "subjects": "Subjects (comma-separated)",
+      "subjectsPlaceholder": "e.g. Math, Physics",
+      "rating": "Rating ({{value}})",
+      "yearsOfExperience": "Years of Experience ({{value}})",
+      "verifiedStatus": "Verified Status",
+      "markVerified": "Mark this tutor as verified",
+      "bankName": "Bank Name",
+      "bankNamePlaceholder": "BCA",
+      "accountNumber": "Account Number",
+      "accountNumberPlaceholder": "1234567890",
+      "accountHolder": "Account Holder",
+      "accountHolderPlaceholder": "John Doe",
+      "monthlySalary": "Monthly Salary",
+      "monthlySalaryPlaceholder": "e.g., 5000000",
+      "sendInvitation": "Send Invitation"
+    },
+    "table": {
+      "tutor": "Tutor",
+      "subjects": "Subjects",
+      "experience": "Experience",
+      "rating": "Rating",
+      "status": "Status"
+    },
+    "sort": {
+      "byRating": "Sort by Rating",
+      "byExperience": "Sort by Experience",
+      "byName": "Sort by Name"
+    },
+    "status": {
+      "pendingInvite": "Pending Invite",
+      "unverified": "Unverified",
+      "verified": "Verified"
+    },
+    "toast": {
+      "inviteSent": "Invitation sent",
+      "inviteSentNoEmail": "Tutor created but email failed. Use \"Resend Invite\" to retry.",
+      "inviteError": "Failed to send invitation",
+      "inviteResent": "Invitation resent",
+      "inviteResentNoEmail": "Token refreshed but email failed. Try again.",
+      "resendError": "Failed to resend invitation",
+      "inviteCancelled": "Invitation cancelled",
+      "cancelError": "Failed to cancel invitation",
+      "updated": "Tutor updated",
+      "updateError": "Failed to update tutor",
+      "deleted": "Tutor deleted",
+      "deleteError": "Failed to delete tutor"
+    },
+    "modal": {
+      "editTitle": "Edit Tutor Details",
+      "inviteTitle": "Invite New Tutor"
+    },
+    "menu": {
+      "resendInvite": "Resend Invite",
+      "cancelInvite": "Cancel Invite",
+      "editProfile": "Edit Profile",
+      "deleteTutor": "Delete Tutor"
+    },
+    "confirm": {
+      "cancelInvite": "Cancel this invitation? The tutor record will be deleted.",
+      "deleteTutor": "Are you sure you want to delete this tutor?"
+    },
+    "confirmDialog": {
+      "cancelTitle": "Cancel Invitation",
+      "cancelDescription": "This will revoke the invitation and remove the tutor record. This action cannot be undone.",
+      "cancelConfirm": "Cancel Invitation",
+      "deleteTitle": "Delete Tutor",
+      "deleteDescription": "This will permanently delete this tutor and all associated data. This action cannot be undone.",
+      "deleteConfirm": "Delete Tutor"
+    },
+    "card": {
+      "experience": "Experience",
+      "rating": "Rating",
+      "subjects": "Subjects",
+      "years": "years"
+    }
+  },
+
+  "classes": {
+    "title": "Classes",
+    "subtitle": "Manage your class catalog and enrollment.",
+    "registerNewClass": "Add Class",
+    "noClassesFound": "No classes found",
+    "noClassesHint": "Try adjusting your search or filters to find what you're looking for.",
+    "searchPlaceholder": "Search class or tutor...",
+    "activeOnly": "Active Only",
+    "totalMonthlyFee": "Total Monthly Fee",
+    "totalClasses": "Total Classes",
+    "activeCourses": "Active Classes",
+    "form": {
+      "className": "Class Name",
+      "classNamePlaceholder": "e.g. Advanced Physics",
+      "subject": "Subject",
+      "selectSubject": "Select a subject...",
+      "assignTutor": "Assign Tutor",
+      "selectTutor": "Select a tutor...",
+      "status": "Status",
+      "scheduleDays": "Schedule Days",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "capacity": "Capacity",
+      "feePerSession": "Fee per Session (Rp)",
+      "monthlyFee": "Monthly Fee (Rp)",
+      "baseFee": "Base Fee (Rp)",
+      "packageFee": "Package Fee (Rp)",
+      "tutorFee": "Tutor Fee per Session (Rp)",
+      "tutorFeeMode": "Tutor Fee Mode",
+      "tutorFeePerStudent": "Fee Per Student (per session)",
+      "feeMode": {
+        "fixedPerSession": "Fixed Per Session",
+        "perStudentAttendance": "Per Attending Student",
+        "monthlySalary": "Monthly Salary"
+      },
+      "monthlySalaryHint": "Tutor payout comes from their monthly salary. No per-session fee needed.",
+      "room": "Room (optional)",
+      "roomPlaceholder": "e.g. Room 101"
+    },
+    "table": {
+      "className": "Class Name",
+      "subject": "Subject",
+      "capacity": "Capacity",
+      "tutorSchedule": "Tutor & Schedule",
+      "fee": "Fee",
+      "status": "Status",
+      "cap": "Cap: {{count}}"
+    },
+    "toast": {
+      "created": "Class created",
+      "createError": "Failed to create class",
+      "updated": "Class updated",
+      "updateError": "Failed to update class",
+      "deleted": "Class deleted",
+      "deleteError": "Failed to delete class",
+      "selectTutor": "Please select a tutor",
+      "selectScheduleDay": "Please select at least one schedule day",
+      "generateSuccess": "{{count}} sessions generated",
+      "generateError": "Failed to generate sessions"
+    },
+    "modal": {
+      "editTitle": "Edit Class",
+      "createTitle": "Add Class",
+      "updateClass": "Save Changes",
+      "createClass": "Add Class",
+      "deleteTitle": "Delete Class",
+      "deleteClass": "Delete Class"
+    },
+    "menu": {
+      "editClassDetails": "Edit Class Details",
+      "deleteClass": "Delete Class"
+    },
+    "confirm": {
+      "deleteClass": "Are you sure you want to delete this class?"
+    },
+    "delete": {
+      "cannotUndo": "This action cannot be undone.",
+      "permanentDelete": "This will permanently delete <strong>{{name}}</strong> and all associated data including enrollments, sessions, and attendance records.",
+      "typeDelete": "Type <strong>delete</strong> to confirm"
+    },
+    "drawer": {
+      "title": "Class Details",
+      "enrolled": "Enrolled",
+      "fee": "Fee",
+      "room": "Room",
+      "perSession": "per session",
+      "noRoom": "No room assigned",
+      "tutor": "Tutor",
+      "schedule": "Schedule",
+      "enrolledStudents": "Enrolled Students",
+      "noStudents": "No students enrolled yet",
+      "editClass": "Edit Class",
+      "deleteClass": "Delete Class",
+      "generateSessions": "Generate Sessions"
+    },
+    "generateModal": {
+      "title": "Generate Sessions",
+      "duration": "Duration",
+      "days": "days",
+      "dateRange": "From {{from}} to {{to}}",
+      "estimatedSessions": "Estimated sessions",
+      "confirm": "Generate"
+    },
+    "pagination": {
+      "page": "Page",
+      "of": "of",
+      "totalClasses": "total classes"
+    },
+    "view": {
+      "table": "Table",
+      "timetable": "Timetable"
+    },
+    "timetable": {
+      "empty": "No classes to display in timetable"
+    }
+  },
+
+  "schedules": {
+    "title": "Schedules",
+    "subtitle": "Manage class sessions, tutor assignments, and room traffic.",
+    "scheduleSession": "Schedule Session",
+    "autoGenerate": "Auto-Generate",
+    "noSessionsFound": "No sessions found",
+    "noSessionsHint": "Try adjusting your search or filters to find what you're looking for.",
+    "form": {
+      "selectClass": "Select Class",
+      "selectClassPlaceholder": "— Select class —",
+      "date": "Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "dateFrom": "Date From",
+      "dateTo": "Date To",
+      "scheduling": "Scheduling...",
+      "generating": "Generating..."
+    },
+    "toast": {
+      "sessionScheduled": "Session scheduled",
+      "scheduleError": "Failed to schedule session",
+      "sessionCancelled": "Session cancelled",
+      "cancelError": "Failed to cancel session",
+      "sessionsGenerated": "Sessions generated",
+      "generateError": "Failed to generate sessions",
+      "rescheduleApproved": "Reschedule approved",
+      "rescheduleError": "Failed to approve reschedule",
+      "rescheduleRejected": "Reschedule rejected"
+    },
+    "modal": {
+      "scheduleTitle": "Schedule New Session",
+      "generateTitle": "Auto-Generate Sessions",
+      "generateInfo": "Auto-generate sessions for a class based on its recurring schedule within the selected date range.",
+      "generateSessions": "Generate Sessions"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "rescheduleRequested": "Reschedule Req."
+    },
+    "filter": {
+      "allClasses": "All Classes",
+      "allStatuses": "All Statuses",
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "rescheduleRequested": "Reschedule Requested"
+    },
+    "table": {
+      "classSubject": "Class & Subject",
+      "tutor": "Tutor",
+      "dateTime": "Date & Time",
+      "status": "Status"
+    },
+    "menu": {
+      "markAttendance": "Mark Attendance",
+      "approveReschedule": "Approve Reschedule",
+      "cancelSession": "Cancel Session",
+      "completedLocked": "Session completed — locked",
+      "pastLocked": "Date passed — locked"
+    },
+    "calendar": {
+      "month": "MONTH",
+      "week": "WEEK",
+      "day": "DAY",
+      "weekOf": "Week of {{date}}",
+      "weeklyOverview": "Weekly Overview",
+      "weeklyOverviewDesc": "The Week view provides a balanced look at tutor availability across the next 7 days.",
+      "backToMonthView": "Back to Month View",
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "drawer": {
+      "title": "Session Details",
+      "dateTime": "Date & Time",
+      "tutor": "Tutor",
+      "sessionContent": "Session Content",
+      "topicCovered": "Topic Covered",
+      "sessionSummary": "Session Summary",
+      "noContent": "No content recorded yet",
+      "rescheduleInfo": "Reschedule Request",
+      "proposedDateTime": "Proposed",
+      "reason": "Reason",
+      "approve": "Approve",
+      "reject": "Reject",
+      "attendance": "Attendance",
+      "noAttendance": "No attendance recorded",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "homework": "HW",
+      "markAttendance": "Mark Attendance",
+      "cancelSession": "Cancel Session"
+    }
+  },
+
+  "whatsapp": {
+    "tabs": {
+      "messages": "Messages",
+      "paymentReminders": "Payment Reminders",
+      "settings": "Settings"
+    },
+    "stats": {
+      "totalSent": "Total Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed"
+    },
+    "filter": {
+      "allStatuses": "All Statuses",
+      "allTypes": "All Types",
+      "dateFrom": "Date From",
+      "dateTo": "Date To"
+    },
+    "table": {
+      "recipient": "Recipient",
+      "template": "Template",
+      "status": "Status",
+      "relatedTo": "Related To",
+      "date": "Date",
+      "error": "Error"
+    },
+    "drawer": {
+      "title": "Message Details",
+      "phone": "Phone",
+      "templateName": "Template",
+      "templateParams": "Parameters",
+      "currentStatus": "Current Status",
+      "errorDetails": "Error Details",
+      "retryCount": "Retry Count",
+      "relatedEntity": "Related Entity"
+    },
+    "notConfigured": "WhatsApp is not configured. Contact your system administrator to set up API credentials.",
+    "noMessages": "No messages sent yet.",
+    "send": {
+      "title": "Send Payment Reminder",
+      "searchPlaceholder": "Search student name...",
+      "sendReminder": "Send Reminder",
+      "noPhone": "No parent phone",
+      "noPayments": "No matching payments found"
+    },
+    "settings": {
+      "title": "WhatsApp Settings",
+      "autoReminders": "Auto-Reminders",
+      "autoRemindersDesc": "Automatically send payment reminders before due date",
+      "remindDaysBefore": "Remind Days Before Due Date",
+      "remindDaysBeforeDesc": "Number of days before the due date to send the reminder",
+      "save": "Save Settings"
+    },
+    "toast": {
+      "reminderSent": "Payment reminder sent",
+      "reminderError": "Failed to send reminder",
+      "settingsSaved": "WhatsApp settings saved",
+      "settingsError": "Failed to save settings"
+    },
+    "statusLabel": {
+      "pending": "Pending",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed"
+    },
+    "typeLabel": {
+      "payment": "Payment",
+      "attendance": "Attendance",
+      "enrollment": "Enrollment"
+    }
+  },
+
+  "enrollments": {
+    "title": "Enrollments",
+    "subtitle": "Manage student enrollment lifecycle and financial status.",
+    "newEnrollment": "Add Enrollment",
+    "bulkImport": "Bulk Import",
+    "exportCsv": "Export CSV",
+    "noEnrollmentsFound": "No enrollments found",
+    "noEnrollmentsHint": "Try adjusting your search or filters to find what you're looking for.",
+    "totalActive": "Total Active",
+    "onTrial": "On Trial",
+    "waitlisted": "Waitlisted",
+    "overdueInvoices": "Overdue Invoices",
+    "searchPlaceholder": "Search student or class...",
+    "form": {
+      "step1": "Step 1: Select Students",
+      "step2": "Step 2: Select Class & Terms",
+      "searchStudents": "Search students...",
+      "loadingStudents": "Loading students...",
+      "loadingClasses": "Loading classes...",
+      "studentsSelected": "{{count}} students selected",
+      "type": "Type",
+      "autoInvoice": "Auto Invoice",
+      "tutorAssigned": "Tutor assigned",
+      "enrollStudents": "Enroll {{count}} Students",
+      "enrollmentStatus": "Enrollment Status"
+    },
+    "table": {
+      "student": "Student",
+      "class": "Class",
+      "enrollmentDate": "Enrollment Date",
+      "payment": "Payment",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "trial": "Trial",
+      "waitlisted": "Waitlisted",
+      "dropped": "Dropped"
+    },
+    "paymentStatus": {
+      "new": "New",
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    },
+    "toast": {
+      "enrolled": "{{count}} student(s) enrolled",
+      "enrollError": "Failed to enroll some students",
+      "statusUpdated": "Status updated to {{status}}",
+      "statusError": "Failed to update status",
+      "deleted": "Enrollment deleted",
+      "deleteError": "Failed to delete enrollment",
+      "importSuccess": "{{count}} enrollment(s) imported",
+      "importPartial": "Imported {{created}} enrollment(s) with {{errors}} error(s)",
+      "importError": "Failed to import enrollments",
+      "exportSuccess": "Enrollments exported",
+      "exportError": "Failed to export enrollments",
+      "bulkStatusUpdated": "{{count}} enrollment(s) updated to {{status}}",
+      "bulkStatusError": "Failed to update enrollment statuses",
+      "bulkDeleted": "{{count}} enrollment(s) deleted",
+      "bulkDeleteError": "Failed to delete enrollments"
+    },
+    "modal": {
+      "newTitle": "Add Enrollment",
+      "editTitle": "Edit Enrollment",
+      "importTitle": "Bulk Enrollment Import"
+    },
+    "menu": {
+      "editEnrollment": "Edit Enrollment",
+      "updateStatus": "Update Status",
+      "setActive": "Set Active",
+      "convertToFull": "Convert to Full",
+      "drop": "Drop",
+      "deleteRecord": "Delete Record",
+      "sendReminder": "Send Reminder"
+    },
+    "bulk": {
+      "changeStatus": "Change Status...",
+      "confirmDeleteTitle": "Delete Enrollments",
+      "confirmDeleteMessage": "This will permanently delete {{count}} enrollment(s). This action cannot be undone.",
+      "confirmDelete": "Delete {{count}} Enrollment(s)"
+    },
+    "confirm": {
+      "deleteEnrollment": "Are you sure you want to delete this enrollment?"
+    },
+    "import": {
+      "clickToUpload": "Click to upload CSV",
+      "csvMapDesc": "Map Student_ID to Class_ID in one go",
+      "csvFormatGuide": "CSV Format Guide",
+      "processImport": "Process Import",
+      "uuidNote": "Use full UUIDs for student_id and class_id columns"
+    }
+  },
+
+  "attendance": {
+    "title": "Attendance Management",
+    "subtitle": "Manage attendance tracking, notifications, and session reporting.",
+    "viewHistory": "View History",
+    "selectDate": "Select Date",
+    "sessions": "Sessions",
+    "noSessionsForDate": "No sessions scheduled for this date.",
+    "noSessionSelected": "No Session Selected",
+    "noSessionSelectedHint": "Select a session from the list on the left to start taking attendance.",
+    "noRecords": "No attendance records for this session.",
+    "incomplete": "Incomplete",
+    "studentList": "Student List",
+    "keyboardHint": "Use P, A, L keys to mark",
+    "markAllPresent": "Mark All Present",
+    "present": "Present",
+    "absent": "Absent",
+    "late": "Late",
+    "hw": "HW",
+    "notes": "Notes",
+    "notePlaceholder": "Note...",
+    "editingEnabled": "Editing Enabled",
+    "completedLocked": "Session completed — editing locked",
+    "pastLocked": "Session date passed — editing locked",
+    "saveAttendance": "Save Attendance",
+    "unsavedChanges": "Unsaved Changes",
+    "presentCount": "{{present}} Present, {{absent}} Absent",
+    "toast": {
+      "saved": "Attendance saved",
+      "saveError": "Failed to save some attendance records"
+    },
+    "table": {
+      "student": "Student",
+      "status": "Status",
+      "hw": "HW",
+      "notes": "Notes"
+    }
+  },
+
+  "finance": {
+    "title": "Finance Intelligence",
+    "subtitle": "Monitor your institution's financial health and insights.",
+    "revenueThisMonth": "Revenue This Month",
+    "outstandingPayments": "Outstanding Payments",
+    "pendingPayouts": "Pending Payouts",
+    "netProfit": "Net Profit",
+    "basedOnTotalRevenue": "Based on total revenue",
+    "seeStudentPayments": "See Student Payments",
+    "seeTutorPayouts": "See Tutor Payouts",
+    "formulaRevPayoutsOpex": "Formula: Rev - Payouts - OpEx",
+    "netRevenueFormula": "Net Revenue Formula",
+    "totalRevenueGross": "Total Revenue (Gross)",
+    "tutorPayoutsDirect": "- Tutor Payouts (Direct Cost)",
+    "operatingCostsOverhead": "- Operating Expenses (Overhead)",
+    "netRevenue": "= Net Revenue",
+    "thisMonth": "This Month",
+    "thisQuarter": "This Quarter",
+    "yearToDate": "Year to Date",
+    "custom": "Custom",
+    "generateReport": "Generate Report",
+    "revenueSummary": "Revenue Summary",
+    "aggregateRevenue": "Aggregate revenue from backend dashboard stats",
+    "totalRevenue": "Total Revenue",
+    "liveFromDashboardApi": "Live from dashboard API",
+    "students": "Students",
+    "tutors": "Tutors",
+    "attendanceLabel": "Attendance",
+    "financeModules": "Finance Modules",
+    "quickAccessFinance": "Quick access to finance sections",
+    "studentPayments": "Student Payments",
+    "tutorPayouts": "Tutor Payouts",
+    "operatingExpenses": "Operating Expenses",
+    "generatePdfReport": "Generate PDF Report",
+    "revenueThisPeriod": "Revenue This Period",
+    "totalRevenueLive": "Total Revenue (Live)",
+    "fromDashboardApi": "From dashboard API",
+    "upcomingSessions": "Upcoming Sessions",
+    "sessionsScheduled": "Sessions scheduled",
+    "viewAllPayments": "View All Payments",
+    "attendanceRate": "Attendance Rate",
+    "overallAttendance": "Overall attendance",
+    "receivables": "Receivables",
+    "studentClass": "Student / Class",
+    "dueDate": "Due Date",
+    "amount": "Amount",
+    "action": "Action",
+    "remind": "Remind",
+    "overduePayments": "overdue payments",
+    "batchReady": "Batch Ready",
+    "sessionsLabel": "Sessions",
+    "approve": "Approve",
+    "payout": "Payout",
+    "payoutReconciliation": "Payout Reconciliation: {{tutor}}",
+    "totalPayout": "Total Payout",
+    "period": "Period",
+    "approveAllSessions": "Approve All Sessions",
+    "payoutApproved": "Payout approved and scheduled.",
+    "exportedSuccess": "{{name}} exported to CSV",
+    "reminderSent": "Payment reminder sent to {{student}}'s parent via WhatsApp.",
+    "recordsTotal": "records total",
+    "tutor": "Tutor",
+    "sessions": "Sessions",
+    "revenueBreakdown": "Revenue Breakdown",
+    "byClass": "By Class",
+    "byPaymentMethod": "By Payment Method",
+    "byStatus": "By Status",
+    "expenseBreakdown": "Expense Breakdown",
+    "byCategory": "By Category",
+    "monthlyTrend": "Monthly Trend",
+    "exportPayments": "Export Payments",
+    "exportPayouts": "Export Payouts",
+    "exportExpenses": "Export Expenses",
+    "exportSuccess": "Export downloaded",
+    "noDataForPeriod": "No data for this period",
+    "paymentCountLabel": "{{count}} payments",
+    "payoutCountLabel": "{{count}} payouts",
+    "expenseCountLabel": "{{count}} records",
+    "exportCsv": "Export CSV",
+    "totalPayouts": "Total Payouts",
+    "totalExpenses": "Total Expenses",
+    "class": "Class",
+    "revenueLabel": "Revenue",
+    "payments": "Payments",
+    "method": "Method",
+    "count": "Count",
+    "category": "Category",
+    "records": "Records",
+    "status": {
+      "NEW": "New",
+      "PAID": "Paid",
+      "PENDING": "Pending",
+      "OVERDUE": "Overdue"
+    },
+    "methodLabel": {
+      "TRANSFER": "Bank Transfer",
+      "CASH": "Cash",
+      "OTHER": "Other"
+    },
+    "expenseCategory": {
+      "RENT": "Rent",
+      "SUPPLIES": "Supplies",
+      "UTILITIES": "Utilities",
+      "SALARY": "Salary",
+      "MARKETING": "Marketing",
+      "OTHER": "Other"
+    }
+  },
+
+  "payments": {
+    "title": "Student Payments",
+    "subtitle": "Manage student billing and payment records.",
+    "recordBatch": "Record Batch ({{count}})",
+    "revenueAnalytics": "Revenue Analytics",
+    "noPaymentsFound": "No payments found",
+    "noPaymentsHint": "Try adjusting your search or filters to find what you're looking for.",
+    "totalRecords": "Total Records",
+    "overdueCount": "Overdue Count",
+    "overdueAmount": "Overdue Amount",
+    "flaggedStudents": "Flagged Students",
+    "daysOverdue": "{{count}} days overdue",
+    "form": {
+      "paymentAmount": "Payment Amount (Rp)",
+      "discount": "Discount / Adj (Rp)",
+      "date": "Date",
+      "method": "Method",
+      "bankTransfer": "Bank Transfer",
+      "cash": "Cash",
+      "eWallet": "E-Wallet",
+      "sendReceipt": "Send Digital Receipt to Parent"
+    },
+    "table": {
+      "invoiceStudent": "Invoice / Student",
+      "class": "Class",
+      "dueDate": "Due Date",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "modal": {
+      "recordTitle": "Record Payment",
+      "amountDue": "Amount Due",
+      "afterDiscount": "After Discount",
+      "confirmPayment": "Confirm Payment",
+      "batchRecordTitle": "Batch Record Payments",
+      "batchRecordSubtitle": "Record {{count}} selected payment(s) as paid"
+    },
+    "drawer": {
+      "title": "Payment Details",
+      "amount": "Amount",
+      "dueDate": "Due Date",
+      "paidDate": "Paid Date",
+      "method": "Method",
+      "exportPdf": "Export PDF",
+      "resendReceipt": "Resend Receipt"
+    },
+    "toast": {
+      "recorded": "Payment recorded",
+      "recordError": "Failed to record payment.",
+      "deleted": "Payment deleted",
+      "deleteError": "Failed to delete payment.",
+      "batchRecorded": "{{count}} payment(s) recorded",
+      "batchError": "Failed to record batch payments"
+    },
+    "confirm": {
+      "deleteTitle": "Delete Payment",
+      "deletePayment": "Are you sure you want to delete this payment?"
+    },
+    "reminderSent": "Payment reminder sent",
+    "reminderFailed": "Failed to send reminder",
+    "tooltip": {
+      "recordPayment": "Record Payment",
+      "sendReminder": "Send Reminder",
+      "viewDetails": "View Details",
+      "delete": "Delete"
+    },
+    "overdueAlert": {
+      "title": "Overdue Payments",
+      "students": "{{count}} students",
+      "totalDebt": "Total {{amount}}",
+      "viewDetails": "View Details",
+      "warning": "Overdue"
+    },
+    "generateInvoice": "Generate Invoice",
+    "downloadInvoice": "Download Invoice",
+    "invoiceGenerated": "Invoice generated",
+    "invoiceExists": "Invoice already exists for this payment",
+    "invoiceNumber": "Invoice No.",
+    "generatingInvoice": "Generating invoice..."
+  },
+
+  "payouts": {
+    "title": "Tutor Payouts Intelligence",
+    "subtitle": "Manage tutor payout records and audit trails.",
+    "searchPlaceholder": "Search tutors...",
+    "allStatuses": "All Statuses",
+    "newPayout": "Add Payout",
+    "generateSalaries": "Generate Monthly Salaries",
+    "salariesGenerated": "{{count}} salary payout(s) created",
+    "salariesError": "Failed to generate salaries",
+    "noPayoutsFound": "No payouts found",
+    "noPayoutsHint": "Try adjusting your search or filters to find what you're looking for.",
+    "backToPayouts": "Back to Payouts",
+    "exportAudit": "Export Audit",
+    "downloadPayoutSlip": "Download Payout Slip",
+    "confirmGenerateSlip": "Confirm & Generate Slip",
+    "viewSlip": "View Slip",
+    "reconcile": "Reconcile",
+    "noBankInfo": "No bank info",
+    "notSet": "Not set",
+    "form": {
+      "tutor": "Tutor",
+      "selectTutor": "Select tutor...",
+      "amount": "Amount (Rp)",
+      "date": "Date",
+      "description": "Description (optional)",
+      "descriptionPlaceholder": "e.g. March 2026 payout"
+    },
+    "table": {
+      "tutor": "Tutor",
+      "status": "Status",
+      "date": "Date",
+      "amount": "Amount",
+      "action": "Action"
+    },
+    "reconciliation": {
+      "payoutDetails": "Payout Details",
+      "reviewInfo": "Review payout information for this cycle",
+      "tutor": "Tutor",
+      "bankAccount": "Bank Account",
+      "payoutDate": "Payout Date",
+      "baseAmount": "Base Amount",
+      "proofOfPayment": "Proof of Payment",
+      "uploadReceipt": "Click to upload bank transfer receipt",
+      "fileTypes": "JPG, PNG or PDF (Max 5MB)",
+      "bonuses": "Bonuses",
+      "deductions": "Deductions",
+      "calculationFormula": "Calculation Formula",
+      "netPayout": "Net Payout",
+      "payoutStatus": "Payout Status",
+      "pending": "Pending",
+      "processing": "Processing",
+      "paid": "Paid"
+    },
+    "modal": {
+      "createTitle": "Add Payout",
+      "createPayout": "Add Payout",
+      "creating": "Creating..."
+    },
+    "toast": {
+      "confirmed": "Payout confirmed for {{tutor}}",
+      "confirmError": "Failed to confirm payout.",
+      "created": "Payout created",
+      "createError": "Failed to create payout.",
+      "deleted": "Payout deleted",
+      "deleteError": "Failed to delete payout.",
+      "fillRequired": "Please fill in all required fields."
+    },
+    "confirm": {
+      "deletePayout": "Are you sure you want to delete this payout?"
+    },
+    "periodStart": "Period Start",
+    "periodEnd": "Period End",
+    "calculate": "Calculate",
+    "calculating": "Calculating...",
+    "sessionBreakdown": "Session Breakdown",
+    "sessionsCount": "{{count}} sessions",
+    "overlapWarning": "Warning: Overlaps with existing payout",
+    "noSessions": "No sessions found in this period",
+    "period": "Period"
+  },
+
+  "expenses": {
+    "title": "Operating Expenses",
+    "subtitle": "Manage non-tutor operational expenses.",
+    "recordExpense": "Record Expense",
+    "noExpensesFound": "No expenses found",
+    "noExpensesHint": "Try adjusting your search or filters to find what you're looking for.",
+    "searchPlaceholder": "Search expenses...",
+    "totalExpensesPage": "Total Expenses (Page)",
+    "categories": "Categories",
+    "activeExpenseCategories": "Active expense categories",
+    "recordsShown": "Records Shown",
+    "form": {
+      "expenseAmount": "Expense Amount (Rp)",
+      "date": "Date",
+      "category": "Category",
+      "description": "Description",
+      "descriptionPlaceholder": "What was this for?",
+      "recurringExpense": "Recurring Expense",
+      "frequency": "Frequency",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly",
+      "receiptInvoice": "Receipt / Invoice",
+      "uploadProof": "Upload proof of payment",
+      "viewReceipt": "View Receipt"
+    },
+    "table": {
+      "dateId": "Date / ID",
+      "category": "Category",
+      "description": "Description",
+      "amount": "Amount",
+      "actions": "Actions"
+    },
+    "drawer": {
+      "editTitle": "Edit Expense",
+      "createTitle": "Record Expense",
+      "updateExpense": "Save Changes",
+      "saveExpense": "Record Expense"
+    },
+    "toast": {
+      "created": "Expense recorded",
+      "createError": "Failed to record expense.",
+      "updated": "Expense updated",
+      "updateError": "Failed to update expense.",
+      "deleted": "Expense deleted",
+      "deleteError": "Failed to delete expense.",
+      "fillRequired": "Please fill in required fields."
+    },
+    "confirm": {
+      "deleteExpense": "Are you sure you want to delete this expense?"
+    },
+    "categoryLabel": {
+      "RENT": "Rent",
+      "UTILITIES": "Utilities",
+      "SUPPLIES": "Supplies",
+      "MARKETING": "Marketing",
+      "OTHER": "Other"
+    }
+  },
+
+  "settings": {
+    "title": "Institution Settings",
+    "subtitle": "Define global rules and branding for your academy.",
+    "tabs": {
+      "general": "General",
+      "billing": "Billing",
+      "branding": "Branding",
+      "academic": "Academic",
+      "security": "Security",
+      "integrations": "Integrations"
+    },
+    "general": {
+      "institutionInfo": "Institution Information",
+      "institutionName": "Institution Name",
+      "supportEmail": "Support Email",
+      "timezone": "Timezone",
+      "language": "Language",
+      "phone": "Phone",
+      "address": "Address",
+      "addressPlaceholder": "123 Education Street",
+      "saveSuccess": "Settings saved",
+      "saveFailed": "Failed to save settings",
+      "dangerZone": "Danger Zone",
+      "dangerZoneDesc": "Permanently delete your institution data. This action is irreversible.",
+      "deleteInstitution": "Delete Institution"
+    },
+    "billing": {
+      "billingConfig": "Billing Configuration",
+      "billingMode": "Billing Mode",
+      "payAsYouGo": "Pay-as-you-go",
+      "payAsYouGoDesc": "Bill after attendance",
+      "packagePrepaid": "Package/Prepaid",
+      "packagePrepaidDesc": "Deduct from credits",
+      "subscription": "Subscription",
+      "subscriptionDesc": "Flat monthly fee",
+      "currency": "Currency",
+      "invoicePrefix": "Invoice Prefix",
+      "latePaymentAutoLock": "Late Payment Auto-Lock",
+      "latePaymentAutoLockDesc": "Lock enrollment if debt exceeds threshold",
+      "threshold": "Threshold:",
+      "expenseCategories": "Expense Categories",
+      "addCategory": "Add Category",
+      "categoriesNote": "These categories will appear in the Operating Expenses menu.",
+      "bankAccounts": "Bank Accounts (Self-Method)",
+      "addAccount": "Add Account",
+      "saveSuccess": "Billing settings saved",
+      "saveFailed": "Failed to save billing settings",
+      "addCategoryPlaceholder": "New category name",
+      "bankNamePlaceholder": "e.g. BCA",
+      "accountNumberPlaceholder": "1234567890",
+      "accountHolderPlaceholder": "Account holder name",
+      "addBankAccount": "Add"
+    },
+    "branding": {
+      "whiteLabelingTitle": "White-Labeling & Branding",
+      "institutionLogo": "Institution Logo",
+      "clickToUploadLogo": "Click to upload logo",
+      "logoUsage": "Used for invoices and sidebar",
+      "primaryBrandColor": "Primary Brand Color",
+      "colorNote": "This updates buttons and active states across the app.",
+      "customDomain": "Custom Domain",
+      "customDomainDesc": "Use your own domain for the student portal",
+      "connect": "Connect"
+    },
+    "academic": {
+      "regionalSettings": "Regional & Operational Settings",
+      "workingDays": "Working Days",
+      "workingDaysNote": "Unselected days will be hidden from the calendar view.",
+      "subjectCategories": "Subject Categories",
+      "gradeLevels": "Grade Levels",
+      "roomManagement": "Room Management",
+      "roomManagementDesc": "Define physical spaces and their student capacity.",
+      "addRoom": "Add Room",
+      "roomName": "Room Name",
+      "type": "Type",
+      "capacity": "Capacity",
+      "status": "Status",
+      "available": "Available",
+      "maintenance": "Maintenance"
+    },
+    "security": {
+      "securityTitle": "Security & Access Control",
+      "twoFactorAuth": "Two-Factor Authentication (2FA)",
+      "twoFactorAuthDesc": "Require a code from your phone to login",
+      "passwordPolicy": "Password Policy",
+      "minChars": "Minimum 8 characters",
+      "includeNumbers": "Must include numbers",
+      "includeSpecialChars": "Must include special characters",
+      "requirePasswordChange": "Require password change every 90 days"
+    },
+    "integrations": {
+      "connectedServices": "Connected Services",
+      "whatsappApi": "WhatsApp API",
+      "whatsappDesc": "Send automated reminders",
+      "midtrans": "Midtrans",
+      "midtransDesc": "Payment gateway integration",
+      "sendgrid": "SendGrid",
+      "sendgridDesc": "Email SMTP for invoices",
+      "googleCalendar": "Google Calendar",
+      "googleCalendarDesc": "Sync tutor schedules",
+      "connected": "Connected",
+      "notConnected": "Not Connected"
+    }
+  },
+
+  "superAdmin": {
+    "institutions": "Institutions",
+    "institutionsSubtitle": "Manage all tutoring institutions",
+    "createInstitution": "Add Institution",
+    "createInstitutionSubtitle": "Set up a new tutoring institution and its first admin.",
+    "searchPlaceholder": "Search institutions...",
+    "enter": "Enter",
+    "table": {
+      "name": "Name",
+      "admins": "Admin(s)",
+      "created": "Created"
+    },
+    "tabs": {
+      "general": "General",
+      "admins": "Admins",
+      "overview": "Overview"
+    },
+    "addAdmin": "Add Admin",
+    "form": {
+      "institutionDetails": "Institution Details",
+      "name": "Name",
+      "namePlaceholder": "e.g. Sinaloka Academy",
+      "slug": "Slug",
+      "email": "Email",
+      "emailPlaceholder": "info@academy.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+62 21 1234 5678",
+      "address": "Address",
+      "addressPlaceholder": "123 Education Street",
+      "timezone": "Timezone",
+      "defaultLanguage": "Default Language",
+      "firstAdmin": "First Admin",
+      "adminName": "Name",
+      "adminNamePlaceholder": "e.g. John Doe",
+      "adminEmail": "Email",
+      "adminEmailPlaceholder": "admin@academy.com",
+      "adminPassword": "Password",
+      "nameRequired": "Institution name is required",
+      "adminRequired": "All admin fields are required"
+    },
+    "dangerZone": "Danger Zone",
+    "deactivateWarning": "Deactivating this institution will prevent all users from accessing it.",
+    "activateInfo": "This institution is currently inactive. Activate it to restore access.",
+    "confirmToggle": "Are you sure?",
+    "deactivateInstitution": "Deactivate Institution",
+    "activateInstitution": "Activate Institution",
+    "overview": {
+      "students": "Students",
+      "tutors": "Tutors",
+      "admins": "Admins",
+      "activeClasses": "Active Classes"
+    },
+    "toast": {
+      "created": "Institution created",
+      "createError": "Failed to create institution",
+      "updated": "Institution updated",
+      "updateError": "Failed to update institution",
+      "deactivated": "Institution deactivated",
+      "activated": "Institution activated",
+      "adminCreated": "Admin created",
+      "adminCreateError": "Failed to create admin",
+      "userUpdated": "User updated",
+      "userUpdateError": "Failed to update user"
+    },
+    "users": "Users",
+    "usersSubtitle": "Manage users across all institutions",
+    "createAdmin": "Add Admin",
+    "searchUsersPlaceholder": "Search by name or email...",
+    "allRoles": "All Roles",
+    "allInstitutions": "All Institutions",
+    "allStatuses": "All Statuses",
+    "userTable": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "institution": "Institution",
+      "status": "Status",
+      "lastLogin": "Last Login"
+    },
+    "createAdminModal": {
+      "title": "Add Admin",
+      "name": "Name",
+      "namePlaceholder": "e.g. John Doe",
+      "email": "Email",
+      "emailPlaceholder": "admin@institution.com",
+      "password": "Password",
+      "institution": "Institution",
+      "selectInstitution": "Select an institution",
+      "fieldsRequired": "All fields are required"
+    },
+    "editUserModal": {
+      "title": "Edit User",
+      "active": "Active"
+    },
+    "noInstitution": "No institution",
+    "neverLoggedIn": "Never"
+  },
+
+  "notFound": {
+    "title": "404",
+    "message": "The page you're looking for doesn't exist.",
+    "backToDashboard": "Back to Dashboard"
+  },
+
+  "report": {
+    "title": "Generate Report",
+    "tabs": {
+      "attendance": "Attendance",
+      "finance": "Finance",
+      "studentProgress": "Student Progress"
+    },
+    "dateFrom": "Date From",
+    "dateTo": "Date To",
+    "classOptional": "Class (optional)",
+    "allClasses": "All Classes",
+    "student": "Student",
+    "selectStudent": "Select student...",
+    "generate": "Generate",
+    "generating": "Generating...",
+    "downloadPdf": "Download PDF",
+    "selectFiltersHint": "Select filters and click Generate",
+    "pdfPreviewHint": "PDF preview will appear here"
+  }
+}

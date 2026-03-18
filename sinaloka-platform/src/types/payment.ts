@@ -10,6 +10,8 @@ export interface Payment {
   status: 'PAID' | 'PENDING' | 'OVERDUE';
   method: 'CASH' | 'TRANSFER' | 'OTHER' | null;
   notes: string | null;
+  invoice_number: string | null;
+  invoice_url: string | null;
   student?: { id: string; name: string };
   enrollment?: { id: string; class?: { id: string; name: string } };
   institution_id: string;
@@ -40,4 +42,19 @@ export interface UpdatePaymentDto {
 export interface PaymentQueryParams extends PaginationParams {
   status?: 'PAID' | 'PENDING' | 'OVERDUE';
   student_id?: string;
+  sort_by?: 'due_date' | 'amount' | 'created_at';
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface FlaggedStudent {
+  student_id: string;
+  student_name: string;
+  total_debt: number;
+  overdue_payments: number;
+}
+
+export interface OverdueSummary {
+  overdue_count: number;
+  total_overdue_amount: number;
+  flagged_students: FlaggedStudent[];
 }

@@ -6,11 +6,10 @@ import {
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import {
-  PaginationDto,
   buildPaginationMeta,
   PaginatedResponse,
 } from '../../common/dto/pagination.dto.js';
-import { CreateUserDto, UpdateUserDto } from './user.dto.js';
+import { CreateUserDto, UpdateUserDto, UserQueryDto } from './user.dto.js';
 
 @Injectable()
 export class UserService {
@@ -18,7 +17,7 @@ export class UserService {
 
   async findAll(
     institutionId: string | null,
-    query: PaginationDto,
+    query: UserQueryDto,
   ): Promise<PaginatedResponse<any>> {
     const { page, limit, search } = query;
     const skip = (page - 1) * limit;
@@ -27,6 +26,16 @@ export class UserService {
 
     if (institutionId) {
       where.institution_id = institutionId;
+    } else if (query.institution_id) {
+      where.institution_id = query.institution_id;
+    }
+
+    if (query.role) {
+      where.role = query.role;
+    }
+
+    if (query.is_active !== undefined) {
+      where.is_active = query.is_active;
     }
 
     if (search) {

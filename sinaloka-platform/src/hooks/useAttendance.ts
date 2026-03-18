@@ -10,5 +10,5 @@ export function useAttendanceSummary(params: AttendanceSummaryParams) {
 }
 export function useUpdateAttendance() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: attendanceService.update, onSuccess: () => { qc.invalidateQueries({ queryKey: ['attendance'] }); qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] }); } });
+  return useMutation({ mutationFn: attendanceService.update, onSuccess: () => { qc.invalidateQueries({ queryKey: ['attendance'] }); qc.invalidateQueries({ queryKey: ['session-students'] }); qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] }); } });
 }

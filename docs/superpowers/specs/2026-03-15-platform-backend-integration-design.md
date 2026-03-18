@@ -299,7 +299,7 @@ Every page transforms from mock data to real API data. The pattern is consistent
 
 **Schedules** — Maps to Sessions API. Auto-generate button calls `useGenerateSessions()`. Reschedule approval uses `useApproveReschedule()`.
 
-**Attendance** — View and update only (see note above). Summary view uses `useAttendanceSummary()` with date/class/student filters.
+**Attendance** — View and update only (see Students note above). Loaded by session, summary view uses `useAttendanceSummary()` with date/class/student filters.
 
 **Finance pages** — Standard CRUD. Finance Overview aggregates data from dashboard stats.
 

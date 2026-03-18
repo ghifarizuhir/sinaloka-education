@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import {
   buildPaginationMeta,
@@ -11,14 +11,42 @@ export class ClassService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(institutionId: string, dto: CreateClassDto) {
-    return this.prisma.class.create({
+    const tutor = await this.prisma.tutor.findFirst({
+      where: { id: dto.tutor_id, institution_id: institutionId },
+    });
+
+    if (!tutor) {
+      throw new NotFoundException('Tutor not found');
+    }
+
+    if (!tutor.is_verified) {
+      throw new BadRequestException('Only verified tutors can be assigned to classes');
+    }
+
+    // Validate subject exists in institution
+    const subject = await this.prisma.subject.findFirst({
+      where: { id: dto.subject_id, institution_id: institutionId },
+    });
+    if (!subject) throw new NotFoundException('Subject not found');
+
+    // Validate tutor teaches this subject
+    const tutorSubject = await this.prisma.tutorSubject.findUnique({
+      where: { tutor_id_subject_id: { tutor_id: dto.tutor_id, subject_id: dto.subject_id } },
+    });
+    if (!tutorSubject) throw new BadRequestException('Tutor does not teach this subject');
+
+    const record = await this.prisma.class.create({
       data: {
         institution_id: institutionId,
         tutor_id: dto.tutor_id,
         name: dto.name,
-        subject: dto.subject,
+        subject_id: dto.subject_id,
         capacity: dto.capacity,
         fee: dto.fee,
+        package_fee: dto.package_fee ?? null,
+        tutor_fee: dto.tutor_fee,
+        tutor_fee_mode: dto.tutor_fee_mode ?? 'FIXED_PER_SESSION',
+        tutor_fee_per_student: dto.tutor_fee_per_student ?? null,
         schedule_days: dto.schedule_days,
         schedule_start_time: dto.schedule_start_time,
         schedule_end_time: dto.schedule_end_time,
@@ -26,21 +54,29 @@ export class ClassService {
         status: dto.status ?? 'ACTIVE',
       },
     });
+    return {
+      ...record,
+      fee: Number(record.fee),
+      package_fee: record.package_fee != null ? Number(record.package_fee) : null,
+      tutor_fee: Number(record.tutor_fee),
+      tutor_fee_mode: record.tutor_fee_mode,
+      tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
+    };
   }
 
   async findAll(
     institutionId: string,
     query: ClassQueryDto,
   ): Promise<PaginatedResponse<any>> {
-    const { page, limit, search, subject, status, sort_by, sort_order } = query;
+    const { page, limit, search, subject_id, status, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {
       institution_id: institutionId,
     };
 
-    if (subject) {
-      where.subject = subject;
+    if (subject_id) {
+      where.subject_id = subject_id;
     }
 
     if (status) {
@@ -53,18 +89,37 @@ export class ClassService {
       ];
     }
 
+    const orderBy =
+      sort_by === 'subject_name'
+        ? { subject: { name: sort_order } }
+        : { [sort_by]: sort_order };
+
     const [data, total] = await Promise.all([
       this.prisma.class.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { [sort_by]: sort_order },
+        orderBy,
+        include: {
+          subject: true,
+          tutor: { include: { user: { select: { id: true, name: true } } } },
+          _count: { select: { enrollments: { where: { status: { in: ['ACTIVE', 'TRIAL'] } } } } },
+        },
       }),
       this.prisma.class.count({ where }),
     ]);
 
     return {
-      data,
+      data: data.map(({ _count, ...c }) => ({
+        ...c,
+        fee: Number(c.fee),
+        package_fee: c.package_fee != null ? Number(c.package_fee) : null,
+        tutor_fee: c.tutor_fee != null ? Number(c.tutor_fee) : null,
+        tutor_fee_mode: c.tutor_fee_mode,
+        tutor_fee_per_student: c.tutor_fee_per_student != null ? Number(c.tutor_fee_per_student) : null,
+        tutor: c.tutor ? { id: c.tutor.id, name: c.tutor.user.name } : null,
+        enrolled_count: _count.enrollments,
+      })),
       meta: buildPaginationMeta(total, page, limit),
     };
   }
@@ -72,22 +127,31 @@ export class ClassService {
   async findOne(institutionId: string, id: string) {
     const classRecord = await this.prisma.class.findFirst({
       where: { id, institution_id: institutionId },
+      include: {
+        subject: true,
+        tutor: { include: { user: { select: { id: true, name: true, email: true } } } },
+        enrollments: {
+          where: { status: { in: ['ACTIVE', 'TRIAL'] } },
+          include: { student: { select: { id: true, name: true, grade: true, status: true } } },
+          orderBy: { created_at: 'desc' },
+        },
+      },
     });
 
     if (!classRecord) {
       throw new NotFoundException(`Class with ID "${id}" not found`);
     }
 
-    const enrolledCount = await this.prisma.enrollment.count({
-      where: {
-        class_id: id,
-        status: { in: ['ACTIVE', 'TRIAL'] },
-      },
-    });
-
     return {
       ...classRecord,
-      enrolled_count: enrolledCount,
+      fee: Number(classRecord.fee),
+      package_fee: classRecord.package_fee != null ? Number(classRecord.package_fee) : null,
+      tutor_fee: classRecord.tutor_fee != null ? Number(classRecord.tutor_fee) : null,
+      tutor_fee_mode: classRecord.tutor_fee_mode,
+      tutor_fee_per_student: classRecord.tutor_fee_per_student != null ? Number(classRecord.tutor_fee_per_student) : null,
+      tutor: classRecord.tutor ? { id: classRecord.tutor.id, name: classRecord.tutor.user.name, email: classRecord.tutor.user.email } : null,
+      enrolled_count: classRecord.enrollments.length,
+      enrollments: classRecord.enrollments.map((e) => ({ id: e.id, status: e.status, student: e.student })),
     };
   }
 
@@ -100,10 +164,58 @@ export class ClassService {
       throw new NotFoundException(`Class with ID "${id}" not found`);
     }
 
-    return this.prisma.class.update({
+    if (dto.tutor_id) {
+      const tutor = await this.prisma.tutor.findFirst({
+        where: { id: dto.tutor_id, institution_id: institutionId },
+      });
+
+      if (!tutor) {
+        throw new NotFoundException('Tutor not found');
+      }
+
+      if (!tutor.is_verified) {
+        throw new BadRequestException('Only verified tutors can be assigned to classes');
+      }
+    }
+
+    if (dto.tutor_id || dto.subject_id) {
+      const effectiveTutorId = dto.tutor_id ?? existing.tutor_id;
+      const effectiveSubjectId = dto.subject_id ?? existing.subject_id;
+
+      const tutorSubject = await this.prisma.tutorSubject.findUnique({
+        where: { tutor_id_subject_id: { tutor_id: effectiveTutorId, subject_id: effectiveSubjectId } },
+      });
+      if (!tutorSubject) throw new BadRequestException('Tutor does not teach this subject');
+    }
+
+    const { subject_id, tutor_id, name, capacity, fee, schedule_days, schedule_start_time, schedule_end_time, room, package_fee, tutor_fee, tutor_fee_mode, tutor_fee_per_student, status } = dto;
+    const record = await this.prisma.class.update({
       where: { id },
-      data: dto,
+      data: {
+        ...(subject_id !== undefined && { subject_id }),
+        ...(tutor_id !== undefined && { tutor_id }),
+        ...(name !== undefined && { name }),
+        ...(capacity !== undefined && { capacity }),
+        ...(fee !== undefined && { fee }),
+        ...(schedule_days !== undefined && { schedule_days }),
+        ...(schedule_start_time !== undefined && { schedule_start_time }),
+        ...(schedule_end_time !== undefined && { schedule_end_time }),
+        ...(room !== undefined && { room }),
+        ...(package_fee !== undefined && { package_fee }),
+        ...(tutor_fee !== undefined && { tutor_fee }),
+        ...(tutor_fee_mode !== undefined && { tutor_fee_mode }),
+        ...(tutor_fee_per_student !== undefined && { tutor_fee_per_student }),
+        ...(status !== undefined && { status }),
+      },
     });
+    return {
+      ...record,
+      fee: Number(record.fee),
+      package_fee: record.package_fee != null ? Number(record.package_fee) : null,
+      tutor_fee: Number(record.tutor_fee),
+      tutor_fee_mode: record.tutor_fee_mode,
+      tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
+    };
   }
 
   async delete(institutionId: string, id: string) {

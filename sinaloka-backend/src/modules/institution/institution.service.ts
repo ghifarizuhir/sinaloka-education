@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { PaginationDto, buildPaginationMeta, PaginatedResponse } from '../../common/dto/pagination.dto.js';
 import { CreateInstitutionDto, UpdateInstitutionDto } from './institution.dto.js';
@@ -20,12 +21,20 @@ export class InstitutionService {
         }
       : {};
 
+    const include = {
+      users: {
+        where: { role: 'ADMIN' as const },
+        select: { id: true, name: true, email: true },
+      },
+    };
+
     const [data, total] = await Promise.all([
       this.prisma.institution.findMany({
         where,
         skip,
         take: limit,
         orderBy: { created_at: 'desc' },
+        include,
       }),
       this.prisma.institution.count({ where }),
     ]);
@@ -39,6 +48,12 @@ export class InstitutionService {
   async findOne(id: string) {
     const institution = await this.prisma.institution.findUnique({
       where: { id },
+      include: {
+        users: {
+          where: { role: 'ADMIN' as const },
+          select: { id: true, name: true, email: true },
+        },
+      },
     });
 
     if (!institution) {
@@ -48,19 +63,40 @@ export class InstitutionService {
     return institution;
   }
 
-  async create(dto: CreateInstitutionDto) {
-    const slug = await this.generateUniqueSlug(dto.name);
+  async create(data: CreateInstitutionDto) {
+    const { admin, ...institutionData } = data;
+    const slug = await this.generateUniqueSlug(institutionData.name);
+
+    if (admin) {
+      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      return this.prisma.$transaction(async (tx) => {
+        const institution = await tx.institution.create({
+          data: { ...institutionData, settings: institutionData.settings as any, slug },
+        });
+        await tx.user.create({
+          data: {
+            name: admin.name,
+            email: admin.email,
+            password_hash: hashedPassword,
+            role: 'ADMIN',
+            institution_id: institution.id,
+          },
+        });
+        const created = await tx.institution.findUnique({
+          where: { id: institution.id },
+          include: {
+            users: {
+              where: { role: 'ADMIN' as const },
+              select: { id: true, name: true, email: true },
+            },
+          },
+        });
+        return created!;
+      });
+    }
 
     return this.prisma.institution.create({
-      data: {
-        name: dto.name,
-        slug,
-        address: dto.address,
-        phone: dto.phone,
-        email: dto.email,
-        logo_url: dto.logo_url,
-        settings: dto.settings as any,
-      },
+      data: { ...institutionData, settings: institutionData.settings as any, slug },
     });
   }
 
@@ -80,11 +116,24 @@ export class InstitutionService {
   }
 
   async remove(id: string) {
-    await this.findOne(id); // throws NotFoundException if not found
+    throw new ForbiddenException(
+      'Institution deletion is not supported. Use deactivation instead.',
+    );
+  }
 
-    return this.prisma.institution.delete({
-      where: { id },
-    });
+  async getSummary(institutionId: string) {
+    const [studentCount, tutorCount, adminCount, activeClassCount] =
+      await Promise.all([
+        this.prisma.student.count({ where: { institution_id: institutionId } }),
+        this.prisma.tutor.count({ where: { institution_id: institutionId } }),
+        this.prisma.user.count({
+          where: { institution_id: institutionId, role: 'ADMIN' },
+        }),
+        this.prisma.class.count({
+          where: { institution_id: institutionId, status: 'ACTIVE' },
+        }),
+      ]);
+    return { studentCount, tutorCount, adminCount, activeClassCount };
   }
 
   private async generateUniqueSlug(

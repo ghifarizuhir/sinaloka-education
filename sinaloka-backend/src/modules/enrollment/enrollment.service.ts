@@ -2,8 +2,12 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
+import { parse } from 'csv-parse/sync';
+import { stringify } from 'csv-stringify/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js';
 import {
   buildPaginationMeta,
   PaginatedResponse,
@@ -13,11 +17,16 @@ import {
   UpdateEnrollmentDto,
   EnrollmentQueryDto,
   CheckConflictDto,
+  ImportEnrollmentRowSchema,
+  BulkUpdateEnrollmentDto,
 } from './enrollment.dto.js';
 
 @Injectable()
 export class EnrollmentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly invoiceGenerator: InvoiceGeneratorService,
+  ) {}
 
   private timeRangesOverlap(
     startA: string,
@@ -112,11 +121,12 @@ export class EnrollmentService {
       );
     }
 
-    // Check for duplicate enrollment (student+class)
+    // Check for duplicate enrollment (student+class) scoped to institution
     const existing = await this.prisma.enrollment.findFirst({
       where: {
         student_id: dto.student_id,
         class_id: dto.class_id,
+        institution_id: institutionId,
       },
     });
 
@@ -126,13 +136,13 @@ export class EnrollmentService {
       );
     }
 
-    return this.prisma.enrollment.create({
+    const enrollment = await this.prisma.enrollment.create({
       data: {
         institution_id: institutionId,
         student_id: dto.student_id,
         class_id: dto.class_id,
         status: dto.status ?? 'ACTIVE',
-        payment_status: dto.payment_status ?? 'PENDING',
+        payment_status: dto.payment_status ?? 'NEW',
         enrolled_at: dto.enrolled_at ?? new Date(),
       },
       include: {
@@ -140,6 +150,17 @@ export class EnrollmentService {
         class: { select: { id: true, name: true } },
       },
     });
+
+    // Auto-generate package payment
+    await this.invoiceGenerator.generatePackagePayment({
+      institutionId,
+      studentId: dto.student_id,
+      enrollmentId: enrollment.id,
+      classId: dto.class_id,
+      enrolledAt: enrollment.enrolled_at,
+    });
+
+    return enrollment;
   }
 
   async findAll(
@@ -245,5 +266,160 @@ export class EnrollmentService {
     return this.prisma.enrollment.delete({
       where: { id },
     });
+  }
+
+  async exportToCsv(query: Record<string, any>, institutionId: string): Promise<string> {
+    const where: any = { institution_id: institutionId };
+    if (query.status) where.status = query.status;
+    if (query.class_id) where.class_id = query.class_id;
+    if (query.student_id) where.student_id = query.student_id;
+    if (query.payment_status) where.payment_status = query.payment_status;
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where,
+      include: {
+        student: { select: { name: true } },
+        class: { select: { name: true } },
+      },
+      orderBy: { enrolled_at: 'desc' },
+    });
+
+    return stringify(
+      enrollments.map((e) => ({
+        student_name: e.student?.name ?? '',
+        class_name: e.class?.name ?? '',
+        status: e.status,
+        payment_status: e.payment_status,
+        enrolled_at: e.enrolled_at?.toISOString().split('T')[0] ?? '',
+      })),
+      { header: true },
+    );
+  }
+
+  async bulkUpdate(institutionId: string, dto: BulkUpdateEnrollmentDto) {
+    const { ids, ...data } = dto;
+    const result = await this.prisma.enrollment.updateMany({
+      where: { id: { in: ids }, institution_id: institutionId },
+      data,
+    });
+    return { updated: result.count };
+  }
+
+  async bulkDelete(institutionId: string, ids: string[]) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      await tx.payment.deleteMany({
+        where: { enrollment_id: { in: ids }, institution_id: institutionId },
+      });
+      return tx.enrollment.deleteMany({
+        where: { id: { in: ids }, institution_id: institutionId },
+      });
+    });
+    return { deleted: result.count };
+  }
+
+  async importFromCsv(buffer: Buffer, institutionId: string) {
+    const records: Record<string, string>[] = parse(buffer, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+    });
+
+    if (records.length > 500) {
+      throw new BadRequestException(`CSV exceeds maximum of 500 rows`);
+    }
+
+    let created = 0;
+    let skipped = 0;
+    const errors: { row: number; message: string }[] = [];
+
+    for (let i = 0; i < records.length; i++) {
+      const row = records[i];
+      const rowNum = i + 1;
+
+      try {
+        // 1. Validate row schema
+        const result = ImportEnrollmentRowSchema.safeParse(row);
+        if (!result.success) {
+          errors.push({
+            row: rowNum,
+            message: result.error.issues
+              .map((e: any) => `${e.path}: ${e.message}`)
+              .join('; '),
+          });
+          continue;
+        }
+
+        const { student_id, class_id, status } = result.data;
+
+        // 2. Verify student exists in institution
+        const student = await this.prisma.student.findFirst({
+          where: { id: student_id, institution_id: institutionId },
+        });
+        if (!student) {
+          errors.push({ row: rowNum, message: `Student ${student_id} not found in institution` });
+          continue;
+        }
+
+        // 3. Verify class exists in institution
+        const cls = await this.prisma.class.findFirst({
+          where: { id: class_id, institution_id: institutionId },
+        });
+        if (!cls) {
+          errors.push({ row: rowNum, message: `Class ${class_id} not found in institution` });
+          continue;
+        }
+
+        // 4. Check duplicate enrollment (student+class)
+        const existing = await this.prisma.enrollment.findFirst({
+          where: { student_id, class_id, institution_id: institutionId },
+        });
+        if (existing) {
+          skipped++;
+          errors.push({ row: rowNum, message: `Student already enrolled in this class` });
+          continue;
+        }
+
+        // 5. Run schedule conflict detection
+        const conflictResult = await this.checkConflict(institutionId, {
+          student_id,
+          class_id,
+        });
+        if (conflictResult.has_conflict) {
+          const names = conflictResult.conflicting_classes
+            .map((c) => c.name)
+            .join(', ');
+          skipped++;
+          errors.push({ row: rowNum, message: `Schedule conflict with: ${names}` });
+          continue;
+        }
+
+        // 6. Create enrollment
+        const enrollment = await this.prisma.enrollment.create({
+          data: {
+            institution_id: institutionId,
+            student_id,
+            class_id,
+            status,
+            payment_status: 'NEW',
+            enrolled_at: new Date(),
+          },
+        });
+
+        // 7. Generate package payment
+        await this.invoiceGenerator.generatePackagePayment({
+          institutionId,
+          studentId: student_id,
+          enrollmentId: enrollment.id,
+          classId: class_id,
+          enrolledAt: enrollment.enrolled_at,
+        });
+
+        created++;
+      } catch (err: any) {
+        errors.push({ row: rowNum, message: err.message ?? 'Unknown error' });
+      }
+    }
+
+    return { created, skipped, errors };
   }
 }

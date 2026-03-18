@@ -3,13 +3,15 @@ import {
   Post,
   Get,
   Body,
+  Param,
   UsePipes,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { LoginSchema, RefreshTokenSchema, LogoutSchema } from './auth.dto.js';
-import type { LoginDto, RefreshTokenDto, LogoutDto } from './auth.dto.js';
+import { LoginSchema, RefreshTokenSchema, LogoutSchema, ParentRegisterSchema, ForgotPasswordSchema, ResetPasswordSchema } from './auth.dto.js';
+import type { LoginDto, RefreshTokenDto, LogoutDto, ParentRegisterDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto.js';
+import { ParentInviteService } from '../parent/parent-invite.service.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
@@ -17,7 +19,10 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly parentInviteService: ParentInviteService,
+  ) {}
 
   @Public()
   @Post('login')
@@ -35,11 +40,46 @@ export class AuthController {
     return this.authService.refresh(dto);
   }
 
+  @Public()
+  @Post('register/parent')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ZodValidationPipe(ParentRegisterSchema))
+  async registerParent(@Body() dto: ParentRegisterDto) {
+    const { user } = await this.parentInviteService.registerParent(dto);
+    // Auto-login: return tokens
+    return this.authService.login({
+      email: user.email,
+      password: dto.password,
+    });
+  }
+
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ZodValidationPipe(LogoutSchema))
   async logout(@Body() dto: LogoutDto) {
     return this.authService.logout(dto);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(ForgotPasswordSchema))
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Public()
+  @Get('reset-password/:token')
+  async validateResetToken(@Param('token') token: string) {
+    return this.authService.validateResetToken(token);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(ResetPasswordSchema))
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 
   @Get('me')

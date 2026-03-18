@@ -5,8 +5,8 @@ import type { SessionQueryParams, GenerateSessionsDto, ApproveRescheduleDto } fr
 export function useSessions(params?: SessionQueryParams) {
   return useQuery({ queryKey: ['sessions', params], queryFn: () => sessionsService.getAll(params) });
 }
-export function useSession(id: string) {
-  return useQuery({ queryKey: ['sessions', id], queryFn: () => sessionsService.getById(id), enabled: !!id });
+export function useSession(id: string | null) {
+  return useQuery({ queryKey: ['sessions', id], queryFn: () => sessionsService.getById(id!), enabled: !!id });
 }
 export function useCreateSession() {
   const qc = useQueryClient();
@@ -27,4 +27,7 @@ export function useGenerateSessions() {
 export function useApproveReschedule() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: ({ id, data }: { id: string; data: ApproveRescheduleDto }) => sessionsService.approveReschedule({ id, data }), onSuccess: () => qc.invalidateQueries({ queryKey: ['sessions'] }) });
+}
+export function useSessionStudents(sessionId: string | null) {
+  return useQuery({ queryKey: ['session-students', sessionId], queryFn: () => sessionsService.getStudents(sessionId!), enabled: !!sessionId });
 }

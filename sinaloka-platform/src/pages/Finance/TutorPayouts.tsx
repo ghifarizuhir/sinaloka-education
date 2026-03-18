@@ -1,19 +1,23 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import {
   History, ChevronLeft, ChevronRight, FileText, CheckCircle2,
   AlertCircle, Clock, DollarSign, Plus, Minus, Upload,
   Download, ExternalLink, Search, Filter, MoreVertical,
-  ArrowLeft, BadgeCheck, X
+  ArrowLeft, BadgeCheck, X, AlertTriangle
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Checkbox, Skeleton } from '../../components/UI';
-import { cn } from '../../lib/utils';
-import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout } from '@/src/hooks/usePayouts';
+import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog } from '../../components/UI';
+import { cn, formatCurrency, formatDate } from '../../lib/utils';
+import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout, useGenerateSalaries } from '@/src/hooks/usePayouts';
 import { useTutors } from '@/src/hooks/useTutors';
 import { toast } from 'sonner';
-import type { Payout, CreatePayoutDto, UpdatePayoutDto } from '@/src/types/payout';
+import type { Payout, CreatePayoutDto, UpdatePayoutDto, PayoutCalculation } from '@/src/types/payout';
+import { getPayoutTutorName, getPayoutBankInfo } from '@/src/types/payout';
+import { payoutsService } from '@/src/services/payouts.service';
 
 export const TutorPayouts = () => {
+  const { t, i18n } = useTranslation();
   const [view, setView] = useState<'list' | 'reconciliation'>('list');
   const [selectedPayout, setSelectedPayout] = useState<Payout | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,15 +31,35 @@ export const TutorPayouts = () => {
   const [newAmount, setNewAmount] = useState(0);
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [newDescription, setNewDescription] = useState('');
+  const [formPeriodStart, setFormPeriodStart] = useState('');
+  const [formPeriodEnd, setFormPeriodEnd] = useState('');
+  const [calculation, setCalculation] = useState<PayoutCalculation | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'PENDING' | 'PROCESSING' | 'PAID' | ''>('');
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+  const [isGeneratingSlip, setIsGeneratingSlip] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [isExportingAudit, setIsExportingAudit] = useState(false);
   const itemsPerPage = 10;
 
-  const { data: payoutsData, isLoading } = usePayouts({ page: currentPage, limit: itemsPerPage });
+  const { data: payoutsData, isLoading } = usePayouts({
+    page: currentPage,
+    limit: itemsPerPage,
+    ...(statusFilter ? { status: statusFilter as 'PENDING' | 'PROCESSING' | 'PAID' } : {}),
+  });
   const { data: tutorsData } = useTutors({ limit: 100 });
   const updatePayout = useUpdatePayout();
   const createPayout = useCreatePayout();
   const deletePayout = useDeletePayout();
+  const calculatePayout = useCalculatePayout();
+  const generateSalaries = useGenerateSalaries();
 
-  const payouts = payoutsData?.data ?? [];
+  const allPayouts = payoutsData?.data ?? [];
+  const payouts = searchQuery
+    ? allPayouts.filter((p) =>
+        getPayoutTutorName(p).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : allPayouts;
   const total = payoutsData?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / itemsPerPage);
   const tutors = tutorsData?.data ?? [];
@@ -50,22 +74,42 @@ export const TutorPayouts = () => {
 
   const handleConfirmPayout = () => {
     if (!selectedPayout) return;
-    const dto: UpdatePayoutDto = { status: 'PAID' };
+    const totalAmount = Number(selectedPayout.amount) + bonus - deduction;
+    const dto: UpdatePayoutDto = {
+      status: 'PAID',
+      amount: totalAmount,
+      description: (bonus || deduction)
+        ? `${selectedPayout.description || ''}${selectedPayout.description ? ' | ' : ''}${t('payouts.reconciliation.bonuses')}: +${formatCurrency(bonus, i18n.language)} ${t('payouts.reconciliation.deductions')}: -${formatCurrency(deduction, i18n.language)}`.trim()
+        : undefined,
+    };
     updatePayout.mutate(
       { id: selectedPayout.id, data: dto },
       {
         onSuccess: () => {
-          toast.success(`Payout confirmed for ${selectedPayout.tutor?.name ?? selectedPayout.tutor_id}.`);
+          toast.success(t('payouts.toast.confirmed', { tutor: getPayoutTutorName(selectedPayout) || t('common.noData') }));
           setView('list');
         },
-        onError: () => toast.error('Failed to confirm payout.'),
+        onError: () => toast.error(t('payouts.toast.confirmError')),
       }
+    );
+  };
+
+  const handleCalculate = () => {
+    if (!newTutorId || !formPeriodStart || !formPeriodEnd) return;
+    calculatePayout.mutate(
+      { tutor_id: newTutorId, period_start: formPeriodStart, period_end: formPeriodEnd },
+      {
+        onSuccess: (data: PayoutCalculation) => {
+          setCalculation(data);
+          setNewAmount(data.calculated_amount);
+        },
+      },
     );
   };
 
   const handleCreatePayout = () => {
     if (!newTutorId || !newAmount) {
-      toast.error('Please fill in all required fields.');
+      toast.error(t('payouts.toast.fillRequired'));
       return;
     }
     const dto: CreatePayoutDto = {
@@ -74,24 +118,93 @@ export const TutorPayouts = () => {
       date: newDate,
       description: newDescription || undefined,
       status: 'PENDING',
+      period_start: formPeriodStart || undefined,
+      period_end: formPeriodEnd || undefined,
     };
     createPayout.mutate(dto, {
       onSuccess: () => {
-        toast.success('Payout created successfully.');
+        toast.success(t('payouts.toast.created'));
         setShowCreateModal(false);
         setNewTutorId('');
         setNewAmount(0);
         setNewDescription('');
+        setFormPeriodStart('');
+        setFormPeriodEnd('');
+        setCalculation(null);
       },
-      onError: () => toast.error('Failed to create payout.'),
+      onError: () => toast.error(t('payouts.toast.createError')),
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Delete this payout?')) return;
-    deletePayout.mutate(id, {
-      onSuccess: () => toast.success('Payout deleted.'),
-      onError: () => toast.error('Failed to delete payout.'),
+  const handleProofUpload = async (file: File) => {
+    if (!selectedPayout) return;
+    setIsUploadingProof(true);
+    try {
+      const proofUrl = await payoutsService.uploadProof(file);
+      updatePayout.mutate(
+        { id: selectedPayout.id, data: { proof_url: proofUrl } },
+        {
+          onSuccess: (updated) => {
+            setSelectedPayout(updated);
+            toast.success(t('payouts.toast.proofUploaded', { defaultValue: 'Proof uploaded successfully' }));
+          },
+          onError: () => toast.error(t('payouts.toast.proofUploadError', { defaultValue: 'Failed to upload proof' })),
+        },
+      );
+    } catch {
+      toast.error(t('payouts.toast.proofUploadError', { defaultValue: 'Failed to upload proof' }));
+    } finally {
+      setIsUploadingProof(false);
+    }
+  };
+
+  const handleGenerateSlip = async () => {
+    if (!selectedPayout) return;
+    setIsGeneratingSlip(true);
+    try {
+      const updated = await payoutsService.generateSlip(selectedPayout.id);
+      setSelectedPayout(updated);
+      if (updated.slip_url) {
+        const apiUrl = import.meta.env.VITE_API_URL ?? '';
+        window.open(`${apiUrl}/api/uploads/${updated.slip_url}`, '_blank');
+      }
+      toast.success(t('payouts.toast.slipGenerated', { defaultValue: 'Payout slip generated' }));
+    } catch {
+      toast.error(t('payouts.toast.slipError', { defaultValue: 'Failed to generate payout slip' }));
+    } finally {
+      setIsGeneratingSlip(false);
+    }
+  };
+
+  const handleDownloadSlip = () => {
+    if (!selectedPayout?.slip_url) return;
+    const apiUrl = import.meta.env.VITE_API_URL ?? '';
+    window.open(`${apiUrl}/api/uploads/${selectedPayout.slip_url}`, '_blank');
+  };
+
+  const handleExportAudit = async () => {
+    if (!selectedPayout) return;
+    setIsExportingAudit(true);
+    try {
+      const blob = await payoutsService.exportAudit(selectedPayout.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `payout-audit-${selectedPayout.id}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t('payouts.toast.exportError', { defaultValue: 'Failed to export audit' }));
+    } finally {
+      setIsExportingAudit(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    deletePayout.mutate(deleteTarget, {
+      onSuccess: () => { toast.success(t('payouts.toast.deleted')); setDeleteTarget(null); },
+      onError: () => toast.error(t('payouts.toast.deleteError')),
     });
   };
 
@@ -113,7 +226,7 @@ export const TutorPayouts = () => {
   }
 
   if (view === 'reconciliation' && selectedPayout) {
-    const totalPayout = selectedPayout.amount + bonus - deduction;
+    const totalPayout = Number(selectedPayout.amount) + bonus - deduction;
 
     return (
       <motion.div
@@ -127,25 +240,36 @@ export const TutorPayouts = () => {
             className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition-colors"
           >
             <ArrowLeft size={20} />
-            <span className="font-bold">Back to Payouts</span>
+            <span className="font-bold">{t('payouts.backToPayouts')}</span>
           </button>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExportAudit} disabled={isExportingAudit}>
               <Download size={16} />
-              Export Audit
+              {isExportingAudit ? t('common.processing') : t('payouts.exportAudit')}
             </Button>
             {selectedPayout.status === 'PAID' ? (
-              <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none">
-                <FileText size={16} />
-                Download Payout Slip
-              </Button>
+              selectedPayout.slip_url ? (
+                <Button onClick={handleDownloadSlip} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none">
+                  <FileText size={16} />
+                  {t('payouts.downloadPayoutSlip')}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleGenerateSlip}
+                  disabled={isGeneratingSlip}
+                  className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none"
+                >
+                  <FileText size={16} />
+                  {isGeneratingSlip ? t('common.processing') : t('payouts.downloadPayoutSlip')}
+                </Button>
+              )
             ) : (
               <Button
                 onClick={handleConfirmPayout}
                 disabled={updatePayout.isPending}
                 className="gap-2"
               >
-                {updatePayout.isPending ? 'Processing...' : 'Confirm & Generate Slip'}
+                {updatePayout.isPending ? t('common.processing') : t('payouts.confirmGenerateSlip')}
               </Button>
             )}
           </div>
@@ -157,39 +281,45 @@ export const TutorPayouts = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-bold">Payout Details</h3>
-                  <p className="text-sm text-zinc-500">Review payout information for this cycle</p>
+                  <h3 className="text-lg font-bold">{t('payouts.reconciliation.payoutDetails')}</h3>
+                  <p className="text-sm text-zinc-500">{t('payouts.reconciliation.reviewInfo')}</p>
                 </div>
                 <Badge variant={
                   selectedPayout.status === 'PAID' ? 'success' :
                   selectedPayout.status === 'PROCESSING' ? 'default' : 'outline'
                 }>
-                  {selectedPayout.status}
+                  {selectedPayout.status === 'PAID' ? t('payouts.reconciliation.paid') : selectedPayout.status === 'PROCESSING' ? t('payouts.reconciliation.processing') : t('payouts.reconciliation.pending')}
                 </Badge>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Tutor</p>
-                  <p className="text-sm font-medium dark:text-zinc-200 mt-1">{selectedPayout.tutor?.name ?? selectedPayout.tutor_id}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.reconciliation.tutor')}</p>
+                  <p className="text-sm font-medium dark:text-zinc-200 mt-1">{getPayoutTutorName(selectedPayout) || t('common.noData')}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Bank Account</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.reconciliation.bankAccount')}</p>
                   <p className="text-sm font-medium dark:text-zinc-200 mt-1">
-                    {selectedPayout.tutor?.bank_name && selectedPayout.tutor?.bank_account_number
-                      ? `${selectedPayout.tutor.bank_name} - ${selectedPayout.tutor.bank_account_number}`
-                      : 'Not set'}
+                    {getPayoutBankInfo(selectedPayout).bank_name && getPayoutBankInfo(selectedPayout).bank_account_number
+                      ? `${getPayoutBankInfo(selectedPayout).bank_name} - ${getPayoutBankInfo(selectedPayout).bank_account_number}`
+                      : t('payouts.notSet')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Payout Date</p>
-                  <p className="text-sm font-medium dark:text-zinc-200 mt-1">{selectedPayout.date}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.reconciliation.payoutDate')}</p>
+                  <p className="text-sm font-medium dark:text-zinc-200 mt-1">{formatDate(selectedPayout.date, i18n.language)}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Base Amount</p>
-                  <p className="text-sm font-bold text-indigo-600 mt-1">Rp {selectedPayout.amount.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.reconciliation.baseAmount')}</p>
+                  <p className="text-sm font-bold text-indigo-600 mt-1">{formatCurrency(Number(selectedPayout.amount), i18n.language)}</p>
                 </div>
               </div>
+              {selectedPayout?.period_start && selectedPayout?.period_end && (
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-xs text-zinc-400">{t('payouts.period')}</span>
+                  <span className="text-sm font-medium">{formatDate(selectedPayout.period_start, i18n.language)} — {formatDate(selectedPayout.period_end, i18n.language)}</span>
+                </div>
+              )}
               {selectedPayout.description && (
                 <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
                   <p className="text-xs text-zinc-500 italic">"{selectedPayout.description}"</p>
@@ -198,25 +328,36 @@ export const TutorPayouts = () => {
             </Card>
 
             <Card className="p-6">
-              <h3 className="text-lg font-bold mb-4">Proof of Payment</h3>
+              <h3 className="text-lg font-bold mb-4">{t('payouts.reconciliation.proofOfPayment')}</h3>
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 hover:border-indigo-400 transition-colors cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-400">
-                  {receiptFile ? <BadgeCheck className="text-emerald-500" size={24} /> : <Upload size={24} />}
+                  {receiptFile || selectedPayout.proof_url ? <BadgeCheck className="text-emerald-500" size={24} /> : <Upload size={24} />}
                 </div>
                 <div>
                   <p className="text-sm font-bold dark:text-zinc-200">
-                    {receiptFile ? receiptFile.name : 'Click to upload bank transfer receipt'}
+                    {isUploadingProof
+                      ? t('common.processing')
+                      : receiptFile
+                      ? receiptFile.name
+                      : selectedPayout.proof_url
+                      ? t('payouts.reconciliation.proofUploaded', { defaultValue: 'Proof uploaded' })
+                      : t('payouts.reconciliation.uploadReceipt')}
                   </p>
-                  <p className="text-xs text-zinc-500">JPG, PNG or PDF (Max 5MB)</p>
+                  <p className="text-xs text-zinc-500">{t('payouts.reconciliation.fileTypes')}</p>
                 </div>
                 <input
                   type="file"
                   ref={fileInputRef}
                   className="hidden"
-                  onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                  accept="image/*,application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setReceiptFile(file);
+                    if (file) handleProofUpload(file);
+                  }}
                 />
               </div>
             </Card>
@@ -227,24 +368,24 @@ export const TutorPayouts = () => {
             <Card className="p-6 bg-zinc-900 text-white">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center text-xl font-bold">
-                  {(selectedPayout.tutor?.name ?? 'T').charAt(0)}
+                  {(getPayoutTutorName(selectedPayout) || 'T').charAt(0)}
                 </div>
                 <div>
-                  <h4 className="font-bold">{selectedPayout.tutor?.name ?? selectedPayout.tutor_id}</h4>
+                  <h4 className="font-bold">{getPayoutTutorName(selectedPayout) || t('common.noData')}</h4>
                   <p className="text-xs text-zinc-400">
-                    {selectedPayout.tutor?.bank_name ? `${selectedPayout.tutor.bank_name} - ${selectedPayout.tutor.bank_account_number}` : 'No bank info'}
+                    {getPayoutBankInfo(selectedPayout).bank_name ? `${getPayoutBankInfo(selectedPayout).bank_name} - ${getPayoutBankInfo(selectedPayout).bank_account_number}` : t('payouts.noBankInfo')}
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4 border-t border-zinc-800 pt-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Base Amount</span>
-                  <span className="font-bold">Rp {selectedPayout.amount.toLocaleString()}</span>
+                  <span className="text-zinc-400">{t('payouts.reconciliation.baseAmount')}</span>
+                  <span className="font-bold">{formatCurrency(Number(selectedPayout.amount), i18n.language)}</span>
                 </div>
                 <div className="flex justify-between text-sm items-center">
                   <span className="text-zinc-400 flex items-center gap-1">
-                    Bonuses <Plus size={10} />
+                    {t('payouts.reconciliation.bonuses')} <Plus size={10} />
                   </span>
                   <input
                     type="number"
@@ -256,7 +397,7 @@ export const TutorPayouts = () => {
                 </div>
                 <div className="flex justify-between text-sm items-center">
                   <span className="text-zinc-400 flex items-center gap-1">
-                    Deductions <Minus size={10} />
+                    {t('payouts.reconciliation.deductions')} <Minus size={10} />
                   </span>
                   <input
                     type="number"
@@ -268,15 +409,15 @@ export const TutorPayouts = () => {
                 </div>
                 <div className="pt-4 border-t border-zinc-800 space-y-3">
                   <div className="flex flex-col gap-1">
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Calculation Formula</p>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('payouts.reconciliation.calculationFormula')}</p>
                     <p className="text-[10px] text-zinc-400 font-mono">
-                      {selectedPayout.amount.toLocaleString()} (Base) + {bonus.toLocaleString()} (Bonus) - {deduction.toLocaleString()} (Adj)
+                      {formatCurrency(Number(selectedPayout.amount), i18n.language)} (Base) + {formatCurrency(bonus, i18n.language)} (Bonus) - {formatCurrency(deduction, i18n.language)} (Adj)
                     </p>
                   </div>
                   <div className="flex justify-between items-end">
                     <div>
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Net Payout</p>
-                      <p className="text-2xl font-bold text-indigo-400">Rp {totalPayout.toLocaleString()}</p>
+                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('payouts.reconciliation.netPayout')}</p>
+                      <p className="text-2xl font-bold text-indigo-400">{formatCurrency(totalPayout, i18n.language)}</p>
                     </div>
                   </div>
                 </div>
@@ -284,12 +425,12 @@ export const TutorPayouts = () => {
             </Card>
 
             <Card className="p-6 space-y-4">
-              <h4 className="font-bold text-sm uppercase tracking-widest text-zinc-400">Payout Status</h4>
+              <h4 className="font-bold text-sm uppercase tracking-widest text-zinc-400">{t('payouts.reconciliation.payoutStatus')}</h4>
               <div className="space-y-3">
                 {[
-                  { label: 'Pending', icon: Clock, color: 'text-amber-500', active: selectedPayout.status === 'PENDING' },
-                  { label: 'Processing', icon: History, color: 'text-blue-500', active: selectedPayout.status === 'PROCESSING' },
-                  { label: 'Paid', icon: CheckCircle2, color: 'text-emerald-500', active: selectedPayout.status === 'PAID' },
+                  { label: t('payouts.reconciliation.pending'), icon: Clock, color: 'text-amber-500', active: selectedPayout.status === 'PENDING' },
+                  { label: t('payouts.reconciliation.processing'), icon: History, color: 'text-blue-500', active: selectedPayout.status === 'PROCESSING' },
+                  { label: t('payouts.reconciliation.paid'), icon: CheckCircle2, color: 'text-emerald-500', active: selectedPayout.status === 'PAID' },
                 ].map((s) => (
                   <div
                     key={s.label}
@@ -317,21 +458,46 @@ export const TutorPayouts = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Tutor Payouts Intelligence</h2>
-          <p className="text-zinc-500 text-sm">Verification-first model for tutor earnings and audit trails.</p>
+          <h2 className="text-2xl font-bold tracking-tight">{t('payouts.title')}</h2>
+          <p className="text-zinc-500 text-sm">{t('payouts.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
-            <Input placeholder="Search tutors..." className="pl-9 h-9 w-64" />
+            <Input
+              placeholder={t('payouts.searchPlaceholder')}
+              className="pl-9 h-9 w-64"
+              value={searchQuery}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <Button variant="outline" className="gap-2 h-9">
-            <Filter size={14} />
-            Filter
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value as any); setCurrentPage(1); }}
+            className="h-9 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
+          >
+            <option value="">{t('payouts.allStatuses')}</option>
+            <option value="PENDING">{t('payouts.reconciliation.pending')}</option>
+            <option value="PROCESSING">{t('payouts.reconciliation.processing')}</option>
+            <option value="PAID">{t('payouts.reconciliation.paid')}</option>
+          </select>
+          <Button
+            variant="outline"
+            className="gap-2 h-9"
+            onClick={() => {
+              generateSalaries.mutate(undefined, {
+                onSuccess: (result) => toast.success(t('payouts.salariesGenerated', { count: result.created })),
+                onError: () => toast.error(t('payouts.salariesError')),
+              });
+            }}
+            disabled={generateSalaries.isPending}
+          >
+            <DollarSign size={14} />
+            {t('payouts.generateSalaries')}
           </Button>
-          <Button className="gap-2 h-9" onClick={() => setShowCreateModal(true)}>
+          <Button className="gap-2 h-9" onClick={() => { setFormPeriodStart(''); setFormPeriodEnd(''); setCalculation(null); setShowCreateModal(true); }}>
             <Plus size={14} />
-            New Payout
+            {t('payouts.newPayout')}
           </Button>
         </div>
       </div>
@@ -340,27 +506,33 @@ export const TutorPayouts = () => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Tutor</th>
-              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Status</th>
-              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Date</th>
-              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Amount</th>
-              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">Action</th>
+              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.table.tutor')}</th>
+              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.table.status')}</th>
+              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.table.date')}</th>
+              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('payouts.table.amount')}</th>
+              <th className="px-6 py-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">{t('payouts.table.action')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {payouts.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 text-sm">
-                  No payouts found.
+                <td colSpan={5} className="px-6 py-20 text-center">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+                      <Search size={32} className="text-zinc-300" />
+                    </div>
+                    <h3 className="text-lg font-bold mb-1">{t('payouts.noPayoutsFound')}</h3>
+                    <p className="text-zinc-500 text-sm mb-6">{t('payouts.noPayoutsHint')}</p>
+                  </div>
                 </td>
               </tr>
             ) : payouts.map((p) => (
               <tr key={p.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors group">
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium dark:text-zinc-200">{p.tutor?.name ?? p.tutor_id}</span>
+                    <span className="text-sm font-medium dark:text-zinc-200">{getPayoutTutorName(p) || t('common.noData')}</span>
                     <span className="text-[10px] text-zinc-400">
-                      {p.tutor?.bank_name ? `${p.tutor.bank_name} - ${p.tutor.bank_account_number}` : 'No bank info'}
+                      {getPayoutBankInfo(p).bank_name ? `${getPayoutBankInfo(p).bank_name} - ${getPayoutBankInfo(p).bank_account_number}` : t('payouts.noBankInfo')}
                     </span>
                   </div>
                 </td>
@@ -372,11 +544,11 @@ export const TutorPayouts = () => {
                     }
                     className="text-[8px] uppercase tracking-tighter"
                   >
-                    {p.status}
+                    {p.status === 'PAID' ? t('payouts.reconciliation.paid') : p.status === 'PROCESSING' ? t('payouts.reconciliation.processing') : t('payouts.reconciliation.pending')}
                   </Badge>
                 </td>
-                <td className="px-6 py-4 text-sm dark:text-zinc-300">{p.date}</td>
-                <td className="px-6 py-4 text-sm font-bold text-zinc-900 dark:text-zinc-100">Rp {p.amount.toLocaleString()}</td>
+                <td className="px-6 py-4 text-sm dark:text-zinc-300">{formatDate(p.date, i18n.language)}</td>
+                <td className="px-6 py-4 text-sm font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(Number(p.amount), i18n.language)}</td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button
@@ -385,10 +557,10 @@ export const TutorPayouts = () => {
                       onClick={() => handleOpenReconciliation(p)}
                       className="h-8 text-[10px]"
                     >
-                      {p.status === 'PAID' ? 'View Slip' : 'Reconcile'}
+                      {p.status === 'PAID' ? t('payouts.viewSlip') : t('payouts.reconcile')}
                     </Button>
                     <button
-                      onClick={() => handleDelete(p.id)}
+                      onClick={() => setDeleteTarget(p.id)}
                       className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-zinc-400 hover:text-rose-600 transition-colors"
                     >
                       <X size={14} />
@@ -403,7 +575,7 @@ export const TutorPayouts = () => {
         {/* Pagination */}
         <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/30 dark:bg-zinc-900/30">
           <p className="text-xs text-zinc-500">
-            Showing <span className="font-bold text-zinc-900 dark:text-zinc-100">{Math.min((currentPage - 1) * itemsPerPage + 1, total)}</span> to <span className="font-bold text-zinc-900 dark:text-zinc-100">{Math.min(currentPage * itemsPerPage, total)}</span> of <span className="font-bold text-zinc-900 dark:text-zinc-100">{total}</span> results
+            {t('common.showing')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{Math.min((currentPage - 1) * itemsPerPage + 1, total)}</span> {t('common.to')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{Math.min(currentPage * itemsPerPage, total)}</span> {t('common.of')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{total}</span> {t('common.results')}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -443,31 +615,77 @@ export const TutorPayouts = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm"
-            onClick={() => setShowCreateModal(false)}
+            onClick={() => { setShowCreateModal(false); setFormPeriodStart(''); setFormPeriodEnd(''); setCalculation(null); }}
           />
           <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative z-10 border border-zinc-100 dark:border-zinc-800">
             <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
-              <h3 className="text-xl font-bold dark:text-zinc-100">Create Payout</h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-zinc-400 hover:text-zinc-900">
+              <h3 className="text-xl font-bold dark:text-zinc-100">{t('payouts.modal.createTitle')}</h3>
+              <button onClick={() => { setShowCreateModal(false); setFormPeriodStart(''); setFormPeriodEnd(''); setCalculation(null); }} className="text-zinc-400 hover:text-zinc-900">
                 <X size={20} />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <Label>Tutor</Label>
+                <Label>{t('payouts.form.tutor')}</Label>
                 <select
                   value={newTutorId}
                   onChange={(e) => setNewTutorId(e.target.value)}
                   className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
                 >
-                  <option value="">Select tutor...</option>
-                  {tutors.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+                  <option value="">{t('payouts.form.selectTutor')}</option>
+                  {tutors.map(t_item => (
+                    <option key={t_item.id} value={t_item.id}>{t_item.name}</option>
                   ))}
                 </select>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>{t('payouts.periodStart')}</Label>
+                  <Input type="date" value={formPeriodStart} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPeriodStart(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t('payouts.periodEnd')}</Label>
+                  <Input type="date" value={formPeriodEnd} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPeriodEnd(e.target.value)} />
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCalculate}
+                disabled={!newTutorId || !formPeriodStart || !formPeriodEnd || calculatePayout.isPending}
+                className="w-full justify-center"
+              >
+                {calculatePayout.isPending ? t('payouts.calculating') : t('payouts.calculate')}
+              </Button>
+              {calculation && (
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 space-y-2">
+                  <p className="text-xs font-bold text-zinc-600 dark:text-zinc-400">
+                    {t('payouts.sessionBreakdown')} — {t('payouts.sessionsCount', { count: calculation.total_sessions })}
+                  </p>
+                  {calculation.sessions.length > 0 ? (
+                    <div className="max-h-40 overflow-y-auto space-y-1">
+                      {calculation.sessions.map((s) => (
+                        <div key={s.session_id} className="flex items-center justify-between text-xs text-zinc-500">
+                          <span>{formatDate(s.date, i18n.language)} — {s.class_name}</span>
+                          <span className="font-mono">{formatCurrency(s.tutor_fee_amount, i18n.language)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-zinc-400 italic">{t('payouts.noSessions')}</p>
+                  )}
+                </div>
+              )}
+              {calculation?.overlap_warning && (
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                  <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                    <AlertTriangle size={14} />
+                    {calculation.overlap_warning}
+                  </p>
+                </div>
+              )}
               <div className="space-y-1.5">
-                <Label>Amount (Rp)</Label>
+                <Label>{t('payouts.form.amount')}</Label>
                 <Input
                   type="number"
                   value={newAmount}
@@ -476,7 +694,7 @@ export const TutorPayouts = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Date</Label>
+                <Label>{t('payouts.form.date')}</Label>
                 <Input
                   type="date"
                   value={newDate}
@@ -484,23 +702,33 @@ export const TutorPayouts = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Description (optional)</Label>
+                <Label>{t('payouts.form.description')}</Label>
                 <Input
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  placeholder="e.g. March 2026 payout"
+                  placeholder={t('payouts.form.descriptionPlaceholder')}
                 />
               </div>
             </div>
             <div className="p-6 border-t border-zinc-100 dark:border-zinc-800 flex gap-3">
-              <Button variant="outline" className="flex-1 justify-center" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button variant="outline" className="flex-1 justify-center" onClick={() => { setShowCreateModal(false); setFormPeriodStart(''); setFormPeriodEnd(''); setCalculation(null); }}>{t('common.cancel')}</Button>
               <Button className="flex-1 justify-center" onClick={handleCreatePayout} disabled={createPayout.isPending}>
-                {createPayout.isPending ? 'Creating...' : 'Create Payout'}
+                {createPayout.isPending ? t('payouts.modal.creating') : t('payouts.modal.createPayout')}
               </Button>
             </div>
           </div>
         </div>
       )}
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title={t('payouts.confirm.deleteTitle', 'Delete Payout')}
+        description={t('payouts.confirm.deletePayout')}
+        confirmLabel={t('common.delete', 'Delete')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        isLoading={deletePayout.isPending}
+      />
     </div>
   );
 };

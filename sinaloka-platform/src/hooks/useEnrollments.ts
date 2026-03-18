@@ -23,3 +23,18 @@ export function useDeleteEnrollment() {
 export function useCheckConflict() {
   return useMutation({ mutationFn: (data: CheckConflictDto) => enrollmentsService.checkConflict(data) });
 }
+export function useExportEnrollments() {
+  return useMutation({ mutationFn: enrollmentsService.exportCsv });
+}
+export function useBulkUpdateEnrollment() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: enrollmentsService.bulkUpdate, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+}
+export function useBulkDeleteEnrollment() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: enrollmentsService.bulkDelete, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+}
+export function useImportEnrollments() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: enrollmentsService.importCsv, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+}

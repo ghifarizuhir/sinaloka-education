@@ -20,3 +20,16 @@ export function useDeletePayment() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: paymentsService.remove, onSuccess: () => { qc.invalidateQueries({ queryKey: ['payments'] }); qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] }); } });
 }
+export function useOverdueSummary() {
+  return useQuery({
+    queryKey: ['payments', 'overdue-summary'],
+    queryFn: paymentsService.getOverdueSummary,
+  });
+}
+export function useGenerateInvoice() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: paymentsService.generateInvoice,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['payments'] }),
+  });
+}

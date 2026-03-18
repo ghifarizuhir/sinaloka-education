@@ -1,26 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, X } from 'lucide-react';
 import { BottomNav } from './components/BottomNav';
 import { LoginPage } from './pages/LoginPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SchedulePage } from './pages/SchedulePage';
 import { PayoutsPage } from './pages/PayoutsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AttendancePage } from './pages/AttendancePage';
+import { ProfileEditPage } from './pages/ProfileEditPage';
+import { SessionDetailPage } from './pages/SessionDetailPage';
 import { RescheduleModal } from './components/RescheduleModal';
 import { useAuth } from './hooks/useAuth';
 import { useSchedule } from './hooks/useSchedule';
 import { usePayouts } from './hooks/usePayouts';
 import { useAttendance } from './hooks/useAttendance';
 
-export default function App() {
-  const { isAuthenticated, isLoading: authLoading, profile, logout } = useAuth();
+function MainAppContent() {
+  const { profile, logout } = useAuth();
   const { data: schedule, isLoading: scheduleLoading, activeFilter, setFilter, refetch: refetchSchedule, cancelSession, requestReschedule } = useSchedule();
-  const { data: payouts } = usePayouts();
+  const { data: payouts, refetch: refetchPayouts } = usePayouts();
   const { students, setStudents, fetchStudents, submitAttendance } = useAttendance();
 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTabRaw] = useState('dashboard');
+  const setActiveTab = (tab: string) => {
+    setActiveTabRaw(tab);
+    if (tab === 'payouts') refetchPayouts();
+  };
   const [selectedProof, setSelectedProof] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
@@ -28,6 +38,8 @@ export default function App() {
   const [topicCovered, setTopicCovered] = useState('');
   const [sessionSummary, setSessionSummary] = useState('');
   const [rescheduleSessionId, setRescheduleSessionId] = useState<string | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [detailSessionId, setDetailSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedClassId) {
@@ -44,18 +56,6 @@ export default function App() {
       }
     }
   }, [selectedClassId, schedule]);
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
 
   const upcomingClasses = schedule.filter((s) => s.status === 'upcoming');
   const pendingPayout = payouts.filter((p) => p.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0);
@@ -78,6 +78,10 @@ export default function App() {
     setStudents((prev) => prev.map((st) => st.id === studentId ? { ...st, homeworkDone: !st.homeworkDone } : st));
   };
 
+  const handleSetNote = (_classId: string, studentId: string, note: string) => {
+    setStudents((prev) => prev.map((st) => st.id === studentId ? { ...st, note } : st));
+  };
+
   const selectedClass = selectedClassId ? schedule.find((s) => s.id === selectedClassId) ?? null : null;
 
   const handleFinishAttendance = async (classId: string) => {
@@ -94,6 +98,7 @@ export default function App() {
       setSelectedClassId(null);
       triggerNotification('Absensi kelas berhasil disimpan!');
       refetchSchedule();
+      refetchPayouts();
     } catch (err: any) {
       triggerNotification(err?.response?.data?.message || 'Gagal menyimpan absensi');
     }
@@ -119,6 +124,8 @@ export default function App() {
 
   const rescheduleSession = rescheduleSessionId ? schedule.find((s) => s.id === rescheduleSessionId) ?? null : null;
 
+  const detailSession = detailSessionId ? schedule.find((s) => s.id === detailSessionId) ?? null : null;
+
   const renderPage = () => {
     if (selectedClassId && selectedClass) {
       return (
@@ -132,8 +139,30 @@ export default function App() {
           onSetSessionSummary={setSessionSummary}
           onToggleAttendance={handleToggleAttendance}
           onToggleHomework={handleToggleHomework}
+          onSetNote={handleSetNote}
           onFinish={handleFinishAttendance}
           onClose={() => setSelectedClassId(null)}
+        />
+      );
+    }
+
+    if (detailSession) {
+      return (
+        <SessionDetailPage
+          session={detailSession}
+          onClose={() => setDetailSessionId(null)}
+        />
+      );
+    }
+
+    if (editingProfile) {
+      return (
+        <ProfileEditPage
+          onSaved={() => {
+            setEditingProfile(false);
+            triggerNotification('Profil berhasil diperbarui.');
+          }}
+          onClose={() => setEditingProfile(false)}
         />
       );
     }
@@ -149,6 +178,7 @@ export default function App() {
             onOpenAttendance={setSelectedClassId}
             onReschedule={setRescheduleSessionId}
             onCancel={handleCancel}
+            onViewDetail={setDetailSessionId}
             onViewAllSchedule={() => setActiveTab('schedule')}
           />
         );
@@ -162,6 +192,7 @@ export default function App() {
             onOpenAttendance={setSelectedClassId}
             onReschedule={setRescheduleSessionId}
             onCancel={handleCancel}
+            onViewDetail={setDetailSessionId}
           />
         );
       case 'payouts':
@@ -175,7 +206,7 @@ export default function App() {
           />
         );
       case 'profile':
-        return <ProfilePage profile={profile} onLogout={logout} />;
+        return <ProfilePage profile={profile} onLogout={logout} onEditProfile={() => setEditingProfile(true)} />;
       default:
         return null;
     }
@@ -186,7 +217,7 @@ export default function App() {
       <main className="relative z-10 max-w-md mx-auto px-6 pt-8 min-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
-            key={selectedClassId ? 'attendance' : activeTab}
+            key={selectedClassId ? 'attendance' : detailSessionId ? 'detail' : editingProfile ? 'edit-profile' : activeTab}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -197,7 +228,7 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {!selectedClassId && <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />}
+      {!selectedClassId && !detailSessionId && !editingProfile && <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />}
 
       {/* Proof Modal */}
       <AnimatePresence>
@@ -263,5 +294,27 @@ export default function App() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
+  );
+}
+
+export default function App() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/accept-invite" element={<AcceptInvitePage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />} />
+      <Route path="/*" element={isAuthenticated ? <MainAppContent /> : <Navigate to="/login" replace />} />
+    </Routes>
   );
 }
