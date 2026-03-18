@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Filter, DollarSign, History, ChevronLeft, ChevronRight,
+  Filter, DollarSign, History,
   Send, Receipt, AlertCircle, TrendingUp, Download,
   MoreVertical, CheckCircle2, Clock, Trash2, Mail,
   FileText, FileDown, Search
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton, ConfirmDialog } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton, ConfirmDialog, PageHeader, Select, Pagination } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import { usePayments, useUpdatePayment, useDeletePayment, useGenerateInvoice, useOverdueSummary } from '@/src/hooks/usePayments';
 import { useQueryClient } from '@tanstack/react-query';
@@ -165,36 +165,32 @@ export const StudentPayments = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('payments.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('payments.subtitle')}</p>
-        </div>
-        <div className="flex items-center gap-3">
+      <PageHeader
+        title={t('payments.title')}
+        subtitle={t('payments.subtitle')}
+        actions={<>
           {selectedIds.length > 0 && (
             <Button variant="primary" className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={() => { setBatchDate(new Date().toISOString().split('T')[0]); setBatchMethod('TRANSFER'); setShowBatchModal(true); }}>
               <CheckCircle2 size={16} />
               {t('payments.recordBatch', { count: selectedIds.length })}
             </Button>
           )}
-          <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
-            <select
-              value={filterStatus}
-              onChange={(e) => { setFilterStatus(e.target.value as any); setCurrentPage(1); }}
-              className="bg-transparent text-xs font-bold px-3 py-1.5 focus:outline-none dark:text-zinc-100"
-            >
-              <option value="all">{t('common.allStatuses')}</option>
-              <option value="PAID">{t('common.paid')}</option>
-              <option value="PENDING">{t('common.pending')}</option>
-              <option value="OVERDUE">{t('common.overdue')}</option>
-            </select>
-          </div>
+          <Select
+            value={filterStatus}
+            onChange={(value) => { setFilterStatus(value as any); setCurrentPage(1); }}
+            options={[
+              { value: 'all', label: t('common.allStatuses') },
+              { value: 'PAID', label: t('common.paid') },
+              { value: 'PENDING', label: t('common.pending') },
+              { value: 'OVERDUE', label: t('common.overdue') },
+            ]}
+          />
           <Button variant="outline" className="gap-2" onClick={() => toast.info(t('common.comingSoon'))}>
             <TrendingUp size={16} />
             {t('payments.revenueAnalytics')}
           </Button>
-        </div>
-      </div>
+        </>}
+      />
 
       {/* Aging Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -355,42 +351,13 @@ export const StudentPayments = () => {
           </tbody>
         </table>
 
-        {/* Pagination */}
-        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/30 dark:bg-zinc-900/30">
-          <p className="text-xs text-zinc-500">
-            {t('common.showing')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{Math.min((currentPage - 1) * itemsPerPage + 1, total)}</span> {t('common.to')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{Math.min(currentPage * itemsPerPage, total)}</span> {t('common.of')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{total}</span> {t('common.results')}
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(prev => prev - 1)}
-              className="p-1.5 disabled:opacity-30 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <div className="flex items-center gap-1">
-              {[...Array(Math.min(totalPages, 5))].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={cn(
-                    "w-8 h-8 text-xs font-bold rounded-lg transition-all",
-                    currentPage === i + 1 ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
-                  )}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              disabled={currentPage === totalPages || totalPages === 0}
-              onClick={() => setCurrentPage(prev => prev + 1)}
-              className="p-1.5 disabled:opacity-30 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          total={total}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </Card>
 
       {/* Batch Record Modal */}
@@ -421,15 +388,16 @@ export const StudentPayments = () => {
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t('payments.form.method')}</Label>
-                  <select
+                  <Select
                     value={batchMethod}
-                    onChange={(e) => setBatchMethod(e.target.value as 'CASH' | 'TRANSFER' | 'OTHER')}
-                    className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
-                  >
-                    <option value="TRANSFER">{t('payments.form.bankTransfer')}</option>
-                    <option value="CASH">{t('payments.form.cash')}</option>
-                    <option value="OTHER">{t('payments.form.eWallet')}</option>
-                  </select>
+                    onChange={(value) => setBatchMethod(value as 'CASH' | 'TRANSFER' | 'OTHER')}
+                    className="w-full"
+                    options={[
+                      { value: 'TRANSFER', label: t('payments.form.bankTransfer') },
+                      { value: 'CASH', label: t('payments.form.cash') },
+                      { value: 'OTHER', label: t('payments.form.eWallet') },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
@@ -511,15 +479,16 @@ export const StudentPayments = () => {
                     </div>
                     <div className="space-y-1.5">
                       <Label>{t('payments.form.method')}</Label>
-                      <select
+                      <Select
                         value={paymentMethod}
-                        onChange={(e) => setPaymentMethod(e.target.value as 'CASH' | 'TRANSFER' | 'OTHER')}
-                        className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
-                      >
-                        <option value="TRANSFER">{t('payments.form.bankTransfer')}</option>
-                        <option value="CASH">{t('payments.form.cash')}</option>
-                        <option value="OTHER">{t('payments.form.eWallet')}</option>
-                      </select>
+                        onChange={(value) => setPaymentMethod(value as 'CASH' | 'TRANSFER' | 'OTHER')}
+                        className="w-full"
+                        options={[
+                          { value: 'TRANSFER', label: t('payments.form.bankTransfer') },
+                          { value: 'CASH', label: t('payments.form.cash') },
+                          { value: 'OTHER', label: t('payments.form.eWallet') },
+                        ]}
+                      />
                     </div>
                   </div>
 
