@@ -882,7 +882,35 @@
     "paymentCountLabel": "{{count}} payments",
     "payoutCountLabel": "{{count}} payouts",
     "expenseCountLabel": "{{count}} records",
-    "exportCsv": "Export CSV"
+    "exportCsv": "Export CSV",
+    "totalPayouts": "Total Payouts",
+    "totalExpenses": "Total Expenses",
+    "class": "Class",
+    "revenueLabel": "Revenue",
+    "payments": "Payments",
+    "method": "Method",
+    "count": "Count",
+    "category": "Category",
+    "records": "Records",
+    "status": {
+      "NEW": "New",
+      "PAID": "Paid",
+      "PENDING": "Pending",
+      "OVERDUE": "Overdue"
+    },
+    "methodLabel": {
+      "TRANSFER": "Bank Transfer",
+      "CASH": "Cash",
+      "OTHER": "Other"
+    },
+    "expenseCategory": {
+      "RENT": "Rent",
+      "SUPPLIES": "Supplies",
+      "UTILITIES": "Utilities",
+      "SALARY": "Salary",
+      "MARKETING": "Marketing",
+      "OTHER": "Other"
+    }
   },
 
   "payments": {

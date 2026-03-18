@@ -882,7 +882,35 @@
     "paymentCountLabel": "{{count}} pembayaran",
     "payoutCountLabel": "{{count}} pembayaran tutor",
     "expenseCountLabel": "{{count}} catatan",
-    "exportCsv": "Ekspor CSV"
+    "exportCsv": "Ekspor CSV",
+    "totalPayouts": "Total Pembayaran Tutor",
+    "totalExpenses": "Total Biaya Operasional",
+    "class": "Kelas",
+    "revenueLabel": "Pendapatan",
+    "payments": "Pembayaran",
+    "method": "Metode",
+    "count": "Jumlah",
+    "category": "Kategori",
+    "records": "Catatan",
+    "status": {
+      "NEW": "Baru",
+      "PAID": "Lunas",
+      "PENDING": "Tertunda",
+      "OVERDUE": "Terlambat"
+    },
+    "methodLabel": {
+      "TRANSFER": "Transfer Bank",
+      "CASH": "Tunai",
+      "OTHER": "Lainnya"
+    },
+    "expenseCategory": {
+      "RENT": "Sewa",
+      "SUPPLIES": "Perlengkapan",
+      "UTILITIES": "Utilitas",
+      "SALARY": "Gaji",
+      "MARKETING": "Pemasaran",
+      "OTHER": "Lainnya"
+    }
   },
 
   "payments": {

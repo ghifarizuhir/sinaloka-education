@@ -264,7 +264,7 @@ export const FinanceOverview = () => {
                 {formatCurrency(summary?.total_payouts ?? 0, i18n.language)}
               </h3>
               <p className="text-[10px] text-zinc-400 mt-1">
-                {t('finance.paymentCountLabel', { count: summary?.payout_count ?? 0 })}
+                {t('finance.payoutCountLabel', { count: summary?.payout_count ?? 0 })}
               </p>
             </Card>
 
@@ -279,7 +279,7 @@ export const FinanceOverview = () => {
                 {formatCurrency(summary?.total_expenses ?? 0, i18n.language)}
               </h3>
               <p className="text-[10px] text-zinc-400 mt-1">
-                {t('finance.paymentCountLabel', { count: summary?.expense_count ?? 0 })}
+                {t('finance.expenseCountLabel', { count: summary?.expense_count ?? 0 })}
               </p>
             </Card>
 
@@ -326,7 +326,7 @@ export const FinanceOverview = () => {
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => formatCurrencyShort(v, i18n.language)} />
               <Tooltip formatter={(v: number) => formatCurrency(v, i18n.language)} />
-              <Bar dataKey="amount" fill="#18181b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -354,7 +354,7 @@ export const FinanceOverview = () => {
                   ) : (revenueBreakdown.by_class ?? []).map((item: any, idx: number) => (
                     <tr key={idx}>
                       <td className="py-2 text-sm dark:text-zinc-200">{item.class_name}</td>
-                      <td className="py-2 text-sm font-medium text-right dark:text-zinc-100">{formatCurrency(item.revenue, i18n.language)}</td>
+                      <td className="py-2 text-sm font-medium text-right dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</td>
                       <td className="py-2 text-sm text-zinc-500 text-right">{item.payment_count}</td>
                     </tr>
                   ))}
@@ -378,7 +378,7 @@ export const FinanceOverview = () => {
                     <tr><td colSpan={3} className="py-4 text-center text-sm text-zinc-400">{t('common.noData')}</td></tr>
                   ) : (revenueBreakdown.by_payment_method ?? []).map((item: any, idx: number) => (
                     <tr key={idx}>
-                      <td className="py-2 text-sm dark:text-zinc-200">{item.method}</td>
+                      <td className="py-2 text-sm dark:text-zinc-200">{t(`finance.methodLabel.${item.method}`, item.method)}</td>
                       <td className="py-2 text-sm font-medium text-right dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</td>
                       <td className="py-2 text-sm text-zinc-500 text-right">{item.count}</td>
                     </tr>
@@ -399,7 +399,7 @@ export const FinanceOverview = () => {
                       variant={item.status === 'PAID' ? 'success' : item.status === 'PENDING' ? 'warning' : 'error'}
                       className="text-[10px]"
                     >
-                      {item.status}
+                      {t(`finance.status.${item.status}`, item.status)}
                     </Badge>
                     <span className="text-sm font-medium dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</span>
                   </div>
@@ -431,7 +431,7 @@ export const FinanceOverview = () => {
                     <tr><td colSpan={3} className="py-4 text-center text-sm text-zinc-400">{t('common.noData')}</td></tr>
                   ) : (expenseBreakdown.by_category ?? []).map((item: any, idx: number) => (
                     <tr key={idx}>
-                      <td className="py-2 text-sm dark:text-zinc-200">{item.category}</td>
+                      <td className="py-2 text-sm dark:text-zinc-200">{t(`finance.expenseCategory.${item.category}`, item.category)}</td>
                       <td className="py-2 text-sm font-medium text-right dark:text-zinc-100">{formatCurrency(item.amount, i18n.language)}</td>
                       <td className="py-2 text-sm text-zinc-500 text-right">{item.count}</td>
                     </tr>
