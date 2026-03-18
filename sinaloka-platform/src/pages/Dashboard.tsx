@@ -1,38 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Users,
   GraduationCap,
-  BookOpen,
-  ArrowUpRight,
   ChevronRight,
   Clock,
-  AlertCircle,
   AlertTriangle,
-  CheckCircle2,
   TrendingUp,
-  Plus,
   Receipt,
   ClipboardCheck,
   UserPlus,
   Calendar,
-  MoreVertical,
   Zap,
   Search,
   Command,
-  X
+  X,
+  Sparkles,
+  BookOpen,
+  CreditCard,
+  Activity,
+  Sun,
+  Moon,
+  Sunset
 } from 'lucide-react';
-import { Card, Button, Badge, Skeleton, Progress, PageHeader } from '../components/UI';
+import { Card, Button, Skeleton } from '../components/UI';
 import { cn, formatCurrencyShort, formatCurrency } from '../lib/utils';
-import { toast } from 'sonner';
 import { useDashboardStats, useDashboardActivity } from '@/src/hooks/useDashboard';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
+import { AuthContext } from '@/src/contexts/AuthContext';
+
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return { key: 'morning' as const, icon: Sun, gradient: 'from-amber-200 via-orange-100 to-yellow-50 dark:from-amber-950/40 dark:via-orange-950/20 dark:to-transparent' };
+  if (h < 17) return { key: 'afternoon' as const, icon: Sunset, gradient: 'from-sky-200 via-blue-100 to-indigo-50 dark:from-sky-950/40 dark:via-blue-950/20 dark:to-transparent' };
+  return { key: 'evening' as const, icon: Moon, gradient: 'from-indigo-200 via-purple-100 to-violet-50 dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-transparent' };
+};
+
+const getActivityIcon = (type: string) => {
+  switch (type) {
+    case 'enrollment': return UserPlus;
+    case 'payment': return Receipt;
+    case 'attendance': return ClipboardCheck;
+    default: return Activity;
+  }
+};
+
+const getActivityColor = (type: string) => {
+  switch (type) {
+    case 'enrollment': return 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+    case 'payment': return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+    case 'attendance': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+    default: return 'bg-muted text-muted-foreground';
+  }
+};
 
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const auth = useContext(AuthContext);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
@@ -40,24 +67,8 @@ export const Dashboard = () => {
   const { data: overdueSummary } = useOverdueSummary();
 
   const isLoading = statsLoading || activityLoading;
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'enrollment': return UserPlus;
-      case 'payment': return Receipt;
-      case 'attendance': return ClipboardCheck;
-      default: return CheckCircle2;
-    }
-  };
-
-  const getActivityCategory = (type: string) => {
-    switch (type) {
-      case 'enrollment': return t('dashboard.activityCategory.operations');
-      case 'payment': return t('dashboard.activityCategory.finance');
-      case 'attendance': return t('dashboard.activityCategory.academic');
-      default: return t('dashboard.activityCategory.system');
-    }
-  };
+  const greeting = getGreeting();
+  const userName = auth?.user?.name?.split(' ')[0] ?? '';
 
   const getTimeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -70,331 +81,309 @@ export const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <Card key={i} className="space-y-4">
-              <div className="flex justify-between">
-                <Skeleton className="w-10 h-10" />
-                <Skeleton className="w-12 h-5" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="w-24 h-4" />
-                <Skeleton className="w-32 h-8" />
-              </div>
-            </Card>
-          ))}
+      <div className="space-y-6">
+        <Skeleton className="h-40 rounded-3xl" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Skeleton className="lg:col-span-2 h-[400px]" />
-          <Skeleton className="h-[400px]" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Skeleton className="lg:col-span-2 h-80 rounded-2xl" />
+          <Skeleton className="h-80 rounded-2xl" />
         </div>
       </div>
     );
   }
 
-  const statCards = [
-    {
-      label: t('dashboard.totalStudents'),
-      value: stats?.total_students?.toLocaleString() ?? '—',
-      icon: Users,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50 dark:bg-indigo-900/20'
-    },
-    {
-      label: t('dashboard.activeTutors'),
-      value: stats?.active_tutors?.toLocaleString() ?? '—',
-      icon: GraduationCap,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50 dark:bg-emerald-900/20'
-    },
-    {
-      label: t('dashboard.attendanceRate'),
-      value: stats?.attendance_rate != null ? `${stats.attendance_rate.toFixed(1)}%` : '—',
-      icon: ClipboardCheck,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50 dark:bg-amber-900/20'
-    },
-    {
-      label: t('dashboard.monthlyRevenue'),
-      value: stats?.total_revenue != null ? formatCurrencyShort(stats.total_revenue, i18n.language) : '—',
-      icon: ArrowUpRight,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50 dark:bg-indigo-900/20'
-    },
-  ];
-
   return (
-    <div className="space-y-8 pb-20">
-      {/* Header */}
-      <PageHeader
-        title={t('dashboard.greeting')}
-        subtitle={t('dashboard.subtitle')}
-        actions={
-          <>
-            <Button
-              variant="outline"
-              className="h-10"
-              onClick={() => navigate('/schedules')}
-            >
-              <Calendar size={16} />
-              {t('dashboard.schedule')}
-            </Button>
-            <div className="relative group">
+    <div className="space-y-6 pb-20">
+      {/* ─── Hero Greeting ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className={cn(
+          "relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br",
+          greeting.gradient
+        )}>
+          {/* Decorative circles */}
+          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/20 dark:bg-white/5 blur-2xl" />
+          <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-white/30 dark:bg-white/5 blur-xl" />
+
+          <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-foreground/60">
+                <greeting.icon size={16} />
+                <span className="text-xs font-semibold uppercase tracking-widest">{t(`dashboard.greeting_${greeting.key}`)}</span>
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                {userName ? `${userName} 👋` : t('dashboard.greeting')}
+              </h1>
+              <p className="text-sm text-foreground/60 max-w-md">
+                {t('dashboard.subtitle')}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
               <Button
-                className="h-10 gap-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                variant="outline"
+                className="bg-background/60 backdrop-blur-sm border-border/50"
+                onClick={() => navigate('/schedules')}
+              >
+                <Calendar size={16} />
+                {t('dashboard.schedule')}
+              </Button>
+              <Button
+                className="bg-foreground text-background hover:bg-foreground/90"
                 onClick={() => setIsCommandPaletteOpen(true)}
               >
                 <Zap size={16} />
                 {t('dashboard.quickActions')}
               </Button>
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
-                <button
-                  onClick={() => navigate('/enrollments')}
-                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-                >
-                  <UserPlus size={14} /> {t('dashboard.quickEnroll')}
-                </button>
-                <button
-                  onClick={() => navigate('/finance/payments')}
-                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-                >
-                  <Receipt size={14} /> {t('dashboard.recordPayment')}
-                </button>
-                <button
-                  onClick={() => navigate('/schedules')}
-                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-                >
-                  <Plus size={14} /> {t('dashboard.addMakeupClass')}
-                </button>
-              </div>
             </div>
-          </>
-        }
-      />
+          </div>
+        </div>
+      </motion.div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, i) => (
+      {/* ─── Overdue Alert ─── */}
+      {overdueSummary && overdueSummary.overdue_count > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <div className="flex items-center gap-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+              <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{t('payments.overdueAlert.title')}</p>
+              <p className="text-xs text-amber-700/80 dark:text-amber-400/70 truncate">
+                {t('payments.overdueAlert.students', { count: overdueSummary.flagged_students.length })} · {t('payments.overdueAlert.totalDebt', { amount: formatCurrency(overdueSummary.total_overdue_amount, i18n.language) })}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900/30 shrink-0"
+              onClick={() => navigate('/finance/payments')}
+            >
+              {t('payments.overdueAlert.viewDetails')}
+              <ChevronRight size={14} />
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ─── Bento Stats Grid ─── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            label: t('dashboard.totalStudents'),
+            value: stats?.total_students?.toLocaleString() ?? '—',
+            icon: Users,
+            accent: 'text-blue-600 dark:text-blue-400',
+            accentBg: 'bg-blue-500/10',
+            sub: t('dashboard.enrolled'),
+          },
+          {
+            label: t('dashboard.activeTutors'),
+            value: stats?.active_tutors?.toLocaleString() ?? '—',
+            icon: GraduationCap,
+            accent: 'text-emerald-600 dark:text-emerald-400',
+            accentBg: 'bg-emerald-500/10',
+            sub: t('tutors.status.verified'),
+          },
+          {
+            label: t('dashboard.attendanceRate'),
+            value: stats?.attendance_rate != null ? `${stats.attendance_rate.toFixed(0)}%` : '—',
+            icon: ClipboardCheck,
+            accent: 'text-amber-600 dark:text-amber-400',
+            accentBg: 'bg-amber-500/10',
+            sub: t('dashboard.rate'),
+          },
+          {
+            label: t('dashboard.monthlyRevenue'),
+            value: stats?.total_revenue != null ? formatCurrencyShort(stats.total_revenue, i18n.language) : '—',
+            icon: TrendingUp,
+            accent: 'text-violet-600 dark:text-violet-400',
+            accentBg: 'bg-violet-500/10',
+            sub: t('finance.thisMonth'),
+          },
+        ].map((stat, i) => (
           <motion.div
             key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
+            transition={{ delay: 0.2 + i * 0.08, duration: 0.4 }}
           >
-            <Card className="flex flex-col gap-4 group hover:border-zinc-300 dark:hover:border-zinc-600 transition-all">
-              <div className="flex items-center justify-between">
-                <div className={cn("p-2 rounded-lg", stat.bg)}>
-                  <stat.icon size={20} className={stat.color} />
+            <Card className="p-5 hover:shadow-md transition-shadow group cursor-default">
+              <div className="flex items-start justify-between mb-4">
+                <div className={cn('p-2.5 rounded-xl', stat.accentBg)}>
+                  <stat.icon size={18} className={stat.accent} />
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">{stat.label}</p>
-                <p className="text-2xl font-bold tracking-tight dark:text-zinc-100">{stat.value}</p>
-              </div>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
             </Card>
           </motion.div>
         ))}
       </div>
 
-      {/* Overdue Payment Alert */}
-      {overdueSummary && overdueSummary.overdue_count > 0 && (
-        <Card className="p-4 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <AlertTriangle size={20} className="text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-amber-900 dark:text-amber-200">{t('payments.overdueAlert.title')}</p>
-                <p className="text-xs text-amber-700 dark:text-amber-400">
-                  {t('payments.overdueAlert.students', { count: overdueSummary.flagged_students.length })} · {t('payments.overdueAlert.totalDebt', { amount: formatCurrency(overdueSummary.total_overdue_amount, i18n.language) })}
+      {/* ─── Main Content: 2/3 + 1/3 Layout ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        {/* Left: Sessions & Metrics */}
+        <motion.div
+          className="lg:col-span-2 space-y-4"
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+        >
+          {/* Revenue + Sessions Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Revenue Card */}
+            <Card className="p-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-violet-500/5 to-transparent rounded-bl-full" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 rounded-lg bg-violet-500/10">
+                    <CreditCard size={16} className="text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('dashboard.monthlyRevenue')}</span>
+                </div>
+                <p className="text-3xl font-bold tracking-tight text-foreground">
+                  {stats?.total_revenue != null ? formatCurrency(stats.total_revenue, i18n.language) : '—'}
                 </p>
+                <p className="text-xs text-muted-foreground mt-2">{t('finance.basedOnTotalRevenue')}</p>
               </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30"
-              onClick={() => navigate('/finance/payments')}
-            >
-              {t('payments.overdueAlert.viewDetails')}
-            </Button>
-          </div>
-        </Card>
-      )}
+            </Card>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Upcoming Sessions */}
-        <Card className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-bold text-lg dark:text-zinc-100">{t('dashboard.overview')}</h3>
-              <p className="text-xs text-zinc-500">{t('dashboard.keyMetrics')}</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/schedules')}>{t('dashboard.fullSchedule')}</Button>
+            {/* Sessions Card */}
+            <Card className="p-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/5 to-transparent rounded-bl-full" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 rounded-lg bg-blue-500/10">
+                    <BookOpen size={16} className="text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('dashboard.upcomingSessions')}</span>
+                </div>
+                <p className="text-3xl font-bold tracking-tight text-foreground">
+                  {stats?.upcoming_sessions ?? '—'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">{t('dashboard.sessionsPlanned')}</p>
+              </div>
+            </Card>
           </div>
 
-          <div className="space-y-4">
-            <div className="p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-2 h-12 rounded-full bg-indigo-500" />
-                  <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-bold text-sm dark:text-zinc-100">{t('dashboard.upcomingSessions')}</h4>
-                      <Badge variant="default">{stats?.upcoming_sessions ?? 0} {t('dashboard.scheduled')}</Badge>
-                    </div>
-                    <p className="text-xs text-zinc-500">{t('dashboard.sessionsPlanned')}</p>
-                  </div>
+          {/* Activity Feed */}
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-muted">
+                  <Activity size={16} className="text-muted-foreground" />
                 </div>
-                <Button variant="outline" size="sm" onClick={() => navigate('/schedules')}>
-                  {t('common.viewAll')}
-                </Button>
+                <div>
+                  <h3 className="font-bold text-sm text-foreground">{t('dashboard.recentActivity')}</h3>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{t('dashboard.liveFeed')}</p>
+                </div>
               </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/attendance')}>
+                {t('common.viewAll')}
+              </Button>
             </div>
 
-            <div className="p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-2 h-12 rounded-full bg-emerald-500" />
-                  <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-bold text-sm dark:text-zinc-100">{t('dashboard.studentAttendance')}</h4>
-                      <Badge variant="success">{stats?.attendance_rate?.toFixed(1) ?? 0}% {t('dashboard.rate')}</Badge>
-                    </div>
-                    <p className="text-xs text-zinc-500">{t('dashboard.overallAttendance')}</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => navigate('/attendance')}>
-                  {t('common.viewDetails')}
-                </Button>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-2 h-12 rounded-full bg-amber-500" />
-                  <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-bold text-sm dark:text-zinc-100">{t('dashboard.totalStudents')}</h4>
-                      <Badge variant="warning">{stats?.total_students?.toLocaleString() ?? 0} {t('dashboard.enrolled')}</Badge>
-                    </div>
-                    <p className="text-xs text-zinc-500">{t('dashboard.registeredStudents')}</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => navigate('/students')}>
-                  {t('dashboard.viewStudents')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Action Center */}
-        <div className="space-y-6">
-          <Card className="border-l-4 border-l-indigo-500">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600">
-                <TrendingUp size={18} />
-              </div>
-              <h3 className="font-bold text-lg dark:text-zinc-100">{t('dashboard.revenueSummary')}</h3>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 shrink-0">
-                    <Receipt size={16} className="text-indigo-500" />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{t('dashboard.monthlyRevenue')}</span>
-                </div>
-                <span className="text-sm font-bold dark:text-zinc-100">
-                  {stats?.total_revenue != null ? formatCurrencyShort(stats.total_revenue, i18n.language) : '—'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 shrink-0">
-                    <Users size={16} className="text-emerald-500" />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{t('dashboard.activeTutors')}</span>
-                </div>
-                <span className="text-sm font-bold dark:text-zinc-100">{stats?.active_tutors ?? '—'}</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 shrink-0">
-                    <Clock size={16} className="text-amber-500" />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{t('dashboard.upcomingSessions')}</span>
-                </div>
-                <span className="text-sm font-bold dark:text-zinc-100">{stats?.upcoming_sessions ?? '—'}</span>
-              </div>
+            <div className="space-y-1">
+              {activity && activity.length > 0 ? (
+                activity.slice(0, 6).map((item, index) => {
+                  const IconComp = getActivityIcon(item.type);
+                  const colorClass = getActivityColor(item.type);
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + index * 0.06 }}
+                      className="flex items-center gap-3 py-3 px-3 -mx-3 rounded-xl hover:bg-muted/50 transition-colors group cursor-default"
+                    >
+                      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', colorClass)}>
+                        <IconComp size={14} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground truncate">{item.description}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium">
+                          {getTimeAgo(item.created_at)}
+                        </p>
+                      </div>
+                      <ChevronRight size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground transition-colors shrink-0" />
+                    </motion.div>
+                  );
+                })
+              ) : (
+                <div className="py-12 text-center text-muted-foreground text-sm">{t('dashboard.noRecentActivity')}</div>
+              )}
             </div>
           </Card>
+        </motion.div>
 
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-sm dark:text-zinc-100">{t('dashboard.quickLinks')}</h3>
+        {/* Right Sidebar */}
+        <motion.div
+          className="space-y-4"
+          initial={{ opacity: 0, x: 12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
+        >
+          {/* Quick Navigate */}
+          <Card className="p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles size={14} className="text-muted-foreground" />
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.quickLinks')}</h3>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {[
-                { label: t('dashboard.viewAllStudents'), path: '/students', icon: Users },
-                { label: t('dashboard.manageFinance'), path: '/finance', icon: Receipt },
-                { label: t('dashboard.attendanceRecords'), path: '/attendance', icon: ClipboardCheck },
+                { label: t('dashboard.viewAllStudents'), path: '/students', icon: Users, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10' },
+                { label: t('dashboard.manageFinance'), path: '/finance', icon: CreditCard, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-500/10' },
+                { label: t('dashboard.attendanceRecords'), path: '/attendance', icon: ClipboardCheck, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10' },
+                { label: t('dashboard.schedule'), path: '/schedules', icon: Calendar, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10' },
               ].map((link, i) => (
                 <button
                   key={i}
                   onClick={() => navigate(link.path)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group text-left"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted/70 transition-all group text-left"
                 >
-                  <link.icon size={16} className="text-zinc-400" />
-                  <span className="text-sm font-medium dark:text-zinc-200 flex-1">{link.label}</span>
-                  <ChevronRight size={14} className="text-zinc-300 opacity-0 group-hover:opacity-100 transition-all" />
+                  <div className={cn('p-2 rounded-lg transition-transform group-hover:scale-110', link.bg)}>
+                    <link.icon size={14} className={link.color} />
+                  </div>
+                  <span className="text-sm font-medium text-foreground flex-1">{link.label}</span>
+                  <ChevronRight size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all" />
                 </button>
               ))}
             </div>
           </Card>
-        </div>
+
+          {/* Metrics Summary */}
+          <Card className="p-5 bg-gradient-to-br from-card to-muted/30">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp size={14} className="text-muted-foreground" />
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.overview')}</h3>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: t('dashboard.monthlyRevenue'), value: stats?.total_revenue != null ? formatCurrencyShort(stats.total_revenue, i18n.language) : '—', icon: Receipt, color: 'text-violet-500' },
+                { label: t('dashboard.activeTutors'), value: stats?.active_tutors?.toString() ?? '—', icon: GraduationCap, color: 'text-emerald-500' },
+                { label: t('dashboard.upcomingSessions'), value: stats?.upcoming_sessions?.toString() ?? '—', icon: Clock, color: 'text-blue-500' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2.5">
+                    <item.icon size={14} className={item.color} />
+                    <span className="text-xs text-muted-foreground">{item.label}</span>
+                  </div>
+                  <span className="text-sm font-bold text-foreground tabular-nums">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </motion.div>
       </div>
 
-      {/* Activity Feed */}
-      <Card>
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-lg dark:text-zinc-100">{t('dashboard.recentActivity')}</h3>
-          <Button variant="outline" size="sm">{t('common.viewAll')}</Button>
-        </div>
-        <div className="space-y-6">
-          {activity && activity.length > 0 ? (
-            activity.map((item, index) => {
-              const IconComp = getActivityIcon(item.type);
-              return (
-                <div key={index} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400">
-                      <IconComp size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium dark:text-zinc-200">{item.description}</p>
-                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-bold">
-                        {getTimeAgo(item.created_at)} • {getActivityCategory(item.type)}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight size={16} className="text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
-                </div>
-              );
-            })
-          ) : (
-            <div className="py-8 text-center text-zinc-400 text-sm">{t('dashboard.noRecentActivity')}</div>
-          )}
-        </div>
-      </Card>
-
-      {/* Command Palette Modal */}
+      {/* ─── Command Palette ─── */}
       <AnimatePresence>
         {isCommandPaletteOpen && (
           <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
@@ -403,75 +392,70 @@ export const Dashboard = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCommandPaletteOpen(false)}
-              className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm"
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              initial={{ opacity: 0, scale: 0.96, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 overflow-hidden"
+              exit={{ opacity: 0, scale: 0.96, y: -10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-xl bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
             >
-              <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-                <Search className="text-zinc-400" size={20} />
+              <div className="p-4 border-b border-border flex items-center gap-3">
+                <Search className="text-muted-foreground" size={18} />
                 <input
                   autoFocus
                   placeholder={t('dashboard.commandPalette.searchPlaceholder')}
-                  className="flex-1 bg-transparent border-none outline-none text-sm dark:text-zinc-100"
+                  className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
                 />
-                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-[10px] font-mono text-zinc-400">
-                  <Command size={10} />
-                  <span>K</span>
-                </div>
+                <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px] font-mono text-muted-foreground flex items-center gap-0.5">
+                  <Command size={10} /> K
+                </kbd>
                 <button
                   onClick={() => setIsCommandPaletteOpen(false)}
-                  className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                  className="p-1 hover:bg-accent rounded-lg transition-colors"
                 >
-                  <X size={16} className="text-zinc-400" />
+                  <X size={16} className="text-muted-foreground" />
                 </button>
               </div>
 
-              <div className="max-h-[60vh] overflow-y-auto p-2 scrollbar-thin">
-                <div className="px-3 py-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('dashboard.commandPalette.quickActions')}</div>
-                <div className="space-y-1">
-                  {[
-                    { icon: UserPlus, label: t('dashboard.commandPalette.enrollNewStudent'), path: '/enrollments', color: 'text-blue-500' },
-                    { icon: Receipt, label: t('dashboard.commandPalette.recordNewPayment'), path: '/finance/payments', color: 'text-emerald-500' },
-                    { icon: Calendar, label: t('dashboard.commandPalette.scheduleMakeupClass'), path: '/schedules', color: 'text-amber-500' },
-                    { icon: Users, label: t('dashboard.commandPalette.addNewTutor'), path: '/tutors', color: 'text-purple-500' },
-                  ].map((action, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        navigate(action.path);
-                        setIsCommandPaletteOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group text-left"
-                    >
-                      <div className={cn("p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 group-hover:bg-white dark:group-hover:bg-zinc-900 transition-colors", action.color)}>
-                        <action.icon size={18} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium dark:text-zinc-200">{action.label}</p>
-                        <p className="text-[10px] text-zinc-500">{t('dashboard.commandPalette.navigateTo', { path: action.path })}</p>
-                      </div>
-                      <ChevronRight size={14} className="text-zinc-300 opacity-0 group-hover:opacity-100 transition-all" />
-                    </button>
-                  ))}
-                </div>
+              <div className="max-h-[50vh] overflow-y-auto p-2 scrollbar-thin">
+                <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.commandPalette.quickActions')}</div>
+                {[
+                  { icon: UserPlus, label: t('dashboard.commandPalette.enrollNewStudent'), path: '/enrollments', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                  { icon: Receipt, label: t('dashboard.commandPalette.recordNewPayment'), path: '/finance/payments', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                  { icon: Calendar, label: t('dashboard.commandPalette.scheduleMakeupClass'), path: '/schedules', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                  { icon: Users, label: t('dashboard.commandPalette.addNewTutor'), path: '/tutors', color: 'text-violet-500', bg: 'bg-violet-500/10' },
+                ].map((action, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { navigate(action.path); setIsCommandPaletteOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent transition-colors group text-left"
+                  >
+                    <div className={cn('p-2 rounded-lg', action.bg, action.color)}>
+                      <action.icon size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{action.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{t('dashboard.commandPalette.navigateTo', { path: action.path })}</p>
+                    </div>
+                    <ChevronRight size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
+                  </button>
+                ))}
               </div>
 
-              <div className="p-3 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+              <div className="p-3 bg-muted/50 border-t border-border flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[10px] font-mono shadow-sm">↑↓</kbd>
-                    <span className="text-[10px] text-zinc-500">{t('dashboard.commandPalette.navigate')}</span>
+                    <kbd className="px-1.5 py-0.5 rounded border border-border bg-card text-[10px] font-mono shadow-sm">↑↓</kbd>
+                    <span className="text-[10px] text-muted-foreground">{t('dashboard.commandPalette.navigate')}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-[10px] font-mono shadow-sm">Enter</kbd>
-                    <span className="text-[10px] text-zinc-500">{t('dashboard.commandPalette.select')}</span>
+                    <kbd className="px-1.5 py-0.5 rounded border border-border bg-card text-[10px] font-mono shadow-sm">Enter</kbd>
+                    <span className="text-[10px] text-muted-foreground">{t('dashboard.commandPalette.select')}</span>
                   </div>
                 </div>
-                <span className="text-[10px] text-zinc-400">{t('dashboard.commandPalette.version')}</span>
+                <span className="text-[10px] text-muted-foreground">{t('dashboard.commandPalette.version')}</span>
               </div>
             </motion.div>
           </div>
