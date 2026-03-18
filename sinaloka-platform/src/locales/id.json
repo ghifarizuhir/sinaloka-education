@@ -43,7 +43,6 @@
     "allSubjects": "Semua Mata Pelajaran",
     "allClasses": "Semua Kelas",
     "allCategories": "Semua Kategori",
-    "allStatus": "Semua Status",
     "perSession": "per sesi",
     "saveChanges": "Simpan Perubahan",
     "confirm": "Konfirmasi",
@@ -384,7 +383,7 @@
 
   "classes": {
     "title": "Kelas",
-    "subtitle": "Kelola katalog kursus dan pendaftaran.",
+    "subtitle": "Kelola katalog kelas dan pendaftaran.",
     "registerNewClass": "Daftarkan Kelas Baru",
     "noClassesFound": "Tidak ada kelas ditemukan",
     "noClassesHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
@@ -392,7 +391,7 @@
     "activeOnly": "Hanya Aktif",
     "totalMonthlyFee": "Total Biaya Bulanan",
     "totalClasses": "Total Kelas",
-    "activeCourses": "Kursus Aktif",
+    "activeCourses": "Kelas Aktif",
     "form": {
       "className": "Nama Kelas",
       "classNamePlaceholder": "contoh: Fisika Lanjutan",
@@ -662,7 +661,7 @@
 
   "enrollments": {
     "title": "Pendaftaran",
-    "subtitle": "Kelola siklus pendaftaran kursus siswa dan status keuangan.",
+    "subtitle": "Kelola siklus pendaftaran siswa dan status keuangan.",
     "newEnrollment": "Pendaftaran Baru",
     "bulkImport": "Impor Massal",
     "exportCsv": "Ekspor CSV",
@@ -1184,7 +1183,7 @@
       "sendgrid": "SendGrid",
       "sendgridDesc": "SMTP email untuk faktur",
       "googleCalendar": "Google Calendar",
-      "googleCalendarDesc": "Sinkronkan jadwal guru",
+      "googleCalendarDesc": "Sinkronkan jadwal tutor",
       "connected": "Terhubung",
       "notConnected": "Belum Terhubung"
     }
