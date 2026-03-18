@@ -14,7 +14,7 @@ export function Drawer({ isOpen, onClose, title, children }: { isOpen: boolean, 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-zinc-950/50 backdrop-blur-sm"
+          className="absolute inset-0 bg-background/80 backdrop-blur-sm"
         />
         <motion.div
           initial={{ x: '100%' }}
@@ -23,13 +23,13 @@ export function Drawer({ isOpen, onClose, title, children }: { isOpen: boolean, 
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           role="dialog"
           aria-modal="true"
-          className="relative w-full max-w-md bg-white dark:bg-zinc-900 h-full shadow-2xl overflow-hidden flex flex-col"
+          className="relative w-full max-w-md bg-card h-full shadow-2xl overflow-hidden flex flex-col border-l border-border"
         >
-          <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
-            <h3 className="text-xl font-bold dark:text-zinc-100">{title}</h3>
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <h3 className="text-xl font-bold text-foreground">{title}</h3>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
+              className="p-2 hover:bg-accent rounded-full transition-colors text-muted-foreground"
             >
               <X size={20} />
             </button>
