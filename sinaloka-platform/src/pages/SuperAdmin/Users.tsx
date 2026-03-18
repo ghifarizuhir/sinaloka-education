@@ -17,6 +17,8 @@ import {
   Label,
   Switch,
   PasswordInput,
+  PageHeader,
+  Select,
 } from '../../components/UI';
 import { cn, formatDate } from '../../lib/utils';
 import { useUsers, useCreateUser, useUpdateUser } from '@/src/hooks/useUsers';
@@ -30,9 +32,6 @@ const ROLE_BADGE: Record<string, { variant: 'default' | 'success' | 'warning' | 
   PARENT: { variant: 'default', className: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' },
   SUPER_ADMIN: { variant: 'default', className: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' },
 };
-
-const selectClass =
-  'h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200';
 
 export default function SuperAdminUsers() {
   const { t, i18n } = useTranslation();
@@ -132,21 +131,16 @@ export default function SuperAdminUsers() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold dark:text-zinc-100">
-            {t('superAdmin.users')}
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {t('superAdmin.usersSubtitle')}
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateModal(true)}>
-          <Plus size={16} />
-          {t('superAdmin.createAdmin')}
-        </Button>
-      </div>
+      <PageHeader
+        title={t('superAdmin.users')}
+        subtitle={t('superAdmin.usersSubtitle')}
+        actions={
+          <Button onClick={() => setShowCreateModal(true)}>
+            <Plus size={16} />
+            {t('superAdmin.createAdmin')}
+          </Button>
+        }
+      />
 
       {/* Search + Filters */}
       <Card className="!p-0 overflow-hidden">
@@ -161,35 +155,33 @@ export default function SuperAdminUsers() {
               }}
             />
           </div>
-          <select
-            className={selectClass}
+          <Select
             value={roleFilter}
-            onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-          >
-            <option value="">{t('superAdmin.allRoles')}</option>
-            <option value="ADMIN">Admin</option>
-            <option value="TUTOR">Tutor</option>
-            <option value="PARENT">Parent</option>
-          </select>
-          <select
-            className={selectClass}
+            onChange={(val) => { setRoleFilter(val); setPage(1); }}
+            options={[
+              { value: '', label: t('superAdmin.allRoles') },
+              { value: 'ADMIN', label: 'Admin' },
+              { value: 'TUTOR', label: 'Tutor' },
+              { value: 'PARENT', label: 'Parent' },
+            ]}
+          />
+          <Select
             value={institutionFilter}
-            onChange={(e) => { setInstitutionFilter(e.target.value); setPage(1); }}
-          >
-            <option value="">{t('superAdmin.allInstitutions')}</option>
-            {institutions.map((inst) => (
-              <option key={inst.id} value={inst.id}>{inst.name}</option>
-            ))}
-          </select>
-          <select
-            className={selectClass}
+            onChange={(val) => { setInstitutionFilter(val); setPage(1); }}
+            options={[
+              { value: '', label: t('superAdmin.allInstitutions') },
+              ...institutions.map((inst) => ({ value: inst.id, label: inst.name })),
+            ]}
+          />
+          <Select
             value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          >
-            <option value="">{t('superAdmin.allStatuses')}</option>
-            <option value="active">{t('common.active')}</option>
-            <option value="inactive">{t('common.inactive')}</option>
-          </select>
+            onChange={(val) => { setStatusFilter(val); setPage(1); }}
+            options={[
+              { value: '', label: t('superAdmin.allStatuses') },
+              { value: 'active', label: t('common.active') },
+              { value: 'inactive', label: t('common.inactive') },
+            ]}
+          />
         </div>
 
         {/* Table */}
@@ -382,16 +374,14 @@ export default function SuperAdminUsers() {
           </div>
           <div className="space-y-1.5">
             <Label>{t('superAdmin.createAdminModal.institution')}</Label>
-            <select
-              className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+            <Select
               value={createInstitutionId}
-              onChange={(e) => setCreateInstitutionId(e.target.value)}
-            >
-              <option value="">{t('superAdmin.createAdminModal.selectInstitution')}</option>
-              {institutions.map((inst) => (
-                <option key={inst.id} value={inst.id}>{inst.name}</option>
-              ))}
-            </select>
+              onChange={(val) => setCreateInstitutionId(val)}
+              options={[
+                { value: '', label: t('superAdmin.createAdminModal.selectInstitution') },
+                ...institutions.map((inst) => ({ value: inst.id, label: inst.name })),
+              ]}
+            />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button

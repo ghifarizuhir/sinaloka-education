@@ -15,6 +15,7 @@ import {
   Badge,
   SearchInput,
   Skeleton,
+  PageHeader,
 } from '../../components/UI';
 import { cn, formatDate } from '../../lib/utils';
 import { useInstitutions } from '@/src/hooks/useInstitutions';
@@ -44,23 +45,15 @@ export default function Institutions() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold dark:text-zinc-100">
-            {t('superAdmin.institutions')}
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {t('superAdmin.institutionsSubtitle')}
-          </p>
-        </div>
-        <Link to="/super/institutions/new">
-          <Button>
-            <Plus size={16} />
-            {t('superAdmin.createInstitution')}
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title={t('superAdmin.institutions')}
+        subtitle={t('superAdmin.institutionsSubtitle')}
+        actions={
+          <Link to="/super/institutions/new">
+            <Button><Plus size={16} />{t('superAdmin.createInstitution')}</Button>
+          </Link>
+        }
+      />
 
       {/* Search */}
       <Card className="!p-0 overflow-hidden">

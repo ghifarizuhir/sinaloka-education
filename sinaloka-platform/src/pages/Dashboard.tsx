@@ -24,7 +24,7 @@ import {
   Command,
   X
 } from 'lucide-react';
-import { Card, Button, Badge, Skeleton, Progress } from '../components/UI';
+import { Card, Button, Badge, Skeleton, Progress, PageHeader } from '../components/UI';
 import { cn, formatCurrencyShort, formatCurrency } from '../lib/utils';
 import { toast } from 'sonner';
 import { useDashboardStats, useDashboardActivity } from '@/src/hooks/useDashboard';
@@ -127,51 +127,51 @@ export const Dashboard = () => {
   return (
     <div className="space-y-8 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight dark:text-zinc-100">{t('dashboard.greeting')}</h2>
-          <p className="text-zinc-500 text-sm">{t('dashboard.subtitle')}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="h-10"
-            onClick={() => navigate('/schedules')}
-          >
-            <Calendar size={16} />
-            {t('dashboard.schedule')}
-          </Button>
-          <div className="relative group">
+      <PageHeader
+        title={t('dashboard.greeting')}
+        subtitle={t('dashboard.subtitle')}
+        actions={
+          <>
             <Button
-              className="h-10 gap-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
-              onClick={() => setIsCommandPaletteOpen(true)}
+              variant="outline"
+              className="h-10"
+              onClick={() => navigate('/schedules')}
             >
-              <Zap size={16} />
-              {t('dashboard.quickActions')}
+              <Calendar size={16} />
+              {t('dashboard.schedule')}
             </Button>
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
-              <button
-                onClick={() => navigate('/enrollments')}
-                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
+            <div className="relative group">
+              <Button
+                className="h-10 gap-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                onClick={() => setIsCommandPaletteOpen(true)}
               >
-                <UserPlus size={14} /> {t('dashboard.quickEnroll')}
-              </button>
-              <button
-                onClick={() => navigate('/finance/payments')}
-                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-              >
-                <Receipt size={14} /> {t('dashboard.recordPayment')}
-              </button>
-              <button
-                onClick={() => navigate('/schedules')}
-                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-              >
-                <Plus size={14} /> {t('dashboard.addMakeupClass')}
-              </button>
+                <Zap size={16} />
+                {t('dashboard.quickActions')}
+              </Button>
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
+                <button
+                  onClick={() => navigate('/enrollments')}
+                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
+                >
+                  <UserPlus size={14} /> {t('dashboard.quickEnroll')}
+                </button>
+                <button
+                  onClick={() => navigate('/finance/payments')}
+                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
+                >
+                  <Receipt size={14} /> {t('dashboard.recordPayment')}
+                </button>
+                <button
+                  onClick={() => navigate('/schedules')}
+                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
+                >
+                  <Plus size={14} /> {t('dashboard.addMakeupClass')}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

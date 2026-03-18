@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Label, PasswordInput } from '../../components/UI';
+import { Card, Button, Input, Label, PasswordInput, PageHeader, Select } from '../../components/UI';
 import { toast } from 'sonner';
 import {
   useCreateInstitution,
@@ -127,14 +127,7 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Create mode header */}
       {!isEdit && (
-        <div>
-          <h1 className="text-2xl font-bold dark:text-zinc-100">
-            {t('superAdmin.createInstitution')}
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {t('superAdmin.createInstitutionSubtitle')}
-          </p>
-        </div>
+        <PageHeader title={t('superAdmin.createInstitution')} subtitle={t('superAdmin.createInstitutionSubtitle')} />
       )}
 
       {/* Institution Details */}
@@ -199,31 +192,29 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="timezone">{t('superAdmin.form.timezone')}</Label>
-            <select
-              id="timezone"
+            <Select
               value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              className="flex h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 focus-visible:ring-offset-2"
-            >
-              <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
-              <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
-              <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
-            </select>
+              onChange={(val) => setTimezone(val)}
+              options={[
+                { value: 'Asia/Jakarta', label: 'Asia/Jakarta (WIB)' },
+                { value: 'Asia/Makassar', label: 'Asia/Makassar (WITA)' },
+                { value: 'Asia/Jayapura', label: 'Asia/Jayapura (WIT)' },
+              ]}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="language">
               {t('superAdmin.form.defaultLanguage')}
             </Label>
-            <select
-              id="language"
+            <Select
               value={defaultLanguage}
-              onChange={(e) => setDefaultLanguage(e.target.value)}
-              className="flex h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 focus-visible:ring-offset-2"
-            >
-              <option value="id">Indonesian</option>
-              <option value="en">English</option>
-            </select>
+              onChange={(val) => setDefaultLanguage(val)}
+              options={[
+                { value: 'id', label: 'Indonesian' },
+                { value: 'en', label: 'English' },
+              ]}
+            />
           </div>
         </div>
       </Card>

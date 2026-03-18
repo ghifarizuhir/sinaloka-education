@@ -11,6 +11,7 @@ import {
   Modal,
   Skeleton,
   PasswordInput,
+  PageHeader,
 } from '../../components/UI';
 import { cn } from '../../lib/utils';
 import { toast } from 'sonner';
@@ -79,21 +80,16 @@ export default function InstitutionDetail() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold dark:text-zinc-100">
-            {institution.name}
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1 font-mono">
-            {institution.slug}
-          </p>
-        </div>
-        <Button variant="secondary" onClick={handleEnter}>
-          <LogIn size={16} />
-          {t('superAdmin.enter')}
-        </Button>
-      </div>
+      <PageHeader
+        title={institution.name}
+        subtitle={institution.slug}
+        actions={
+          <Button variant="secondary" onClick={handleEnter}>
+            <LogIn size={16} />
+            {t('superAdmin.enter')}
+          </Button>
+        }
+      />
 
       {/* Tab Navigation */}
       <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-lg w-fit">
