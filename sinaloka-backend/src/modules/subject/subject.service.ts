@@ -67,7 +67,7 @@ export class SubjectService {
         is_verified: true,
         tutor_subjects: { some: { subject_id: subjectId } },
       },
-      include: { tutor_subjects: { include: { subject: true } } },
+      include: { tutor_subjects: { include: { subject: true } }, user: { select: { name: true } } },
       orderBy: { user: { name: 'asc' } },
     });
   }
