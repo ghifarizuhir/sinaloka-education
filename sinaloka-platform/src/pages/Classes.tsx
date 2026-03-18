@@ -211,7 +211,12 @@ export const Classes = () => {
             schedule.start_time < s.end_time &&
             s.start_time < schedule.end_time
           ) {
-            toast.error(`Jadwal bentrok: ${schedule.day.slice(0, 3)} ${schedule.start_time}-${schedule.end_time} bentrok dengan ${cls.name} (${s.start_time}-${s.end_time})`);
+            toast.error(t('classes.toast.scheduleConflict', {
+              day: schedule.day.slice(0, 3),
+              time: `${schedule.start_time}-${schedule.end_time}`,
+              className: cls.name,
+              conflictTime: `${s.start_time}-${s.end_time}`,
+            }));
             return;
           }
         }

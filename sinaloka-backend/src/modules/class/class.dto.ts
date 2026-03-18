@@ -37,7 +37,11 @@ export const CreateClassSchema = z
     fee: z.number().min(0),
     schedules: z
       .array(ScheduleItemSchema)
-      .min(1, 'At least one schedule is required'),
+      .min(1, 'At least one schedule is required')
+      .refine(
+        (items) => new Set(items.map((i) => i.day)).size === items.length,
+        { message: 'Duplicate schedule days are not allowed' },
+      ),
     room: z.string().max(100).optional().nullable(),
     package_fee: z.number().min(0).optional().nullable(),
     tutor_fee: z.number().min(0),
@@ -63,7 +67,14 @@ export const UpdateClassSchema = z.object({
   subject_id: z.string().uuid().optional(),
   capacity: z.number().int().min(1).optional(),
   fee: z.number().min(0).optional(),
-  schedules: z.array(ScheduleItemSchema).min(1).optional(),
+  schedules: z
+    .array(ScheduleItemSchema)
+    .min(1)
+    .refine(
+      (items) => new Set(items.map((i) => i.day)).size === items.length,
+      { message: 'Duplicate schedule days are not allowed' },
+    )
+    .optional(),
   room: z.string().max(100).optional().nullable(),
   package_fee: z.number().min(0).optional().nullable(),
   tutor_fee: z.number().min(0).optional(),

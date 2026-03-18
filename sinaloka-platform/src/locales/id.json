@@ -438,6 +438,7 @@
       "deleteError": "Gagal menghapus kelas",
       "selectTutor": "Silakan pilih tutor",
       "selectScheduleDay": "Silakan pilih setidaknya satu hari jadwal",
+      "scheduleConflict": "Jadwal bentrok: {{day}} {{time}} bentrok dengan {{className}} ({{conflictTime}})",
       "generateSuccess": "{{count}} sesi dibuat",
       "generateError": "Gagal membuat sesi"
     },

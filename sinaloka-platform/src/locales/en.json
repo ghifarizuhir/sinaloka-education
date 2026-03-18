@@ -438,6 +438,7 @@
       "deleteError": "Failed to delete class",
       "selectTutor": "Please select a tutor",
       "selectScheduleDay": "Please select at least one schedule day",
+      "scheduleConflict": "Schedule conflict: {{day}} {{time}} conflicts with {{className}} ({{conflictTime}})",
       "generateSuccess": "{{count}} sessions generated",
       "generateError": "Failed to generate sessions"
     },
