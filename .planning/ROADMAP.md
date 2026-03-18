@@ -29,7 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Admin can toggle working days (Mon–Sun) in Settings Academic tab and the configuration persists
   4. Class creation and edit forms show a room dropdown populated from the institution's saved rooms instead of a free-text field
   5. All academic settings are stored per-institution (multi-tenant) via backend API endpoints against the Institution.settings JSON blob
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Backend API + frontend data layer (types, service, hooks) for academic settings
+- [ ] 01-02-PLAN.md — Academic tab UI: rooms CRUD modal, subject categories, grade levels, working days toggles
+- [ ] 01-03-PLAN.md — Class form room dropdown replacing free-text input + human verification
 
 ### Phase 2: Settings Completion
 **Goal**: All remaining Settings tabs either work correctly or are honestly represented — no fake toggles, no missing persistence
@@ -72,7 +77,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Academic Settings | 0/TBD | Not started | - |
+| 1. Academic Settings | 0/3 | Planning complete | - |
 | 2. Settings Completion | 0/TBD | Not started | - |
 | 3. Feature Completion | 0/TBD | Not started | - |
 | 4. Quality Polish | 0/TBD | Not started | - |
