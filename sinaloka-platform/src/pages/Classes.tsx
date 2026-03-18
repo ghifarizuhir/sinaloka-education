@@ -201,6 +201,23 @@ export const Classes = () => {
       return;
     }
 
+    // Check for tutor schedule conflicts
+    const otherClasses = tutorClasses.filter(c => c.id !== editingClass?.id);
+    for (const schedule of formSchedules) {
+      for (const cls of otherClasses) {
+        for (const s of cls.schedules) {
+          if (
+            s.day === schedule.day &&
+            schedule.start_time < s.end_time &&
+            s.start_time < schedule.end_time
+          ) {
+            toast.error(`Jadwal bentrok: ${schedule.day.slice(0, 3)} ${schedule.start_time}-${schedule.end_time} bentrok dengan ${cls.name} (${s.start_time}-${s.end_time})`);
+            return;
+          }
+        }
+      }
+    }
+
     const payload: CreateClassDto = {
       name: formName,
       subject_id: formSubjectId,
