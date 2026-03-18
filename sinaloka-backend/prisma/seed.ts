@@ -63,6 +63,21 @@ async function main() {
   });
   console.log('Users created');
 
+  // Subjects (4 per institution — 8 total)
+  const [subj1Math, subj1Physics, subj1English, subj1Indonesian] = await Promise.all([
+    prisma.subject.create({ data: { name: 'Matematika', institution_id: inst1.id } }),
+    prisma.subject.create({ data: { name: 'Fisika', institution_id: inst1.id } }),
+    prisma.subject.create({ data: { name: 'Bahasa Inggris', institution_id: inst1.id } }),
+    prisma.subject.create({ data: { name: 'Bahasa Indonesia', institution_id: inst1.id } }),
+  ]);
+  const [subj2Math, subj2Physics, subj2English, subj2Indonesian] = await Promise.all([
+    prisma.subject.create({ data: { name: 'Matematika', institution_id: inst2.id } }),
+    prisma.subject.create({ data: { name: 'Fisika', institution_id: inst2.id } }),
+    prisma.subject.create({ data: { name: 'Bahasa Inggris', institution_id: inst2.id } }),
+    prisma.subject.create({ data: { name: 'Bahasa Indonesia', institution_id: inst2.id } }),
+  ]);
+  console.log('Subjects created');
+
   // Tutors (4 total, 2 per institution)
   const tutorUsers = await Promise.all([
     prisma.user.create({
@@ -108,10 +123,6 @@ async function main() {
         data: {
           user_id: u.id,
           institution_id: i < 2 ? inst1.id : inst2.id,
-          subjects:
-            i % 2 === 0
-              ? ['Matematika', 'Fisika']
-              : ['Bahasa Inggris', 'Bahasa Indonesia'],
           experience_years: 2 + i,
           is_verified: true,
           ...(i === 3 ? { monthly_salary: 5000000 } : {}),
@@ -119,6 +130,24 @@ async function main() {
       }),
     ),
   );
+
+  // TutorSubject mappings
+  // tutors[0] = Budi (inst1): Matematika, Fisika
+  // tutors[1] = Siti (inst1): Bahasa Inggris, Bahasa Indonesia
+  // tutors[2] = Andi (inst2): Matematika, Fisika
+  // tutors[3] = Dewi (inst2): Bahasa Inggris, Bahasa Indonesia
+  await prisma.tutorSubject.createMany({
+    data: [
+      { tutor_id: tutors[0].id, subject_id: subj1Math.id },
+      { tutor_id: tutors[0].id, subject_id: subj1Physics.id },
+      { tutor_id: tutors[1].id, subject_id: subj1English.id },
+      { tutor_id: tutors[1].id, subject_id: subj1Indonesian.id },
+      { tutor_id: tutors[2].id, subject_id: subj2Math.id },
+      { tutor_id: tutors[2].id, subject_id: subj2Physics.id },
+      { tutor_id: tutors[3].id, subject_id: subj2English.id },
+      { tutor_id: tutors[3].id, subject_id: subj2Indonesian.id },
+    ],
+  });
   console.log('Tutors created');
 
   // Students (10 total, 5 per institution)
@@ -158,7 +187,7 @@ async function main() {
         institution_id: inst1.id,
         tutor_id: tutors[0].id,
         name: 'Matematika SMP',
-        subject: 'Matematika',
+        subject_id: subj1Math.id,
         capacity: 10,
         fee: 500000,
         tutor_fee: 150000,
@@ -174,7 +203,7 @@ async function main() {
         institution_id: inst1.id,
         tutor_id: tutors[1].id,
         name: 'English SMP',
-        subject: 'Bahasa Inggris',
+        subject_id: subj1English.id,
         capacity: 8,
         fee: 450000,
         tutor_fee: 130000,
@@ -191,7 +220,7 @@ async function main() {
         institution_id: inst2.id,
         tutor_id: tutors[2].id,
         name: 'Fisika SMA',
-        subject: 'Fisika',
+        subject_id: subj2Physics.id,
         capacity: 12,
         fee: 600000,
         tutor_fee: 180000,
@@ -207,7 +236,7 @@ async function main() {
         institution_id: inst2.id,
         tutor_id: tutors[3].id,
         name: 'B. Indonesia SMA',
-        subject: 'Bahasa Indonesia',
+        subject_id: subj2Indonesian.id,
         capacity: 10,
         fee: 400000,
         tutor_fee: 120000,

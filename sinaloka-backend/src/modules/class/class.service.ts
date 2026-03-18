@@ -23,12 +23,24 @@ export class ClassService {
       throw new BadRequestException('Only verified tutors can be assigned to classes');
     }
 
+    // Validate subject exists in institution
+    const subject = await this.prisma.subject.findFirst({
+      where: { id: dto.subject_id, institution_id: institutionId },
+    });
+    if (!subject) throw new NotFoundException('Subject not found');
+
+    // Validate tutor teaches this subject
+    const tutorSubject = await this.prisma.tutorSubject.findUnique({
+      where: { tutor_id_subject_id: { tutor_id: dto.tutor_id, subject_id: dto.subject_id } },
+    });
+    if (!tutorSubject) throw new BadRequestException('Tutor does not teach this subject');
+
     const record = await this.prisma.class.create({
       data: {
         institution_id: institutionId,
         tutor_id: dto.tutor_id,
         name: dto.name,
-        subject: dto.subject,
+        subject_id: dto.subject_id,
         capacity: dto.capacity,
         fee: dto.fee,
         package_fee: dto.package_fee ?? null,
@@ -56,15 +68,15 @@ export class ClassService {
     institutionId: string,
     query: ClassQueryDto,
   ): Promise<PaginatedResponse<any>> {
-    const { page, limit, search, subject, status, sort_by, sort_order } = query;
+    const { page, limit, search, subject_id, status, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {
       institution_id: institutionId,
     };
 
-    if (subject) {
-      where.subject = subject;
+    if (subject_id) {
+      where.subject_id = subject_id;
     }
 
     if (status) {
@@ -77,13 +89,19 @@ export class ClassService {
       ];
     }
 
+    const orderBy =
+      sort_by === 'subject_name'
+        ? { subject: { name: sort_order } }
+        : { [sort_by]: sort_order };
+
     const [data, total] = await Promise.all([
       this.prisma.class.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { [sort_by]: sort_order },
+        orderBy,
         include: {
+          subject: true,
           tutor: { include: { user: { select: { id: true, name: true } } } },
           _count: { select: { enrollments: { where: { status: { in: ['ACTIVE', 'TRIAL'] } } } } },
         },
@@ -110,6 +128,7 @@ export class ClassService {
     const classRecord = await this.prisma.class.findFirst({
       where: { id, institution_id: institutionId },
       include: {
+        subject: true,
         tutor: { include: { user: { select: { id: true, name: true, email: true } } } },
         enrollments: {
           where: { status: { in: ['ACTIVE', 'TRIAL'] } },
@@ -159,9 +178,35 @@ export class ClassService {
       }
     }
 
+    if (dto.tutor_id || dto.subject_id) {
+      const effectiveTutorId = dto.tutor_id ?? existing.tutor_id;
+      const effectiveSubjectId = dto.subject_id ?? existing.subject_id;
+
+      const tutorSubject = await this.prisma.tutorSubject.findUnique({
+        where: { tutor_id_subject_id: { tutor_id: effectiveTutorId, subject_id: effectiveSubjectId } },
+      });
+      if (!tutorSubject) throw new BadRequestException('Tutor does not teach this subject');
+    }
+
+    const { subject_id, tutor_id, name, capacity, fee, schedule_days, schedule_start_time, schedule_end_time, room, package_fee, tutor_fee, tutor_fee_mode, tutor_fee_per_student, status } = dto;
     const record = await this.prisma.class.update({
       where: { id },
-      data: dto,
+      data: {
+        ...(subject_id !== undefined && { subject_id }),
+        ...(tutor_id !== undefined && { tutor_id }),
+        ...(name !== undefined && { name }),
+        ...(capacity !== undefined && { capacity }),
+        ...(fee !== undefined && { fee }),
+        ...(schedule_days !== undefined && { schedule_days }),
+        ...(schedule_start_time !== undefined && { schedule_start_time }),
+        ...(schedule_end_time !== undefined && { schedule_end_time }),
+        ...(room !== undefined && { room }),
+        ...(package_fee !== undefined && { package_fee }),
+        ...(tutor_fee !== undefined && { tutor_fee }),
+        ...(tutor_fee_mode !== undefined && { tutor_fee_mode }),
+        ...(tutor_fee_per_student !== undefined && { tutor_fee_per_student }),
+        ...(status !== undefined && { status }),
+      },
     });
     return {
       ...record,
