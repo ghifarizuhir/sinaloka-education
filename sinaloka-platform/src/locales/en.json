@@ -230,7 +230,7 @@
       "updated": "Student updated",
       "deleted": "Student deleted",
       "bulkDeleted": "{{count}} students deleted",
-      "importSuccess": "Students imported successfully",
+      "importSuccess": "Students imported",
       "importError": "Failed to import students",
       "exportSuccess": "Students exported",
       "exportError": "Failed to export students",
@@ -338,7 +338,7 @@
       "verified": "Verified"
     },
     "toast": {
-      "inviteSent": "Invitation sent successfully",
+      "inviteSent": "Invitation sent",
       "inviteSentNoEmail": "Tutor created but email failed. Use \"Resend Invite\" to retry.",
       "inviteError": "Failed to send invitation",
       "inviteResent": "Invitation resent",
@@ -346,7 +346,7 @@
       "resendError": "Failed to resend invitation",
       "inviteCancelled": "Invitation cancelled",
       "cancelError": "Failed to cancel invitation",
-      "updated": "Tutor updated successfully",
+      "updated": "Tutor updated",
       "updateError": "Failed to update tutor",
       "deleted": "Tutor deleted",
       "deleteError": "Failed to delete tutor"
@@ -429,15 +429,15 @@
       "cap": "Cap: {{count}}"
     },
     "toast": {
-      "created": "Class created successfully",
+      "created": "Class created",
       "createError": "Failed to create class",
-      "updated": "Class updated successfully",
+      "updated": "Class updated",
       "updateError": "Failed to update class",
       "deleted": "Class deleted",
       "deleteError": "Failed to delete class",
       "selectTutor": "Please select a tutor",
       "selectScheduleDay": "Please select at least one schedule day",
-      "generateSuccess": "{{count}} sessions generated successfully",
+      "generateSuccess": "{{count}} sessions generated",
       "generateError": "Failed to generate sessions"
     },
     "modal": {
@@ -519,7 +519,7 @@
       "scheduleError": "Failed to schedule session",
       "sessionCancelled": "Session cancelled",
       "cancelError": "Failed to cancel session",
-      "sessionsGenerated": "Sessions generated successfully",
+      "sessionsGenerated": "Sessions generated",
       "generateError": "Failed to generate sessions",
       "rescheduleApproved": "Reschedule approved",
       "rescheduleError": "Failed to approve reschedule",
@@ -704,16 +704,16 @@
       "overdue": "Overdue"
     },
     "toast": {
-      "enrolled": "{{count}} student(s) enrolled successfully",
+      "enrolled": "{{count}} student(s) enrolled",
       "enrollError": "Failed to enroll some students",
       "statusUpdated": "Status updated to {{status}}",
       "statusError": "Failed to update status",
       "deleted": "Enrollment deleted",
       "deleteError": "Failed to delete enrollment",
-      "importSuccess": "Successfully imported {{count}} enrollment(s)",
+      "importSuccess": "{{count}} enrollment(s) imported",
       "importPartial": "Imported {{created}} enrollment(s) with {{errors}} error(s)",
       "importError": "Failed to import enrollments",
-      "exportSuccess": "Enrollments exported successfully",
+      "exportSuccess": "Enrollments exported",
       "exportError": "Failed to export enrollments",
       "bulkStatusUpdated": "{{count}} enrollment(s) updated to {{status}}",
       "bulkStatusError": "Failed to update enrollment statuses",
@@ -848,7 +848,7 @@
     "period": "Period",
     "approveAllSessions": "Approve All Sessions",
     "payoutApproved": "Payout approved and scheduled.",
-    "exportedSuccess": "{{name}} exported successfully to CSV.",
+    "exportedSuccess": "{{name}} exported to CSV",
     "reminderSent": "Payment reminder sent to {{student}}'s parent via WhatsApp.",
     "recordsTotal": "records total",
     "tutor": "Tutor",
@@ -916,9 +916,9 @@
       "resendReceipt": "Resend Receipt"
     },
     "toast": {
-      "recorded": "Payment recorded successfully.",
+      "recorded": "Payment recorded",
       "recordError": "Failed to record payment.",
-      "deleted": "Payment deleted.",
+      "deleted": "Payment deleted",
       "deleteError": "Failed to delete payment."
     },
     "confirm": {
@@ -939,7 +939,7 @@
     },
     "generateInvoice": "Generate Invoice",
     "downloadInvoice": "Download Invoice",
-    "invoiceGenerated": "Invoice generated successfully",
+    "invoiceGenerated": "Invoice generated",
     "invoiceExists": "Invoice already exists for this payment",
     "invoiceNumber": "Invoice No.",
     "generatingInvoice": "Generating invoice..."
@@ -1003,11 +1003,11 @@
       "creating": "Creating..."
     },
     "toast": {
-      "confirmed": "Payout confirmed for {{tutor}}.",
+      "confirmed": "Payout confirmed for {{tutor}}",
       "confirmError": "Failed to confirm payout.",
-      "created": "Payout created successfully.",
+      "created": "Payout created",
       "createError": "Failed to create payout.",
-      "deleted": "Payout deleted.",
+      "deleted": "Payout deleted",
       "deleteError": "Failed to delete payout.",
       "fillRequired": "Please fill in all required fields."
     },
@@ -1064,11 +1064,11 @@
       "saveExpense": "Record Expense"
     },
     "toast": {
-      "created": "Expense recorded.",
+      "created": "Expense recorded",
       "createError": "Failed to record expense.",
-      "updated": "Expense updated.",
+      "updated": "Expense updated",
       "updateError": "Failed to update expense.",
-      "deleted": "Expense deleted.",
+      "deleted": "Expense deleted",
       "deleteError": "Failed to delete expense.",
       "fillRequired": "Please fill in required fields."
     },
@@ -1104,7 +1104,7 @@
       "phone": "Phone",
       "address": "Address",
       "addressPlaceholder": "123 Education Street",
-      "saveSuccess": "Settings saved successfully",
+      "saveSuccess": "Settings saved",
       "saveFailed": "Failed to save settings",
       "dangerZone": "Danger Zone",
       "dangerZoneDesc": "Permanently delete your institution data. This action is irreversible.",
@@ -1129,7 +1129,7 @@
       "categoriesNote": "These categories will appear in the Operating Expenses menu.",
       "bankAccounts": "Bank Accounts (Self-Method)",
       "addAccount": "Add Account",
-      "saveSuccess": "Billing settings saved successfully",
+      "saveSuccess": "Billing settings saved",
       "saveFailed": "Failed to save billing settings",
       "addCategoryPlaceholder": "New category name",
       "bankNamePlaceholder": "e.g. BCA",
@@ -1242,15 +1242,15 @@
       "activeClasses": "Active Classes"
     },
     "toast": {
-      "created": "Institution created successfully",
+      "created": "Institution created",
       "createError": "Failed to create institution",
-      "updated": "Institution updated successfully",
+      "updated": "Institution updated",
       "updateError": "Failed to update institution",
       "deactivated": "Institution deactivated",
       "activated": "Institution activated",
-      "adminCreated": "Admin created successfully",
+      "adminCreated": "Admin created",
       "adminCreateError": "Failed to create admin",
-      "userUpdated": "User updated successfully",
+      "userUpdated": "User updated",
       "userUpdateError": "Failed to update user"
     },
     "users": "Users",
