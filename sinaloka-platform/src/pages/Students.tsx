@@ -38,6 +38,7 @@ import {
   Skeleton
 } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
+import { GRADE_GROUPS, ALL_GRADES } from '../lib/constants';
 import { toast } from 'sonner';
 import {
   useStudents,
@@ -75,6 +76,8 @@ export const Students = () => {
   const [formParentName, setFormParentName] = useState('');
   const [formParentPhone, setFormParentPhone] = useState('');
   const [formParentEmail, setFormParentEmail] = useState('');
+  const [formCustomGrade, setFormCustomGrade] = useState('');
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
@@ -156,8 +159,8 @@ export const Students = () => {
 
   const handleDownloadTemplate = () => {
     const headers = 'name,email,phone,grade,status,parent_name,parent_phone,parent_email';
-    const example1 = 'Rina Pelajar,rina@example.com,08121234567,10th Grade,ACTIVE,Budi Pelajar,08129876543,budi@example.com';
-    const example2 = 'Dimas Pelajar,,08131234567,11th Grade,ACTIVE,Siti Pelajar,08139876543,';
+    const example1 = 'Rina Pelajar,rina@example.com,08121234567,Kelas 10,ACTIVE,Budi Pelajar,08129876543,budi@example.com';
+    const example2 = 'Dimas Pelajar,,08131234567,Kelas 11,ACTIVE,Siti Pelajar,08139876543,';
     const csv = [headers, example1, example2].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -226,11 +229,13 @@ export const Students = () => {
     setFormName('');
     setFormEmail('');
     setFormPhone('');
-    setFormGrade('10th Grade');
+    setFormGrade('');
     setFormStatus('ACTIVE');
     setFormParentName('');
     setFormParentPhone('');
     setFormParentEmail('');
+    setFormCustomGrade('');
+    setFormErrors({});
     setShowAddModal(true);
   };
 
@@ -239,23 +244,51 @@ export const Students = () => {
     setFormName(student.name);
     setFormEmail(student.email ?? '');
     setFormPhone(student.phone ?? '');
-    setFormGrade(student.grade);
+    const isStandardGrade = ALL_GRADES.some(g => g.value === student.grade);
+    if (!isStandardGrade && student.grade) {
+      setFormGrade('__custom__');
+      setFormCustomGrade(student.grade);
+    } else {
+      setFormGrade(student.grade);
+      setFormCustomGrade('');
+    }
     setFormStatus(student.status);
     setFormParentName(student.parent_name ?? '');
     setFormParentPhone(student.parent_phone ?? '');
     setFormParentEmail(student.parent_email ?? '');
+    setFormErrors({});
     setShowAddModal(true);
   };
 
   const handleFormSubmit = () => {
+    const errors: Record<string, string> = {};
+    if (!formName.trim()) errors.name = 'Nama lengkap wajib diisi';
+    const resolvedGrade = formGrade === '__custom__' ? formCustomGrade : formGrade;
+    if (!resolvedGrade.trim()) {
+      errors.grade = formGrade === '__custom__' ? 'Kelas wajib diisi' : 'Kelas wajib dipilih';
+    }
+    if (!formParentName.trim()) errors.parent_name = 'Nama orang tua wajib diisi';
+    if (!formParentPhone.trim()) errors.parent_phone = 'Telepon orang tua wajib diisi';
+    if (formEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)) {
+      errors.email = 'Format email tidak valid';
+    }
+    if (formParentEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formParentEmail)) {
+      errors.parent_email = 'Format email tidak valid';
+    }
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
+
     const payload = {
       name: formName,
       email: formEmail || undefined,
       phone: formPhone || undefined,
-      grade: formGrade,
+      grade: resolvedGrade,
       status: formStatus,
-      parent_name: formParentName || undefined,
-      parent_phone: formParentPhone || undefined,
+      parent_name: formParentName,
+      parent_phone: formParentPhone,
       parent_email: formParentEmail || undefined,
     };
 
@@ -360,9 +393,13 @@ export const Students = () => {
               value={activeFilters.grade || ''}
             >
               <option value="">{t('students.filter.allGrades')}</option>
-              <option value="10th Grade">{t('students.filter.10thGrade')}</option>
-              <option value="11th Grade">{t('students.filter.11thGrade')}</option>
-              <option value="12th Grade">{t('students.filter.12thGrade')}</option>
+              {GRADE_GROUPS.map(group => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.options.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
             <select
               className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
@@ -778,8 +815,12 @@ export const Students = () => {
               id="new-name"
               placeholder={t('students.form.namePlaceholder')}
               value={formName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFormName(e.target.value);
+                if (formErrors.name) setFormErrors(prev => { const { name, ...rest } = prev; return rest; });
+              }}
             />
+            {formErrors.name && <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -789,8 +830,12 @@ export const Students = () => {
                 type="email"
                 placeholder={t('students.form.emailPlaceholder')}
                 value={formEmail}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormEmail(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFormEmail(e.target.value);
+                  if (formErrors.email) setFormErrors(prev => { const { email, ...rest } = prev; return rest; });
+                }}
               />
+              {formErrors.email && <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="new-phone">{t('students.form.phoneNumber')}</Label>
@@ -808,12 +853,34 @@ export const Students = () => {
               <select
                 className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
                 value={formGrade}
-                onChange={(e) => setFormGrade(e.target.value)}
+                onChange={(e) => {
+                  setFormGrade(e.target.value);
+                  if (e.target.value !== '__custom__') setFormCustomGrade('');
+                  if (formErrors.grade) setFormErrors(prev => { const { grade, ...rest } = prev; return rest; });
+                }}
               >
-                <option value="10th Grade">{t('students.filter.10thGrade')}</option>
-                <option value="11th Grade">{t('students.filter.11thGrade')}</option>
-                <option value="12th Grade">{t('students.filter.12thGrade')}</option>
+                <option value="" disabled>Pilih kelas...</option>
+                {GRADE_GROUPS.map(group => (
+                  <optgroup key={group.label} label={group.label}>
+                    {group.options.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </optgroup>
+                ))}
+                <option value="__custom__">Lainnya...</option>
               </select>
+              {formGrade === '__custom__' && (
+                <Input
+                  placeholder="Masukkan kelas..."
+                  value={formCustomGrade}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFormCustomGrade(e.target.value);
+                    if (formErrors.grade) setFormErrors(prev => { const { grade, ...rest } = prev; return rest; });
+                  }}
+                  className="mt-1.5"
+                />
+              )}
+              {formErrors.grade && <p className="text-red-500 text-sm mt-1">{formErrors.grade}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>{t('students.form.status')}</Label>
@@ -833,8 +900,12 @@ export const Students = () => {
               id="new-parent-name"
               placeholder={t('students.form.parentNamePlaceholder')}
               value={formParentName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormParentName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFormParentName(e.target.value);
+                if (formErrors.parent_name) setFormErrors(prev => { const { parent_name, ...rest } = prev; return rest; });
+              }}
             />
+            {formErrors.parent_name && <p className="text-red-500 text-sm mt-1">{formErrors.parent_name}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="new-parent-phone">{t('students.form.parentPhone')}</Label>
@@ -842,8 +913,12 @@ export const Students = () => {
               id="new-parent-phone"
               placeholder={t('students.form.parentPhonePlaceholder')}
               value={formParentPhone}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormParentPhone(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFormParentPhone(e.target.value);
+                if (formErrors.parent_phone) setFormErrors(prev => { const { parent_phone, ...rest } = prev; return rest; });
+              }}
             />
+            {formErrors.parent_phone && <p className="text-red-500 text-sm mt-1">{formErrors.parent_phone}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="new-parent-email">{t('students.form.parentEmail')}</Label>
@@ -852,8 +927,12 @@ export const Students = () => {
               type="email"
               placeholder={t('students.form.parentEmailPlaceholder')}
               value={formParentEmail}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormParentEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFormParentEmail(e.target.value);
+                if (formErrors.parent_email) setFormErrors(prev => { const { parent_email, ...rest } = prev; return rest; });
+              }}
             />
+            {formErrors.parent_email && <p className="text-red-500 text-sm mt-1">{formErrors.parent_email}</p>}
           </div>
           <div className="flex items-center gap-3 mt-8">
             <Button
@@ -866,7 +945,7 @@ export const Students = () => {
             <Button
               className="flex-1 justify-center"
               onClick={handleFormSubmit}
-              disabled={createStudent.isPending || updateStudent.isPending || !formName}
+              disabled={createStudent.isPending || updateStudent.isPending}
             >
               {editingStudent ? t('students.modal.updateStudent') : t('students.modal.createStudent')}
             </Button>

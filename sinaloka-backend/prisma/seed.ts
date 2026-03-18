@@ -140,7 +140,7 @@ async function main() {
         data: {
           institution_id: i < 5 ? inst1.id : inst2.id,
           name: `${name} Pelajar`,
-          grade: `Grade ${(i % 3) + 7}`,
+          grade: `Kelas ${(i % 3) + 7}`,
           status: 'ACTIVE',
           parent_name: `Parent of ${name}`,
           parent_phone: `0812000000${i}`,
