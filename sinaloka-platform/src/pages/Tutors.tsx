@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus,
@@ -189,6 +189,30 @@ export const Tutors = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingTutor, setEditingTutor] = useState<Tutor | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ type: 'cancel' | 'delete'; tutorId: string } | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const toggleMenu = useCallback((id: string) => {
+    setOpenMenuId(prev => prev === id ? null : id);
+  }, []);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenMenuId(null);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [openMenuId]);
 
   const { data, isLoading } = useTutors({ page, limit });
   const createTutor = useCreateTutor();
@@ -341,13 +365,13 @@ export const Tutors = () => {
           <div className="h-8 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-1" />
           <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
             <button
-              onClick={() => setViewMode('grid')}
+              onClick={() => { setOpenMenuId(null); setViewMode('grid'); }}
               className={cn('p-1.5 rounded-md transition-all', viewMode === 'grid' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-500')}
             >
               <Grid size={16} />
             </button>
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => { setOpenMenuId(null); setViewMode('list'); }}
               className={cn('p-1.5 rounded-md transition-all', viewMode === 'list' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-500')}
             >
               <List size={16} />
@@ -392,43 +416,48 @@ export const Tutors = () => {
             {filteredTutors.map((tutor) => (
               <Card key={tutor.id} className="hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4">
-                  <div className="relative group/menu">
-                    <button className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                  <div className="relative" ref={openMenuId === tutor.id ? menuRef : undefined}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleMenu(tutor.id); }}
+                      className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
                       <MoreHorizontal size={18} />
                     </button>
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-10 p-1">
-                      {(tutor as any).user?.is_active === false ? (
-                        <>
-                          <button
-                            onClick={() => handleResendInvite(tutor.id)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                          >
-                            <Mail size={14} /> {t('tutors.menu.resendInvite')}
-                          </button>
-                          <button
-                            onClick={() => handleCancelInvite(tutor.id)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
-                          >
-                            <XCircle size={14} /> {t('tutors.menu.cancelInvite')}
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => { setEditingTutor(tutor); setShowForm(true); }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                          >
-                            <FileText size={14} /> {t('tutors.menu.editProfile')}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTutor(tutor.id)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
-                          >
-                            <XCircle size={14} /> {t('tutors.menu.deleteTutor')}
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    {openMenuId === tutor.id && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1">
+                        {(tutor as any).user?.is_active === false ? (
+                          <>
+                            <button
+                              onClick={() => { setOpenMenuId(null); handleResendInvite(tutor.id); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                            >
+                              <Mail size={14} /> {t('tutors.menu.resendInvite')}
+                            </button>
+                            <button
+                              onClick={() => { setOpenMenuId(null); handleCancelInvite(tutor.id); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                            >
+                              <XCircle size={14} /> {t('tutors.menu.cancelInvite')}
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => { setOpenMenuId(null); setEditingTutor(tutor); setShowForm(true); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                            >
+                              <FileText size={14} /> {t('tutors.menu.editProfile')}
+                            </button>
+                            <button
+                              onClick={() => { setOpenMenuId(null); handleDeleteTutor(tutor.id); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                            >
+                              <XCircle size={14} /> {t('tutors.menu.deleteTutor')}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -512,43 +541,48 @@ export const Tutors = () => {
                       {getAvailabilityBadge(tutor)}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="relative group/menu inline-block">
-                        <button className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                      <div className="relative inline-block" ref={openMenuId === tutor.id ? menuRef : undefined}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleMenu(tutor.id); }}
+                          className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        >
                           <MoreHorizontal size={18} />
                         </button>
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-10 p-1">
-                          {(tutor as any).user?.is_active === false ? (
-                            <>
-                              <button
-                                onClick={() => handleResendInvite(tutor.id)}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                              >
-                                <Mail size={14} /> {t('tutors.menu.resendInvite')}
-                              </button>
-                              <button
-                                onClick={() => handleCancelInvite(tutor.id)}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
-                              >
-                                <XCircle size={14} /> {t('tutors.menu.cancelInvite')}
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => { setEditingTutor(tutor); setShowForm(true); }}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                              >
-                                <FileText size={14} /> {t('tutors.menu.editProfile')}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteTutor(tutor.id)}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
-                              >
-                                <XCircle size={14} /> {t('tutors.menu.deleteTutor')}
-                              </button>
-                            </>
-                          )}
-                        </div>
+                        {openMenuId === tutor.id && (
+                          <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1">
+                            {(tutor as any).user?.is_active === false ? (
+                              <>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); handleResendInvite(tutor.id); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                                >
+                                  <Mail size={14} /> {t('tutors.menu.resendInvite')}
+                                </button>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); handleCancelInvite(tutor.id); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                                >
+                                  <XCircle size={14} /> {t('tutors.menu.cancelInvite')}
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); setEditingTutor(tutor); setShowForm(true); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                                >
+                                  <FileText size={14} /> {t('tutors.menu.editProfile')}
+                                </button>
+                                <button
+                                  onClick={() => { setOpenMenuId(null); handleDeleteTutor(tutor.id); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors text-rose-600"
+                                >
+                                  <XCircle size={14} /> {t('tutors.menu.deleteTutor')}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
