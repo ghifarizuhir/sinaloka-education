@@ -40,7 +40,11 @@ import {
   Checkbox,
   Switch,
   Progress,
-  ConfirmDialog
+  ConfirmDialog,
+  PageHeader,
+  Select,
+  DropdownMenu,
+  EmptyState,
 } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
 import { toast } from 'sonner';
@@ -95,7 +99,6 @@ export const Enrollments = () => {
   const [filterStudentId, setFilterStudentId] = useState('');
   const [filterClassId, setFilterClassId] = useState('');
   const [selectedEnrollmentIds, setSelectedEnrollmentIds] = useState<string[]>([]);
-  const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
   const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [importModal, setImportModal] = useState(false);
@@ -189,7 +192,6 @@ export const Enrollments = () => {
     updateEnrollment.mutate({ id, data: { status: newStatus } }, {
       onSuccess: () => {
         toast.success(t('enrollments.toast.statusUpdated', { status: STATUS_LABEL[newStatus] }));
-        setActiveActionMenu(null);
         setShowEditModal(false);
       },
       onError: () => toast.error(t('enrollments.toast.statusError')),
@@ -201,7 +203,6 @@ export const Enrollments = () => {
     deleteEnrollment.mutate(deleteTarget, {
       onSuccess: () => {
         toast.success(t('enrollments.toast.deleted'));
-        setActiveActionMenu(null);
         setDeleteTarget(null);
       },
       onError: () => toast.error(t('enrollments.toast.deleteError')),
@@ -282,22 +283,22 @@ export const Enrollments = () => {
     <div className="space-y-6 pb-20">
       {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md pt-2 pb-4 -mx-4 px-4 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">{t('enrollments.title')}</h2>
-            <p className="text-zinc-500 text-sm">{t('enrollments.subtitle')}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setImportModal(true)}>
-              <Upload size={16} />
-              {t('enrollments.bulkImport')}
-            </Button>
-            <Button onClick={() => setShowModal(true)}>
-              <UserPlus size={18} />
-              {t('enrollments.newEnrollment')}
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title={t('enrollments.title')}
+          subtitle={t('enrollments.subtitle')}
+          actions={
+            <>
+              <Button variant="outline" onClick={() => setImportModal(true)}>
+                <Upload size={16} />
+                {t('enrollments.bulkImport')}
+              </Button>
+              <Button onClick={() => setShowModal(true)}>
+                <UserPlus size={18} />
+                {t('enrollments.newEnrollment')}
+              </Button>
+            </>
+          }
+        />
       </div>
 
       {/* Stats Overview */}
@@ -332,17 +333,17 @@ export const Enrollments = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <select
-            className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+          <Select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as EnrollmentStatus | '')}
-          >
-            <option value="">{t('common.allStatuses')}</option>
-            <option value="ACTIVE">{t('enrollments.status.active')}</option>
-            <option value="TRIAL">{t('enrollments.status.trial')}</option>
-            <option value="WAITLISTED">{t('enrollments.status.waitlisted')}</option>
-            <option value="DROPPED">{t('enrollments.status.dropped')}</option>
-          </select>
+            onChange={(v) => setFilterStatus(v as EnrollmentStatus | '')}
+            options={[
+              { value: '', label: t('common.allStatuses') },
+              { value: 'ACTIVE', label: t('enrollments.status.active') },
+              { value: 'TRIAL', label: t('enrollments.status.trial') },
+              { value: 'WAITLISTED', label: t('enrollments.status.waitlisted') },
+              { value: 'DROPPED', label: t('enrollments.status.dropped') },
+            ]}
+          />
           <Button variant="outline" size="sm" className="ml-auto" onClick={handleExportCsv} disabled={exportEnrollments.isPending}>
             <Download size={14} />
             {t('enrollments.exportCsv')}
@@ -383,14 +384,12 @@ export const Enrollments = () => {
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {filteredEnrollments.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-6 py-20 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
-                          <Search size={32} className="text-zinc-300" />
-                        </div>
-                        <h3 className="text-lg font-bold mb-1">{t('enrollments.noEnrollmentsFound')}</h3>
-                        <p className="text-zinc-500 text-sm mb-6">{t('enrollments.noEnrollmentsHint')}</p>
-                      </div>
+                    <td colSpan={7}>
+                      <EmptyState
+                        icon={Search}
+                        title={t('enrollments.noEnrollmentsFound')}
+                        description={t('enrollments.noEnrollmentsHint')}
+                      />
                     </td>
                   </tr>
                 )}
@@ -452,77 +451,49 @@ export const Enrollments = () => {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="relative">
-                        <button
-                          onClick={() => setActiveActionMenu(activeActionMenu === enroll.id ? null : enroll.id)}
-                          className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        >
-                          <MoreHorizontal size={18} />
-                        </button>
-
-                        <AnimatePresence>
-                          {activeActionMenu === enroll.id && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-10"
-                                onClick={() => setActiveActionMenu(null)}
-                              />
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-20 p-1"
-                              >
-                                <button
-                                  onClick={() => { setSelectedEnrollment(enroll); setEditStatus(enroll.status); setShowEditModal(true); setActiveActionMenu(null); }}
-                                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-                                >
-                                  <Edit size={14} /> {t('enrollments.menu.editEnrollment')}
-                                </button>
-
-                                <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
-                                <div className="px-3 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('enrollments.menu.updateStatus')}</div>
-
-                                {enroll.status !== 'ACTIVE' && (
-                                  <button
-                                    onClick={() => handleStatusUpdate(enroll.id, 'ACTIVE')}
-                                    className="w-full text-left px-3 py-2 text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg flex items-center gap-2"
-                                  >
-                                    <CheckCircle2 size={14} /> {t('enrollments.menu.setActive')}
-                                  </button>
-                                )}
-
-                                {enroll.status === 'TRIAL' && (
-                                  <button
-                                    onClick={() => handleStatusUpdate(enroll.id, 'ACTIVE')}
-                                    className="w-full text-left px-3 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg flex items-center gap-2"
-                                  >
-                                    <GraduationCap size={14} /> {t('enrollments.menu.convertToFull')}
-                                  </button>
-                                )}
-
-                                {enroll.status !== 'DROPPED' && (
-                                  <button
-                                    onClick={() => handleStatusUpdate(enroll.id, 'DROPPED')}
-                                    className="w-full text-left px-3 py-2 text-xs font-medium text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg flex items-center gap-2"
-                                  >
-                                    <UserPlus size={14} className="rotate-45" /> {t('enrollments.menu.drop')}
-                                  </button>
-                                )}
-
-                                <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
-
-                                <button
-                                  onClick={() => { setDeleteTarget(enroll.id); setActiveActionMenu(null); }}
-                                  className="w-full text-left px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg flex items-center gap-2"
-                                >
-                                  <Trash2 size={14} /> {t('enrollments.menu.deleteRecord')}
-                                </button>
-                              </motion.div>
-                            </>
-                          )}
-                        </AnimatePresence>
-                      </div>
+                      <DropdownMenu
+                        trigger={<MoreHorizontal size={18} />}
+                        items={[
+                          {
+                            label: t('enrollments.menu.editEnrollment'),
+                            icon: Edit,
+                            onClick: () => { setSelectedEnrollment(enroll); setEditStatus(enroll.status); setShowEditModal(true); },
+                          },
+                          { separator: true },
+                          {
+                            content: (
+                              <div className="px-3 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                {t('enrollments.menu.updateStatus')}
+                              </div>
+                            ),
+                          },
+                          ...(enroll.status !== 'ACTIVE' ? [{
+                            label: t('enrollments.menu.setActive'),
+                            icon: CheckCircle2,
+                            onClick: () => handleStatusUpdate(enroll.id, 'ACTIVE'),
+                            className: 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
+                          }] : []),
+                          ...(enroll.status === 'TRIAL' ? [{
+                            label: t('enrollments.menu.convertToFull'),
+                            icon: GraduationCap,
+                            onClick: () => handleStatusUpdate(enroll.id, 'ACTIVE'),
+                            className: 'text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20',
+                          }] : []),
+                          ...(enroll.status !== 'DROPPED' ? [{
+                            label: t('enrollments.menu.drop'),
+                            icon: UserPlus,
+                            onClick: () => handleStatusUpdate(enroll.id, 'DROPPED'),
+                            className: 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20',
+                          }] : []),
+                          { separator: true },
+                          {
+                            label: t('enrollments.menu.deleteRecord'),
+                            icon: Trash2,
+                            onClick: () => setDeleteTarget(enroll.id),
+                            variant: 'danger' as const,
+                          },
+                        ]}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -689,16 +660,17 @@ export const Enrollments = () => {
 
             <div className="space-y-1.5">
               <Label>{t('enrollments.form.enrollmentStatus')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+              <Select
                 value={editStatus}
-                onChange={(e) => setEditStatus(e.target.value as EnrollmentStatus)}
-              >
-                <option value="ACTIVE">{t('enrollments.status.active')}</option>
-                <option value="TRIAL">{t('enrollments.status.trial')}</option>
-                <option value="WAITLISTED">{t('enrollments.status.waitlisted')}</option>
-                <option value="DROPPED">{t('enrollments.status.dropped')}</option>
-              </select>
+                onChange={(v) => setEditStatus(v as EnrollmentStatus)}
+                className="w-full"
+                options={[
+                  { value: 'ACTIVE', label: t('enrollments.status.active') },
+                  { value: 'TRIAL', label: t('enrollments.status.trial') },
+                  { value: 'WAITLISTED', label: t('enrollments.status.waitlisted') },
+                  { value: 'DROPPED', label: t('enrollments.status.dropped') },
+                ]}
+              />
             </div>
 
             <div className="flex items-center gap-3 pt-6">

@@ -35,7 +35,11 @@ import {
   SearchInput,
   Input,
   Label,
-  Skeleton
+  Skeleton,
+  PageHeader,
+  Select,
+  Avatar,
+  EmptyState
 } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
 import { GRADE_GROUPS, ALL_GRADES } from '../lib/constants';
@@ -322,26 +326,26 @@ export const Students = () => {
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('students.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('students.subtitle')}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleImportClick} disabled={importStudents.isPending}>
-            <Upload size={16} />
-            {importStudents.isPending ? t('students.importing') : t('common.import')}
-          </Button>
-          <Button variant="outline" className="hidden sm:flex" onClick={handleExportClick} disabled={exportStudents.isPending}>
-            <Download size={16} />
-            {t('common.export')}
-          </Button>
-          <Button onClick={openAddModal}>
-            <Plus size={18} />
-            {t('students.addStudent')}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t('students.title')}
+        subtitle={t('students.subtitle')}
+        actions={
+          <>
+            <Button variant="outline" onClick={handleImportClick} disabled={importStudents.isPending}>
+              <Upload size={16} />
+              {importStudents.isPending ? t('students.importing') : t('common.import')}
+            </Button>
+            <Button variant="outline" className="hidden sm:flex" onClick={handleExportClick} disabled={exportStudents.isPending}>
+              <Download size={16} />
+              {t('common.export')}
+            </Button>
+            <Button onClick={openAddModal}>
+              <Plus size={18} />
+              {t('students.addStudent')}
+            </Button>
+          </>
+        }
+      />
 
       {/* Stats Cards */}
       {isLoading ? (
@@ -387,29 +391,26 @@ export const Students = () => {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
           />
           <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
-            <select
-              className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
-              onChange={(e) => setActiveFilters(prev => ({ ...prev, grade: e.target.value || undefined }))}
+            <Select
               value={activeFilters.grade || ''}
-            >
-              <option value="">{t('students.filter.allGrades')}</option>
-              {GRADE_GROUPS.map(group => (
-                <optgroup key={group.label} label={group.label}>
-                  {group.options.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            <select
-              className="h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
-              onChange={(e) => setActiveFilters(prev => ({ ...prev, status: e.target.value || undefined }))}
+              onChange={(val) => setActiveFilters(prev => ({ ...prev, grade: val || undefined }))}
+              options={[
+                { value: '', label: t('students.filter.allGrades') },
+                ...GRADE_GROUPS.map(group => ({
+                  label: group.label,
+                  options: group.options,
+                })),
+              ]}
+            />
+            <Select
               value={activeFilters.status || ''}
-            >
-              <option value="">{t('students.filter.allStatus')}</option>
-              <option value="ACTIVE">{t('common.active')}</option>
-              <option value="INACTIVE">{t('common.inactive')}</option>
-            </select>
+              onChange={(val) => setActiveFilters(prev => ({ ...prev, status: val || undefined }))}
+              options={[
+                { value: '', label: t('students.filter.allStatus') },
+                { value: 'ACTIVE', label: t('common.active') },
+                { value: 'INACTIVE', label: t('common.inactive') },
+              ]}
+            />
 
             <div className="ml-auto flex items-center gap-2">
               <Button
@@ -506,9 +507,7 @@ export const Students = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-600 dark:text-zinc-400">
-                            {student.name.charAt(0)}
-                          </div>
+                          <Avatar name={student.name} size="sm" />
                           <div>
                             <span className="text-sm font-medium dark:text-zinc-200 block">{student.name}</span>
                             <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-tighter">ID: {student.id.slice(0, 8)}</span>
@@ -606,17 +605,17 @@ export const Students = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-6 py-20 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
-                          <Search size={32} className="text-zinc-300" />
-                        </div>
-                        <h3 className="text-lg font-bold mb-1">{t('students.noStudentsFound')}</h3>
-                        <p className="text-zinc-500 text-sm mb-6">{t('students.noStudentsHint')}</p>
-                        <Button variant="outline" onClick={() => { setActiveFilters({}); setSearchQuery(''); }}>
-                          {t('common.clearAllFilters')}
-                        </Button>
-                      </div>
+                    <td colSpan={7}>
+                      <EmptyState
+                        icon={Search}
+                        title={t('students.noStudentsFound')}
+                        description={t('students.noStudentsHint')}
+                        action={
+                          <Button variant="outline" onClick={() => { setActiveFilters({}); setSearchQuery(''); }}>
+                            {t('common.clearAllFilters')}
+                          </Button>
+                        }
+                      />
                     </td>
                   </tr>
                 )}
@@ -717,9 +716,7 @@ export const Students = () => {
         {selectedStudent && (
           <div className="space-y-8">
             <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-3xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 text-3xl font-bold mb-4 shadow-xl">
-                {selectedStudent.name.charAt(0)}
-              </div>
+              <Avatar name={selectedStudent.name} size="lg" className="mb-4 w-24 h-24 rounded-3xl text-3xl shadow-xl" />
               <h3 className="text-2xl font-bold dark:text-zinc-100">{selectedStudent.name}</h3>
               <p className="text-zinc-500">{selectedStudent.grade} {t('students.student')}</p>
               <div className="mt-4 flex gap-2">
@@ -762,9 +759,7 @@ export const Students = () => {
               <Card className="p-4 border-dashed border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 font-bold">
-                      {(selectedStudent.parent_name ?? 'P').charAt(0)}
-                    </div>
+                    <Avatar name={selectedStudent.parent_name ?? 'P'} size="md" />
                     <div>
                       <p className="text-sm font-bold dark:text-zinc-200">{selectedStudent.parent_name ?? '—'}</p>
                       <p className="text-xs text-zinc-500">{t('students.drawer.primaryContact')}</p>
@@ -850,25 +845,23 @@ export const Students = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>{t('students.form.grade')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+              <Select
                 value={formGrade}
-                onChange={(e) => {
-                  setFormGrade(e.target.value);
-                  if (e.target.value !== '__custom__') setFormCustomGrade('');
+                onChange={(val) => {
+                  setFormGrade(val);
+                  if (val !== '__custom__') setFormCustomGrade('');
                   if (formErrors.grade) setFormErrors(prev => { const { grade, ...rest } = prev; return rest; });
                 }}
-              >
-                <option value="" disabled>Pilih kelas...</option>
-                {GRADE_GROUPS.map(group => (
-                  <optgroup key={group.label} label={group.label}>
-                    {group.options.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </optgroup>
-                ))}
-                <option value="__custom__">Lainnya...</option>
-              </select>
+                placeholder="Pilih kelas..."
+                className="w-full"
+                options={[
+                  ...GRADE_GROUPS.map(group => ({
+                    label: group.label,
+                    options: group.options,
+                  })),
+                  { value: '__custom__', label: 'Lainnya...' },
+                ]}
+              />
               {formGrade === '__custom__' && (
                 <Input
                   placeholder="Masukkan kelas..."
@@ -884,14 +877,15 @@ export const Students = () => {
             </div>
             <div className="space-y-1.5">
               <Label>{t('students.form.status')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+              <Select
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as 'ACTIVE' | 'INACTIVE')}
-              >
-                <option value="ACTIVE">{t('common.active')}</option>
-                <option value="INACTIVE">{t('common.inactive')}</option>
-              </select>
+                onChange={(val) => setFormStatus(val as 'ACTIVE' | 'INACTIVE')}
+                className="w-full"
+                options={[
+                  { value: 'ACTIVE', label: t('common.active') },
+                  { value: 'INACTIVE', label: t('common.inactive') },
+                ]}
+              />
             </div>
           </div>
           <div className="space-y-1.5">
