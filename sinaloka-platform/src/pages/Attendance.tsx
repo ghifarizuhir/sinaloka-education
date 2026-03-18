@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { format, isSameDay, isBefore, startOfDay, addDays, subDays, parseISO } from 'date-fns';
 import { toast } from 'sonner';
-import { Card, Button, Badge, Switch, Input, Label } from '../components/UI';
+import { Card, Button, Badge, Switch, Input, Label, PageHeader, EmptyState } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
 import { useAttendanceBySession, useAttendanceSummary, useUpdateAttendance } from '@/src/hooks/useAttendance';
 import { useSessions, useSessionStudents } from '@/src/hooks/useSessions';
@@ -159,16 +159,16 @@ export const Attendance = () => {
 
   return (
     <div className="space-y-6 pb-24">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('attendance.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('attendance.subtitle')}</p>
-        </div>
-        <Button variant="outline" className="gap-2">
-          <History size={18} />
-          {t('attendance.viewHistory')}
-        </Button>
-      </div>
+      <PageHeader
+        title={t('attendance.title')}
+        subtitle={t('attendance.subtitle')}
+        actions={
+          <Button variant="outline" className="gap-2">
+            <History size={18} />
+            {t('attendance.viewHistory')}
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Panel: Date Picker & Sessions List */}
@@ -214,8 +214,11 @@ export const Attendance = () => {
                 ))}
               </div>
             ) : sessions.length === 0 ? (
-              <Card className="py-12 text-center border-dashed border-2">
-                <p className="text-sm text-zinc-500">{t('attendance.noSessionsForDate')}</p>
+              <Card className="border-dashed border-2">
+                <EmptyState
+                  icon={CalendarIcon}
+                  title={t('attendance.noSessionsForDate')}
+                />
               </Card>
             ) : (
               <div className="space-y-3">
@@ -503,12 +506,12 @@ export const Attendance = () => {
               </div>
             </div>
           ) : (
-            <Card className="py-32 flex flex-col items-center justify-center text-center border-dashed border-2">
-              <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
-                <ClipboardCheck size={32} className="text-zinc-300" />
-              </div>
-              <h3 className="font-bold text-lg mb-1">{t('attendance.noSessionSelected')}</h3>
-              <p className="text-sm text-zinc-500 max-w-xs">{t('attendance.noSessionSelectedHint')}</p>
+            <Card className="py-32 border-dashed border-2">
+              <EmptyState
+                icon={ClipboardCheck}
+                title={t('attendance.noSessionSelected')}
+                description={t('attendance.noSessionSelectedHint')}
+              />
             </Card>
           )}
         </div>
