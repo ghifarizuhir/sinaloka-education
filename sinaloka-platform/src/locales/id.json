@@ -241,13 +241,13 @@
       "inviteError": "Gagal mengirim undangan"
     },
     "modal": {
-      "addTitle": "Daftarkan Siswa Baru",
+      "addTitle": "Tambah Siswa",
       "editTitle": "Edit Profil Siswa",
       "deleteTitle": "Hapus Siswa",
       "bulkDeleteTitle": "Hapus Beberapa Siswa",
       "importTitle": "Impor Siswa",
-      "updateStudent": "Perbarui Siswa",
-      "createStudent": "Buat Siswa",
+      "updateStudent": "Simpan Perubahan",
+      "createStudent": "Tambah Siswa",
       "deleteStudent": "Hapus Siswa",
       "deleteBulk": "Hapus {{count}} Siswa"
     },
@@ -384,7 +384,7 @@
   "classes": {
     "title": "Kelas",
     "subtitle": "Kelola katalog kelas dan pendaftaran.",
-    "registerNewClass": "Daftarkan Kelas Baru",
+    "registerNewClass": "Tambah Kelas",
     "noClassesFound": "Tidak ada kelas ditemukan",
     "noClassesHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
     "searchPlaceholder": "Cari kelas atau tutor...",
@@ -442,9 +442,9 @@
     },
     "modal": {
       "editTitle": "Edit Kelas",
-      "createTitle": "Daftarkan Kelas Baru",
-      "updateClass": "Perbarui Kelas",
-      "createClass": "Buat Kelas",
+      "createTitle": "Tambah Kelas",
+      "updateClass": "Simpan Perubahan",
+      "createClass": "Tambah Kelas",
       "deleteTitle": "Hapus Kelas",
       "deleteClass": "Hapus Kelas"
     },
@@ -662,7 +662,7 @@
   "enrollments": {
     "title": "Pendaftaran",
     "subtitle": "Kelola siklus pendaftaran siswa dan status keuangan.",
-    "newEnrollment": "Pendaftaran Baru",
+    "newEnrollment": "Tambah Pendaftaran",
     "bulkImport": "Impor Massal",
     "exportCsv": "Ekspor CSV",
     "noEnrollmentsFound": "Tidak ada pendaftaran ditemukan.",
@@ -721,7 +721,7 @@
       "bulkDeleteError": "Gagal menghapus pendaftaran"
     },
     "modal": {
-      "newTitle": "Pendaftaran Siswa Baru",
+      "newTitle": "Tambah Pendaftaran",
       "editTitle": "Edit Pendaftaran",
       "importTitle": "Impor Pendaftaran Massal"
     },
@@ -950,7 +950,7 @@
     "subtitle": "Model verifikasi-pertama untuk pendapatan tutor dan jejak audit.",
     "searchPlaceholder": "Cari tutor...",
     "allStatuses": "Semua Status",
-    "newPayout": "Pembayaran Baru",
+    "newPayout": "Tambah Pembayaran",
     "generateSalaries": "Generate Gaji Bulanan",
     "salariesGenerated": "{{count}} payout gaji dibuat",
     "salariesError": "Gagal membuat gaji",
@@ -998,8 +998,8 @@
       "paid": "Lunas"
     },
     "modal": {
-      "createTitle": "Buat Pembayaran",
-      "createPayout": "Buat Pembayaran",
+      "createTitle": "Tambah Pembayaran",
+      "createPayout": "Tambah Pembayaran",
       "creating": "Membuat..."
     },
     "toast": {
@@ -1059,9 +1059,9 @@
     },
     "drawer": {
       "editTitle": "Edit Pengeluaran",
-      "createTitle": "Catat Pengeluaran Baru",
-      "updateExpense": "Perbarui Pengeluaran",
-      "saveExpense": "Simpan Pengeluaran"
+      "createTitle": "Catat Pengeluaran",
+      "updateExpense": "Simpan Perubahan",
+      "saveExpense": "Catat Pengeluaran"
     },
     "toast": {
       "created": "Pengeluaran tercatat.",
@@ -1192,7 +1192,7 @@
   "superAdmin": {
     "institutions": "Institusi",
     "institutionsSubtitle": "Kelola semua institusi bimbingan belajar",
-    "createInstitution": "Buat Institusi",
+    "createInstitution": "Tambah Institusi",
     "createInstitutionSubtitle": "Siapkan institusi bimbingan belajar baru beserta admin pertamanya.",
     "searchPlaceholder": "Cari institusi...",
     "enter": "Masuk",
@@ -1255,7 +1255,7 @@
     },
     "users": "Pengguna",
     "usersSubtitle": "Kelola pengguna di semua institusi",
-    "createAdmin": "Buat Admin",
+    "createAdmin": "Tambah Admin",
     "searchUsersPlaceholder": "Cari berdasarkan nama atau email...",
     "allRoles": "Semua Peran",
     "allInstitutions": "Semua Institusi",
@@ -1269,7 +1269,7 @@
       "lastLogin": "Login Terakhir"
     },
     "createAdminModal": {
-      "title": "Buat Admin",
+      "title": "Tambah Admin",
       "name": "Nama",
       "namePlaceholder": "cth. John Doe",
       "email": "Email",
