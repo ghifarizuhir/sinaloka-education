@@ -35,7 +35,7 @@ export function DropdownMenu({ trigger, items, align = 'right' }: {
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); setIsOpen(prev => !prev); }}
-        className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+        className="p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent"
       >
         {trigger}
       </button>
@@ -47,13 +47,13 @@ export function DropdownMenu({ trigger, items, align = 'right' }: {
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              "absolute top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1",
+              "absolute top-full mt-1 w-48 bg-popover border border-border rounded-xl shadow-xl z-10 p-1",
               align === 'right' ? 'right-0' : 'left-0'
             )}
           >
             {items.map((item, i) => {
               if ('separator' in item) {
-                return <div key={i} className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />;
+                return <div key={i} className="h-px bg-border my-1" />;
               }
               if ('content' in item) {
                 return <div key={i}>{item.content}</div>;
@@ -69,8 +69,8 @@ export function DropdownMenu({ trigger, items, align = 'right' }: {
                     "w-full flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg transition-colors",
                     item.disabled && "opacity-50 cursor-not-allowed",
                     item.variant === 'danger'
-                      ? "hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600"
-                      : "hover:bg-zinc-50 dark:hover:bg-zinc-800",
+                      ? "hover:bg-destructive/10 text-destructive"
+                      : "hover:bg-accent",
                     item.className
                   )}
                 >
