@@ -81,30 +81,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ACAD-01 | — | Pending |
-| ACAD-02 | — | Pending |
-| ACAD-03 | — | Pending |
-| ACAD-04 | — | Pending |
-| ACAD-05 | — | Pending |
-| ACAD-06 | — | Pending |
-| BRND-01 | — | Pending |
-| SETT-01 | — | Pending |
-| SETT-02 | — | Pending |
-| SETT-03 | — | Pending |
-| FINA-01 | — | Pending |
-| FINA-02 | — | Pending |
-| FINA-03 | — | Pending |
-| FINA-04 | — | Pending |
-| FINA-05 | — | Pending |
-| ATTN-01 | — | Pending |
-| QUAL-01 | — | Pending |
-| QUAL-02 | — | Pending |
+| ACAD-01 | Phase 1 | Pending |
+| ACAD-02 | Phase 1 | Pending |
+| ACAD-03 | Phase 1 | Pending |
+| ACAD-04 | Phase 1 | Pending |
+| ACAD-05 | Phase 1 | Pending |
+| ACAD-06 | Phase 1 | Pending |
+| BRND-01 | Phase 2 | Pending |
+| SETT-01 | Phase 2 | Pending |
+| SETT-02 | Phase 2 | Pending |
+| SETT-03 | Phase 2 | Pending |
+| FINA-01 | Phase 3 | Pending |
+| FINA-02 | Phase 3 | Pending |
+| FINA-03 | Phase 3 | Pending |
+| FINA-04 | Phase 3 | Pending |
+| FINA-05 | Phase 3 | Pending |
+| ATTN-01 | Phase 3 | Pending |
+| QUAL-01 | Phase 4 | Pending |
+| QUAL-02 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-19 — traceability filled after roadmap creation*
