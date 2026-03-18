@@ -241,13 +241,13 @@
       "inviteError": "Failed to send invitation"
     },
     "modal": {
-      "addTitle": "Register New Student",
+      "addTitle": "Add Student",
       "editTitle": "Edit Student Profile",
       "deleteTitle": "Delete Student",
       "bulkDeleteTitle": "Delete Multiple Students",
       "importTitle": "Import Students",
-      "updateStudent": "Update Student",
-      "createStudent": "Create Student",
+      "updateStudent": "Save Changes",
+      "createStudent": "Add Student",
       "deleteStudent": "Delete Student",
       "deleteBulk": "Delete {{count}} Students"
     },
@@ -384,7 +384,7 @@
   "classes": {
     "title": "Classes",
     "subtitle": "Manage your class catalog and enrollment.",
-    "registerNewClass": "Register New Class",
+    "registerNewClass": "Add Class",
     "noClassesFound": "No classes found",
     "noClassesHint": "Try adjusting your search or filters to find what you're looking for.",
     "searchPlaceholder": "Search class or tutor...",
@@ -442,9 +442,9 @@
     },
     "modal": {
       "editTitle": "Edit Class",
-      "createTitle": "Register New Class",
-      "updateClass": "Update Class",
-      "createClass": "Create Class",
+      "createTitle": "Add Class",
+      "updateClass": "Save Changes",
+      "createClass": "Add Class",
       "deleteTitle": "Delete Class",
       "deleteClass": "Delete Class"
     },
@@ -662,7 +662,7 @@
   "enrollments": {
     "title": "Enrollments",
     "subtitle": "Manage student enrollment lifecycle and financial status.",
-    "newEnrollment": "New Enrollment",
+    "newEnrollment": "Add Enrollment",
     "bulkImport": "Bulk Import",
     "exportCsv": "Export CSV",
     "noEnrollmentsFound": "No enrollments found.",
@@ -721,7 +721,7 @@
       "bulkDeleteError": "Failed to delete enrollments"
     },
     "modal": {
-      "newTitle": "New Student Enrollment",
+      "newTitle": "Add Enrollment",
       "editTitle": "Edit Enrollment",
       "importTitle": "Bulk Enrollment Import"
     },
@@ -950,7 +950,7 @@
     "subtitle": "Verification-first model for tutor earnings and audit trails.",
     "searchPlaceholder": "Search tutors...",
     "allStatuses": "All Statuses",
-    "newPayout": "New Payout",
+    "newPayout": "Add Payout",
     "generateSalaries": "Generate Monthly Salaries",
     "salariesGenerated": "{{count}} salary payout(s) created",
     "salariesError": "Failed to generate salaries",
@@ -998,8 +998,8 @@
       "paid": "Paid"
     },
     "modal": {
-      "createTitle": "Create Payout",
-      "createPayout": "Create Payout",
+      "createTitle": "Add Payout",
+      "createPayout": "Add Payout",
       "creating": "Creating..."
     },
     "toast": {
@@ -1059,9 +1059,9 @@
     },
     "drawer": {
       "editTitle": "Edit Expense",
-      "createTitle": "Record New Expense",
-      "updateExpense": "Update Expense",
-      "saveExpense": "Save Expense"
+      "createTitle": "Record Expense",
+      "updateExpense": "Save Changes",
+      "saveExpense": "Record Expense"
     },
     "toast": {
       "created": "Expense recorded.",
@@ -1192,7 +1192,7 @@
   "superAdmin": {
     "institutions": "Institutions",
     "institutionsSubtitle": "Manage all tutoring institutions",
-    "createInstitution": "Create Institution",
+    "createInstitution": "Add Institution",
     "createInstitutionSubtitle": "Set up a new tutoring institution and its first admin.",
     "searchPlaceholder": "Search institutions...",
     "enter": "Enter",
@@ -1255,7 +1255,7 @@
     },
     "users": "Users",
     "usersSubtitle": "Manage users across all institutions",
-    "createAdmin": "Create Admin",
+    "createAdmin": "Add Admin",
     "searchUsersPlaceholder": "Search by name or email...",
     "allRoles": "All Roles",
     "allInstitutions": "All Institutions",
@@ -1269,7 +1269,7 @@
       "lastLogin": "Last Login"
     },
     "createAdminModal": {
-      "title": "Create Admin",
+      "title": "Add Admin",
       "name": "Name",
       "namePlaceholder": "e.g. John Doe",
       "email": "Email",
