@@ -502,7 +502,8 @@
     "subtitle": "Manage class sessions, tutor assignments, and room traffic.",
     "scheduleSession": "Schedule Session",
     "autoGenerate": "Auto-Generate",
-    "noSessionsFound": "No sessions found.",
+    "noSessionsFound": "No sessions found",
+    "noSessionsHint": "Try adjusting your search or filters to find what you're looking for.",
     "form": {
       "selectClass": "Select Class",
       "selectClassPlaceholder": "— Select class —",
@@ -665,7 +666,8 @@
     "newEnrollment": "Add Enrollment",
     "bulkImport": "Bulk Import",
     "exportCsv": "Export CSV",
-    "noEnrollmentsFound": "No enrollments found.",
+    "noEnrollmentsFound": "No enrollments found",
+    "noEnrollmentsHint": "Try adjusting your search or filters to find what you're looking for.",
     "totalActive": "Total Active",
     "onTrial": "On Trial",
     "waitlisted": "Waitlisted",
@@ -754,7 +756,7 @@
 
   "attendance": {
     "title": "Attendance Management",
-    "subtitle": "Automated tracking, parent notifications, and session reporting.",
+    "subtitle": "Manage attendance tracking, notifications, and session reporting.",
     "viewHistory": "View History",
     "selectDate": "Select Date",
     "sessions": "Sessions",
@@ -792,7 +794,7 @@
 
   "finance": {
     "title": "Finance Intelligence",
-    "subtitle": "Actionable insights into your school's financial health.",
+    "subtitle": "Monitor your institution's financial health and insights.",
     "revenueThisMonth": "Revenue This Month",
     "outstandingPayments": "Outstanding Payments",
     "pendingPayouts": "Pending Payouts",
@@ -873,10 +875,11 @@
 
   "payments": {
     "title": "Student Payments",
-    "subtitle": "Automated billing and revenue recovery system.",
+    "subtitle": "Manage student billing and payment records.",
     "recordBatch": "Record Batch ({{count}})",
     "revenueAnalytics": "Revenue Analytics",
-    "noPaymentsFound": "No payments found.",
+    "noPaymentsFound": "No payments found",
+    "noPaymentsHint": "Try adjusting your search or filters to find what you're looking for.",
     "totalRecords": "Total Records",
     "overdueCount": "Overdue Count",
     "overdueAmount": "Overdue Amount",
@@ -947,14 +950,15 @@
 
   "payouts": {
     "title": "Tutor Payouts Intelligence",
-    "subtitle": "Verification-first model for tutor earnings and audit trails.",
+    "subtitle": "Manage tutor payout records and audit trails.",
     "searchPlaceholder": "Search tutors...",
     "allStatuses": "All Statuses",
     "newPayout": "Add Payout",
     "generateSalaries": "Generate Monthly Salaries",
     "salariesGenerated": "{{count}} salary payout(s) created",
     "salariesError": "Failed to generate salaries",
-    "noPayoutsFound": "No payouts found.",
+    "noPayoutsFound": "No payouts found",
+    "noPayoutsHint": "Try adjusting your search or filters to find what you're looking for.",
     "backToPayouts": "Back to Payouts",
     "exportAudit": "Export Audit",
     "downloadPayoutSlip": "Download Payout Slip",
@@ -1012,7 +1016,7 @@
       "fillRequired": "Please fill in all required fields."
     },
     "confirm": {
-      "deletePayout": "Delete this payout?"
+      "deletePayout": "Are you sure you want to delete this payout?"
     },
     "periodStart": "Period Start",
     "periodEnd": "Period End",
@@ -1027,9 +1031,10 @@
 
   "expenses": {
     "title": "Operating Expenses",
-    "subtitle": "Track and manage non-tutor operational costs.",
+    "subtitle": "Manage non-tutor operational expenses.",
     "recordExpense": "Record Expense",
-    "noExpensesFound": "No expenses found.",
+    "noExpensesFound": "No expenses found",
+    "noExpensesHint": "Try adjusting your search or filters to find what you're looking for.",
     "searchPlaceholder": "Search expenses...",
     "totalExpensesPage": "Total Expenses (Page)",
     "categories": "Categories",
