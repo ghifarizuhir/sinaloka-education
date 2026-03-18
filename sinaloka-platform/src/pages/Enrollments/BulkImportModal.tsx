@@ -39,6 +39,11 @@ export const BulkImportModal = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const handleSubmit = () => {
+    handleImportSubmit();
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <Modal
       isOpen={importModal}
@@ -91,7 +96,7 @@ export const BulkImportModal = ({
           <Button variant="outline" className="flex-1 justify-center" onClick={handleClose}>{t('common.cancel')}</Button>
           <Button
             className="flex-1 justify-center"
-            onClick={handleImportSubmit}
+            onClick={handleSubmit}
             disabled={!importFile || importIsPending}
           >
             {importIsPending ? t('common.processing') : t('enrollments.import.processImport')}
