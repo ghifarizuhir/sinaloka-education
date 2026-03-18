@@ -13,7 +13,7 @@ The platform has 4 common UI patterns repeated inline across pages without centr
 
 1. **27 raw `<select>` elements** with identical 3-line class strings across 11 pages
 2. **6+ inline dropdown action menus** each with ~40 lines of click-outside state, useRef, useEffect, and absolute positioning
-3. **4 manual tab implementations** with identical button styling and state management
+3. **3 manual tab implementations** with identical pill-style button styling and state management (Settings uses a vertical sidebar nav — different component, out of scope)
 4. **19 inline page headers** repeating the same h2 + subtitle + flex layout
 
 ---
@@ -23,18 +23,29 @@ The platform has 4 common UI patterns repeated inline across pages without centr
 ### Props
 
 ```typescript
-interface SelectProps {
+interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
+interface SelectOptionGroup {
+  label: string;
+  options: SelectOption[];
+}
+
+interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
   value: string;
   onChange: (value: string) => void;
-  options: { value: string; label: string }[];
+  options: (SelectOption | SelectOptionGroup)[];
   placeholder?: string;
-  className?: string;
 }
 ```
 
 ### Usage
 
 ```tsx
+// Simple flat options
 <Select
   value={filterStatus}
   onChange={setFilterStatus}
@@ -44,15 +55,31 @@ interface SelectProps {
     { value: 'PENDING', label: t('common.pending') },
   ]}
 />
+
+// Grouped options (optgroup)
+<Select
+  value={selectedGrade}
+  onChange={setSelectedGrade}
+  options={[
+    { label: 'SMP', options: [
+      { value: '7', label: 'Kelas 7' },
+      { value: '8', label: 'Kelas 8' },
+    ]},
+    { label: 'SMA', options: [
+      { value: '10', label: 'Kelas 10' },
+    ]},
+  ]}
+/>
 ```
 
 ### Implementation
 
 - Renders a native `<select>` element with consistent styling
-- Styling matches existing raw selects: `h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100`
-- Maps `options` array to `<option>` elements
+- Styling: `h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:text-zinc-100`
+- Uses `focus-visible:` (not `focus:`) to match existing Input component convention — ring only shows on keyboard navigation
+- Detects grouped vs flat options: if an item has `options` array property, renders as `<optgroup>`
 - Calls `onChange` with the selected value string (not the event)
-- Supports optional `className` for overrides
+- Spreads remaining HTML select attributes (`name`, `id`, `required`, `disabled`, etc.) via `...rest` props
 
 ### Pages Affected (27 instances across 11 pages)
 
@@ -70,13 +97,18 @@ interface DropdownMenuItem {
   icon?: React.ComponentType<{ size?: number }>;
   onClick: () => void;
   variant?: 'default' | 'danger';
+  className?: string;
+  disabled?: boolean;
 }
 
-type DropdownMenuItemOrSeparator = DropdownMenuItem | { separator: true };
+type DropdownMenuEntry =
+  | DropdownMenuItem
+  | { separator: true }
+  | { content: React.ReactNode };
 
 interface DropdownMenuProps {
   trigger: React.ReactNode;
-  items: DropdownMenuItemOrSeparator[];
+  items: DropdownMenuEntry[];
   align?: 'left' | 'right';
 }
 ```
@@ -93,6 +125,12 @@ interface DropdownMenuProps {
     { label: t('tutors.menu.deleteTutor'), icon: XCircle, onClick: () => handleDelete(tutor.id), variant: 'danger' },
   ]}
 />
+
+// Custom color via className
+{ label: 'Approve', icon: CheckCircle, onClick: handleApprove, className: 'text-emerald-600' }
+
+// Non-interactive content (e.g. info message)
+{ content: <div className="px-3 py-2 text-xs text-zinc-400 flex items-center gap-1"><Lock size={12} /> Locked</div> }
 ```
 
 ### Implementation
@@ -101,12 +139,16 @@ interface DropdownMenuProps {
 - Internal `isOpen` state — no external state management needed
 - Click-outside close via `useRef` + `mousedown` event listener
 - Escape key close via `keydown` listener
+- Enter/exit animation via `AnimatePresence` + `motion.div` (matches existing Modal/Drawer pattern)
 - Positioned absolutely below trigger, aligned left or right (default: right)
 - Menu items: `w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg`
 - Danger variant: `hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600`
+- Custom colors via `className` prop on items (overrides default text color)
+- Disabled items: `opacity-50 cursor-not-allowed` with click handler suppressed
 - Separator: `h-px bg-zinc-100 dark:bg-zinc-800 my-1`
+- Content entries: rendered as-is (no click handler, no hover styling)
 - Menu container: `w-48 bg-white dark:bg-zinc-900 border rounded-xl shadow-xl z-10 p-1`
-- Auto-closes when any item is clicked
+- Auto-closes when any non-disabled item is clicked
 
 ### Pages Affected (6+ instances)
 
@@ -119,10 +161,16 @@ Tutors (2 — grid and list), Enrollments (1), Schedules (1), FinanceOverview (1
 ### Props
 
 ```typescript
+interface TabItem {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
 interface TabsProps {
   value: string;
   onChange: (value: string) => void;
-  items: { value: string; label: string }[];
+  items: TabItem[];
   className?: string;
 }
 ```
@@ -134,9 +182,9 @@ interface TabsProps {
   value={activeTab}
   onChange={setActiveTab}
   items={[
-    { value: 'general', label: t('settings.tabs.general') },
-    { value: 'billing', label: t('settings.tabs.billing') },
-    { value: 'branding', label: t('settings.tabs.branding') },
+    { value: 'messages', label: t('whatsapp.tabs.messages') },
+    { value: 'reminders', label: t('whatsapp.tabs.paymentReminders') },
+    { value: 'settings', label: t('whatsapp.tabs.settings'), disabled: !isConfigured },
   ]}
 />
 ```
@@ -147,11 +195,14 @@ interface TabsProps {
 - Each tab button: `px-3 py-1.5 text-xs font-bold rounded-md transition-all`
 - Active tab: `bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100`
 - Inactive tab: `text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300`
+- Disabled tab: `opacity-40 cursor-not-allowed` (click suppressed)
 - Controlled only — parent manages `value` state
 
-### Pages Affected (4 instances)
+### Pages Affected (3 instances)
 
-Settings (6 tabs), WhatsApp (3 tabs), SuperAdmin/InstitutionDetail (3 tabs), FinanceOverview (4 period tabs)
+WhatsApp (3 tabs), SuperAdmin/InstitutionDetail (3 tabs), FinanceOverview (4 period tabs)
+
+> **Note**: Settings page uses a vertical sidebar navigation pattern — this is a fundamentally different component and is NOT covered by Tabs. Settings will be addressed separately (either as a `VerticalNav` component in Phase 2 or kept as-is).
 
 ---
 
@@ -189,6 +240,8 @@ interface PageHeaderProps {
 - Subtitle: `text-zinc-500 text-sm`
 - Actions rendered on the right side (flex end on md+)
 
+> **Note**: The `dark:text-zinc-100` on the title is intentionally included. Some pages currently omit this — the centralized component will fix a dark mode inconsistency on ~11 pages.
+
 ### Pages Affected
 
 All 19 pages.
@@ -199,7 +252,7 @@ All 19 pages.
 
 | File | Change |
 |---|---|
-| `src/components/UI.tsx` | Add Select, DropdownMenu, Tabs, PageHeader components (~150 lines total) |
+| `src/components/UI.tsx` | Add Select, DropdownMenu, Tabs, PageHeader components (~200 lines total) |
 
 ## No Other Changes in Phase 1
 
@@ -211,3 +264,5 @@ Phase 1 only creates the components. Page migration happens in Phase 3 per the r
 - Component file split (Phase 4)
 - shadcn migration (Phase 5)
 - Other missing components (Table, EmptyState, etc. — Phase 2)
+- Settings sidebar navigation (different pattern from Tabs)
+- Vertical/sidebar tab variant
