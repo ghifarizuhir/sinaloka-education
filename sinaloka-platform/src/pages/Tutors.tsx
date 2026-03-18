@@ -436,11 +436,11 @@ export const Tutors = () => {
                   <div className="w-16 h-16 rounded-2xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 font-bold text-2xl shadow-lg">
                     {tutor.name.split(' ').pop()?.charAt(0)}
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-lg dark:text-zinc-100">{tutor.name}</h4>
                     </div>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate" title={`${(tutor.subjects ?? []).slice(0, 2).join(', ')} ${t('tutors.specialist')}`}>
                       {(tutor.subjects ?? []).slice(0, 2).join(', ')} {t('tutors.specialist')}
                     </p>
                     <div className="mt-1">{getAvailabilityBadge(tutor)}</div>
