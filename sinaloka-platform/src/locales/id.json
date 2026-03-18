@@ -502,7 +502,8 @@
     "subtitle": "Kelola sesi kelas, penugasan tutor, dan lalu lintas ruangan.",
     "scheduleSession": "Jadwalkan Sesi",
     "autoGenerate": "Buat Otomatis",
-    "noSessionsFound": "Tidak ada sesi ditemukan.",
+    "noSessionsFound": "Tidak ada sesi ditemukan",
+    "noSessionsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
     "form": {
       "selectClass": "Pilih Kelas",
       "selectClassPlaceholder": "— Pilih kelas —",
@@ -665,7 +666,8 @@
     "newEnrollment": "Tambah Pendaftaran",
     "bulkImport": "Impor Massal",
     "exportCsv": "Ekspor CSV",
-    "noEnrollmentsFound": "Tidak ada pendaftaran ditemukan.",
+    "noEnrollmentsFound": "Tidak ada pendaftaran ditemukan",
+    "noEnrollmentsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
     "totalActive": "Total Aktif",
     "onTrial": "Percobaan",
     "waitlisted": "Daftar Tunggu",
@@ -754,7 +756,7 @@
 
   "attendance": {
     "title": "Manajemen Kehadiran",
-    "subtitle": "Pelacakan otomatis, notifikasi orang tua, dan pelaporan sesi.",
+    "subtitle": "Kelola pelacakan kehadiran, notifikasi, dan pelaporan sesi.",
     "viewHistory": "Lihat Riwayat",
     "selectDate": "Pilih Tanggal",
     "sessions": "Sesi",
@@ -792,7 +794,7 @@
 
   "finance": {
     "title": "Inteligensi Keuangan",
-    "subtitle": "Wawasan yang dapat ditindaklanjuti tentang kesehatan keuangan sekolah Anda.",
+    "subtitle": "Pantau kesehatan keuangan dan wawasan institusi Anda.",
     "revenueThisMonth": "Pendapatan Bulan Ini",
     "outstandingPayments": "Pembayaran Tertunggak",
     "pendingPayouts": "Pembayaran Tutor Tertunda",
@@ -873,10 +875,11 @@
 
   "payments": {
     "title": "Pembayaran Siswa",
-    "subtitle": "Sistem penagihan otomatis dan pemulihan pendapatan.",
+    "subtitle": "Kelola tagihan siswa dan catatan pembayaran.",
     "recordBatch": "Catat Batch ({{count}})",
     "revenueAnalytics": "Analitik Pendapatan",
-    "noPaymentsFound": "Tidak ada pembayaran ditemukan.",
+    "noPaymentsFound": "Tidak ada pembayaran ditemukan",
+    "noPaymentsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
     "totalRecords": "Total Data",
     "overdueCount": "Jumlah Terlambat",
     "overdueAmount": "Total Terlambat",
@@ -947,14 +950,15 @@
 
   "payouts": {
     "title": "Inteligensi Pembayaran Tutor",
-    "subtitle": "Model verifikasi-pertama untuk pendapatan tutor dan jejak audit.",
+    "subtitle": "Kelola catatan pembayaran tutor dan jejak audit.",
     "searchPlaceholder": "Cari tutor...",
     "allStatuses": "Semua Status",
     "newPayout": "Tambah Pembayaran",
     "generateSalaries": "Generate Gaji Bulanan",
     "salariesGenerated": "{{count}} payout gaji dibuat",
     "salariesError": "Gagal membuat gaji",
-    "noPayoutsFound": "Tidak ada pembayaran ditemukan.",
+    "noPayoutsFound": "Tidak ada pembayaran ditemukan",
+    "noPayoutsHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
     "backToPayouts": "Kembali ke Pembayaran",
     "exportAudit": "Ekspor Audit",
     "downloadPayoutSlip": "Unduh Slip Pembayaran",
@@ -1012,7 +1016,7 @@
       "fillRequired": "Silakan isi semua kolom yang wajib."
     },
     "confirm": {
-      "deletePayout": "Hapus pembayaran ini?"
+      "deletePayout": "Apakah Anda yakin ingin menghapus pembayaran tutor ini?"
     },
     "periodStart": "Periode Mulai",
     "periodEnd": "Periode Akhir",
@@ -1027,9 +1031,10 @@
 
   "expenses": {
     "title": "Biaya Operasional",
-    "subtitle": "Lacak dan kelola biaya operasional non-tutor.",
+    "subtitle": "Kelola pengeluaran operasional non-tutor.",
     "recordExpense": "Catat Pengeluaran",
-    "noExpensesFound": "Tidak ada pengeluaran ditemukan.",
+    "noExpensesFound": "Tidak ada pengeluaran ditemukan",
+    "noExpensesHint": "Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.",
     "searchPlaceholder": "Cari pengeluaran...",
     "totalExpensesPage": "Total Pengeluaran (Halaman)",
     "categories": "Kategori",
