@@ -84,6 +84,10 @@ export function AcceptInvitePage() {
       return;
     }
 
+    if (!bankName || !bankAccountNumber || !bankAccountHolder) {
+      return;
+    }
+
     setPageState({ status: 'submitting' });
 
     try {
@@ -91,9 +95,9 @@ export function AcceptInvitePage() {
         token,
         name: fullName,
         password,
-        bank_name: bankName || undefined,
-        bank_account_number: bankAccountNumber || undefined,
-        bank_account_holder: bankAccountHolder || undefined,
+        bank_name: bankName,
+        bank_account_number: bankAccountNumber,
+        bank_account_holder: bankAccountHolder,
       });
       navigate('/login?invited=true', { replace: true });
     } catch (err: any) {
@@ -216,7 +220,7 @@ export function AcceptInvitePage() {
           <div className="flex items-center gap-3 pt-2">
             <div className="flex-1 h-px bg-zinc-800" />
             <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">
-              Info Bank (Opsional)
+              Info Bank
             </span>
             <div className="flex-1 h-px bg-zinc-800" />
           </div>
@@ -230,6 +234,7 @@ export function AcceptInvitePage() {
               type="text"
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
+              required
               placeholder="Contoh: BCA, Mandiri, BNI"
               className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
@@ -244,6 +249,7 @@ export function AcceptInvitePage() {
               type="text"
               value={bankAccountNumber}
               onChange={(e) => setBankAccountNumber(e.target.value)}
+              required
               placeholder="Nomor rekening bank"
               className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
@@ -258,6 +264,7 @@ export function AcceptInvitePage() {
               type="text"
               value={bankAccountHolder}
               onChange={(e) => setBankAccountHolder(e.target.value)}
+              required
               placeholder="Nama sesuai rekening"
               className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
             />
