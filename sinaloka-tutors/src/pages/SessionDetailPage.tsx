@@ -140,7 +140,7 @@ export function SessionDetailPage({ session, onClose }: SessionDetailPageProps) 
                   {student.attendance ? statusLabel[student.attendance] : 'Belum'}
                 </span>
                 {student.homeworkDone && (
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-subtle bg-surface-border px-2 py-0.5 rounded">HW</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-subtle bg-surface-elevated px-2 py-0.5 rounded">HW</span>
                 )}
               </div>
             </div>

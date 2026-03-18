@@ -249,7 +249,7 @@ function MainAppContent() {
             >
               <div className="p-6 border-b border-surface-border flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Bukti Transfer</h3>
-                <button onClick={() => setSelectedProof(null)} className="w-8 h-8 rounded-full bg-surface-border flex items-center justify-center">
+                <button onClick={() => setSelectedProof(null)} className="w-8 h-8 rounded-full bg-surface-elevated flex items-center justify-center">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -281,7 +281,7 @@ function MainAppContent() {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-24 left-6 right-6 z-[110] flex justify-center pointer-events-none"
           >
-            <div className="bg-brand text-brand-foreground px-6 py-3 rounded-full font-semibold shadow-[0_10px_30px_rgba(45,212,191,0.3)] flex items-center gap-2">
+            <div className="bg-brand text-brand-foreground px-6 py-3 rounded-full font-semibold shadow-brand-md flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
               {notificationMessage}
             </div>

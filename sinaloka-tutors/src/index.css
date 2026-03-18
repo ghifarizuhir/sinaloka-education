@@ -9,9 +9,11 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-muted: var(--brand-muted);
+  --color-brand-glow: var(--brand-glow);
   --color-surface: var(--surface);
   --color-surface-foreground: var(--surface-foreground);
   --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
   --color-surface-border: var(--surface-border);
   --color-subtle: var(--subtle);
 }
@@ -22,15 +24,17 @@
   --brand: oklch(0.680 0.155 180);
   --brand-foreground: oklch(0.155 0.030 180);
   --brand-muted: oklch(0.680 0.155 180 / 15%);
+  --brand-glow: oklch(0.680 0.155 180 / 30%);
 
   /* Warm dark surfaces */
   --surface: oklch(0.155 0.012 260);
   --surface-foreground: oklch(0.975 0.005 90);
   --surface-muted: oklch(0.205 0.012 260);
-  --surface-border: oklch(1 0 0 / 10%);
+  --surface-elevated: oklch(1 0 0 / 12%);
+  --surface-border: oklch(1 0 0 / 8%);
 
-  /* Subtle text */
-  --subtle: oklch(0.550 0.010 260);
+  /* Subtle text (0.650 per brand guidelines — WCAG AA ~4.5:1) */
+  --subtle: oklch(0.650 0.010 260);
 
   /* Status */
   --color-success: oklch(0.680 0.155 160);
@@ -49,9 +53,13 @@ body {
 
 /* Custom text selection — brand teal */
 ::selection {
-  background-color: oklch(0.680 0.155 180 / 30%);
+  background-color: var(--brand-glow);
   color: white;
 }
+
+/* Brand glow shadows — must track --brand if color changes */
+.shadow-brand-sm { box-shadow: 0 0 40px oklch(0.680 0.155 180 / 25%); }
+.shadow-brand-md { box-shadow: 0 10px 30px oklch(0.680 0.155 180 / 30%); }
 
 /* Hide scrollbar utility */
 .no-scrollbar::-webkit-scrollbar { display: none; }

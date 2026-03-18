@@ -71,7 +71,7 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
           <h3 className="text-lg font-semibold">Atur Ulang Jadwal</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-surface-border flex items-center justify-center hover:bg-surface-border/80 transition-colors"
+            className="w-8 h-8 rounded-full bg-surface-elevated flex items-center justify-center hover:bg-surface-elevated/80 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -108,7 +108,7 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
               value={proposedDate}
               onChange={(e) => setProposedDate(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-lg bg-surface-border border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
+              className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
             />
           </div>
 
@@ -120,7 +120,7 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
                 value={proposedStartTime}
                 onChange={(e) => setProposedStartTime(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg bg-surface-border border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
               />
             </div>
             <div className="space-y-1.5">
@@ -130,7 +130,7 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
                 value={proposedEndTime}
                 onChange={(e) => setProposedEndTime(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg bg-surface-border border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
               placeholder="Jelaskan alasan atur ulang jadwal..."
               rows={3}
               maxLength={500}
-              className="w-full px-4 py-3 rounded-lg bg-surface-border border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm resize-none"
+              className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm resize-none"
             />
           </div>
 

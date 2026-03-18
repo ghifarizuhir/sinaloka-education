@@ -72,14 +72,14 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
           </button>
           <button
             onClick={() => onReschedule(item.id)}
-            className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-surface-border text-white hover:bg-surface-border/80 transition-colors"
+            className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-surface-elevated text-white hover:bg-surface-elevated/80 transition-colors"
           >
             <RefreshCcw className="w-5 h-5" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Atur Ulang</span>
           </button>
           <button
             onClick={() => onCancel(item.id)}
-            className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-surface-border text-red-400 hover:bg-surface-border/80 transition-colors"
+            className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-surface-elevated text-red-400 hover:bg-surface-elevated/80 transition-colors"
           >
             <XCircle className="w-5 h-5" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Cancel</span>
@@ -88,7 +88,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
       )}
 
       {isUpcoming && allAttended && (
-        <div className="p-4 rounded-lg bg-surface-border/50 border border-surface-border text-center">
+        <div className="p-4 rounded-lg bg-surface-elevated/50 border border-surface-border text-center">
           <p className="text-subtle text-[10px] font-bold uppercase tracking-wider">Absensi Murid Selesai</p>
         </div>
       )}
@@ -96,7 +96,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
       {!isUpcoming && onViewDetail && (
         <button
           onClick={() => onViewDetail(item.id)}
-          className="w-full p-3 rounded-lg bg-surface-border text-subtle hover:bg-surface-border/80 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider"
+          className="w-full p-3 rounded-lg bg-surface-elevated text-subtle hover:bg-surface-elevated/80 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider"
         >
           Lihat Detail
         </button>

@@ -52,7 +52,7 @@ export const PayoutCard: React.FC<PayoutCardProps> = ({ payout, onViewProof }) =
       {isPaid && payout.proofUrl && (
         <button 
           onClick={() => onViewProof(payout.proofUrl!)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-surface-border text-white text-xs font-bold uppercase tracking-wider hover:bg-surface-border/80 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-surface-elevated text-white text-xs font-bold uppercase tracking-wider hover:bg-surface-elevated/80 transition-colors"
         >
           <Eye className="w-4 h-4" />
           Lihat Bukti Transfer

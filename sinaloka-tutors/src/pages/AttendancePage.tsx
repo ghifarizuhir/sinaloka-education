@@ -64,7 +64,7 @@ export function AttendancePage({
           <div>
             <h1 className="text-xl font-semibold leading-none mb-1">{selectedClass.subject}</h1>
             <div className="flex items-center gap-3 text-subtle text-[10px] font-bold uppercase tracking-widest">
-              <span className="bg-surface-border px-2 py-0.5 rounded text-subtle">Scheduled</span>
+              <span className="bg-surface-elevated px-2 py-0.5 rounded text-subtle">Scheduled</span>
               <span>{tutorName}</span>
             </div>
           </div>
@@ -132,7 +132,7 @@ export function AttendancePage({
                             : status === 'A'
                               ? 'bg-red-500 border-red-500 text-white'
                               : 'bg-orange-400 border-orange-400 text-white'
-                          : 'bg-surface-border border-surface-border text-subtle',
+                          : 'bg-surface-elevated border-surface-border text-subtle',
                       )}
                     >
                       {status}
@@ -147,7 +147,7 @@ export function AttendancePage({
                       type="checkbox"
                       checked={student.homeworkDone || false}
                       onChange={() => onToggleHomework(selectedClass.id, student.id)}
-                      className="w-4 h-4 rounded border-surface-border bg-surface-border text-brand focus:ring-brand-muted"
+                      className="w-4 h-4 rounded border-surface-border bg-surface-elevated text-brand focus:ring-brand-muted"
                     />
                     <span className="text-[10px] font-bold uppercase tracking-wider text-subtle">HW Done</span>
                   </div>
@@ -157,7 +157,7 @@ export function AttendancePage({
                       'w-8 h-8 rounded-lg flex items-center justify-center transition-all border',
                       student.note
                         ? 'text-brand border-brand/30 bg-brand-muted'
-                        : 'text-subtle border-surface-border bg-surface-border'
+                        : 'text-subtle border-surface-border bg-surface-elevated'
                     )}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />

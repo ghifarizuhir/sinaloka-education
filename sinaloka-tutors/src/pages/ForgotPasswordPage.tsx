@@ -97,7 +97,7 @@ export function ForgotPasswordPage() {
             <button
               onClick={handleResend}
               disabled={loading || cooldown > 0}
-              className="w-full bg-surface-border hover:bg-surface-border/80 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-surface-elevated hover:bg-surface-elevated/80 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               {cooldown > 0 ? `Kirim Ulang (${cooldown}s)` : 'Kirim Ulang'}
