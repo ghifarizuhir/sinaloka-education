@@ -60,6 +60,7 @@ export class SessionService {
   private async validateClassForSession(classId: string, institutionId: string) {
     const classRecord = await this.prisma.class.findUnique({
       where: { id: classId, institution_id: institutionId },
+      include: { schedules: true },
     });
 
     if (!classRecord) {
@@ -278,10 +279,11 @@ export class SessionService {
       throw new BadRequestException('date_from must be before or equal to date_to');
     }
 
-    // Get target day-of-week numbers from class schedule_days
-    const targetDays = (classRecord.schedule_days as string[]).map(
-      (day) => DAY_MAP[day],
+    // Build a map of day-of-week number → schedule (with start_time/end_time)
+    const scheduleByDay = new Map(
+      classRecord.schedules.map((s: any) => [DAY_MAP[s.day], s]),
     );
+    const targetDays = [...scheduleByDay.keys()];
 
     // Find existing sessions for this class in the date range to skip them
     const existingSessions = await this.prisma.session.findMany({
@@ -318,12 +320,13 @@ export class SessionService {
         const dateStr = current.toISOString().split('T')[0];
 
         if (!existingDates.has(dateStr)) {
+          const schedule = scheduleByDay.get(dayOfWeek)!;
           sessionsToCreate.push({
             class_id: dto.class_id,
             institution_id: institutionId,
             date: new Date(dateStr),
-            start_time: classRecord.schedule_start_time,
-            end_time: classRecord.schedule_end_time,
+            start_time: schedule.start_time,
+            end_time: schedule.end_time,
             status: SessionStatus.SCHEDULED,
             created_by: userId,
           });

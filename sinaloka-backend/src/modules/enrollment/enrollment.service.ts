@@ -28,23 +28,25 @@ export class EnrollmentService {
     private readonly invoiceGenerator: InvoiceGeneratorService,
   ) {}
 
-  private timeRangesOverlap(
-    startA: string,
-    endA: string,
-    startB: string,
-    endB: string,
+  private schedulesConflict(
+    schedulesA: { day: string; start_time: string; end_time: string }[],
+    schedulesB: { day: string; start_time: string; end_time: string }[],
   ): boolean {
-    return startA < endB && startB < endA;
-  }
-
-  private daysOverlap(daysA: string[], daysB: string[]): boolean {
-    return daysA.some((day) => daysB.includes(day));
+    for (const a of schedulesA) {
+      for (const b of schedulesB) {
+        if (a.day === b.day && a.start_time < b.end_time && b.start_time < a.end_time) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   async checkConflict(institutionId: string, dto: CheckConflictDto) {
     // 1. Get target class schedule
     const targetClass = await this.prisma.class.findFirst({
       where: { id: dto.class_id, institution_id: institutionId },
+      include: { schedules: true },
     });
 
     if (!targetClass) {
@@ -61,40 +63,25 @@ export class EnrollmentService {
         status: { in: ['ACTIVE', 'TRIAL'] },
       },
       include: {
-        class: true,
+        class: { include: { schedules: true } },
       },
     });
 
-    // 3. Check each for day overlap AND time range overlap
+    // 3. Check each for schedule overlap
     const conflictingClasses: Array<{
       id: string;
       name: string;
-      schedule_days: string[];
-      schedule_start_time: string;
-      schedule_end_time: string;
+      schedules: { day: string; start_time: string; end_time: string }[];
     }> = [];
 
     for (const enrollment of existingEnrollments) {
       const enrolledClass = enrollment.class;
 
-      if (
-        this.daysOverlap(
-          targetClass.schedule_days,
-          enrolledClass.schedule_days,
-        ) &&
-        this.timeRangesOverlap(
-          targetClass.schedule_start_time,
-          targetClass.schedule_end_time,
-          enrolledClass.schedule_start_time,
-          enrolledClass.schedule_end_time,
-        )
-      ) {
+      if (this.schedulesConflict(targetClass.schedules, enrolledClass.schedules)) {
         conflictingClasses.push({
           id: enrolledClass.id,
           name: enrolledClass.name,
-          schedule_days: enrolledClass.schedule_days,
-          schedule_start_time: enrolledClass.schedule_start_time,
-          schedule_end_time: enrolledClass.schedule_end_time,
+          schedules: enrolledClass.schedules,
         });
       }
     }

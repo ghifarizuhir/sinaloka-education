@@ -11,7 +11,22 @@ const ScheduleDay = z.enum([
   'Sunday',
 ]);
 const TimeString = z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:mm format');
-const TutorFeeMode = z.enum(['FIXED_PER_SESSION', 'PER_STUDENT_ATTENDANCE', 'MONTHLY_SALARY']);
+const TutorFeeMode = z.enum([
+  'FIXED_PER_SESSION',
+  'PER_STUDENT_ATTENDANCE',
+  'MONTHLY_SALARY',
+]);
+
+const ScheduleItemSchema = z
+  .object({
+    day: ScheduleDay,
+    start_time: TimeString,
+    end_time: TimeString,
+  })
+  .refine((d) => d.start_time < d.end_time, {
+    message: 'start_time must be before end_time',
+    path: ['end_time'],
+  });
 
 export const CreateClassSchema = z
   .object({
@@ -20,9 +35,9 @@ export const CreateClassSchema = z
     subject_id: z.string().uuid('Valid subject is required'),
     capacity: z.number().int().min(1),
     fee: z.number().min(0),
-    schedule_days: z.array(ScheduleDay).min(1),
-    schedule_start_time: TimeString,
-    schedule_end_time: TimeString,
+    schedules: z
+      .array(ScheduleItemSchema)
+      .min(1, 'At least one schedule is required'),
     room: z.string().max(100).optional().nullable(),
     package_fee: z.number().min(0).optional().nullable(),
     tutor_fee: z.number().min(0),
@@ -30,48 +45,32 @@ export const CreateClassSchema = z
     tutor_fee_per_student: z.number().min(0).optional().nullable(),
     status: ClassStatus.default('ACTIVE'),
   })
-  .refine((data) => data.schedule_start_time < data.schedule_end_time, {
-    message: 'schedule_start_time must be before schedule_end_time',
-    path: ['schedule_end_time'],
-  })
   .refine(
-    (data) => data.tutor_fee_mode !== 'PER_STUDENT_ATTENDANCE' || (data.tutor_fee_per_student != null && data.tutor_fee_per_student > 0),
+    (data) =>
+      data.tutor_fee_mode !== 'PER_STUDENT_ATTENDANCE' ||
+      (data.tutor_fee_per_student != null && data.tutor_fee_per_student > 0),
     {
-      message: 'tutor_fee_per_student is required when mode is PER_STUDENT_ATTENDANCE',
+      message:
+        'tutor_fee_per_student is required when mode is PER_STUDENT_ATTENDANCE',
       path: ['tutor_fee_per_student'],
     },
   );
 export type CreateClassDto = z.infer<typeof CreateClassSchema>;
 
-export const UpdateClassSchema = z
-  .object({
-    tutor_id: z.string().uuid().optional(),
-    name: z.string().min(1).max(255).optional(),
-    subject_id: z.string().uuid().optional(),
-    capacity: z.number().int().min(1).optional(),
-    fee: z.number().min(0).optional(),
-    schedule_days: z.array(ScheduleDay).min(1).optional(),
-    schedule_start_time: TimeString.optional(),
-    schedule_end_time: TimeString.optional(),
-    room: z.string().max(100).optional().nullable(),
-    package_fee: z.number().min(0).optional().nullable(),
-    tutor_fee: z.number().min(0).optional(),
-    tutor_fee_mode: TutorFeeMode.optional(),
-    tutor_fee_per_student: z.number().min(0).optional().nullable(),
-    status: ClassStatus.optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.schedule_start_time && data.schedule_end_time) {
-        return data.schedule_start_time < data.schedule_end_time;
-      }
-      return true;
-    },
-    {
-      message: 'schedule_start_time must be before schedule_end_time',
-      path: ['schedule_end_time'],
-    },
-  );
+export const UpdateClassSchema = z.object({
+  tutor_id: z.string().uuid().optional(),
+  name: z.string().min(1).max(255).optional(),
+  subject_id: z.string().uuid().optional(),
+  capacity: z.number().int().min(1).optional(),
+  fee: z.number().min(0).optional(),
+  schedules: z.array(ScheduleItemSchema).min(1).optional(),
+  room: z.string().max(100).optional().nullable(),
+  package_fee: z.number().min(0).optional().nullable(),
+  tutor_fee: z.number().min(0).optional(),
+  tutor_fee_mode: TutorFeeMode.optional(),
+  tutor_fee_per_student: z.number().min(0).optional().nullable(),
+  status: ClassStatus.optional(),
+});
 export type UpdateClassDto = z.infer<typeof UpdateClassSchema>;
 
 export const ClassQuerySchema = z.object({
@@ -79,6 +78,7 @@ export const ClassQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().optional(),
   subject_id: z.string().uuid().optional(),
+  tutor_id: z.string().uuid().optional(),
   status: ClassStatus.optional(),
   sort_by: z
     .enum(['name', 'subject_name', 'capacity', 'created_at'])

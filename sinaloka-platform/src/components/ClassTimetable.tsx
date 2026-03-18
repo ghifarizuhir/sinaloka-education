@@ -95,12 +95,12 @@ export default function ClassTimetable({
     const rawBlocks: Omit<TimetableBlock, 'colIndex' | 'colTotal'>[] = [];
 
     for (const cls of classes) {
-      const startMin = parseTime(cls.schedule_start_time);
-      const endMin = parseTime(cls.schedule_end_time);
-      if (startMin < earliest) earliest = startMin;
-      if (endMin > latest) latest = endMin;
-
-      for (const day of cls.schedule_days) {
+      for (const schedule of cls.schedules) {
+        const startMin = parseTime(schedule.start_time);
+        const endMin = parseTime(schedule.end_time);
+        if (startMin < earliest) earliest = startMin;
+        if (endMin > latest) latest = endMin;
+        const day = schedule.day as ScheduleDay;
         rawBlocks.push({ cls, day, startMin, endMin });
       }
     }
@@ -239,7 +239,8 @@ export default function ClassTimetable({
                 const height =
                   ((block.endMin - block.startMin) / 30) * ROW_HEIGHT;
                 const halfRowCount = (block.endMin - block.startMin) / 30;
-                const color = getColorForSubject(block.cls.subject);
+                const subjectName = typeof block.cls.subject === 'string' ? block.cls.subject : block.cls.subject?.name ?? '';
+                const color = getColorForSubject(subjectName);
 
                 return (
                   <div
@@ -255,7 +256,7 @@ export default function ClassTimetable({
                       left: `${(block.colIndex * 100) / block.colTotal}%`,
                     }}
                     onClick={() => onClassClick(block.cls.id)}
-                    title={`${block.cls.name} — ${block.cls.subject}`}
+                    title={`${block.cls.name} — ${subjectName}`}
                   >
                     <p className="truncate text-xs font-semibold leading-tight">
                       {block.cls.name}
