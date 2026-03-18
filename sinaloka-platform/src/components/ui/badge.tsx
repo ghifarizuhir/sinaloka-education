@@ -1,18 +1,31 @@
-import React from 'react';
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
-export const Badge = ({ children, variant = 'default', className, ...props }: { children: React.ReactNode, variant?: 'default' | 'success' | 'warning' | 'error' | 'outline', className?: string } & React.HTMLAttributes<HTMLSpanElement>) => {
-  const variants = {
-    default: "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400",
-    success: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400",
-    warning: "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400",
-    error: "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400",
-    outline: "border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400"
-  };
+const badgeVariants = cva(
+  'inline-flex items-center rounded-full px-2 py-1 text-[10px] uppercase tracking-wider font-bold transition-colors',
+  {
+    variants: {
+      variant: {
+        default: 'bg-secondary text-secondary-foreground',
+        success: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
+        warning: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
+        error: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+        outline: 'border border-border text-muted-foreground',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
-  return (
-    <span className={cn("text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full", variants[variant], className)} {...props}>
-      {children}
-    </span>
-  );
-};
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {}
+
+export const Badge = ({ className, variant, ...props }: BadgeProps) => (
+  <span className={cn(badgeVariants({ variant }), className)} {...props} />
+);
+
+export { badgeVariants };
