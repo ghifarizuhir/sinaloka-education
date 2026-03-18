@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, CheckCircle2, Eye, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
-import { Card, Button, Badge, Drawer, Input, Label, SearchInput, Switch, Skeleton } from '../components/UI';
+import { Card, Button, Badge, Drawer, Input, Label, SearchInput, Switch, Skeleton, PageHeader, Select, Tabs } from '../components/UI';
 import { cn, formatDate, formatCurrency } from '../lib/utils';
 import { toast } from 'sonner';
 import { useWhatsappMessages, useWhatsappStats, useWhatsappSettings, useUpdateWhatsappSettings, useSendPaymentReminder } from '@/src/hooks/useWhatsapp';
@@ -105,11 +105,7 @@ export const WhatsApp = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">{t('layout.pageTitle.whatsapp')}</h2>
-        <p className="text-zinc-500 text-sm">{t('whatsapp.send.title')}</p>
-      </div>
+      <PageHeader title={t('layout.pageTitle.whatsapp')} subtitle={t('whatsapp.send.title')} />
 
       {/* Not-configured banner */}
       {stats.data?.configured === false && (
@@ -121,25 +117,15 @@ export const WhatsApp = () => {
         </Card>
       )}
 
-      {/* Tab bar */}
-      <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 rounded-lg p-1">
-        {(['messages', 'paymentReminders', 'settings'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            disabled={tab !== 'messages' && stats.data?.configured === false}
-            className={cn(
-              'px-4 py-2 rounded-md text-sm font-medium transition-all',
-              activeTab === tab
-                ? 'bg-white dark:bg-zinc-800 shadow-sm'
-                : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300',
-              tab !== 'messages' && stats.data?.configured === false && 'opacity-50 cursor-not-allowed'
-            )}
-          >
-            {t(`whatsapp.tabs.${tab}`)}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={activeTab}
+        onChange={setActiveTab}
+        items={[
+          { value: 'messages', label: t('whatsapp.tabs.messages') },
+          { value: 'paymentReminders', label: t('whatsapp.tabs.paymentReminders'), disabled: stats.data?.configured === false },
+          { value: 'settings', label: t('whatsapp.tabs.settings'), disabled: stats.data?.configured === false },
+        ]}
+      />
 
       {/* Messages Tab */}
       {activeTab === 'messages' && (
@@ -166,20 +152,18 @@ export const WhatsApp = () => {
 
           {/* Filters */}
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
-              <select
-                value={filterStatus}
-                onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-                className="bg-transparent text-xs font-bold px-3 py-1.5 focus:outline-none dark:text-zinc-100"
-              >
-                <option value="">{t('whatsapp.filter.allStatuses')}</option>
-                <option value="PENDING">{t('whatsapp.statusLabel.pending')}</option>
-                <option value="SENT">{t('whatsapp.statusLabel.sent')}</option>
-                <option value="DELIVERED">{t('whatsapp.statusLabel.delivered')}</option>
-                <option value="READ">{t('whatsapp.statusLabel.read')}</option>
-                <option value="FAILED">{t('whatsapp.statusLabel.failed')}</option>
-              </select>
-            </div>
+            <Select
+              value={filterStatus}
+              onChange={(val) => { setFilterStatus(val); setPage(1); }}
+              options={[
+                { value: '', label: t('whatsapp.filter.allStatuses') },
+                { value: 'PENDING', label: t('whatsapp.statusLabel.pending') },
+                { value: 'SENT', label: t('whatsapp.statusLabel.sent') },
+                { value: 'DELIVERED', label: t('whatsapp.statusLabel.delivered') },
+                { value: 'READ', label: t('whatsapp.statusLabel.read') },
+                { value: 'FAILED', label: t('whatsapp.statusLabel.failed') },
+              ]}
+            />
             <Input
               type="date"
               value={filterDateFrom}
@@ -194,18 +178,16 @@ export const WhatsApp = () => {
               placeholder={t('whatsapp.filter.dateTo')}
               className="w-auto"
             />
-            <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
-              <select
-                value={filterRelatedType}
-                onChange={(e) => { setFilterRelatedType(e.target.value); setPage(1); }}
-                className="bg-transparent text-xs font-bold px-3 py-1.5 focus:outline-none dark:text-zinc-100"
-              >
-                <option value="">{t('whatsapp.filter.allTypes')}</option>
-                <option value="payment">{t('whatsapp.typeLabel.payment')}</option>
-                <option value="attendance">{t('whatsapp.typeLabel.attendance')}</option>
-                <option value="enrollment">{t('whatsapp.typeLabel.enrollment')}</option>
-              </select>
-            </div>
+            <Select
+              value={filterRelatedType}
+              onChange={(val) => { setFilterRelatedType(val); setPage(1); }}
+              options={[
+                { value: '', label: t('whatsapp.filter.allTypes') },
+                { value: 'payment', label: t('whatsapp.typeLabel.payment') },
+                { value: 'attendance', label: t('whatsapp.typeLabel.attendance') },
+                { value: 'enrollment', label: t('whatsapp.typeLabel.enrollment') },
+              ]}
+            />
           </div>
 
           {/* Table */}
