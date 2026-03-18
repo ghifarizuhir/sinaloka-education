@@ -919,7 +919,9 @@
       "recordTitle": "Catat Pembayaran",
       "amountDue": "Jumlah Tagihan",
       "afterDiscount": "Setelah Diskon",
-      "confirmPayment": "Konfirmasi Pembayaran"
+      "confirmPayment": "Konfirmasi Pembayaran",
+      "batchRecordTitle": "Catat Pembayaran Massal",
+      "batchRecordSubtitle": "Catat {{count}} pembayaran terpilih sebagai lunas"
     },
     "drawer": {
       "title": "Detail Pembayaran",
@@ -934,11 +936,16 @@
       "recorded": "Pembayaran dicatat",
       "recordError": "Gagal mencatat pembayaran.",
       "deleted": "Pembayaran dihapus",
-      "deleteError": "Gagal menghapus pembayaran."
+      "deleteError": "Gagal menghapus pembayaran.",
+      "batchRecorded": "{{count}} pembayaran dicatat",
+      "batchError": "Gagal mencatat pembayaran massal"
     },
     "confirm": {
+      "deleteTitle": "Hapus Pembayaran",
       "deletePayment": "Apakah Anda yakin ingin menghapus pembayaran ini?"
     },
+    "reminderSent": "Pengingat pembayaran terkirim",
+    "reminderFailed": "Gagal mengirim pengingat",
     "tooltip": {
       "recordPayment": "Catat Pembayaran",
       "sendReminder": "Kirim Pengingat",

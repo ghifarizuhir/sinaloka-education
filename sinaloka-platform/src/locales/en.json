@@ -919,7 +919,9 @@
       "recordTitle": "Record Payment",
       "amountDue": "Amount Due",
       "afterDiscount": "After Discount",
-      "confirmPayment": "Confirm Payment"
+      "confirmPayment": "Confirm Payment",
+      "batchRecordTitle": "Batch Record Payments",
+      "batchRecordSubtitle": "Record {{count}} selected payment(s) as paid"
     },
     "drawer": {
       "title": "Payment Details",
@@ -934,11 +936,16 @@
       "recorded": "Payment recorded",
       "recordError": "Failed to record payment.",
       "deleted": "Payment deleted",
-      "deleteError": "Failed to delete payment."
+      "deleteError": "Failed to delete payment.",
+      "batchRecorded": "{{count}} payment(s) recorded",
+      "batchError": "Failed to record batch payments"
     },
     "confirm": {
+      "deleteTitle": "Delete Payment",
       "deletePayment": "Are you sure you want to delete this payment?"
     },
+    "reminderSent": "Payment reminder sent",
+    "reminderFailed": "Failed to send reminder",
     "tooltip": {
       "recordPayment": "Record Payment",
       "sendReminder": "Send Reminder",
