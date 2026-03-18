@@ -7,7 +7,7 @@ import {
   Download, ExternalLink, Search, Filter, MoreVertical,
   ArrowLeft, BadgeCheck, X, AlertTriangle
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog, PageHeader, Select } from '../../components/UI';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
 import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout, useGenerateSalaries } from '@/src/hooks/usePayouts';
 import { useTutors } from '@/src/hooks/useTutors';
@@ -456,12 +456,10 @@ export const TutorPayouts = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('payouts.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('payouts.subtitle')}</p>
-        </div>
-        <div className="flex items-center gap-3">
+      <PageHeader
+        title={t('payouts.title')}
+        subtitle={t('payouts.subtitle')}
+        actions={<>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
             <Input
@@ -471,16 +469,16 @@ export const TutorPayouts = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             />
           </div>
-          <select
+          <Select
             value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value as any); setCurrentPage(1); }}
-            className="h-9 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
-          >
-            <option value="">{t('payouts.allStatuses')}</option>
-            <option value="PENDING">{t('payouts.reconciliation.pending')}</option>
-            <option value="PROCESSING">{t('payouts.reconciliation.processing')}</option>
-            <option value="PAID">{t('payouts.reconciliation.paid')}</option>
-          </select>
+            onChange={(value) => { setStatusFilter(value as any); setCurrentPage(1); }}
+            options={[
+              { value: '', label: t('payouts.allStatuses') },
+              { value: 'PENDING', label: t('payouts.reconciliation.pending') },
+              { value: 'PROCESSING', label: t('payouts.reconciliation.processing') },
+              { value: 'PAID', label: t('payouts.reconciliation.paid') },
+            ]}
+          />
           <Button
             variant="outline"
             className="gap-2 h-9"
@@ -499,8 +497,8 @@ export const TutorPayouts = () => {
             <Plus size={14} />
             {t('payouts.newPayout')}
           </Button>
-        </div>
-      </div>
+        </>}
+      />
 
       <Card className="p-0 overflow-hidden relative">
         <table className="w-full text-left border-collapse">
@@ -627,16 +625,13 @@ export const TutorPayouts = () => {
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <Label>{t('payouts.form.tutor')}</Label>
-                <select
+                <Select
                   value={newTutorId}
-                  onChange={(e) => setNewTutorId(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:text-zinc-100"
-                >
-                  <option value="">{t('payouts.form.selectTutor')}</option>
-                  {tutors.map(t_item => (
-                    <option key={t_item.id} value={t_item.id}>{t_item.name}</option>
-                  ))}
-                </select>
+                  onChange={(value) => setNewTutorId(value)}
+                  className="w-full"
+                  placeholder={t('payouts.form.selectTutor')}
+                  options={tutors.map(t_item => ({ value: t_item.id, label: t_item.name }))}
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">

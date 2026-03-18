@@ -7,7 +7,7 @@ import {
   MessageSquare, ChevronRight, ArrowUpRight,
   FileText, ChevronDown
 } from 'lucide-react';
-import { Card, Button, Badge, Skeleton } from '../../components/UI';
+import { Card, Button, Badge, Skeleton, PageHeader, Tabs, StatCard, Separator } from '../../components/UI';
 import { cn, formatCurrencyShort, formatCurrency, formatDate } from '../../lib/utils';
 import { useDashboardStats } from '@/src/hooks/useDashboard';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
@@ -87,13 +87,6 @@ export const FinanceOverview = () => {
     toast.success(t('finance.reminderSent', { student }));
   };
 
-  const dateRangeOptions = [
-    { key: 'month', label: t('finance.thisMonth') },
-    { key: 'quarter', label: t('finance.thisQuarter') },
-    { key: 'year', label: t('finance.yearToDate') },
-    { key: 'custom', label: t('finance.custom', 'Custom') },
-  ];
-
   if (isLoading) {
     return (
       <div className="space-y-8 pb-20">
@@ -142,89 +135,83 @@ export const FinanceOverview = () => {
   return (
     <div className="space-y-8 relative pb-20">
       {/* Header with Period Selector + Export */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('finance.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('finance.subtitle')}</p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2">
-          <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-            {dateRangeOptions.map((range) => (
-              <button
-                key={range.key}
-                onClick={() => handlePeriodChange(range.key)}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-bold rounded-md transition-all",
-                  activePeriod === range.key ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
-                )}
-              >
-                {range.label}
-              </button>
-            ))}
-          </div>
-          <Button variant="primary" size="sm" className="h-9" onClick={() => setShowReportModal(true)}>
-            <FileText size={14} />
-            {t('finance.generateReport')}
-          </Button>
-          <div className="relative">
-            <Button variant="outline" size="sm" className="h-9" onClick={() => setShowExportMenu(!showExportMenu)}>
-              <Download size={14} />
-              {t('common.export')}
-              <ChevronDown size={12} />
+      <PageHeader
+        title={t('finance.title')}
+        subtitle={t('finance.subtitle')}
+        actions={
+          <>
+            <Tabs
+              value={activePeriod}
+              onChange={(val) => handlePeriodChange(val)}
+              items={[
+                { value: 'month', label: t('finance.thisMonth') },
+                { value: 'quarter', label: t('finance.thisQuarter') },
+                { value: 'year', label: t('finance.yearToDate') },
+                { value: 'custom', label: t('finance.custom', 'Custom') },
+              ]}
+            />
+            <Button variant="primary" size="sm" className="h-9" onClick={() => setShowReportModal(true)}>
+              <FileText size={14} />
+              {t('finance.generateReport')}
             </Button>
-            {showExportMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
-                <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 py-1">
-                  <button
-                    onClick={() => handleExport('payments')}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
-                  >
-                    {t('finance.studentPayments')}
-                  </button>
-                  <button
-                    onClick={() => handleExport('payouts')}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
-                  >
-                    {t('finance.tutorPayouts')}
-                  </button>
-                  <button
-                    onClick={() => handleExport('expenses')}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
-                  >
-                    {t('finance.operatingExpenses')}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-          </div>
-          {activePeriod === 'custom' && (
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={customStart}
-                onChange={(e) => {
-                  setCustomStart(e.target.value);
-                  handleCustomDateChange(e.target.value, customEnd);
-                }}
-                className="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-              />
-              <span className="text-xs text-zinc-400">—</span>
-              <input
-                type="date"
-                value={customEnd}
-                onChange={(e) => {
-                  setCustomEnd(e.target.value);
-                  handleCustomDateChange(customStart, e.target.value);
-                }}
-                className="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
-              />
+            <div className="relative">
+              <Button variant="outline" size="sm" className="h-9" onClick={() => setShowExportMenu(!showExportMenu)}>
+                <Download size={14} />
+                {t('common.export')}
+                <ChevronDown size={12} />
+              </Button>
+              {showExportMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 py-1">
+                    <button
+                      onClick={() => handleExport('payments')}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
+                    >
+                      {t('finance.studentPayments')}
+                    </button>
+                    <button
+                      onClick={() => handleExport('payouts')}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
+                    >
+                      {t('finance.tutorPayouts')}
+                    </button>
+                    <button
+                      onClick={() => handleExport('expenses')}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-200"
+                    >
+                      {t('finance.operatingExpenses')}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
-          )}
+          </>
+        }
+      />
+      {activePeriod === 'custom' && (
+        <div className="flex items-center gap-2 justify-end">
+          <input
+            type="date"
+            value={customStart}
+            onChange={(e) => {
+              setCustomStart(e.target.value);
+              handleCustomDateChange(e.target.value, customEnd);
+            }}
+            className="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+          />
+          <span className="text-xs text-zinc-400">—</span>
+          <input
+            type="date"
+            value={customEnd}
+            onChange={(e) => {
+              setCustomEnd(e.target.value);
+              handleCustomDateChange(customStart, e.target.value);
+            }}
+            className="px-3 py-1.5 text-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500"
+          />
         </div>
-      </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -238,53 +225,32 @@ export const FinanceOverview = () => {
           ))
         ) : (
           <>
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
-                  <DollarSign className="text-emerald-600" size={20} />
-                </div>
-              </div>
-              <p className="text-sm text-zinc-500 mb-1">{t('finance.totalRevenue')}</p>
-              <h3 className="text-2xl font-bold tracking-tight dark:text-zinc-100">
-                {formatCurrency(summary?.total_revenue ?? 0, i18n.language)}
-              </h3>
-              <p className="text-[10px] text-zinc-400 mt-1">
-                {t('finance.paymentCountLabel', { count: summary?.payment_count ?? 0 })}
-              </p>
-            </Card>
+            <StatCard
+              label={t('finance.totalRevenue')}
+              value={formatCurrency(summary?.total_revenue ?? 0, i18n.language)}
+              icon={DollarSign}
+              iconBg="bg-emerald-50 dark:bg-emerald-900/20"
+              iconColor="text-emerald-600"
+            />
 
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20">
-                  <Wallet className="text-blue-600" size={20} />
-                </div>
-              </div>
-              <p className="text-sm text-zinc-500 mb-1">{t('finance.totalPayouts')}</p>
-              <h3 className="text-2xl font-bold tracking-tight dark:text-zinc-100">
-                {formatCurrency(summary?.total_payouts ?? 0, i18n.language)}
-              </h3>
-              <p className="text-[10px] text-zinc-400 mt-1">
-                {t('finance.payoutCountLabel', { count: summary?.payout_count ?? 0 })}
-              </p>
-            </Card>
+            <StatCard
+              label={t('finance.totalPayouts')}
+              value={formatCurrency(summary?.total_payouts ?? 0, i18n.language)}
+              icon={Wallet}
+              iconBg="bg-blue-50 dark:bg-blue-900/20"
+              iconColor="text-blue-600"
+            />
 
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20">
-                  <Receipt className="text-amber-600" size={20} />
-                </div>
-              </div>
-              <p className="text-sm text-zinc-500 mb-1">{t('finance.totalExpenses')}</p>
-              <h3 className="text-2xl font-bold tracking-tight dark:text-zinc-100">
-                {formatCurrency(summary?.total_expenses ?? 0, i18n.language)}
-              </h3>
-              <p className="text-[10px] text-zinc-400 mt-1">
-                {t('finance.expenseCountLabel', { count: summary?.expense_count ?? 0 })}
-              </p>
-            </Card>
+            <StatCard
+              label={t('finance.totalExpenses')}
+              value={formatCurrency(summary?.total_expenses ?? 0, i18n.language)}
+              icon={Receipt}
+              iconBg="bg-amber-50 dark:bg-amber-900/20"
+              iconColor="text-amber-600"
+            />
 
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/20">
                   <Banknote className="text-indigo-600" size={20} />
                 </div>
@@ -303,14 +269,13 @@ export const FinanceOverview = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-zinc-500 mb-1">{t('finance.netProfit')}</p>
-              <h3 className={cn(
-                "text-2xl font-bold tracking-tight",
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('finance.netProfit')}</p>
+              <p className={cn(
+                "text-xl font-bold tracking-tight mt-1",
                 (summary?.net_profit ?? 0) >= 0 ? "text-emerald-600" : "text-red-600"
               )}>
                 {formatCurrency(summary?.net_profit ?? 0, i18n.language)}
-              </h3>
-              <p className="text-[10px] text-zinc-400 mt-1">{t('finance.formulaRevPayoutsOpex')}</p>
+              </p>
             </Card>
           </>
         )}
