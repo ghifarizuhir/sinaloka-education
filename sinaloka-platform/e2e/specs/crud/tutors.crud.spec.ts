@@ -23,7 +23,7 @@ test.describe('Tutors CRUD', () => {
     await tutorsPage.createTutor({
       name: 'Ahmad Fauzi',
       email: 'ahmad.fauzi@sinaloka.com',
-      subjects: 'Chemistry, Biology',
+      subjects: ['Chemistry', 'Biology'],
       password: 'password123',
     });
 
@@ -40,7 +40,7 @@ test.describe('Tutors CRUD', () => {
     await tutorsPage.createTutor({
       name: 'Budi Santoso',
       email: 'budi.santoso@sinaloka.com',
-      subjects: 'History',
+      subjects: ['History'],
       password: 'securepass456',
       bank_name: 'BCA',
       bank_account_number: '9876543210',
@@ -129,7 +129,7 @@ test.describe('Tutors CRUD', () => {
 
     await expect(page.getByText('Rina Wijaya')).toBeVisible();
 
-    await tutorsPage.editTutor('Rina Wijaya', { subjects: 'English, French' });
+    await tutorsPage.editTutor('Rina Wijaya', { subjects: ['English', 'French'] });
 
     await expect(tutorsPage.getToast()).toContainText(/tutor updated/i);
   });

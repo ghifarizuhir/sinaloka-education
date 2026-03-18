@@ -28,7 +28,7 @@ import {
   Badge,
   SearchInput,
   Switch,
-  Slider,
+  MultiSelect,
   Skeleton,
   ConfirmDialog
 } from '../components/UI';
@@ -60,7 +60,6 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
     password: '',
     subject_ids: initialData?.tutor_subjects?.map(ts => ts.subject.id) ?? [],
     experience_years: initialData?.experience_years ?? 0,
-    rating: initialData?.rating ?? 4.5,
     is_verified: initialData?.is_verified ?? false,
     bank_name: initialData?.bank_name ?? '',
     bank_account_number: initialData?.bank_account_number ?? '',
@@ -80,7 +79,7 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
       email: formData.email,
       subject_ids: formData.subject_ids,
       experience_years: Number(formData.experience_years),
-      ...(isEditing ? { rating: Number(formData.rating), is_verified: formData.is_verified } : {}),
+      ...(isEditing ? { is_verified: formData.is_verified } : {}),
       bank_name: isEditing ? formData.bank_name : (formData.bank_name || undefined),
       bank_account_number: isEditing ? formData.bank_account_number : (formData.bank_account_number || undefined),
       bank_account_holder: isEditing ? formData.bank_account_holder : (formData.bank_account_holder || undefined),
@@ -99,62 +98,30 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
           <Label htmlFor="email">{t('tutors.form.emailAddress')}</Label>
           <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder={t('tutors.form.emailPlaceholder')} />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 sm:col-span-2">
           <Label>{t('tutors.form.subjects')}</Label>
-          <div className="flex flex-wrap gap-2 p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg min-h-[42px]">
-            {(subjectsList ?? []).map(subject => (
-              <label key={subject.id} className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm cursor-pointer transition-colors border",
-                formData.subject_ids.includes(subject.id)
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100"
-                  : "bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400"
-              )}>
-                <input
-                  type="checkbox"
-                  className="hidden"
-                  checked={formData.subject_ids.includes(subject.id)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setFormData(prev => ({ ...prev, subject_ids: [...prev.subject_ids, subject.id] }));
-                    } else {
-                      setFormData(prev => ({ ...prev, subject_ids: prev.subject_ids.filter(id => id !== subject.id) }));
-                    }
-                  }}
-                />
-                {subject.name}
-              </label>
-            ))}
-          </div>
+          <MultiSelect
+            options={(subjectsList ?? []).map(s => ({ id: s.id, label: s.name }))}
+            selected={formData.subject_ids}
+            onChange={(ids) => setFormData(prev => ({ ...prev, subject_ids: ids }))}
+            placeholder={t('common.search') + '...'}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {isEditing && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>{t('tutors.form.rating', { value: Number(formData.rating).toFixed(1) })}</Label>
-              <div className="flex text-amber-400">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={14} fill={i < Math.floor(formData.rating) ? 'currentColor' : 'none'} />
-                ))}
-              </div>
-            </div>
-            <Slider
-              value={formData.rating}
-              min={0}
-              max={5}
-              step={0.1}
-              onChange={(val: number) => setFormData(prev => ({ ...prev, rating: val }))}
-            />
-          </div>
-        )}
-        <div className="space-y-3">
-          <Label htmlFor="experience_years">{t('tutors.form.yearsOfExperience', { value: formData.experience_years })}</Label>
-          <Slider
-            value={formData.experience_years}
+        <div className="space-y-2">
+          <Label htmlFor="experience_years">{t('tutors.form.yearsOfExperience')}</Label>
+          <Input
+            id="experience_years"
+            name="experience_years"
+            type="number"
             min={0}
-            max={30}
-            onChange={(val: number) => setFormData(prev => ({ ...prev, experience_years: val }))}
+            max={50}
+            step={1}
+            value={formData.experience_years}
+            onChange={(e) => setFormData(prev => ({ ...prev, experience_years: Number(e.target.value) || 0 }))}
+            placeholder="e.g. 5"
           />
         </div>
       </div>
@@ -509,7 +476,11 @@ export const Tutors = () => {
                   <div>
                     <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">{t('tutors.card.rating')}</p>
                     <p className="text-sm font-bold dark:text-zinc-300 flex items-center gap-1">
-                      <Star size={12} className="text-amber-400 fill-amber-400" /> {(tutor.rating ?? 0).toFixed(1)}
+                      {(tutor.rating ?? 0) > 0 ? (
+                        <><Star size={12} className="text-amber-400 fill-amber-400" /> {tutor.rating.toFixed(1)}</>
+                      ) : (
+                        <span className="text-xs text-zinc-400 font-normal">{t('tutors.noRatings')}</span>
+                      )}
                     </p>
                   </div>
                   <div>
@@ -554,9 +525,13 @@ export const Tutors = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">{tutor.experience_years} {t('tutors.card.years')}</td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-                        <Star size={14} fill="currentColor" /> {(tutor.rating ?? 0).toFixed(1)}
-                      </div>
+                      {(tutor.rating ?? 0) > 0 ? (
+                        <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
+                          <Star size={14} fill="currentColor" /> {tutor.rating.toFixed(1)}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-zinc-400">{t('tutors.noRatings')}</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       {getAvailabilityBadge(tutor)}
