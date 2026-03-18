@@ -4,9 +4,8 @@ export interface TutorFormData {
   name: string;
   email: string;
   password?: string;
-  subjects: string; // comma-separated, e.g. "Math, Physics"
+  subjects: string[]; // subject names to select, e.g. ["Math", "Physics"]
   experience_years?: number;
-  rating?: number;
   bank_name?: string;
   bank_account_number?: string;
   bank_account_holder?: string;
@@ -35,11 +34,16 @@ export class TutorsPage {
     await this.modal.getByLabel(/full name/i).fill(data.name);
     await this.modal.getByLabel(/email address/i).fill(data.email);
     if (data.password) await this.modal.getByLabel(/password/i).fill(data.password);
-    await this.modal.getByLabel(/subjects/i).fill(data.subjects);
+    // Select subjects via MultiSelect
+    for (const subject of data.subjects) {
+      const input = this.modal.locator('input[placeholder*="Search"], input[placeholder*="Cari"]');
+      await input.fill(subject);
+      await this.modal.locator('button').filter({ hasText: subject }).click();
+    }
     if (data.bank_name) await this.modal.getByLabel(/bank name/i).fill(data.bank_name);
     if (data.bank_account_number) await this.modal.getByLabel(/account number/i).fill(data.bank_account_number);
     if (data.bank_account_holder) await this.modal.getByLabel(/account holder/i).fill(data.bank_account_holder);
-    await this.modal.getByRole('button', { name: /register tutor/i }).click();
+    await this.modal.getByRole('button', { name: /send invitation/i }).click();
   }
 
   async editTutor(name: string, data: Partial<TutorFormData>) {
@@ -48,7 +52,13 @@ export class TutorsPage {
     await this.modal.waitFor({ state: 'visible' });
     if (data.name) await this.modal.getByLabel(/full name/i).fill(data.name);
     if (data.email) await this.modal.getByLabel(/email address/i).fill(data.email);
-    if (data.subjects) await this.modal.getByLabel(/subjects/i).fill(data.subjects);
+    if (data.subjects) {
+      for (const subject of data.subjects) {
+        const input = this.modal.locator('input[placeholder*="Search"], input[placeholder*="Cari"]');
+        await input.fill(subject);
+        await this.modal.locator('button').filter({ hasText: subject }).click();
+      }
+    }
     await this.modal.getByRole('button', { name: /save changes/i }).click();
   }
 
