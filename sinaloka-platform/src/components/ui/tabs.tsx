@@ -6,7 +6,7 @@ export const Tabs = ({ value, onChange, items, className }: {
   items: { value: string; label: string; disabled?: boolean }[];
   className?: string;
 }) => (
-  <div className={cn("flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg", className)}>
+  <div className={cn("flex p-1 bg-muted rounded-lg", className)}>
     {items.map(item => (
       <button
         key={item.value}
@@ -16,8 +16,8 @@ export const Tabs = ({ value, onChange, items, className }: {
         className={cn(
           "px-3 py-1.5 text-xs font-bold rounded-md transition-all",
           value === item.value
-            ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100"
-            : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
+            ? "bg-background shadow-sm text-foreground"
+            : "text-muted-foreground hover:text-foreground",
           item.disabled && "opacity-40 cursor-not-allowed"
         )}
       >

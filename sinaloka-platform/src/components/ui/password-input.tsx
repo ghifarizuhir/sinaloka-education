@@ -10,7 +10,7 @@ export function PasswordInput(props: Omit<React.ComponentProps<'input'>, 'type'>
       <Input {...props} type={show ? 'text' : 'password'} className={cn(props.className, 'pr-10')} />
       <button
         type="button"
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
         onClick={() => setShow(!show)}
         aria-label={show ? 'Hide password' : 'Show password'}
         tabIndex={-1}

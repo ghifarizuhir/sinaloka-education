@@ -18,7 +18,7 @@ export const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, classNam
         </div>
       </div>
     )}
-    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{label}</p>
-    <p className="text-xl font-bold tracking-tight dark:text-zinc-100 mt-1">{String(value)}</p>
+    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
+    <p className="text-xl font-bold tracking-tight text-foreground mt-1">{String(value)}</p>
   </Card>
 );
