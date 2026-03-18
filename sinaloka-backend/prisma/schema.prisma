@@ -166,7 +166,6 @@ model Tutor {
   id                   String   @id @default(uuid())
   user_id              String   @unique
   institution_id       String
-  subjects             String[]
   rating               Float    @default(0)
   experience_years     Int      @default(0)
   availability         Json?
@@ -251,9 +250,8 @@ model Class {
   institution_id      String
   tutor_id            String
   name                String
-  subject             String
-  subject_id          String?
-  subject_rel         Subject?  @relation(fields: [subject_id], references: [id])
+  subject_id          String
+  subject             Subject  @relation(fields: [subject_id], references: [id])
   capacity            Int
   fee                 Decimal
   package_fee         Decimal?
