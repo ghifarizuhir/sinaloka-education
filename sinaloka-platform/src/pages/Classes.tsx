@@ -43,7 +43,10 @@ import { useSubjects, useSubjectTutors } from '@/src/hooks/useSubjects';
 import { useBillingSettings } from '@/src/hooks/useSettings';
 import { useGenerateSessions } from '@/src/hooks/useSessions';
 import { format, addDays, getDay } from 'date-fns';
-import type { Class, CreateClassDto, ScheduleDay } from '@/src/types/class';
+import type { Class, CreateClassDto, ScheduleDay, ClassScheduleItem } from '@/src/types/class';
+import { ScheduleWeekPreview } from '../components/ScheduleWeekPreview';
+import { useQuery } from '@tanstack/react-query';
+import { classesService } from '../services/classes.service';
 
 function getSubjectColor(name: string): string {
   const colors = [
@@ -89,9 +92,7 @@ export const Classes = () => {
   const [formTutorFee, setFormTutorFee] = useState('');
   const [formTutorFeeMode, setFormTutorFeeMode] = useState<'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY'>('FIXED_PER_SESSION');
   const [formTutorFeePerStudent, setFormTutorFeePerStudent] = useState('');
-  const [formScheduleDays, setFormScheduleDays] = useState<ScheduleDay[]>([]);
-  const [formStartTime, setFormStartTime] = useState('14:00');
-  const [formEndTime, setFormEndTime] = useState('15:30');
+  const [formSchedules, setFormSchedules] = useState<ClassScheduleItem[]>([]);
   const [formRoom, setFormRoom] = useState('');
   const [formStatus, setFormStatus] = useState<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
 
@@ -105,6 +106,13 @@ export const Classes = () => {
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
   const classDetail = useClass(selectedClassId);
+
+  const { data: tutorClassesData } = useQuery({
+    queryKey: ['classes', 'tutor-preview', formTutorId],
+    queryFn: () => classesService.getAll({ tutor_id: formTutorId!, limit: 100 }),
+    enabled: !!formTutorId,
+  });
+  const tutorClasses = tutorClassesData?.data ?? [];
 
   const classes = data?.data ?? [];
   const meta = data?.meta;
@@ -152,9 +160,7 @@ export const Classes = () => {
     setFormTutorFee('');
     setFormTutorFeeMode('FIXED_PER_SESSION');
     setFormTutorFeePerStudent('');
-    setFormScheduleDays([]);
-    setFormStartTime('14:00');
-    setFormEndTime('15:30');
+    setFormSchedules([]);
     setFormRoom('');
     setFormStatus('ACTIVE');
     setShowModal(true);
@@ -167,9 +173,7 @@ export const Classes = () => {
     setFormTutorId(cls.tutor_id);
     setFormCapacity(String(cls.capacity));
     setFormFee(String(cls.fee));
-    setFormScheduleDays(cls.schedule_days);
-    setFormStartTime(cls.schedule_start_time);
-    setFormEndTime(cls.schedule_end_time);
+    setFormSchedules(cls.schedules?.map(s => ({ day: s.day as ScheduleDay, start_time: s.start_time, end_time: s.end_time })) ?? []);
     setFormRoom(cls.room ?? '');
     setFormPackageFee(cls.package_fee ? String(cls.package_fee) : '');
     setFormTutorFee(String(cls.tutor_fee ?? 0));
@@ -180,9 +184,11 @@ export const Classes = () => {
   };
 
   const toggleScheduleDay = (day: ScheduleDay) => {
-    setFormScheduleDays(prev =>
-      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
-    );
+    setFormSchedules(prev => {
+      const exists = prev.find(s => s.day === day);
+      if (exists) return prev.filter(s => s.day !== day);
+      return [...prev, { day, start_time: '14:00', end_time: '15:30' }];
+    });
   };
 
   const handleFormSubmit = () => {
@@ -190,7 +196,7 @@ export const Classes = () => {
       toast.error(t('classes.toast.selectTutor'));
       return;
     }
-    if (formScheduleDays.length === 0) {
+    if (formSchedules.length === 0) {
       toast.error(t('classes.toast.selectScheduleDay'));
       return;
     }
@@ -201,9 +207,7 @@ export const Classes = () => {
       tutor_id: formTutorId,
       capacity: Number(formCapacity),
       fee: Number(formFee),
-      schedule_days: formScheduleDays,
-      schedule_start_time: formStartTime,
-      schedule_end_time: formEndTime,
+      schedules: formSchedules.map(s => ({ day: s.day, start_time: s.start_time, end_time: s.end_time })),
       room: formRoom || undefined,
       package_fee: formPackageFee ? Number(formPackageFee) : null,
       tutor_fee: Number(formTutorFee),
@@ -253,12 +257,12 @@ export const Classes = () => {
     });
   };
 
-  const estimateSessionCount = (scheduleDays: string[], duration: number): number => {
+  const estimateSessionCount = (schedules: { day: string }[], duration: number): number => {
     const dayMap: Record<string, number> = {
       Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
       Thursday: 4, Friday: 5, Saturday: 6,
     };
-    const targetDays = new Set(scheduleDays.map(d => dayMap[d]));
+    const targetDays = new Set(schedules.map(s => dayMap[s.day]));
     const today = new Date();
     let count = 0;
     for (let i = 0; i < duration; i++) {
@@ -460,10 +464,7 @@ export const Classes = () => {
                           </div>
                           <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-medium">
                             <span className="flex items-center gap-1">
-                              <Calendar size={10} /> {cls.schedule_days.join(', ')}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock size={10} /> {cls.schedule_start_time} - {cls.schedule_end_time}
+                              <Calendar size={10} /> {cls.schedules?.map(s => `${s.day.slice(0, 3)} ${s.start_time}-${s.end_time}`).join(', ')}
                             </span>
                           </div>
                         </div>
@@ -595,7 +596,9 @@ export const Classes = () => {
         isOpen={showModal}
         onClose={() => { setShowModal(false); setEditingClass(null); }}
         title={editingClass ? t('classes.modal.editTitle') : t('classes.modal.createTitle')}
+        className="max-w-5xl"
       >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -660,7 +663,7 @@ export const Classes = () => {
                   onClick={() => toggleScheduleDay(day)}
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-xs font-bold border transition-all',
-                    formScheduleDays.includes(day)
+                    formSchedules.some(s => s.day === day)
                       ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
                       : 'bg-white dark:bg-zinc-950 text-zinc-500 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400'
                   )}
@@ -669,27 +672,35 @@ export const Classes = () => {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="start-time">{t('classes.form.startTime')}</Label>
-              <Input
-                id="start-time"
-                type="time"
-                value={formStartTime}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormStartTime(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="end-time">{t('classes.form.endTime')}</Label>
-              <Input
-                id="end-time"
-                type="time"
-                value={formEndTime}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormEndTime(e.target.value)}
-              />
-            </div>
+            {formSchedules
+              .sort((a, b) => DAYS_OF_WEEK.indexOf(a.day) - DAYS_OF_WEEK.indexOf(b.day))
+              .map((schedule) => (
+                <div key={schedule.day} className="flex items-center gap-2 pl-1">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 w-20">
+                    {schedule.day.slice(0, 3)}
+                  </span>
+                  <input
+                    type="time"
+                    value={schedule.start_time}
+                    onChange={(e) => setFormSchedules(prev => prev.map(s => s.day === schedule.day ? { ...s, start_time: e.target.value } : s))}
+                    className="h-8 px-2 text-sm border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 dark:text-zinc-100"
+                  />
+                  <span className="text-zinc-400 text-sm">&ndash;</span>
+                  <input
+                    type="time"
+                    value={schedule.end_time}
+                    onChange={(e) => setFormSchedules(prev => prev.map(s => s.day === schedule.day ? { ...s, end_time: e.target.value } : s))}
+                    className="h-8 px-2 text-sm border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 dark:text-zinc-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormSchedules(prev => prev.filter(s => s.day !== schedule.day))}
+                    className="text-zinc-400 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -800,6 +811,21 @@ export const Classes = () => {
               {editingClass ? t('classes.modal.updateClass') : t('classes.modal.createClass')}
             </Button>
           </div>
+        </div>
+        <div className="hidden lg:block space-y-3">
+          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Pratinjau Jadwal</label>
+          {formTutorId ? (
+            <ScheduleWeekPreview
+              currentSchedules={formSchedules}
+              tutorClasses={tutorClasses}
+              currentClassId={editingClass?.id}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-64 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg">
+              <p className="text-sm text-zinc-400">Pilih tutor untuk melihat jadwal</p>
+            </div>
+          )}
+        </div>
         </div>
       </Modal>
 
@@ -919,18 +945,18 @@ export const Classes = () => {
             {/* Schedule Section */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('classes.drawer.schedule')}</h4>
-              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {selectedClass.schedule_days.map((day) => (
-                    <span key={day} className="px-2 py-1 rounded-md bg-zinc-200 dark:bg-zinc-700 text-[10px] font-bold">
-                      {day.slice(0, 3)}
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-2">
+                {selectedClass.schedules?.map((schedule) => (
+                  <div key={schedule.day} className="flex items-center gap-2">
+                    <span className="px-2 py-1 rounded-md bg-zinc-200 dark:bg-zinc-700 text-[10px] font-bold w-12 text-center">
+                      {schedule.day.slice(0, 3)}
                     </span>
-                  ))}
-                </div>
-                <div className="flex items-center gap-1.5 text-sm text-zinc-500">
-                  <Clock size={14} />
-                  {selectedClass.schedule_start_time} - {selectedClass.schedule_end_time}
-                </div>
+                    <div className="flex items-center gap-1.5 text-sm text-zinc-500">
+                      <Clock size={14} />
+                      {schedule.start_time} - {schedule.end_time}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -970,7 +996,7 @@ export const Classes = () => {
             </div>
 
             {/* Generate Sessions Button */}
-            {classDetail.data?.status === 'ACTIVE' && classDetail.data?.schedule_days?.length > 0 && (
+            {classDetail.data?.status === 'ACTIVE' && classDetail.data?.schedules?.length > 0 && (
               <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
                 <Button
                   variant="outline"
@@ -1015,15 +1041,12 @@ export const Classes = () => {
             <div className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 space-y-2">
               <p className="text-sm font-bold">{classDetail.data.name}</p>
               <div className="flex flex-wrap gap-1.5">
-                {classDetail.data.schedule_days?.map((day: string) => (
-                  <span key={day} className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full">
-                    {day}
+                {classDetail.data.schedules?.map((schedule: { day: string; start_time: string; end_time: string }) => (
+                  <span key={schedule.day} className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full">
+                    {schedule.day.slice(0, 3)} {schedule.start_time}-{schedule.end_time}
                   </span>
                 ))}
               </div>
-              <p className="text-xs text-zinc-500">
-                {classDetail.data.schedule_start_time} - {classDetail.data.schedule_end_time}
-              </p>
             </div>
 
             <div className="space-y-1.5">
@@ -1049,7 +1072,7 @@ export const Classes = () => {
                 })}
               </p>
               <p className="text-lg font-bold">
-                ~{estimateSessionCount(classDetail.data.schedule_days ?? [], generateDuration)}{' '}
+                ~{estimateSessionCount(classDetail.data.schedules ?? [], generateDuration)}{' '}
                 <span className="text-sm font-normal text-zinc-500">{t('classes.generateModal.estimatedSessions')}</span>
               </p>
             </div>

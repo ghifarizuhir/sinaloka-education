@@ -26,10 +26,11 @@ export function EnrollmentList({ data }: { data: EnrollmentRecord[] }) {
             <p className="text-sm font-bold text-lime-400">Rp {enrollment.class.fee.toLocaleString('id-ID')}</p>
           </div>
           <div className="flex flex-wrap gap-1 mb-2">
-            {enrollment.class.schedule_days.map((day) => (
-              <span key={day} className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">{DAY_LABELS[day] ?? day}</span>
+            {enrollment.class.schedules.map((s) => (
+              <span key={s.day} className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">
+                {DAY_LABELS[s.day] ?? s.day} {s.start_time}–{s.end_time}
+              </span>
             ))}
-            <span className="text-[10px] text-zinc-500 ml-1">{enrollment.class.schedule_start_time}–{enrollment.class.schedule_end_time}</span>
           </div>
           <p className="text-xs text-zinc-500">Tutor: {enrollment.class.tutor.user.name}</p>
         </div>

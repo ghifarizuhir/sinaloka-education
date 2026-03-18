@@ -76,9 +76,7 @@ export function mapEnrollment(raw: any): EnrollmentRecord {
     class: {
       name: raw.class.name,
       subject: raw.class.subject,
-      schedule_days: raw.class.schedule_days,
-      schedule_start_time: raw.class.schedule_start_time,
-      schedule_end_time: raw.class.schedule_end_time,
+      schedules: raw.class.schedules ?? [],
       fee: Number(raw.class.fee),
       tutor: { user: { name: raw.class.tutor?.user?.name ?? '' } },
     },
