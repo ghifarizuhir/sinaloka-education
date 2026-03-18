@@ -11,13 +11,13 @@ export function PasswordInput(props: PasswordInputProps) {
       <input
         {...props}
         type={visible ? 'text' : 'password'}
-        className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm pr-12"
+        className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm pr-12"
       />
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
         aria-label={visible ? 'Hide password' : 'Show password'}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-subtle hover:text-surface-foreground/70 transition-colors"
       >
         {visible ? (
           <EyeOff className="w-4.5 h-4.5" />

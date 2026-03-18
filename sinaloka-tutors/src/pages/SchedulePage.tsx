@@ -36,7 +36,7 @@ export function SchedulePage({
     <div className="space-y-6 pb-24">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Jadwal Mengajar</h1>
-        <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Manajemen sesi dan absensi</p>
+        <p className="text-subtle text-xs font-bold uppercase tracking-widest">Manajemen sesi dan absensi</p>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
@@ -47,8 +47,8 @@ export function SchedulePage({
             className={cn(
               'px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all',
               activeFilter === f.value
-                ? 'bg-lime-400 text-black'
-                : 'bg-zinc-900 text-zinc-500 border border-zinc-800',
+                ? 'bg-brand text-brand-foreground'
+                : 'bg-surface-muted text-subtle border border-surface-border',
             )}
           >
             {f.label}
@@ -60,7 +60,7 @@ export function SchedulePage({
         {scheduleLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-zinc-900 rounded-xl h-32 animate-pulse" />
+              <div key={i} className="bg-surface-muted rounded-xl h-32 animate-pulse" />
             ))}
           </div>
         ) : schedule.length > 0 ? (
@@ -75,8 +75,8 @@ export function SchedulePage({
             />
           ))
         ) : (
-          <div className="bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl p-8 text-center">
-            <p className="text-zinc-500 text-sm">Tidak ada jadwal ditemukan.</p>
+          <div className="bg-surface-muted/50 border border-dashed border-surface-border rounded-xl p-8 text-center">
+            <p className="text-subtle text-sm">Tidak ada jadwal ditemukan.</p>
           </div>
         )}
       </div>

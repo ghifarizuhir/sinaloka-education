@@ -69,7 +69,7 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen bg-surface text-white font-sans flex items-center justify-center selection:bg-brand/30 selection:text-white">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -77,7 +77,7 @@ export function ForgotPasswordPage() {
       >
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Lupa Password</h1>
-          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">
+          <p className="text-subtle text-xs font-medium uppercase tracking-wider">
             Masukkan email untuk reset password
           </p>
         </div>
@@ -90,21 +90,21 @@ export function ForgotPasswordPage() {
                 <span>{error}</span>
               </div>
             )}
-            <div className="flex items-start gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
+            <div className="flex items-start gap-3 bg-brand-muted border border-brand/20 text-brand px-5 py-4 rounded-lg text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
               <span>Jika <strong>{email}</strong> terdaftar, link reset password akan dikirim. Periksa inbox atau folder spam.</span>
             </div>
             <button
               onClick={handleResend}
               disabled={loading || cooldown > 0}
-              className="w-full bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-surface-elevated hover:bg-surface-elevated/80 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               {cooldown > 0 ? `Kirim Ulang (${cooldown}s)` : 'Kirim Ulang'}
             </button>
             <Link
               to="/login"
-              className="w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-2 text-subtle hover:text-white text-sm font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Kembali ke Login
@@ -120,7 +120,7 @@ export function ForgotPasswordPage() {
             )}
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
                 Email
               </label>
               <input
@@ -129,14 +129,14 @@ export function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="tutor@example.com"
-                className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+                className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
+              className="w-full bg-brand hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed text-brand-foreground font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
             >
               <Mail className="w-6 h-6" />
               {loading ? 'Mengirim...' : 'Kirim Link Reset'}
@@ -144,7 +144,7 @@ export function ForgotPasswordPage() {
 
             <Link
               to="/login"
-              className="w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-2 text-subtle hover:text-white text-sm font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Kembali ke Login

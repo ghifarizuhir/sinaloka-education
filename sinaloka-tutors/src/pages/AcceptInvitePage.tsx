@@ -116,8 +116,8 @@ export function AcceptInvitePage() {
   // ── Loading ──────────────────────────────────────────────────────────────
   if (pageState.status === 'loading') {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-lime-400 animate-spin" />
+      <div className="min-h-screen bg-surface text-white font-sans flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-brand animate-spin" />
       </div>
     );
   }
@@ -125,11 +125,11 @@ export function AcceptInvitePage() {
   // ── No token ─────────────────────────────────────────────────────────────
   if (pageState.status === 'no_token') {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+      <div className="min-h-screen bg-surface text-white font-sans flex items-center justify-center selection:bg-brand/30 selection:text-white">
         <div className="w-full max-w-sm mx-6 text-center space-y-4">
-          <AlertCircle className="w-12 h-12 text-zinc-500 mx-auto" />
+          <AlertCircle className="w-12 h-12 text-subtle mx-auto" />
           <h2 className="text-xl font-semibold">Token tidak ditemukan</h2>
-          <p className="text-zinc-500 text-sm">
+          <p className="text-subtle text-sm">
             Link undangan tidak memiliki token yang valid.
           </p>
         </div>
@@ -140,11 +140,11 @@ export function AcceptInvitePage() {
   // ── Error ────────────────────────────────────────────────────────────────
   if (pageState.status === 'error') {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+      <div className="min-h-screen bg-surface text-white font-sans flex items-center justify-center selection:bg-brand/30 selection:text-white">
         <div className="w-full max-w-sm mx-6 text-center space-y-4">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto" />
           <h2 className="text-xl font-semibold">Undangan Tidak Valid</h2>
-          <p className="text-zinc-500 text-sm">{pageState.message}</p>
+          <p className="text-subtle text-sm">{pageState.message}</p>
         </div>
       </div>
     );
@@ -154,7 +154,7 @@ export function AcceptInvitePage() {
   const isSubmitting = pageState.status === 'submitting';
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black py-12">
+    <div className="min-h-screen bg-surface text-white font-sans flex items-center justify-center selection:bg-brand/30 selection:text-white py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -162,7 +162,7 @@ export function AcceptInvitePage() {
       >
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Sinaloka</h1>
-          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">
+          <p className="text-subtle text-xs font-medium uppercase tracking-wider">
             Aktivasi Akun Tutor
           </p>
         </div>
@@ -177,7 +177,7 @@ export function AcceptInvitePage() {
 
           {/* Full Name */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Nama Lengkap
             </label>
             <input
@@ -186,13 +186,13 @@ export function AcceptInvitePage() {
               onChange={(e) => setFullName(e.target.value)}
               required
               placeholder="Nama lengkap"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+              className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
             />
           </div>
 
           {/* Password */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Password
             </label>
             <PasswordInput
@@ -205,7 +205,7 @@ export function AcceptInvitePage() {
 
           {/* Confirm Password */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Konfirmasi Password
             </label>
             <PasswordInput
@@ -218,16 +218,16 @@ export function AcceptInvitePage() {
 
           {/* Bank info divider */}
           <div className="flex items-center gap-3 pt-2">
-            <div className="flex-1 h-px bg-zinc-800" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">
+            <div className="flex-1 h-px bg-surface-border" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-subtle">
               Info Bank
             </span>
-            <div className="flex-1 h-px bg-zinc-800" />
+            <div className="flex-1 h-px bg-surface-border" />
           </div>
 
           {/* Bank Name */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Nama Bank
             </label>
             <input
@@ -236,13 +236,13 @@ export function AcceptInvitePage() {
               onChange={(e) => setBankName(e.target.value)}
               required
               placeholder="Contoh: BCA, Mandiri, BNI"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+              className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
             />
           </div>
 
           {/* Bank Account Number */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Nomor Rekening
             </label>
             <input
@@ -251,13 +251,13 @@ export function AcceptInvitePage() {
               onChange={(e) => setBankAccountNumber(e.target.value)}
               required
               placeholder="Nomor rekening bank"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+              className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
             />
           </div>
 
           {/* Bank Account Holder */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Nama Pemilik Rekening
             </label>
             <input
@@ -266,14 +266,14 @@ export function AcceptInvitePage() {
               onChange={(e) => setBankAccountHolder(e.target.value)}
               required
               placeholder="Nama sesuai rekening"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+              className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
+            className="w-full bg-brand hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed text-brand-foreground font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
           >
             {isSubmitting ? (
               <Loader2 className="w-6 h-6 animate-spin" />

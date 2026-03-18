@@ -34,7 +34,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen bg-surface text-white font-sans flex items-center justify-center selection:bg-brand/30 selection:text-white">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -44,21 +44,21 @@ export function LoginPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-2">
             Sinaloka
           </h1>
-          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">
+          <p className="text-subtle text-xs font-medium uppercase tracking-wider">
             Portal Tutor
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {invited && (
-            <div className="flex items-center gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
+            <div className="flex items-center gap-3 bg-brand-muted border border-brand/20 text-brand px-5 py-4 rounded-lg text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
               <span>Akun berhasil diaktivasi! Silakan masuk.</span>
             </div>
           )}
 
           {reset && (
-            <div className="flex items-center gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
+            <div className="flex items-center gap-3 bg-brand-muted border border-brand/20 text-brand px-5 py-4 rounded-lg text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
               <span>Password berhasil direset. Silakan login.</span>
             </div>
@@ -72,7 +72,7 @@ export function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Email
             </label>
             <input
@@ -81,12 +81,12 @@ export function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="tutor@example.com"
-              className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+              className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Password
             </label>
             <PasswordInput
@@ -100,7 +100,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
+            className="w-full bg-brand hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed text-brand-foreground font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
           >
             <LogIn className="w-6 h-6" />
             {loading ? 'Masuk...' : 'Masuk'}
@@ -108,7 +108,7 @@ export function LoginPage() {
 
           <Link
             to="/forgot-password"
-            className="w-full flex items-center justify-center text-zinc-500 hover:text-zinc-300 text-sm font-medium transition-colors"
+            className="w-full flex items-center justify-center text-subtle hover:text-surface-foreground/70 text-sm font-medium transition-colors"
           >
             Lupa Password?
           </Link>

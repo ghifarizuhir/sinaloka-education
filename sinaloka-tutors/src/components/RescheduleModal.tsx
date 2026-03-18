@@ -58,20 +58,20 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-zinc-950/90 backdrop-blur-md"
+        className="absolute inset-0 bg-surface/90 backdrop-blur-md"
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden"
+        className="relative w-full max-w-sm bg-surface-muted border border-surface-border rounded-xl overflow-hidden"
       >
         {/* Header */}
-        <div className="p-5 border-b border-zinc-800 flex justify-between items-center">
+        <div className="p-5 border-b border-surface-border flex justify-between items-center">
           <h3 className="text-lg font-semibold">Atur Ulang Jadwal</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
+            className="w-8 h-8 rounded-full bg-surface-elevated flex items-center justify-center hover:bg-surface-elevated/80 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -80,7 +80,7 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
         {/* Session Info */}
         <div className="px-5 pt-4 pb-2">
           <p className="font-semibold text-white">{session.subject}</p>
-          <div className="flex items-center gap-3 text-zinc-400 text-xs mt-1">
+          <div className="flex items-center gap-3 text-subtle text-xs mt-1">
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               {format(new Date(session.date), 'EEE, d MMM yyyy', { locale: id })}
@@ -102,41 +102,41 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-1">Tanggal Baru</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-1">Tanggal Baru</label>
             <input
               type="date"
               value={proposedDate}
               onChange={(e) => setProposedDate(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+              className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-1">Waktu Mulai</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-1">Waktu Mulai</label>
               <input
                 type="time"
                 value={proposedStartTime}
                 onChange={(e) => setProposedStartTime(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-1">Waktu Selesai</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-1">Waktu Selesai</label>
               <input
                 type="time"
                 value={proposedEndTime}
                 onChange={(e) => setProposedEndTime(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-1">Alasan</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-1">Alasan</label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -144,14 +144,14 @@ export function RescheduleModal({ session, onSubmit, onClose }: RescheduleModalP
               placeholder="Jelaskan alasan atur ulang jadwal..."
               rows={3}
               maxLength={500}
-              className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 focus:outline-none focus:border-lime-400 transition-all text-white text-sm resize-none"
+              className="w-full px-4 py-3 rounded-lg bg-surface-elevated border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm resize-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
+            className="w-full bg-brand hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed text-brand-foreground font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
           >
             {loading ? 'Mengirim...' : 'Kirim Permintaan'}
           </button>

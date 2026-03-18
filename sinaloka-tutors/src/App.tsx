@@ -213,7 +213,7 @@ function MainAppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-lime-400 selection:text-black overflow-x-hidden">
+    <div className="min-h-screen bg-surface text-white font-sans selection:bg-brand/30 selection:text-white overflow-x-hidden">
       <main className="relative z-10 max-w-md mx-auto px-6 pt-8 min-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
@@ -239,17 +239,17 @@ function MainAppContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedProof(null)}
-              className="absolute inset-0 bg-zinc-950/90 backdrop-blur-md"
+              className="absolute inset-0 bg-surface/90 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden"
+              className="relative w-full max-w-sm bg-surface-muted border border-surface-border rounded-xl overflow-hidden"
             >
-              <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
+              <div className="p-6 border-b border-surface-border flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Bukti Transfer</h3>
-                <button onClick={() => setSelectedProof(null)} className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                <button onClick={() => setSelectedProof(null)} className="w-8 h-8 rounded-full bg-surface-elevated flex items-center justify-center">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -281,7 +281,7 @@ function MainAppContent() {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-24 left-6 right-6 z-[110] flex justify-center pointer-events-none"
           >
-            <div className="bg-lime-400 text-black px-6 py-3 rounded-full font-semibold shadow-[0_10px_30px_rgba(163,230,53,0.4)] flex items-center gap-2">
+            <div className="bg-brand text-brand-foreground px-6 py-3 rounded-full font-semibold shadow-brand-md flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
               {notificationMessage}
             </div>
@@ -302,8 +302,8 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

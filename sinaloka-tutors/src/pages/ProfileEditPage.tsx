@@ -52,7 +52,7 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
   if (fetching) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -62,13 +62,13 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
       <div className="flex items-center gap-4 mb-4">
         <button
           onClick={onClose}
-          className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white"
+          className="w-10 h-10 rounded-full bg-surface-muted border border-surface-border flex items-center justify-center text-white"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
           <h1 className="text-xl font-semibold leading-none mb-1">Edit Profil</h1>
-          <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Informasi rekening bank</p>
+          <p className="text-subtle text-[10px] font-bold uppercase tracking-wider">Informasi rekening bank</p>
         </div>
       </div>
 
@@ -81,38 +81,38 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
         )}
 
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-1">Nama Bank</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-1">Nama Bank</label>
           <input
             type="text"
             value={bankName}
             onChange={(e) => setBankName(e.target.value)}
             placeholder="e.g., BCA, BNI, Mandiri"
             required
-            className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+            className="w-full px-4 py-3 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-1">Nomor Rekening</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-1">Nomor Rekening</label>
           <input
             type="text"
             value={bankAccountNumber}
             onChange={(e) => setBankAccountNumber(e.target.value)}
             placeholder="e.g., 1234567890"
             required
-            className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+            className="w-full px-4 py-3 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-1">Nama Pemilik Rekening</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-1">Nama Pemilik Rekening</label>
           <input
             type="text"
             value={bankAccountHolder}
             onChange={(e) => setBankAccountHolder(e.target.value)}
             placeholder="e.g., Budi Santoso"
             required
-            className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+            className="w-full px-4 py-3 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
           />
         </div>
 
@@ -120,7 +120,7 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
+            className="w-full bg-brand hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed text-brand-foreground font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
           >
             {loading ? 'Menyimpan...' : 'Simpan Perubahan'}
           </button>

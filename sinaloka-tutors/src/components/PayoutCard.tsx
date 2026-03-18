@@ -18,19 +18,19 @@ export const PayoutCard: React.FC<PayoutCardProps> = ({ payout, onViewProof }) =
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-4"
+      className="bg-surface-muted border border-surface-border rounded-xl p-5 mb-4"
     >
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-10 h-10 rounded-xl flex items-center justify-center",
-            isPaid ? "bg-lime-400/10 text-lime-400" : "bg-orange-400/10 text-orange-400"
+            isPaid ? "bg-brand-muted text-brand" : "bg-orange-400/10 text-orange-400"
           )}>
             <Wallet className="w-5 h-5" />
           </div>
           <div>
             <h4 className="text-white font-bold text-sm">{payout.description}</h4>
-            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
+            <p className="text-subtle text-[10px] font-bold uppercase tracking-wider">
               {format(new Date(payout.date), 'd MMM yyyy', { locale: id })}
             </p>
           </div>
@@ -41,7 +41,7 @@ export const PayoutCard: React.FC<PayoutCardProps> = ({ payout, onViewProof }) =
           </p>
           <div className={cn(
             "inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider",
-            isPaid ? "text-lime-400" : "text-orange-400"
+            isPaid ? "text-brand" : "text-orange-400"
           )}>
             {isPaid ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
             {payout.status}
@@ -52,7 +52,7 @@ export const PayoutCard: React.FC<PayoutCardProps> = ({ payout, onViewProof }) =
       {isPaid && payout.proofUrl && (
         <button 
           onClick={() => onViewProof(payout.proofUrl!)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-800 text-white text-xs font-bold uppercase tracking-wider hover:bg-zinc-700 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-surface-elevated text-white text-xs font-bold uppercase tracking-wider hover:bg-surface-elevated/80 transition-colors"
         >
           <Eye className="w-4 h-4" />
           Lihat Bukti Transfer
