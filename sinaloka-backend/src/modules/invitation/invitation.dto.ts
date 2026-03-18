@@ -12,8 +12,8 @@ export const AcceptInviteSchema = z.object({
   token: z.string().min(1),
   password: z.string().min(8).max(128),
   name: z.string().min(1).max(255).optional(),
-  bank_name: z.string().max(255).optional(),
-  bank_account_number: z.string().max(50).optional(),
-  bank_account_holder: z.string().max(255).optional(),
+  bank_name: z.string().min(1).max(255),
+  bank_account_number: z.string().min(1).max(50),
+  bank_account_holder: z.string().min(1).max(255),
 });
 export type AcceptInviteDto = z.infer<typeof AcceptInviteSchema>;

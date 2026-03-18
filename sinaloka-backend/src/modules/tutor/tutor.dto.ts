@@ -18,9 +18,9 @@ export const UpdateTutorSchema = z.object({
   subjects: z.array(z.string().min(1)).min(1).optional(),
   experience_years: z.number().int().min(0).optional(),
   availability: z.record(z.string(), z.any()).optional().nullable(),
-  bank_name: z.string().max(255).optional().nullable(),
-  bank_account_number: z.string().max(50).optional().nullable(),
-  bank_account_holder: z.string().max(255).optional().nullable(),
+  bank_name: z.string().min(1).max(255),
+  bank_account_number: z.string().min(1).max(50),
+  bank_account_holder: z.string().min(1).max(255),
   is_verified: z.boolean().optional(),
   rating: z.number().min(0).max(5).optional(),
   monthly_salary: z.number().min(0).optional().nullable(),
@@ -45,8 +45,8 @@ export type TutorQueryDto = z.infer<typeof TutorQuerySchema>;
 
 export const UpdateTutorProfileSchema = z.object({
   availability: z.record(z.string(), z.any()).optional().nullable(),
-  bank_name: z.string().max(255).optional().nullable(),
-  bank_account_number: z.string().max(50).optional().nullable(),
-  bank_account_holder: z.string().max(255).optional().nullable(),
+  bank_name: z.string().min(1).max(255),
+  bank_account_number: z.string().min(1).max(50),
+  bank_account_holder: z.string().min(1).max(255),
 });
 export type UpdateTutorProfileDto = z.infer<typeof UpdateTutorProfileSchema>;
