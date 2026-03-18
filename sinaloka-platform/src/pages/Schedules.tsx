@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -38,7 +37,7 @@ import {
   startOfDay
 } from 'date-fns';
 import { toast } from 'sonner';
-import { Card, Button, Badge, Modal, Drawer, Input, Label, Switch, Skeleton } from '../components/UI';
+import { Card, Button, Badge, Modal, Drawer, Input, Label, Switch, Skeleton, PageHeader, Select, Tabs, DropdownMenu } from '../components/UI';
 import { WeekCalendar } from '../components/WeekCalendar';
 import { cn, formatDate } from '../lib/utils';
 import { useSessions, useSession, useSessionStudents, useCreateSession, useUpdateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
@@ -81,7 +80,6 @@ export const Schedules = () => {
   const [filterDateTo, setFilterDateTo] = useState('');
   const [filterClassId, setFilterClassId] = useState('');
   const [filterStatus, setFilterStatus] = useState<SessionStatus | ''>('');
-  const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [page] = useState(1);
 
@@ -204,42 +202,42 @@ export const Schedules = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('schedules.title')}</h2>
-          <p className="text-zinc-500 text-sm">{t('schedules.subtitle')}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
-            <button
-              onClick={() => setView('list')}
-              className={cn(
-                "p-1.5 rounded-md transition-all",
-                view === 'list' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
-              )}
-            >
-              <List size={18} />
-            </button>
-            <button
-              onClick={() => setView('calendar')}
-              className={cn(
-                "p-1.5 rounded-md transition-all",
-                view === 'calendar' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
-              )}
-            >
-              <CalendarDays size={18} />
-            </button>
-          </div>
-          <Button variant="outline" onClick={() => setShowGenerateModal(true)}>
-            <Zap size={18} />
-            {t('schedules.autoGenerate')}
-          </Button>
-          <Button onClick={() => setShowModal(true)}>
-            <CalendarClock size={18} />
-            {t('schedules.scheduleSession')}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t('schedules.title')}
+        subtitle={t('schedules.subtitle')}
+        actions={
+          <>
+            <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
+              <button
+                onClick={() => setView('list')}
+                className={cn(
+                  "p-1.5 rounded-md transition-all",
+                  view === 'list' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
+                )}
+              >
+                <List size={18} />
+              </button>
+              <button
+                onClick={() => setView('calendar')}
+                className={cn(
+                  "p-1.5 rounded-md transition-all",
+                  view === 'calendar' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
+                )}
+              >
+                <CalendarDays size={18} />
+              </button>
+            </div>
+            <Button variant="outline" onClick={() => setShowGenerateModal(true)}>
+              <Zap size={18} />
+              {t('schedules.autoGenerate')}
+            </Button>
+            <Button onClick={() => setShowModal(true)}>
+              <CalendarClock size={18} />
+              {t('schedules.scheduleSession')}
+            </Button>
+          </>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -257,25 +255,27 @@ export const Schedules = () => {
           className="h-9 text-xs w-36"
           placeholder={t('schedules.form.dateTo')}
         />
-        <select
-          className="h-9 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+        <Select
           value={filterClassId}
-          onChange={(e) => setFilterClassId(e.target.value)}
-        >
-          <option value="">{t('schedules.filter.allClasses')}</option>
-          {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        <select
-          className="h-9 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+          onChange={setFilterClassId}
+          className="h-9 text-xs"
+          options={[
+            { value: '', label: t('schedules.filter.allClasses') },
+            ...classes.map(c => ({ value: c.id, label: c.name })),
+          ]}
+        />
+        <Select
           value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value as SessionStatus | '')}
-        >
-          <option value="">{t('schedules.filter.allStatuses')}</option>
-          <option value="SCHEDULED">{t('schedules.filter.scheduled')}</option>
-          <option value="COMPLETED">{t('schedules.filter.completed')}</option>
-          <option value="CANCELLED">{t('schedules.filter.cancelled')}</option>
-          <option value="RESCHEDULE_REQUESTED">{t('schedules.filter.rescheduleRequested')}</option>
-        </select>
+          onChange={(val) => setFilterStatus(val as SessionStatus | '')}
+          className="h-9 text-xs"
+          options={[
+            { value: '', label: t('schedules.filter.allStatuses') },
+            { value: 'SCHEDULED', label: t('schedules.filter.scheduled') },
+            { value: 'COMPLETED', label: t('schedules.filter.completed') },
+            { value: 'CANCELLED', label: t('schedules.filter.cancelled') },
+            { value: 'RESCHEDULE_REQUESTED', label: t('schedules.filter.rescheduleRequested') },
+          ]}
+        />
       </div>
 
       {isLoading ? (
@@ -329,7 +329,6 @@ export const Schedules = () => {
                       )}
                       onClick={() => {
                         setSelectedSessionId(session.id);
-                        setActiveActionMenu(null);
                       }}
                     >
                       <td className="px-6 py-4">
@@ -366,59 +365,22 @@ export const Schedules = () => {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="relative">
-                          <button
-                            className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                            onClick={() => setActiveActionMenu(activeActionMenu === session.id ? null : session.id)}
-                          >
-                            <MoreHorizontal size={18} />
-                          </button>
-                          <AnimatePresence>
-                            {activeActionMenu === session.id && (
-                              <>
-                                <div className="fixed inset-0 z-[5]" onClick={() => setActiveActionMenu(null)} />
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.95 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.95 }}
-                                  transition={{ duration: 0.1 }}
-                                  className="absolute right-0 top-full mt-1 w-52 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-10 p-1 text-left"
-                                >
-                                  {isLocked ? (
-                                    <div className="px-3 py-2 text-xs text-zinc-400 flex items-center gap-2">
-                                      <Lock size={12} /> {isCompleted ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <button
-                                        onClick={() => { handleMarkAttendance(session.id); setActiveActionMenu(null); }}
-                                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-indigo-600"
-                                      >
-                                        {t('schedules.menu.markAttendance')} <ArrowUpRight size={14} />
-                                      </button>
-                                      {session.status === 'RESCHEDULE_REQUESTED' && (
-                                        <button
-                                          onClick={() => { handleApproveReschedule(session.id); setActiveActionMenu(null); }}
-                                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-emerald-600"
-                                        >
-                                          <CheckCircle2 size={14} /> {t('schedules.menu.approveReschedule')}
-                                        </button>
-                                      )}
-                                      {!isCancelled && (
-                                        <button
-                                          onClick={() => { handleCancelSession(session.id); setActiveActionMenu(null); }}
-                                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors text-red-500"
-                                        >
-                                          {t('schedules.menu.cancelSession')}
-                                        </button>
-                                      )}
-                                    </>
-                                  )}
-                                </motion.div>
-                              </>
-                            )}
-                          </AnimatePresence>
-                        </div>
+                        <DropdownMenu
+                          trigger={<MoreHorizontal size={18} />}
+                          items={
+                            isLocked
+                              ? [{ content: <span className="px-3 py-2 text-xs text-zinc-400 flex items-center gap-2"><Lock size={12} /> {isCompleted ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}</span> }]
+                              : [
+                                  { label: t('schedules.menu.markAttendance'), icon: ArrowUpRight, onClick: () => handleMarkAttendance(session.id), className: 'text-indigo-600' },
+                                  ...(session.status === 'RESCHEDULE_REQUESTED'
+                                    ? [{ label: t('schedules.menu.approveReschedule'), icon: CheckCircle2, onClick: () => handleApproveReschedule(session.id), className: 'text-emerald-600' }]
+                                    : []),
+                                  ...(!isCancelled
+                                    ? [{ label: t('schedules.menu.cancelSession'), onClick: () => handleCancelSession(session.id), variant: 'danger' as const }]
+                                    : []),
+                                ]
+                          }
+                        />
                       </td>
                     </tr>
                   );
@@ -437,20 +399,15 @@ export const Schedules = () => {
                  calendarMode === 'week' ? t('schedules.calendar.weekOf', { date: format(weekStart, 'MMM d') }) :
                  format(currentDate, 'EEEE, MMM d')}
               </h3>
-              <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
-                <button
-                  onClick={() => setCalendarMode('month')}
-                  className={cn("px-3 py-1 text-[10px] font-bold rounded-md transition-all", calendarMode === 'month' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500")}
-                >{t('schedules.calendar.month')}</button>
-                <button
-                  onClick={() => setCalendarMode('week')}
-                  className={cn("px-3 py-1 text-[10px] font-bold rounded-md transition-all", calendarMode === 'week' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500")}
-                >{t('schedules.calendar.week')}</button>
-                <button
-                  onClick={() => setCalendarMode('day')}
-                  className={cn("px-3 py-1 text-[10px] font-bold rounded-md transition-all", calendarMode === 'day' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500")}
-                >{t('schedules.calendar.day')}</button>
-              </div>
+              <Tabs
+                value={calendarMode}
+                onChange={(val) => setCalendarMode(val as 'month' | 'week' | 'day')}
+                items={[
+                  { value: 'month', label: t('schedules.calendar.month') },
+                  { value: 'week', label: t('schedules.calendar.week') },
+                  { value: 'day', label: t('schedules.calendar.day') },
+                ]}
+              />
             </div>
 
             <div className="flex items-center gap-2">
@@ -619,14 +576,15 @@ export const Schedules = () => {
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>{t('schedules.form.selectClass')}</Label>
-            <select
-              className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+            <Select
               value={selectedClassId}
-              onChange={(e) => setSelectedClassId(e.target.value)}
-            >
-              <option value="">{t('schedules.form.selectClassPlaceholder')}</option>
-              {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+              onChange={setSelectedClassId}
+              className="w-full"
+              options={[
+                { value: '', label: t('schedules.form.selectClassPlaceholder') },
+                ...classes.map(c => ({ value: c.id, label: c.name })),
+              ]}
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -639,23 +597,21 @@ export const Schedules = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>{t('schedules.form.startTime')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+              <Select
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              >
-                {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+                onChange={setStartTime}
+                className="w-full"
+                options={TIME_SLOTS.map(slot => ({ value: slot, label: slot }))}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{t('schedules.form.endTime')}</Label>
-              <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+              <Select
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              >
-                {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+                onChange={setEndTime}
+                className="w-full"
+                options={TIME_SLOTS.map(slot => ({ value: slot, label: slot }))}
+              />
             </div>
           </div>
 
@@ -688,14 +644,15 @@ export const Schedules = () => {
 
           <div className="space-y-1.5">
             <Label>{t('schedules.form.selectClass')}</Label>
-            <select
-              className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+            <Select
               value={genClassId}
-              onChange={(e) => setGenClassId(e.target.value)}
-            >
-              <option value="">{t('schedules.form.selectClassPlaceholder')}</option>
-              {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+              onChange={setGenClassId}
+              className="w-full"
+              options={[
+                { value: '', label: t('schedules.form.selectClassPlaceholder') },
+                ...classes.map(c => ({ value: c.id, label: c.name })),
+              ]}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
