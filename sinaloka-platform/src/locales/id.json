@@ -396,6 +396,7 @@
       "className": "Nama Kelas",
       "classNamePlaceholder": "contoh: Fisika Lanjutan",
       "subject": "Mata Pelajaran",
+      "selectSubject": "Pilih mata pelajaran...",
       "assignTutor": "Tetapkan Tutor",
       "selectTutor": "Pilih tutor...",
       "status": "Status",

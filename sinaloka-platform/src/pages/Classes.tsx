@@ -39,18 +39,25 @@ import {
   useUpdateClass,
   useDeleteClass
 } from '@/src/hooks/useClasses';
-import { useTutors } from '@/src/hooks/useTutors';
+import { useSubjects, useSubjectTutors } from '@/src/hooks/useSubjects';
 import { useBillingSettings } from '@/src/hooks/useSettings';
 import { useGenerateSessions } from '@/src/hooks/useSessions';
 import { format, addDays, getDay } from 'date-fns';
 import type { Class, CreateClassDto, ScheduleDay } from '@/src/types/class';
 
-const SUBJECT_COLORS: Record<string, string> = {
-  'Mathematics': 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800',
-  'Science': 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800',
-  'English': 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-800',
-  'History': 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-800',
-};
+function getSubjectColor(name: string): string {
+  const colors = [
+    'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+    'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
+    'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+    'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+    'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400',
+    'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
 
 const DAYS_OF_WEEK: ScheduleDay[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -74,7 +81,7 @@ export const Classes = () => {
 
   // Form state
   const [formName, setFormName] = useState('');
-  const [formSubject, setFormSubject] = useState('Mathematics');
+  const [formSubjectId, setFormSubjectId] = useState('');
   const [formTutorId, setFormTutorId] = useState('');
   const [formCapacity, setFormCapacity] = useState('25');
   const [formFee, setFormFee] = useState('500000');
@@ -90,7 +97,8 @@ export const Classes = () => {
 
   const { data, isLoading } = useClasses({ page, limit });
   const { data: allClassesData } = useClasses({ page: 1, limit: 100 });
-  const { data: tutorsData } = useTutors({ limit: 100, is_verified: true });
+  const { data: subjectsList } = useSubjects();
+  const { data: subjectTutors } = useSubjectTutors(formSubjectId || null);
   const { data: billingSettings } = useBillingSettings();
   const billingMode = billingSettings?.billing_mode ?? 'manual';
   const createClass = useCreateClass();
@@ -100,7 +108,6 @@ export const Classes = () => {
 
   const classes = data?.data ?? [];
   const meta = data?.meta;
-  const tutors = tutorsData?.data ?? [];
 
   const filteredClasses = useMemo(() => {
     return classes.filter(c => {
@@ -108,7 +115,7 @@ export const Classes = () => {
       const matchesSearch =
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tutorName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSubject = !filterSubject || c.subject === filterSubject;
+      const matchesSubject = !filterSubject || c.subject.name === filterSubject;
       // "available" means not archived and enrolled (enrollments not in class object; use capacity as proxy)
       const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
       return matchesSearch && matchesSubject && matchesAvailability;
@@ -122,7 +129,7 @@ export const Classes = () => {
       const matchesSearch =
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tutorName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSubject = !filterSubject || c.subject === filterSubject;
+      const matchesSubject = !filterSubject || c.subject.name === filterSubject;
       const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
       return matchesSearch && matchesSubject && matchesAvailability;
     });
@@ -137,8 +144,8 @@ export const Classes = () => {
   const openAddModal = () => {
     setEditingClass(null);
     setFormName('');
-    setFormSubject('Mathematics');
-    setFormTutorId(tutors[0]?.id ?? '');
+    setFormSubjectId('');
+    setFormTutorId('');
     setFormCapacity('25');
     setFormFee('500000');
     setFormPackageFee('');
@@ -156,7 +163,7 @@ export const Classes = () => {
   const openEditModal = (cls: Class) => {
     setEditingClass(cls);
     setFormName(cls.name);
-    setFormSubject(cls.subject);
+    setFormSubjectId(cls.subject_id);
     setFormTutorId(cls.tutor_id);
     setFormCapacity(String(cls.capacity));
     setFormFee(String(cls.fee));
@@ -190,7 +197,7 @@ export const Classes = () => {
 
     const payload: CreateClassDto = {
       name: formName,
-      subject: formSubject,
+      subject_id: formSubjectId,
       tutor_id: formTutorId,
       capacity: Number(formCapacity),
       fee: Number(formFee),
@@ -353,10 +360,9 @@ export const Classes = () => {
             }}
           >
             <option value="">{t('common.allSubjects')}</option>
-            <option value="Mathematics">Mathematics</option>
-            <option value="Science">Science</option>
-            <option value="English">English</option>
-            <option value="History">History</option>
+            {(subjectsList ?? []).map(s => (
+              <option key={s.id} value={s.name}>{s.name}</option>
+            ))}
           </select>
 
           <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
@@ -431,10 +437,10 @@ export const Classes = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={cn(
-                          'text-[10px] font-bold px-2 py-1 rounded-md border',
-                          SUBJECT_COLORS[cls.subject] || 'bg-zinc-50 text-zinc-500 border-zinc-100'
+                          'text-[10px] font-bold px-2 py-1 rounded-md border border-transparent',
+                          getSubjectColor(cls.subject.name)
                         )}>
-                          {cls.subject.toUpperCase()}
+                          {cls.subject.name.toUpperCase()}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -605,13 +611,13 @@ export const Classes = () => {
               <Label htmlFor="subject">{t('classes.form.subject')}</Label>
               <select
                 className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
-                value={formSubject}
-                onChange={(e) => setFormSubject(e.target.value)}
+                value={formSubjectId}
+                onChange={(e) => { setFormSubjectId(e.target.value); setFormTutorId(''); }}
               >
-                <option>Mathematics</option>
-                <option>Science</option>
-                <option>English</option>
-                <option>History</option>
+                <option value="">{t('classes.form.selectSubject')}</option>
+                {(subjectsList ?? []).map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -620,13 +626,14 @@ export const Classes = () => {
             <div className="space-y-1.5">
               <Label htmlFor="tutor">{t('classes.form.assignTutor')}</Label>
               <select
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100"
+                className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:text-zinc-100 disabled:opacity-50"
                 value={formTutorId}
                 onChange={(e) => setFormTutorId(e.target.value)}
+                disabled={!formSubjectId}
               >
                 <option value="">{t('classes.form.selectTutor')}</option>
-                {tutors.map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
+                {(subjectTutors ?? []).map((tutor: { id: string; name?: string; user?: { name: string } }) => (
+                  <option key={tutor.id} value={tutor.id}>{tutor.user?.name ?? tutor.name}</option>
                 ))}
               </select>
             </div>
@@ -861,10 +868,10 @@ export const Classes = () => {
               <h3 className="text-xl font-bold dark:text-zinc-100">{selectedClass.name}</h3>
               <div className="mt-3 flex gap-2">
                 <span className={cn(
-                  'text-[10px] font-bold px-2 py-1 rounded-md border',
-                  SUBJECT_COLORS[selectedClass.subject] || 'bg-zinc-50 text-zinc-500 border-zinc-100'
+                  'text-[10px] font-bold px-2 py-1 rounded-md border border-transparent',
+                  getSubjectColor(selectedClass.subject.name)
                 )}>
-                  {selectedClass.subject.toUpperCase()}
+                  {selectedClass.subject.name.toUpperCase()}
                 </span>
                 <Badge variant={selectedClass.status === 'ACTIVE' ? 'success' : 'default'}>
                   {selectedClass.status === 'ACTIVE' ? t('common.active') : t('common.archived')}

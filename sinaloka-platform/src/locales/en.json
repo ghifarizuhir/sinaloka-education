@@ -396,6 +396,7 @@
       "className": "Class Name",
       "classNamePlaceholder": "e.g. Advanced Physics",
       "subject": "Subject",
+      "selectSubject": "Select a subject...",
       "assignTutor": "Assign Tutor",
       "selectTutor": "Select a tutor...",
       "status": "Status",
