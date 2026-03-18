@@ -9,8 +9,8 @@ export const Checkbox = ({ checked, onChange, disabled, className }: { checked: 
     className={cn(
       "w-4 h-4 rounded border flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed",
       checked
-        ? "bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 text-white dark:text-zinc-900"
-        : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800",
+        ? "bg-primary border-primary text-primary-foreground"
+        : "bg-background border-input",
       className
     )}
   >
