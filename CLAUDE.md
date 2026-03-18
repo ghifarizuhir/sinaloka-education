@@ -81,6 +81,26 @@ Tests in `sinaloka-platform/e2e/`. Uses API mocking (`e2e/helpers/api-mocker.ts`
 
 ## CI/CD & Git Workflow
 
+### Prefer `gh` CLI over raw `git` for GitHub operations
+
+Always use the GitHub CLI (`gh`) instead of raw `git` commands for remote operations. `gh` handles authentication, token refresh, and network issues more reliably:
+
+```bash
+# Pushing branches — use gh if git push fails
+gh pr create                          # creates branch + PR in one step
+gh pr merge 3 --squash                # merge PR
+
+# Fetching PR info, diffs, reviews
+gh pr view 3 --json state,title
+gh pr diff 3 --stat
+gh api repos/{owner}/{repo}/pulls/3/comments
+
+# Syncing with remote
+gh repo sync                          # sync fork
+```
+
+Use raw `git` only for local operations (commit, branch, checkout, log, diff, blame).
+
 ### Branch & Commit Standards
 
 - **Branch naming**: `feat/`, `fix/`, `refactor/`, `docs/`, `ci/`, `chore/` prefixes (e.g. `feat/student-enrollment`)
