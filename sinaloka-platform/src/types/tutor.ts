@@ -4,7 +4,7 @@ export interface Tutor {
   id: string;
   name: string;
   email: string;
-  subjects: string[];
+  tutor_subjects: { subject: { id: string; name: string } }[];
   experience_years: number;
   rating: number;
   is_verified: boolean;
@@ -23,7 +23,7 @@ export interface CreateTutorDto {
   name: string;
   email: string;
   password: string;
-  subjects: string[];
+  subject_ids: string[];
   experience_years?: number;
   availability?: Record<string, unknown>;
   bank_name?: string;
@@ -33,7 +33,7 @@ export interface CreateTutorDto {
 
 export interface UpdateTutorDto {
   name?: string;
-  subjects?: string[];
+  subject_ids?: string[];
   experience_years?: number;
   availability?: Record<string, unknown>;
   bank_name?: string;

@@ -5,7 +5,8 @@ export type ScheduleDay = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Fri
 export interface Class {
   id: string;
   name: string;
-  subject: string;
+  subject_id: string;
+  subject: { id: string; name: string };
   capacity: number;
   fee: number;
   package_fee: number | null;
@@ -28,7 +29,7 @@ export interface Class {
 export interface CreateClassDto {
   tutor_id: string;
   name: string;
-  subject: string;
+  subject_id: string;
   capacity: number;
   fee: number;
   package_fee?: number | null;
