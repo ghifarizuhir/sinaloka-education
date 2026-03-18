@@ -49,7 +49,13 @@ describe('SessionController (integration)', () => {
     await prisma.class.deleteMany({
       where: { institution: { slug: 'session-ctrl-inst' } },
     });
+    await prisma.tutorSubject.deleteMany({
+      where: { tutor: { institution: { slug: 'session-ctrl-inst' } } },
+    });
     await prisma.tutor.deleteMany({
+      where: { institution: { slug: 'session-ctrl-inst' } },
+    });
+    await prisma.subject.deleteMany({
       where: { institution: { slug: 'session-ctrl-inst' } },
     });
     await prisma.refreshToken.deleteMany({
@@ -98,22 +104,32 @@ describe('SessionController (integration)', () => {
       data: {
         user_id: tutorUser.id,
         institution_id: testInstitutionId,
-        subjects: ['Math'],
       },
     });
 
-    // Seed a class with schedule_days
+    // Create subject and tutor-subject link
+    const subject = await prisma.subject.create({
+      data: { name: 'Math', institution_id: testInstitutionId },
+    });
+    await prisma.tutorSubject.create({
+      data: { tutor_id: tutor.id, subject_id: subject.id },
+    });
+
+    // Seed a class with schedules
     const classRecord = await prisma.class.create({
       data: {
         institution_id: testInstitutionId,
         tutor_id: tutor.id,
         name: 'Math 101',
-        subject: 'Math',
+        subject_id: subject.id,
         capacity: 20,
         fee: 100000,
-        schedule_days: ['Monday', 'Wednesday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: {
+          create: [
+            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
+            { day: 'Wednesday', start_time: '14:00', end_time: '15:30' },
+          ],
+        },
         status: 'ACTIVE',
       },
     });
@@ -138,6 +154,9 @@ describe('SessionController (integration)', () => {
         where: { institution_id: testInstitutionId },
       });
       await prisma.tutor.deleteMany({
+        where: { institution_id: testInstitutionId },
+      });
+      await prisma.subject.deleteMany({
         where: { institution_id: testInstitutionId },
       });
       await prisma.refreshToken.deleteMany({

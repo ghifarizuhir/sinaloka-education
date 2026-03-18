@@ -2,6 +2,13 @@ import type { PaginationParams } from './common';
 
 export type ScheduleDay = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
 
+export interface ClassScheduleItem {
+  id?: string;
+  day: ScheduleDay;
+  start_time: string;
+  end_time: string;
+}
+
 export interface Class {
   id: string;
   name: string;
@@ -13,9 +20,7 @@ export interface Class {
   tutor_fee: number;
   tutor_fee_mode: 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY';
   tutor_fee_per_student: number | null;
-  schedule_days: ScheduleDay[];
-  schedule_start_time: string;
-  schedule_end_time: string;
+  schedules: ClassScheduleItem[];
   room: string | null;
   status: 'ACTIVE' | 'ARCHIVED';
   tutor_id: string;
@@ -36,9 +41,7 @@ export interface CreateClassDto {
   tutor_fee: number;
   tutor_fee_mode?: 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY';
   tutor_fee_per_student?: number | null;
-  schedule_days: ScheduleDay[];
-  schedule_start_time: string;
-  schedule_end_time: string;
+  schedules: { day: ScheduleDay; start_time: string; end_time: string }[];
   room?: string;
   status?: 'ACTIVE' | 'ARCHIVED';
 }
@@ -47,6 +50,7 @@ export type UpdateClassDto = Partial<CreateClassDto>;
 
 export interface ClassQueryParams extends PaginationParams {
   subject?: string;
+  tutor_id?: string;
   status?: 'ACTIVE' | 'ARCHIVED';
 }
 

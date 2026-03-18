@@ -52,7 +52,13 @@ describe('TutorSessionController (integration)', () => {
     await prisma.class.deleteMany({
       where: { institution: { slug: 'tutor-sched-inst' } },
     });
+    await prisma.tutorSubject.deleteMany({
+      where: { tutor: { institution: { slug: 'tutor-sched-inst' } } },
+    });
     await prisma.tutor.deleteMany({
+      where: { institution: { slug: 'tutor-sched-inst' } },
+    });
+    await prisma.subject.deleteMany({
       where: { institution: { slug: 'tutor-sched-inst' } },
     });
     await prisma.refreshToken.deleteMany({
@@ -101,8 +107,15 @@ describe('TutorSessionController (integration)', () => {
       data: {
         user_id: tutorUser.id,
         institution_id: testInstitutionId,
-        subjects: ['Math'],
       },
+    });
+
+    // Create subject and tutor-subject link
+    const subject = await prisma.subject.create({
+      data: { name: 'Math', institution_id: testInstitutionId },
+    });
+    await prisma.tutorSubject.create({
+      data: { tutor_id: tutor.id, subject_id: subject.id },
     });
 
     // Seed class
@@ -111,12 +124,14 @@ describe('TutorSessionController (integration)', () => {
         institution_id: testInstitutionId,
         tutor_id: tutor.id,
         name: 'Math 201',
-        subject: 'Math',
+        subject_id: subject.id,
         capacity: 20,
         fee: 100000,
-        schedule_days: ['Monday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: {
+          create: [
+            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
+          ],
+        },
         status: 'ACTIVE',
       },
     });
@@ -164,6 +179,9 @@ describe('TutorSessionController (integration)', () => {
         where: { institution_id: testInstitutionId },
       });
       await prisma.tutor.deleteMany({
+        where: { institution_id: testInstitutionId },
+      });
+      await prisma.subject.deleteMany({
         where: { institution_id: testInstitutionId },
       });
       await prisma.refreshToken.deleteMany({
@@ -298,7 +316,6 @@ describe('TutorSessionController (integration)', () => {
       data: {
         user_id: otherUser.id,
         institution_id: testInstitutionId,
-        subjects: ['Science'],
       },
     });
 

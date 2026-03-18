@@ -58,7 +58,13 @@ describe('AttendanceController (integration)', () => {
     await prisma.student.deleteMany({
       where: { institution: { slug: 'att-ctrl-inst' } },
     });
+    await prisma.tutorSubject.deleteMany({
+      where: { tutor: { institution: { slug: 'att-ctrl-inst' } } },
+    });
     await prisma.tutor.deleteMany({
+      where: { institution: { slug: 'att-ctrl-inst' } },
+    });
+    await prisma.subject.deleteMany({
       where: { institution: { slug: 'att-ctrl-inst' } },
     });
     await prisma.refreshToken.deleteMany({
@@ -107,8 +113,15 @@ describe('AttendanceController (integration)', () => {
       data: {
         user_id: tutorUser.id,
         institution_id: testInstitutionId,
-        subjects: ['Math'],
       },
+    });
+
+    // Create subject and tutor-subject link
+    const subject = await prisma.subject.create({
+      data: { name: 'Math', institution_id: testInstitutionId },
+    });
+    await prisma.tutorSubject.create({
+      data: { tutor_id: tutor.id, subject_id: subject.id },
     });
 
     // Seed class
@@ -117,12 +130,14 @@ describe('AttendanceController (integration)', () => {
         institution_id: testInstitutionId,
         tutor_id: tutor.id,
         name: 'Math Attendance',
-        subject: 'Math',
+        subject_id: subject.id,
         capacity: 20,
         fee: 100000,
-        schedule_days: ['Monday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
+        schedules: {
+          create: [
+            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
+          ],
+        },
         status: 'ACTIVE',
       },
     });
@@ -191,6 +206,9 @@ describe('AttendanceController (integration)', () => {
         where: { institution_id: testInstitutionId },
       });
       await prisma.tutor.deleteMany({
+        where: { institution_id: testInstitutionId },
+      });
+      await prisma.subject.deleteMany({
         where: { institution_id: testInstitutionId },
       });
       await prisma.refreshToken.deleteMany({

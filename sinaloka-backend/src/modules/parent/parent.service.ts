@@ -139,6 +139,7 @@ export class ParentService {
           include: {
             class: {
               include: {
+                schedules: true,
                 tutor: {
                   include: {
                     user: { select: { name: true } },
@@ -327,6 +328,7 @@ export class ParentService {
       include: {
         class: {
           include: {
+            schedules: true,
             tutor: {
               include: { user: { select: { name: true } } },
             },

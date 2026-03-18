@@ -35,40 +35,58 @@ export class ClassService {
     });
     if (!tutorSubject) throw new BadRequestException('Tutor does not teach this subject');
 
-    const record = await this.prisma.class.create({
-      data: {
-        institution_id: institutionId,
-        tutor_id: dto.tutor_id,
-        name: dto.name,
-        subject_id: dto.subject_id,
-        capacity: dto.capacity,
-        fee: dto.fee,
-        package_fee: dto.package_fee ?? null,
-        tutor_fee: dto.tutor_fee,
-        tutor_fee_mode: dto.tutor_fee_mode ?? 'FIXED_PER_SESSION',
-        tutor_fee_per_student: dto.tutor_fee_per_student ?? null,
-        schedule_days: dto.schedule_days,
-        schedule_start_time: dto.schedule_start_time,
-        schedule_end_time: dto.schedule_end_time,
-        room: dto.room ?? null,
-        status: dto.status ?? 'ACTIVE',
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const record = await tx.class.create({
+        data: {
+          institution_id: institutionId,
+          tutor_id: dto.tutor_id,
+          name: dto.name,
+          subject_id: dto.subject_id,
+          capacity: dto.capacity,
+          fee: dto.fee,
+          package_fee: dto.package_fee ?? null,
+          tutor_fee: dto.tutor_fee,
+          tutor_fee_mode: dto.tutor_fee_mode ?? 'FIXED_PER_SESSION',
+          tutor_fee_per_student: dto.tutor_fee_per_student ?? null,
+          room: dto.room ?? null,
+          status: dto.status ?? 'ACTIVE',
+        },
+      });
+
+      await tx.classSchedule.createMany({
+        data: dto.schedules.map((s) => ({
+          class_id: record.id,
+          day: s.day,
+          start_time: s.start_time,
+          end_time: s.end_time,
+        })),
+      });
+
+      const result = await tx.class.findUnique({
+        where: { id: record.id },
+        include: {
+          subject: true,
+          tutor: { include: { user: { select: { id: true, name: true } } } },
+          schedules: true,
+        },
+      });
+
+      return {
+        ...result,
+        fee: Number(record.fee),
+        package_fee: record.package_fee != null ? Number(record.package_fee) : null,
+        tutor_fee: Number(record.tutor_fee),
+        tutor_fee_mode: record.tutor_fee_mode,
+        tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
+      };
     });
-    return {
-      ...record,
-      fee: Number(record.fee),
-      package_fee: record.package_fee != null ? Number(record.package_fee) : null,
-      tutor_fee: Number(record.tutor_fee),
-      tutor_fee_mode: record.tutor_fee_mode,
-      tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
-    };
   }
 
   async findAll(
     institutionId: string,
     query: ClassQueryDto,
   ): Promise<PaginatedResponse<any>> {
-    const { page, limit, search, subject_id, status, sort_by, sort_order } = query;
+    const { page, limit, search, subject_id, tutor_id, status, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {
@@ -77,6 +95,10 @@ export class ClassService {
 
     if (subject_id) {
       where.subject_id = subject_id;
+    }
+
+    if (tutor_id) {
+      where.tutor_id = tutor_id;
     }
 
     if (status) {
@@ -103,6 +125,7 @@ export class ClassService {
         include: {
           subject: true,
           tutor: { include: { user: { select: { id: true, name: true } } } },
+          schedules: true,
           _count: { select: { enrollments: { where: { status: { in: ['ACTIVE', 'TRIAL'] } } } } },
         },
       }),
@@ -130,6 +153,7 @@ export class ClassService {
       include: {
         subject: true,
         tutor: { include: { user: { select: { id: true, name: true, email: true } } } },
+        schedules: true,
         enrollments: {
           where: { status: { in: ['ACTIVE', 'TRIAL'] } },
           include: { student: { select: { id: true, name: true, grade: true, status: true } } },
@@ -188,34 +212,52 @@ export class ClassService {
       if (!tutorSubject) throw new BadRequestException('Tutor does not teach this subject');
     }
 
-    const { subject_id, tutor_id, name, capacity, fee, schedule_days, schedule_start_time, schedule_end_time, room, package_fee, tutor_fee, tutor_fee_mode, tutor_fee_per_student, status } = dto;
-    const record = await this.prisma.class.update({
-      where: { id },
-      data: {
-        ...(subject_id !== undefined && { subject_id }),
-        ...(tutor_id !== undefined && { tutor_id }),
-        ...(name !== undefined && { name }),
-        ...(capacity !== undefined && { capacity }),
-        ...(fee !== undefined && { fee }),
-        ...(schedule_days !== undefined && { schedule_days }),
-        ...(schedule_start_time !== undefined && { schedule_start_time }),
-        ...(schedule_end_time !== undefined && { schedule_end_time }),
-        ...(room !== undefined && { room }),
-        ...(package_fee !== undefined && { package_fee }),
-        ...(tutor_fee !== undefined && { tutor_fee }),
-        ...(tutor_fee_mode !== undefined && { tutor_fee_mode }),
-        ...(tutor_fee_per_student !== undefined && { tutor_fee_per_student }),
-        ...(status !== undefined && { status }),
-      },
+    const { schedules, subject_id, tutor_id, name, capacity, fee, room, package_fee, tutor_fee, tutor_fee_mode, tutor_fee_per_student, status } = dto;
+
+    return this.prisma.$transaction(async (tx) => {
+      if (schedules) {
+        await tx.classSchedule.deleteMany({ where: { class_id: id } });
+        await tx.classSchedule.createMany({
+          data: schedules.map((s) => ({
+            class_id: id,
+            day: s.day,
+            start_time: s.start_time,
+            end_time: s.end_time,
+          })),
+        });
+      }
+
+      const record = await tx.class.update({
+        where: { id },
+        data: {
+          ...(subject_id !== undefined && { subject_id }),
+          ...(tutor_id !== undefined && { tutor_id }),
+          ...(name !== undefined && { name }),
+          ...(capacity !== undefined && { capacity }),
+          ...(fee !== undefined && { fee }),
+          ...(room !== undefined && { room }),
+          ...(package_fee !== undefined && { package_fee }),
+          ...(tutor_fee !== undefined && { tutor_fee }),
+          ...(tutor_fee_mode !== undefined && { tutor_fee_mode }),
+          ...(tutor_fee_per_student !== undefined && { tutor_fee_per_student }),
+          ...(status !== undefined && { status }),
+        },
+        include: {
+          subject: true,
+          tutor: { include: { user: { select: { id: true, name: true } } } },
+          schedules: true,
+        },
+      });
+
+      return {
+        ...record,
+        fee: Number(record.fee),
+        package_fee: record.package_fee != null ? Number(record.package_fee) : null,
+        tutor_fee: Number(record.tutor_fee),
+        tutor_fee_mode: record.tutor_fee_mode,
+        tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
+      };
     });
-    return {
-      ...record,
-      fee: Number(record.fee),
-      package_fee: record.package_fee != null ? Number(record.package_fee) : null,
-      tutor_fee: Number(record.tutor_fee),
-      tutor_fee_mode: record.tutor_fee_mode,
-      tutor_fee_per_student: record.tutor_fee_per_student != null ? Number(record.tutor_fee_per_student) : null,
-    };
   }
 
   async delete(institutionId: string, id: string) {

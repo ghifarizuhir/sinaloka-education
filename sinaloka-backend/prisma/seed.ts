@@ -192,9 +192,6 @@ async function main() {
         fee: 500000,
         tutor_fee: 150000,
         tutor_fee_mode: 'FIXED_PER_SESSION',
-        schedule_days: ['Monday', 'Wednesday'],
-        schedule_start_time: '14:00',
-        schedule_end_time: '15:30',
         status: 'ACTIVE',
       },
     }),
@@ -209,9 +206,6 @@ async function main() {
         tutor_fee: 130000,
         tutor_fee_mode: 'PER_STUDENT_ATTENDANCE',
         tutor_fee_per_student: 40000,
-        schedule_days: ['Tuesday', 'Thursday'],
-        schedule_start_time: '16:00',
-        schedule_end_time: '17:30',
         status: 'ACTIVE',
       },
     }),
@@ -225,9 +219,6 @@ async function main() {
         fee: 600000,
         tutor_fee: 180000,
         tutor_fee_mode: 'FIXED_PER_SESSION',
-        schedule_days: ['Monday', 'Friday'],
-        schedule_start_time: '09:00',
-        schedule_end_time: '10:30',
         status: 'ACTIVE',
       },
     }),
@@ -241,14 +232,26 @@ async function main() {
         fee: 400000,
         tutor_fee: 120000,
         tutor_fee_mode: 'MONTHLY_SALARY',
-        schedule_days: ['Wednesday', 'Saturday'],
-        schedule_start_time: '10:00',
-        schedule_end_time: '11:30',
         status: 'ACTIVE',
       },
     }),
   ]);
   console.log('Classes created');
+
+  // Class Schedules
+  await prisma.classSchedule.createMany({
+    data: [
+      { class_id: classes[0].id, day: 'Monday', start_time: '14:00', end_time: '15:30' },
+      { class_id: classes[0].id, day: 'Wednesday', start_time: '14:00', end_time: '15:30' },
+      { class_id: classes[1].id, day: 'Tuesday', start_time: '16:00', end_time: '17:30' },
+      { class_id: classes[1].id, day: 'Thursday', start_time: '16:00', end_time: '17:30' },
+      { class_id: classes[2].id, day: 'Monday', start_time: '09:00', end_time: '10:30' },
+      { class_id: classes[2].id, day: 'Friday', start_time: '09:00', end_time: '10:30' },
+      { class_id: classes[3].id, day: 'Wednesday', start_time: '10:00', end_time: '11:30' },
+      { class_id: classes[3].id, day: 'Saturday', start_time: '10:00', end_time: '11:30' },
+    ],
+  });
+  console.log('Class schedules created');
 
   // Enrollments (8 — 2 students per class)
   const enrollments = await Promise.all([
@@ -304,22 +307,34 @@ async function main() {
   console.log('Enrollments created');
 
   // Sessions (8 — 2 per class)
+  // Fetch schedules for each class to get start/end times
+  const classSchedules = await prisma.classSchedule.findMany({
+    where: { class_id: { in: classes.map(c => c.id) } },
+  });
+  const classTimeMap = new Map<string, { start_time: string; end_time: string }>();
+  for (const s of classSchedules) {
+    if (!classTimeMap.has(s.class_id)) {
+      classTimeMap.set(s.class_id, { start_time: s.start_time, end_time: s.end_time });
+    }
+  }
+
   const sessions = await Promise.all(
     classes.flatMap((c, ci) =>
-      [0, 7].map((dayOffset) =>
-        prisma.session.create({
+      [0, 7].map((dayOffset) => {
+        const times = classTimeMap.get(c.id) ?? { start_time: '14:00', end_time: '15:30' };
+        return prisma.session.create({
           data: {
             institution_id: ci < 2 ? inst1.id : inst2.id,
             class_id: c.id,
             date: new Date(Date.now() - dayOffset * 86400000),
-            start_time: c.schedule_start_time,
-            end_time: c.schedule_end_time,
+            start_time: times.start_time,
+            end_time: times.end_time,
             status: dayOffset === 7 ? 'COMPLETED' : 'SCHEDULED',
             topic_covered: dayOffset === 7 ? 'Review chapter 1' : null,
             created_by: ci < 2 ? admin1.id : admin2.id,
           },
-        }),
-      ),
+        });
+      }),
     ),
   );
   console.log('Sessions created');

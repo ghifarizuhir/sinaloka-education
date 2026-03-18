@@ -67,9 +67,7 @@ export interface EnrollmentRecord {
   class: {
     name: string;
     subject: string;
-    schedule_days: string[];
-    schedule_start_time: string;
-    schedule_end_time: string;
+    schedules: { day: string; start_time: string; end_time: string }[];
     fee: number;
     tutor: { user: { name: string } };
   };

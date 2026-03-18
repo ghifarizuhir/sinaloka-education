@@ -418,7 +418,9 @@
       },
       "monthlySalaryHint": "Payout tutor berasal dari gaji bulanan. Tidak perlu biaya per sesi.",
       "room": "Ruangan (opsional)",
-      "roomPlaceholder": "contoh: Ruang 101"
+      "roomPlaceholder": "contoh: Ruang 101",
+      "schedulePreview": "Pratinjau Jadwal",
+      "selectTutorForPreview": "Pilih tutor untuk melihat jadwal"
     },
     "table": {
       "className": "Nama Kelas",
@@ -438,6 +440,7 @@
       "deleteError": "Gagal menghapus kelas",
       "selectTutor": "Silakan pilih tutor",
       "selectScheduleDay": "Silakan pilih setidaknya satu hari jadwal",
+      "scheduleConflict": "Jadwal bentrok: {{day}} {{time}} bentrok dengan {{className}} ({{conflictTime}})",
       "generateSuccess": "{{count}} sesi dibuat",
       "generateError": "Gagal membuat sesi"
     },

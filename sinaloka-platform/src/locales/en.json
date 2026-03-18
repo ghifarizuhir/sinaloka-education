@@ -418,7 +418,9 @@
       },
       "monthlySalaryHint": "Tutor payout comes from their monthly salary. No per-session fee needed.",
       "room": "Room (optional)",
-      "roomPlaceholder": "e.g. Room 101"
+      "roomPlaceholder": "e.g. Room 101",
+      "schedulePreview": "Schedule Preview",
+      "selectTutorForPreview": "Select a tutor to view schedule"
     },
     "table": {
       "className": "Class Name",
@@ -438,6 +440,7 @@
       "deleteError": "Failed to delete class",
       "selectTutor": "Please select a tutor",
       "selectScheduleDay": "Please select at least one schedule day",
+      "scheduleConflict": "Schedule conflict: {{day}} {{time}} conflicts with {{className}} ({{conflictTime}})",
       "generateSuccess": "{{count}} sessions generated",
       "generateError": "Failed to generate sessions"
     },
