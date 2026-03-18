@@ -34,11 +34,18 @@ export interface ClassSchedule {
   notes?: string;
 }
 
+export interface TutorSubject {
+  subject: {
+    id: string;
+    name: string;
+  };
+}
+
 export interface TutorProfile {
   id: string;
   name: string;
   email: string;
   avatar: string;
-  subject: string;
+  tutor_subjects: TutorSubject[];
   rating: number;
 }

@@ -20,7 +20,7 @@ export function ProfilePage({ profile, onLogout, onEditProfile }: ProfilePagePro
           </div>
         </div>
         <h1 className="text-3xl font-bold tracking-tight mb-1">{tutorName}</h1>
-        <p className="text-lime-400 text-xs font-bold uppercase tracking-wider mb-4">{profile?.subject ?? ''} Tutor</p>
+        <p className="text-lime-400 text-xs font-bold uppercase tracking-wider mb-4">{profile?.tutor_subjects?.map(ts => ts.subject.name).join(', ') ?? ''} Tutor</p>
         <div className="flex gap-4">
           <div className="bg-zinc-900 px-4 py-2 rounded-full border border-zinc-800 flex items-center gap-2">
             <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />

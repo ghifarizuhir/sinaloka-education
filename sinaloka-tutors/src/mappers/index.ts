@@ -71,7 +71,9 @@ export function mapProfile(raw: any): TutorProfile {
     id: raw.id,
     name: raw.user?.name ?? '',
     email: raw.user?.email ?? '',
-    subject: raw.subjects?.[0] ?? '',
+    tutor_subjects: (raw.tutor_subjects ?? []).map((ts: any) => ({
+      subject: { id: ts.subject.id, name: ts.subject.name },
+    })),
     rating: raw.rating ?? 0,
     avatar: `https://picsum.photos/seed/${raw.user?.id ?? 'default'}/300/300`,
   };
