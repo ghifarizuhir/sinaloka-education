@@ -83,9 +83,9 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
       subjects: subjectsArr,
       experience_years: Number(formData.experience_years),
       ...(isEditing ? { rating: Number(formData.rating), is_verified: formData.is_verified } : {}),
-      bank_name: formData.bank_name || undefined,
-      bank_account_number: formData.bank_account_number || undefined,
-      bank_account_holder: formData.bank_account_holder || undefined,
+      bank_name: isEditing ? formData.bank_name : (formData.bank_name || undefined),
+      bank_account_number: isEditing ? formData.bank_account_number : (formData.bank_account_number || undefined),
+      bank_account_holder: isEditing ? formData.bank_account_holder : (formData.bank_account_holder || undefined),
       monthly_salary: formData.monthly_salary ? Number(formData.monthly_salary) : null,
     });
   };
@@ -154,15 +154,15 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="bank_name">{t('tutors.form.bankName')}</Label>
-          <Input id="bank_name" name="bank_name" value={formData.bank_name} onChange={handleChange} placeholder={t('tutors.form.bankNamePlaceholder')} />
+          <Input id="bank_name" name="bank_name" value={formData.bank_name} onChange={handleChange} placeholder={t('tutors.form.bankNamePlaceholder')} required={isEditing} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="bank_account_number">{t('tutors.form.accountNumber')}</Label>
-          <Input id="bank_account_number" name="bank_account_number" value={formData.bank_account_number} onChange={handleChange} placeholder={t('tutors.form.accountNumberPlaceholder')} />
+          <Input id="bank_account_number" name="bank_account_number" value={formData.bank_account_number} onChange={handleChange} placeholder={t('tutors.form.accountNumberPlaceholder')} required={isEditing} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="bank_account_holder">{t('tutors.form.accountHolder')}</Label>
-          <Input id="bank_account_holder" name="bank_account_holder" value={formData.bank_account_holder} onChange={handleChange} placeholder={t('tutors.form.accountHolderPlaceholder')} />
+          <Input id="bank_account_holder" name="bank_account_holder" value={formData.bank_account_holder} onChange={handleChange} placeholder={t('tutors.form.accountHolderPlaceholder')} required={isEditing} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="monthly_salary">{t('tutors.form.monthlySalary')}</Label>
