@@ -165,6 +165,108 @@ sinaloka-platform/
 └── public/                              # Static assets
 ```
 
+## Tutors Structure (`sinaloka-tutors/`)
+
+```
+sinaloka-tutors/
+├── src/
+│   ├── main.tsx                         # React entry point
+│   ├── App.tsx                          # React Router + MainAppContent (all state here)
+│   ├── index.css                        # TailwindCSS v4 entry (Sinaloka brand tokens)
+│   ├── pages/                           # Page components (receive props, minimal state)
+│   │   ├── DashboardPage.tsx            # Upcoming classes, payout summary
+│   │   ├── SchedulePage.tsx             # Filtered schedule list
+│   │   ├── AttendancePage.tsx           # Per-class attendance marking
+│   │   ├── PayoutsPage.tsx              # Payout history + proof viewer
+│   │   ├── ProfilePage.tsx              # Tutor profile view
+│   │   ├── ProfileEditPage.tsx          # Tutor profile editing
+│   │   ├── SessionDetailPage.tsx        # Session detail view
+│   │   ├── AcceptInvitePage.tsx         # Tutor invite acceptance
+│   │   ├── LoginPage.tsx
+│   │   ├── ForgotPasswordPage.tsx
+│   │   └── ResetPasswordPage.tsx
+│   ├── hooks/                           # Data hooks (manual useState/useEffect)
+│   │   ├── useAuth.ts                   # Auth context consumer
+│   │   ├── useSchedule.ts              # Schedule data + cancel/reschedule actions
+│   │   ├── usePayouts.ts               # Payout data fetching
+│   │   ├── useAttendance.ts            # Student attendance per session
+│   │   └── useProfile.ts               # Profile data + update
+│   ├── components/                      # Shared components
+│   │   ├── BottomNav.tsx                # Mobile bottom navigation
+│   │   ├── PasswordInput.tsx            # Password input with toggle
+│   │   ├── PayoutCard.tsx               # Payout card display
+│   │   ├── RescheduleModal.tsx          # Reschedule request modal
+│   │   └── ScheduleCard.tsx             # Schedule card with actions
+│   ├── contexts/
+│   │   └── AuthContext.tsx              # JWT auth + profile (tutor-specific)
+│   ├── api/
+│   │   └── client.ts                    # Axios instance + interceptors + token mgmt
+│   ├── mappers/
+│   │   └── index.ts                     # Backend→Frontend mappers (session, student, payout, profile)
+│   ├── types.ts                         # All types in single file
+│   └── lib/
+│       └── utils.ts                     # cn() utility
+├── e2e/                                 # Playwright config exists but no tests written
+└── public/                              # Static assets
+```
+
+## Parent Structure (`sinaloka-parent/`)
+
+```
+sinaloka-parent/
+├── src/
+│   ├── main.tsx                         # React entry point
+│   ├── App.tsx                          # State-based router (NO React Router)
+│   ├── index.css                        # TailwindCSS v4 entry
+│   ├── pages/                           # Page components
+│   │   ├── DashboardPage.tsx            # Children summary cards
+│   │   ├── ChildDetailPage.tsx          # Child attendance, sessions, payments, enrollments
+│   │   ├── LoginPage.tsx
+│   │   ├── RegisterPage.tsx             # Invite-based parent registration
+│   │   ├── ForgotPasswordPage.tsx
+│   │   └── ResetPasswordPage.tsx
+│   ├── hooks/                           # Data hooks (manual useState/useEffect)
+│   │   ├── useAuth.ts                   # Auth context consumer
+│   │   ├── useChildren.ts              # Children list fetching
+│   │   └── useChildDetail.ts           # Per-child detail data (attendance, sessions, payments)
+│   ├── components/                      # Shared components
+│   │   ├── BottomNav.tsx                # Mobile bottom navigation
+│   │   ├── ChildCard.tsx                # Child summary card
+│   │   ├── AttendanceList.tsx           # Attendance record list
+│   │   ├── SessionList.tsx              # Session record list
+│   │   ├── PaymentList.tsx              # Payment record list
+│   │   ├── EnrollmentList.tsx           # Enrollment list
+│   │   └── PasswordInput.tsx            # Password input with toggle
+│   ├── contexts/
+│   │   └── AuthContext.tsx              # JWT auth + parent profile + register method
+│   ├── api/
+│   │   └── client.ts                    # Axios instance (baseURL: /api, parent-specific refresh key)
+│   ├── mappers/
+│   │   └── index.ts                     # Backend→Frontend mappers (child, attendance, session, payment, enrollment, profile)
+│   ├── types.ts                         # All types in single file
+│   └── lib/
+│       └── utils.ts                     # cn() utility
+└── public/                              # Static assets
+```
+
+## Architecture Comparison: Three Frontend Apps
+
+| Aspect | Platform | Tutors | Parent |
+|--------|----------|--------|--------|
+| **Router** | React Router DOM | React Router DOM | State-based (useState) |
+| **Data fetching** | TanStack Query | Manual hooks | Manual hooks |
+| **API layer** | Service objects (`src/services/`) | Mappers + hooks | Mappers + hooks |
+| **State management** | Page hooks per feature | Centralized in App.tsx | Centralized in App.tsx |
+| **Token storage key** | `access_token` / `refresh_token` | `sinaloka_refresh_token` | `sinaloka_parent_refresh_token` |
+| **Token location** | localStorage (both tokens) | Memory (access) + localStorage (refresh) | Memory (access) + localStorage (refresh) |
+| **Auth profile endpoint** | `GET /api/auth/me` | `GET /api/tutor/profile` | `GET /api/auth/me` |
+| **UI primitives** | Custom `src/components/ui/` (25+) | Inline (no shared ui library) | Inline (no shared ui library) |
+| **Types** | Per-domain files in `src/types/` | Single `src/types.ts` | Single `src/types.ts` |
+| **i18n** | i18next (en/id) | None (Indonesian hardcoded) | None (Indonesian hardcoded) |
+| **Animations** | Motion (AnimatePresence) | Motion (AnimatePresence) | Motion (AnimatePresence) |
+| **E2E Tests** | Playwright (19 specs) | Playwright configured, no tests | None |
+| **Mobile-first** | No (desktop admin) | Yes (mobile-first) | Yes (mobile-first) |
+
 ## Naming Conventions
 
 ### Files
@@ -201,8 +303,14 @@ sinaloka-platform/
 | API routes | `sinaloka-backend/src/modules/*/controller.ts` |
 | Auth guards | `sinaloka-backend/src/common/guards/` |
 | Tenant interceptor | `sinaloka-backend/src/common/interceptors/` |
-| Frontend API client | `sinaloka-platform/src/lib/api.ts` |
-| Auth context | `sinaloka-platform/src/contexts/AuthContext.tsx` |
+| Platform API client | `sinaloka-platform/src/lib/api.ts` |
+| Tutors API client | `sinaloka-tutors/src/api/client.ts` |
+| Parent API client | `sinaloka-parent/src/api/client.ts` |
+| Platform auth context | `sinaloka-platform/src/contexts/AuthContext.tsx` |
+| Tutors auth context | `sinaloka-tutors/src/contexts/AuthContext.tsx` |
+| Parent auth context | `sinaloka-parent/src/contexts/AuthContext.tsx` |
+| Tutors mappers | `sinaloka-tutors/src/mappers/index.ts` |
+| Parent mappers | `sinaloka-parent/src/mappers/index.ts` |
 | UI primitives | `sinaloka-platform/src/components/ui/` |
 | E2E mock data | `sinaloka-platform/e2e/mocks/` |
 | CI workflows | `.github/workflows/` |

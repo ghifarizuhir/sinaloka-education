@@ -53,11 +53,57 @@
 
 ## Frontend → Backend Communication
 
+### Platform (Admin Dashboard)
 - **HTTP client:** Axios with interceptors (`sinaloka-platform/src/lib/api.ts`)
 - **Base URL:** `VITE_API_URL` env var (default: `http://localhost:3000`)
 - **API prefix:** `/api` on all backend routes
 - **Caching:** TanStack Query (`@tanstack/react-query`) for data fetching and cache management
 - **Multi-tenancy:** Request interceptor injects `institution_id` query param for SUPER_ADMIN impersonation (reads from `sessionStorage`)
+- **Token storage:** Both access + refresh tokens in `localStorage`
+
+### Tutors (Tutor-Facing App)
+- **HTTP client:** Axios with interceptors (`sinaloka-tutors/src/api/client.ts`)
+- **Base URL:** `/api` (relative, uses Vite proxy or same-origin deployment)
+- **API endpoints used:**
+  - `POST /auth/login` — tutor login
+  - `POST /auth/refresh` — token refresh
+  - `POST /auth/logout` — logout
+  - `GET /tutor/profile` — fetch tutor profile
+  - `PATCH /tutor/profile` — update tutor profile
+  - `GET /tutor/schedule` — fetch schedule (with `?status=` filter)
+  - `PATCH /tutor/schedule/:id/cancel` — cancel session
+  - `PATCH /tutor/schedule/:id/request-reschedule` — request reschedule
+  - `GET /tutor/schedule/:id/students` — fetch students for attendance
+  - `POST /tutor/attendance` — submit attendance
+  - `GET /tutor/payouts` — fetch payout list
+  - `POST /auth/accept-invite` — accept tutor invite
+  - `POST /auth/forgot-password` — request password reset
+  - `POST /auth/reset-password` — reset password
+- **Token storage:** Access token in memory, refresh token in `localStorage` (`sinaloka_refresh_token`)
+- **Auth failure:** Dispatches `auth:logout` window event (handled by AuthContext)
+- **Data mapping:** `sinaloka-tutors/src/mappers/index.ts` transforms snake_case backend responses to camelCase frontend types
+
+### Parent (Parent-Facing App)
+- **HTTP client:** Axios with interceptors (`sinaloka-parent/src/api/client.ts`)
+- **Base URL:** `/api` (relative)
+- **API endpoints used:**
+  - `POST /auth/login` — parent login
+  - `POST /auth/refresh` — token refresh
+  - `POST /auth/logout` — logout
+  - `POST /auth/register/parent` — invite-based registration
+  - `GET /auth/me` — fetch parent profile
+  - `GET /parent/children` — list parent's children
+  - `GET /parent/children/:id` — child detail
+  - `GET /parent/children/:id/attendance` — child attendance records
+  - `GET /parent/children/:id/sessions` — child session records
+  - `GET /parent/children/:id/payments` — child payment records
+  - `GET /parent/children/:id/enrollments` — child enrollment records
+  - `POST /auth/forgot-password` — request password reset
+  - `POST /auth/reset-password` — reset password
+- **Token storage:** Access token in memory, refresh token in `localStorage` (`sinaloka_parent_refresh_token`)
+- **Auth failure:** Dispatches `auth:logout` window event (handled by AuthContext)
+- **Data mapping:** `sinaloka-parent/src/mappers/index.ts` transforms backend responses to typed frontend objects
+- **Backend guard:** `ParentStudentGuard` enforces parents can only access their own children's data
 
 ## Scheduled Tasks
 

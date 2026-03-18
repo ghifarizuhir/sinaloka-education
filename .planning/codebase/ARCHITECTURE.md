@@ -30,26 +30,42 @@
 - Depends on: PostgreSQL database
 - Used by: All backend services
 
-**Frontend Service Layer:**
+**Frontend Service Layer (Platform):**
 - Purpose: Encapsulate all HTTP calls to backend, provide type-safe API interface
-- Location: `src/services/` (e.g., `sinaloka-platform/src/services/students.service.ts`)
+- Location: `sinaloka-platform/src/services/` (e.g., `students.service.ts`)
 - Contains: Service functions wrapping Axios calls with typed responses
 - Depends on: Axios HTTP client, auth context for token injection
 - Used by: React hooks and components
 
-**React Query Layer:**
+**Frontend Mapper Layer (Tutors + Parent):**
+- Purpose: Transform raw backend API responses into frontend-typed objects
+- Location: `sinaloka-tutors/src/mappers/index.ts`, `sinaloka-parent/src/mappers/index.ts`
+- Contains: Pure mapping functions (`mapSession`, `mapPayout`, `mapChild`, `mapPayment`, etc.) that normalize backend snake_case to frontend types
+- Depends on: Frontend type definitions
+- Used by: Hooks that fetch data from the API
+- Pattern difference from Platform: Tutors/Parent use mappers (data transformation layer) while Platform uses service objects (API abstraction layer)
+
+**React Query Layer (Platform only):**
 - Purpose: Manage server state (caching, synchronization, invalidation)
-- Location: `src/hooks/` (e.g., `sinaloka-platform/src/hooks/useStudents.ts`)
+- Location: `sinaloka-platform/src/hooks/` (e.g., `useStudents.ts`)
 - Contains: Custom hooks wrapping TanStack Query's `useQuery`, `useMutation`, `useQueryClient`
 - Depends on: Service layer, React Query
 - Used by: Page hooks and components
 
-**Page Hook Layer:**
+**Custom Hooks Layer (Tutors + Parent):**
+- Purpose: Fetch data from API with manual useState/useEffect (no query cache)
+- Location: `sinaloka-tutors/src/hooks/` (e.g., `useSchedule.ts`, `usePayouts.ts`), `sinaloka-parent/src/hooks/` (e.g., `useChildren.ts`, `useChildDetail.ts`)
+- Contains: Hooks with manual loading/error state, Axios calls, optimistic updates
+- Depends on: API client (`src/api/client.ts`), mappers
+- Note: Unlike Platform, Tutors/Parent have no query cache — refetching is manual via explicit `refetch()` calls
+
+**Page Hook Layer (Platform only):**
 - Purpose: Centralize page-level state and logic (filters, pagination, forms, modals)
 - Location: `src/pages/[Feature]/use[Feature]Page.ts` (e.g., `sinaloka-platform/src/pages/Students/useStudentPage.ts`)
 - Contains: All state for a page (selected items, form inputs, filters, modals), event handlers, computed values
 - Depends on: React hooks, Query hooks, translations (i18n)
 - Used by: Page components
+- Note: Tutors/Parent apps do NOT use page hooks — all state lives in `App.tsx` and is passed down as props
 
 **UI Component Layer:**
 - Purpose: Reusable visual components, page layout shells
@@ -59,10 +75,12 @@
 - Used by: Pages and other components
 
 **Context & Auth Layer:**
-- Purpose: Manage global application state (auth user, tokens, impersonation)
-- Location: `src/contexts/AuthContext.tsx`
+- Purpose: Manage global application state (auth user, tokens)
+- Location: `src/contexts/AuthContext.tsx` (all 3 apps)
 - Contains: Auth provider, user state, login/logout logic, token refresh orchestration
-- Depends on: Auth service, localStorage for tokens, sessionStorage for impersonation
+- **Platform:** Depends on auth service + localStorage for tokens, sessionStorage for impersonation; uses `getMe()` for profile
+- **Tutors:** Depends on API client + localStorage (`sinaloka_refresh_token` key); uses `GET /tutor/profile` for profile; dispatches `auth:logout` window event on token failure; supports `refreshProfile()` for profile edits
+- **Parent:** Depends on API client + localStorage (`sinaloka_parent_refresh_token` key); uses `GET /auth/me` for profile; includes `register()` method for invite-based parent onboarding
 - Used by: All pages via `useAuth` hook
 
 ## Data Flow
@@ -221,6 +239,40 @@
 - Location: `sinaloka-platform/src/pages/Students/index.tsx`
 - Triggers: Route match (e.g., `/students`)
 - Responsibilities: Call page hook, render stats cards, filters, table, modals; delegate all logic to page hook
+
+**Tutors App Component:**
+- Location: `sinaloka-tutors/src/App.tsx`
+- Triggers: React app bootstrap
+- Responsibilities: Uses React Router (`Routes`/`Route`) for auth routes (`/accept-invite`, `/forgot-password`, `/reset-password`, `/login`), then `MainAppContent` for authenticated views
+- Architecture: `MainAppContent` is a single large component holding ALL app state (schedule, payouts, attendance, notifications, modals) — passes state/handlers as props to page components
+- Navigation: `BottomNav` component with tabs: dashboard, schedule, payouts, profile
+- Sub-views: AttendancePage (per-class), SessionDetailPage, ProfileEditPage rendered based on state flags (not routes)
+- Animations: `motion/react` (Framer Motion) for page transitions with `AnimatePresence`
+
+**Tutors Pages:**
+- `DashboardPage` — upcoming classes, pending payout summary
+- `SchedulePage` — filtered schedule list (upcoming/completed/cancelled)
+- `AttendancePage` — per-student attendance marking with topic/summary fields
+- `PayoutsPage` — payout history with proof image viewer
+- `ProfilePage` / `ProfileEditPage` — tutor profile management
+- `SessionDetailPage` — session detail view
+- `AcceptInvitePage` — tutor invite acceptance flow
+- `LoginPage` / `ForgotPasswordPage` / `ResetPasswordPage` — auth flows
+
+**Parent App Component:**
+- Location: `sinaloka-parent/src/App.tsx`
+- Triggers: React app bootstrap
+- Responsibilities: State-based routing (NO React Router) — uses `useState` for `activeTab` and `authScreen` to control which page renders
+- Auth flow: Checks URL params for `?token=` (invite) or `?reset_token=` (password reset), renders RegisterPage or ResetPasswordPage accordingly; otherwise shows LoginPage/ForgotPasswordPage
+- Navigation: `BottomNav` with tabs: dashboard, children, profile
+- Sub-views: `ChildDetailPage` rendered when a child is selected (state-driven, not route-driven)
+- UI language: Indonesian (Bahasa) — all labels hardcoded in Indonesian
+
+**Parent Pages:**
+- `DashboardPage` — children summary cards, quick stats
+- `ChildDetailPage` — attendance list, session list, payment list, enrollment list for a specific child
+- `LoginPage` / `RegisterPage` / `ForgotPasswordPage` / `ResetPasswordPage` — auth flows
+- Components: `ChildCard`, `AttendanceList`, `SessionList`, `PaymentList`, `EnrollmentList`, `BottomNav`
 
 ## Error Handling
 

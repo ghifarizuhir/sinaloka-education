@@ -40,7 +40,7 @@
   - `@vitejs/plugin-react` 5.0.4 - Vite React plugin
 - Vite 6.2.0 - Build tool and dev server
   - Ports: Platform (3000), Tutors (5173), Parent (5174)
-- React Router DOM 7.13.1 (Platform + Tutors only)
+- React Router DOM 7.13.1 (Platform + Tutors only; Parent uses state-based routing — no React Router)
 - TailwindCSS 4.1.14 - Styling
   - `@tailwindcss/vite` 4.1.14 - Vite integration
 
@@ -54,10 +54,12 @@
 **HTTP & API:**
 - Axios 1.13.6 - HTTP client (all frontend apps)
   - Custom interceptors in `src/lib/api.ts` (Platform) for JWT refresh, impersonation, auth handling
+- Custom interceptors in `src/api/client.ts` (Tutors, Parent) for JWT refresh via `auth:logout` event dispatch
 - Express 4.21.2 - HTTP server dependency (used in frontend dev servers)
 
 **State Management & Data Fetching:**
 - TanStack Query (React Query) 5.90.21 (Platform only) - Data fetching, caching, synchronization
+- Manual useState/useEffect hooks (Tutors + Parent) - Custom data fetching without query cache
 - Context API - Custom auth context (all frontend apps)
 
 **UI Components & Styling:**

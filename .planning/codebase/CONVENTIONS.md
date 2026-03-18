@@ -157,6 +157,7 @@
 
 ## Frontend Data Flow
 
+### Platform (Admin Dashboard)
 **Service Layer:**
 - Services wrap Axios calls: `api.get<T>('/endpoint', { params }).then((r) => r.data)`
 - Services are plain objects with methods, not classes
@@ -167,6 +168,26 @@
 - Hooks provide `data`, `error`, `isLoading`, `isPending` states
 - Mutations invalidate related query keys on success: `qc.invalidateQueries({ queryKey: ['students'] })`
 - Conditional queries via `enabled` flag (e.g., `enabled: !!id`)
+
+### Tutors + Parent (Mobile Apps)
+**Mapper Pattern:**
+- Pure mapper functions transform backend responses: `mapSession(raw: any): ClassSchedule`
+- Status enums mapped via lookup objects: `SESSION_STATUS_MAP`, `PAYOUT_STATUS_MAP`
+- Bidirectional mapping in Tutors: `mapAttendanceToBackend()` converts frontend → backend format
+- All mappers accept `any` and return typed objects (no Zod validation at frontend boundary)
+
+**Custom Hooks (no TanStack Query):**
+- Hooks use manual `useState`/`useEffect` pattern with explicit `isLoading`/`error` states
+- Data fetched via `api.get()` + mapper in `useCallback`
+- Refetch exposed as explicit function: `{ data, isLoading, error, refetch }`
+- Optimistic updates done via `setData(prev => ...)` with revert on error (e.g., `cancelSession` in `useSchedule`)
+- No query cache — each mount triggers a fresh fetch
+
+**State Architecture:**
+- All app state lives in `App.tsx` (not in page hooks or separate stores)
+- Pages receive data and handlers as props — they are presentational
+- Tab navigation managed by `useState<string>('dashboard')`
+- Sub-views (e.g., attendance, detail) rendered conditionally based on state flags (not routes)
 
 ## Type Safety
 

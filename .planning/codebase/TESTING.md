@@ -171,10 +171,25 @@ npm run test:e2e:light     # Light mode project
 npm run test:e2e:dark      # Dark mode project
 ```
 
+## Tutors App Testing
+
+- **Playwright configured** (`e2e/` directory exists with `playwright.config.ts`) but **no test specs written**
+- **No unit tests** — no Jest/Vitest configured
+- **Test infrastructure:** Playwright 1.58.2 in devDependencies, but `e2e/specs/` is empty
+- **Untested areas:** All hooks (`useSchedule`, `usePayouts`, `useAttendance`, `useProfile`), all mappers, attendance submission flow, reschedule flow, optimistic update logic
+
+## Parent App Testing
+
+- **No tests at all** — no Playwright, no Jest, no Vitest
+- **No test infrastructure** — no test runner in devDependencies
+- **Untested areas:** All hooks (`useChildren`, `useChildDetail`, `useAuth`), all mappers, invite-based registration, child data display, token refresh flow
+
 ## Test Gaps
 
-- **No frontend unit tests** — no Jest/Vitest configured for React components or hooks
+- **No frontend unit tests** — no Jest/Vitest configured for React components or hooks in any app
 - **No backend integration tests** with real database in CI (unit tests mock Prisma)
-- **Tutors app** — no E2E tests
-- **Parent app** — no E2E tests
+- **Tutors app** — Playwright configured but zero tests written
+- **Parent app** — no test infrastructure at all
 - **No API contract tests** between frontend and backend
+- **Mapper functions untested** — Tutors and Parent mappers (`mapSession`, `mapChild`, `mapPayout`, etc.) have no unit tests despite being the only data transformation layer
+- **Optimistic update logic untested** — Tutors `useSchedule.cancelSession()` does optimistic state updates with rollback, but no tests verify the rollback path
