@@ -230,7 +230,7 @@
       "updated": "Siswa berhasil diperbarui",
       "deleted": "Siswa berhasil dihapus",
       "bulkDeleted": "{{count}} siswa berhasil dihapus",
-      "importSuccess": "Siswa berhasil diimpor",
+      "importSuccess": "Siswa diimpor",
       "importError": "Gagal mengimpor siswa",
       "exportSuccess": "Siswa berhasil diekspor",
       "exportError": "Gagal mengekspor siswa",
@@ -338,7 +338,7 @@
       "verified": "Terverifikasi"
     },
     "toast": {
-      "inviteSent": "Undangan berhasil dikirim",
+      "inviteSent": "Undangan terkirim",
       "inviteSentNoEmail": "Tutor dibuat tetapi email gagal. Gunakan \"Kirim Ulang Undangan\" untuk mencoba lagi.",
       "inviteError": "Gagal mengirim undangan",
       "inviteResent": "Undangan dikirim ulang",
@@ -346,7 +346,7 @@
       "resendError": "Gagal mengirim ulang undangan",
       "inviteCancelled": "Undangan dibatalkan",
       "cancelError": "Gagal membatalkan undangan",
-      "updated": "Tutor berhasil diperbarui",
+      "updated": "Tutor diperbarui",
       "updateError": "Gagal memperbarui tutor",
       "deleted": "Tutor berhasil dihapus",
       "deleteError": "Gagal menghapus tutor"
@@ -429,15 +429,15 @@
       "cap": "Kap: {{count}}"
     },
     "toast": {
-      "created": "Kelas berhasil dibuat",
+      "created": "Kelas dibuat",
       "createError": "Gagal membuat kelas",
-      "updated": "Kelas berhasil diperbarui",
+      "updated": "Kelas diperbarui",
       "updateError": "Gagal memperbarui kelas",
       "deleted": "Kelas berhasil dihapus",
       "deleteError": "Gagal menghapus kelas",
       "selectTutor": "Silakan pilih tutor",
       "selectScheduleDay": "Silakan pilih setidaknya satu hari jadwal",
-      "generateSuccess": "{{count}} sesi berhasil dibuat",
+      "generateSuccess": "{{count}} sesi dibuat",
       "generateError": "Gagal membuat sesi"
     },
     "modal": {
@@ -519,7 +519,7 @@
       "scheduleError": "Gagal menjadwalkan sesi",
       "sessionCancelled": "Sesi dibatalkan",
       "cancelError": "Gagal membatalkan sesi",
-      "sessionsGenerated": "Sesi berhasil dibuat otomatis",
+      "sessionsGenerated": "Sesi dibuat otomatis",
       "generateError": "Gagal membuat sesi otomatis",
       "rescheduleApproved": "Penjadwalan ulang disetujui",
       "rescheduleError": "Gagal menyetujui penjadwalan ulang",
@@ -704,16 +704,16 @@
       "overdue": "Terlambat"
     },
     "toast": {
-      "enrolled": "{{count}} siswa berhasil didaftarkan",
+      "enrolled": "{{count}} siswa didaftarkan",
       "enrollError": "Gagal mendaftarkan beberapa siswa",
       "statusUpdated": "Status diperbarui menjadi {{status}}",
       "statusError": "Gagal memperbarui status",
       "deleted": "Pendaftaran dihapus",
       "deleteError": "Gagal menghapus pendaftaran",
-      "importSuccess": "Berhasil mengimpor {{count}} pendaftaran",
+      "importSuccess": "{{count}} pendaftaran diimpor",
       "importPartial": "Mengimpor {{created}} pendaftaran dengan {{errors}} kesalahan",
       "importError": "Gagal mengimpor pendaftaran",
-      "exportSuccess": "Pendaftaran berhasil diekspor",
+      "exportSuccess": "Pendaftaran diekspor",
       "exportError": "Gagal mengekspor pendaftaran",
       "bulkStatusUpdated": "{{count}} pendaftaran diperbarui menjadi {{status}}",
       "bulkStatusError": "Gagal memperbarui status pendaftaran",
@@ -848,7 +848,7 @@
     "period": "Periode",
     "approveAllSessions": "Setujui Semua Sesi",
     "payoutApproved": "Pembayaran disetujui dan dijadwalkan.",
-    "exportedSuccess": "{{name}} berhasil diekspor ke CSV.",
+    "exportedSuccess": "{{name}} diekspor ke CSV",
     "reminderSent": "Pengingat pembayaran dikirim ke orang tua {{student}} via WhatsApp.",
     "recordsTotal": "total data",
     "tutor": "Tutor",
@@ -916,9 +916,9 @@
       "resendReceipt": "Kirim Ulang Kuitansi"
     },
     "toast": {
-      "recorded": "Pembayaran berhasil dicatat.",
+      "recorded": "Pembayaran dicatat",
       "recordError": "Gagal mencatat pembayaran.",
-      "deleted": "Pembayaran dihapus.",
+      "deleted": "Pembayaran dihapus",
       "deleteError": "Gagal menghapus pembayaran."
     },
     "confirm": {
@@ -939,7 +939,7 @@
     },
     "generateInvoice": "Buat Faktur",
     "downloadInvoice": "Unduh Faktur",
-    "invoiceGenerated": "Faktur berhasil dibuat",
+    "invoiceGenerated": "Faktur dibuat",
     "invoiceExists": "Faktur sudah ada untuk pembayaran ini",
     "invoiceNumber": "No. Faktur",
     "generatingInvoice": "Membuat faktur..."
@@ -1003,11 +1003,11 @@
       "creating": "Membuat..."
     },
     "toast": {
-      "confirmed": "Pembayaran dikonfirmasi untuk {{tutor}}.",
+      "confirmed": "Pembayaran dikonfirmasi untuk {{tutor}}",
       "confirmError": "Gagal mengonfirmasi pembayaran.",
-      "created": "Pembayaran berhasil dibuat.",
+      "created": "Pembayaran dibuat",
       "createError": "Gagal membuat pembayaran.",
-      "deleted": "Pembayaran dihapus.",
+      "deleted": "Pembayaran dihapus",
       "deleteError": "Gagal menghapus pembayaran.",
       "fillRequired": "Silakan isi semua kolom yang wajib."
     },
@@ -1064,11 +1064,11 @@
       "saveExpense": "Catat Pengeluaran"
     },
     "toast": {
-      "created": "Pengeluaran tercatat.",
+      "created": "Pengeluaran tercatat",
       "createError": "Gagal mencatat pengeluaran.",
-      "updated": "Pengeluaran diperbarui.",
+      "updated": "Pengeluaran diperbarui",
       "updateError": "Gagal memperbarui pengeluaran.",
-      "deleted": "Pengeluaran dihapus.",
+      "deleted": "Pengeluaran dihapus",
       "deleteError": "Gagal menghapus pengeluaran.",
       "fillRequired": "Silakan isi kolom yang wajib."
     },
@@ -1104,7 +1104,7 @@
       "phone": "Telepon",
       "address": "Alamat",
       "addressPlaceholder": "Jl. Pendidikan No. 1",
-      "saveSuccess": "Pengaturan berhasil disimpan",
+      "saveSuccess": "Pengaturan disimpan",
       "saveFailed": "Gagal menyimpan pengaturan",
       "dangerZone": "Zona Berbahaya",
       "dangerZoneDesc": "Hapus data institusi Anda secara permanen. Tindakan ini tidak dapat dibatalkan.",
@@ -1129,7 +1129,7 @@
       "categoriesNote": "Kategori ini akan muncul di menu Biaya Operasional.",
       "bankAccounts": "Rekening Bank (Metode Mandiri)",
       "addAccount": "Tambah Rekening",
-      "saveSuccess": "Pengaturan penagihan berhasil disimpan",
+      "saveSuccess": "Pengaturan penagihan disimpan",
       "saveFailed": "Gagal menyimpan pengaturan penagihan",
       "addCategoryPlaceholder": "Nama kategori baru",
       "bankNamePlaceholder": "contoh: BCA",
@@ -1242,15 +1242,15 @@
       "activeClasses": "Kelas Aktif"
     },
     "toast": {
-      "created": "Institusi berhasil dibuat",
+      "created": "Institusi dibuat",
       "createError": "Gagal membuat institusi",
-      "updated": "Institusi berhasil diperbarui",
+      "updated": "Institusi diperbarui",
       "updateError": "Gagal memperbarui institusi",
       "deactivated": "Institusi dinonaktifkan",
       "activated": "Institusi diaktifkan",
-      "adminCreated": "Admin berhasil dibuat",
+      "adminCreated": "Admin dibuat",
       "adminCreateError": "Gagal membuat admin",
-      "userUpdated": "Pengguna berhasil diperbarui",
+      "userUpdated": "Pengguna diperbarui",
       "userUpdateError": "Gagal memperbarui pengguna"
     },
     "users": "Pengguna",
