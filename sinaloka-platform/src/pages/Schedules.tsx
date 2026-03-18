@@ -207,12 +207,12 @@ export const Schedules = () => {
         subtitle={t('schedules.subtitle')}
         actions={
           <>
-            <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
+            <div className="flex bg-muted p-1 rounded-lg">
               <button
                 onClick={() => setView('list')}
                 className={cn(
                   "p-1.5 rounded-md transition-all",
-                  view === 'list' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
+                  view === 'list' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
                 )}
               >
                 <List size={18} />
@@ -221,7 +221,7 @@ export const Schedules = () => {
                 onClick={() => setView('calendar')}
                 className={cn(
                   "p-1.5 rounded-md transition-all",
-                  view === 'calendar' ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
+                  view === 'calendar' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
                 )}
               >
                 <CalendarDays size={18} />
@@ -281,7 +281,7 @@ export const Schedules = () => {
       {isLoading ? (
         <Card className="p-6 space-y-3">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+            <Skeleton key={i} className="h-12" />
           ))}
         </Card>
       ) : view === 'list' ? (
@@ -289,24 +289,24 @@ export const Schedules = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
-                <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.classSubject')}</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.tutor')}</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.dateTime')}</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{t('schedules.table.status')}</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider"></th>
+                <tr className="bg-muted/50 border-b border-border">
+                  <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('schedules.table.classSubject')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('schedules.table.tutor')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('schedules.table.dateTime')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('schedules.table.status')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <tbody className="divide-y divide-border">
                 {sessions.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center justify-center">
-                        <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
-                          <Search size={32} className="text-zinc-300" />
+                        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
+                          <Search size={32} className="text-muted-foreground" />
                         </div>
                         <h3 className="text-lg font-bold mb-1">{t('schedules.noSessionsFound')}</h3>
-                        <p className="text-zinc-500 text-sm mb-6">{t('schedules.noSessionsHint')}</p>
+                        <p className="text-muted-foreground text-sm mb-6">{t('schedules.noSessionsHint')}</p>
                       </div>
                     </td>
                   </tr>
@@ -324,7 +324,7 @@ export const Schedules = () => {
                     <tr
                       key={session.id}
                       className={cn(
-                        "hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer",
+                        "hover:bg-muted/50 transition-colors group cursor-pointer",
                         isCancelled && "opacity-50 grayscale-[0.5]"
                       )}
                       onClick={() => {
@@ -333,7 +333,7 @@ export const Schedules = () => {
                     >
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className={cn("text-sm font-bold dark:text-zinc-200", isCancelled && "line-through")}>{className}</span>
+                          <span className={cn("text-sm font-bold text-foreground", isCancelled && "line-through")}>{className}</span>
                           <div className="flex items-center gap-2 mt-1">
                             {subject && (
                               <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase", getSubjectColor(subject))}>
@@ -344,17 +344,17 @@ export const Schedules = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                          <User size={14} className="text-zinc-400" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <User size={14} className="text-muted-foreground" />
                           {tutorName}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium dark:text-zinc-200">
+                          <span className="text-sm font-medium text-foreground">
                             {isValid(sessionDate) ? formatDate(session.date, i18n.language) : session.date}
                           </span>
-                          <span className="text-xs text-zinc-400 flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock size={12} /> {session.start_time} - {session.end_time}
                           </span>
                         </div>
@@ -369,7 +369,7 @@ export const Schedules = () => {
                           trigger={<MoreHorizontal size={18} />}
                           items={
                             isLocked
-                              ? [{ content: <span className="px-3 py-2 text-xs text-zinc-400 flex items-center gap-2"><Lock size={12} /> {isCompleted ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}</span> }]
+                              ? [{ content: <span className="px-3 py-2 text-xs text-muted-foreground flex items-center gap-2"><Lock size={12} /> {isCompleted ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}</span> }]
                               : [
                                   { label: t('schedules.menu.markAttendance'), icon: ArrowUpRight, onClick: () => handleMarkAttendance(session.id), className: 'text-indigo-600' },
                                   ...(session.status === 'RESCHEDULE_REQUESTED'
@@ -392,7 +392,7 @@ export const Schedules = () => {
       ) : (
         <Card className="p-0 overflow-hidden flex flex-col min-h-[700px]">
           {/* Calendar Header */}
-          <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-50/30 dark:bg-zinc-900/30">
+          <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30">
             <div className="flex items-center gap-4">
               <h3 className="font-bold text-lg min-w-[150px]">
                 {calendarMode === 'month' ? format(currentDate, 'MMMM yyyy') :
@@ -413,19 +413,19 @@ export const Schedules = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentDate(calendarMode === 'month' ? subMonths(currentDate, 1) : calendarMode === 'week' ? addDays(currentDate, -7) : addDays(currentDate, -1))}
-                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                className="p-1.5 hover:bg-accent rounded-lg transition-colors"
               >
                 <ChevronLeft size={20} />
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-1 text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md"
+                className="px-3 py-1 text-xs font-medium bg-card border border-input rounded-md"
               >
                 {t('common.today')}
               </button>
               <button
                 onClick={() => setCurrentDate(calendarMode === 'month' ? addMonths(currentDate, 1) : calendarMode === 'week' ? addDays(currentDate, 7) : addDays(currentDate, 1))}
-                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                className="p-1.5 hover:bg-accent rounded-lg transition-colors"
               >
                 <ChevronRight size={20} />
               </button>
@@ -435,7 +435,7 @@ export const Schedules = () => {
           {/* Month View */}
           {calendarMode === 'month' && (
             <>
-              <div className="grid grid-cols-7 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="grid grid-cols-7 border-b border-border">
                 {[
                   t('schedules.calendar.sun'),
                   t('schedules.calendar.mon'),
@@ -445,7 +445,7 @@ export const Schedules = () => {
                   t('schedules.calendar.fri'),
                   t('schedules.calendar.sat'),
                 ].map((day) => (
-                  <div key={day} className="py-2 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                  <div key={day} className="py-2 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     {day}
                   </div>
                 ))}
@@ -459,15 +459,15 @@ export const Schedules = () => {
                     <div
                       key={day.toString()}
                       className={cn(
-                        "min-h-[120px] p-2 border-r border-b border-zinc-50 dark:border-zinc-900 transition-colors",
-                        !isSameMonth(day, monthStart) && "bg-zinc-50/50 dark:bg-zinc-950/50",
-                        isSameDay(day, new Date()) && "bg-zinc-100/30 dark:bg-zinc-900/30"
+                        "min-h-[120px] p-2 border-r border-b border-border/50 transition-colors",
+                        !isSameMonth(day, monthStart) && "bg-muted/50",
+                        isSameDay(day, new Date()) && "bg-muted/30"
                       )}
                     >
                       <div className="flex justify-between items-center mb-2">
                         <span className={cn(
                           "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
-                          isSameDay(day, new Date()) ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" : "text-zinc-500"
+                          isSameDay(day, new Date()) ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                         )}>
                           {format(day, 'd')}
                         </span>
@@ -482,7 +482,7 @@ export const Schedules = () => {
                               onClick={() => setSelectedSessionId(s.id)}
                               className={cn(
                                 "p-1.5 rounded-md text-[10px] font-medium truncate border transition-all hover:scale-[1.02] cursor-pointer",
-                                isCancelled ? "bg-zinc-50 text-zinc-400 border-zinc-100 line-through" : getSubjectColor(subject),
+                                isCancelled ? "bg-muted text-muted-foreground border-border line-through" : getSubjectColor(subject),
                                 !isCancelled && getStatusBorder(s.status)
                               )}
                               title={`${s.class?.name ?? ''} (${s.start_time} - ${s.end_time})`}
@@ -517,9 +517,9 @@ export const Schedules = () => {
                         } catch { return false; }
                       });
                       return (
-                        <div key={hour} className="flex-1 border-b border-zinc-100 dark:border-zinc-800 flex">
-                          <div className="w-20 shrink-0 border-r border-zinc-100 dark:border-zinc-800 flex items-start justify-center pt-2">
-                            <span className="text-[10px] font-bold text-zinc-400">{hour}:00</span>
+                        <div key={hour} className="flex-1 border-b border-border flex">
+                          <div className="w-20 shrink-0 border-r border-border flex items-start justify-center pt-2">
+                            <span className="text-[10px] font-bold text-muted-foreground">{hour}:00</span>
                           </div>
                           <div className="flex-1 relative p-1 space-y-1">
                             {hourSessions.map(s => {
@@ -530,7 +530,7 @@ export const Schedules = () => {
                                   onClick={() => setSelectedSessionId(s.id)}
                                   className={cn(
                                     "rounded-lg p-2 border shadow-sm text-[10px] cursor-pointer hover:scale-[1.01] transition-all",
-                                    isCancelled ? "bg-zinc-50 text-zinc-400 border-zinc-100 line-through" : getSubjectColor(s.class?.subject),
+                                    isCancelled ? "bg-muted text-muted-foreground border-border line-through" : getSubjectColor(s.class?.subject),
                                     !isCancelled && getStatusBorder(s.status)
                                   )}
                                 >
@@ -689,10 +689,10 @@ export const Schedules = () => {
           <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 rounded-2xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 text-xl font-bold mb-3 shadow-lg">
+              <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold mb-3 shadow-lg">
                 {(selectedSession.class?.name ?? '?').charAt(0)}
               </div>
-              <h3 className="text-lg font-bold dark:text-zinc-100">{selectedSession.class?.name ?? '—'}</h3>
+              <h3 className="text-lg font-bold text-foreground">{selectedSession.class?.name ?? '—'}</h3>
               <div className="mt-2 flex gap-2">
                 {selectedSession.class?.subject && (
                   <span className={cn('text-[10px] font-bold px-2 py-1 rounded-md border', getSubjectColor(selectedSession.class.subject))}>
@@ -707,13 +707,13 @@ export const Schedules = () => {
 
             {/* Date & Time */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.dateTime')}</h4>
-              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-                <div className="flex items-center gap-2 text-sm dark:text-zinc-200">
-                  <CalendarIcon size={14} className="text-zinc-400" />
+              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('schedules.drawer.dateTime')}</h4>
+              <div className="p-3 rounded-xl bg-muted/50">
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                  <CalendarIcon size={14} className="text-muted-foreground" />
                   {isValid(parseISO(selectedSession.date)) ? formatDate(selectedSession.date, i18n.language) : selectedSession.date}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-500 mt-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                   <Clock size={14} />
                   {selectedSession.start_time} - {selectedSession.end_time}
                 </div>
@@ -722,15 +722,15 @@ export const Schedules = () => {
 
             {/* Tutor */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.tutor')}</h4>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('schedules.drawer.tutor')}</h4>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                 <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 font-bold">
                   {(selectedSession.class?.tutor?.name ?? '?').charAt(0)}
                 </div>
                 <div>
-                  <p className="text-sm font-bold dark:text-zinc-200">{selectedSession.class?.tutor?.name ?? '—'}</p>
+                  <p className="text-sm font-bold text-foreground">{selectedSession.class?.tutor?.name ?? '—'}</p>
                   {sessionDetail.data?.class?.tutor?.email && (
-                    <p className="text-xs text-zinc-500">{sessionDetail.data.class.tutor.email}</p>
+                    <p className="text-xs text-muted-foreground">{sessionDetail.data.class.tutor.email}</p>
                   )}
                 </div>
               </div>
@@ -739,16 +739,16 @@ export const Schedules = () => {
             {/* Session Content (if COMPLETED) */}
             {selectedSession.status === 'COMPLETED' && (
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.sessionContent')}</h4>
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('schedules.drawer.sessionContent')}</h4>
                 <div className="space-y-2">
-                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-                    <p className="text-[10px] text-zinc-400 uppercase font-bold mb-1">{t('schedules.drawer.topicCovered')}</p>
-                    <p className="text-sm dark:text-zinc-200">{selectedSession.topic_covered || t('schedules.drawer.noContent')}</p>
+                  <div className="p-3 rounded-xl bg-muted/50">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">{t('schedules.drawer.topicCovered')}</p>
+                    <p className="text-sm text-foreground">{selectedSession.topic_covered || t('schedules.drawer.noContent')}</p>
                   </div>
                   {selectedSession.session_summary && (
-                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-                      <p className="text-[10px] text-zinc-400 uppercase font-bold mb-1">{t('schedules.drawer.sessionSummary')}</p>
-                      <p className="text-sm dark:text-zinc-200">{selectedSession.session_summary}</p>
+                    <div className="p-3 rounded-xl bg-muted/50">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">{t('schedules.drawer.sessionSummary')}</p>
+                      <p className="text-sm text-foreground">{selectedSession.session_summary}</p>
                     </div>
                   )}
                 </div>
@@ -758,7 +758,7 @@ export const Schedules = () => {
             {/* Reschedule Info (if RESCHEDULE_REQUESTED) */}
             {selectedSession.status === 'RESCHEDULE_REQUESTED' && (
               <div className="space-y-3">
-                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('schedules.drawer.rescheduleInfo')}</h4>
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('schedules.drawer.rescheduleInfo')}</h4>
                 <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                   <div className="space-y-2 text-sm">
                     <div>
@@ -811,7 +811,7 @@ export const Schedules = () => {
 
             {/* Attendance */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 {t('schedules.drawer.attendance')} ({sessionStudentsQuery.data?.students?.filter(s => s.attendance_id !== null).length ?? 0}/{sessionStudentsQuery.data?.students?.length ?? 0})
               </h4>
               {sessionStudentsQuery.isLoading ? (
@@ -821,14 +821,14 @@ export const Schedules = () => {
               ) : sessionStudentsQuery.data?.students?.length ? (
                 <div className="space-y-2">
                   {sessionStudentsQuery.data.students.map((student) => (
-                    <div key={student.id} className={cn("flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50", !student.attendance_id && "opacity-60")}>
+                    <div key={student.id} className={cn("flex items-center justify-between p-3 rounded-xl bg-muted/50", !student.attendance_id && "opacity-60")}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
                           {student.name.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-sm font-medium dark:text-zinc-200">{student.name}</p>
-                          {student.grade && <p className="text-[10px] text-zinc-400">{student.grade}</p>}
+                          <p className="text-sm font-medium text-foreground">{student.name}</p>
+                          {student.grade && <p className="text-[10px] text-muted-foreground">{student.grade}</p>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -851,7 +851,7 @@ export const Schedules = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500 text-center py-4">{t('schedules.drawer.noStudents', 'No students enrolled')}</p>
+                <p className="text-sm text-muted-foreground text-center py-4">{t('schedules.drawer.noStudents', 'No students enrolled')}</p>
               )}
             </div>
 
@@ -861,12 +861,12 @@ export const Schedules = () => {
               const drawerIsPast = isValid(drawerSessionDate) && isBefore(startOfDay(drawerSessionDate), startOfDay(new Date()));
               const drawerIsLocked = selectedSession.status === 'COMPLETED' || drawerIsPast;
               return drawerIsLocked ? (
-                <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800 text-zinc-400 text-sm">
+                <div className="flex items-center gap-2 pt-4 border-t border-border text-muted-foreground text-sm">
                   <Lock size={14} />
                   {selectedSession.status === 'COMPLETED' ? t('schedules.menu.completedLocked') : t('schedules.menu.pastLocked')}
                 </div>
               ) : (
-                <div className="flex items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
                   <Button
                     variant="outline"
                     className="flex-1 justify-center"
