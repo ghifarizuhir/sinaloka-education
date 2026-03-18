@@ -258,9 +258,6 @@ model Class {
   tutor_fee           Decimal      @default(0)
   tutor_fee_mode      TutorFeeMode @default(FIXED_PER_SESSION)
   tutor_fee_per_student Decimal?
-  schedule_days       String[]
-  schedule_start_time String
-  schedule_end_time   String
   room                String?
   status              ClassStatus @default(ACTIVE)
   created_at          DateTime    @default(now())
@@ -270,8 +267,24 @@ model Class {
   tutor               Tutor        @relation(fields: [tutor_id], references: [id])
   enrollments         Enrollment[]
   sessions            Session[]
+  schedules           ClassSchedule[]
 
   @@map("classes")
+}
+
+model ClassSchedule {
+  id         String   @id @default(uuid())
+  class_id   String
+  day        String
+  start_time String
+  end_time   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+
+  @@unique([class_id, day])
+  @@map("class_schedules")
 }
 
 model Enrollment {
