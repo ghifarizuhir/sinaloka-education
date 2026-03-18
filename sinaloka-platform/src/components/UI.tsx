@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Search, Check, Eye, EyeOff } from 'lucide-react';
+import { X, Search, Check, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const Card = ({ children, className, ...props }: { children: React.ReactNode, className?: string } & React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl p-6 shadow-sm transition-colors", className)} {...props}>
@@ -568,3 +569,143 @@ export const PageHeader = ({ title, subtitle, actions }: {
     {actions && <div className="flex items-center gap-3">{actions}</div>}
   </div>
 );
+
+// ── Separator ──
+export const Separator = ({ className }: { className?: string }) => (
+  <div className={cn("h-px bg-zinc-100 dark:bg-zinc-800", className)} />
+);
+
+// ── Spinner ──
+export const Spinner = ({ size = 'md', className }: { size?: 'sm' | 'md'; className?: string }) => (
+  <svg className={cn("animate-spin", size === 'sm' ? 'h-4 w-4' : 'h-5 w-5', className)} viewBox="0 0 24 24" fill="none">
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+  </svg>
+);
+
+// ── Avatar ──
+export const Avatar = ({ name, size = 'md', className }: { name: string; size?: 'sm' | 'md' | 'lg'; className?: string }) => {
+  const initial = name.split(' ').pop()?.charAt(0)?.toUpperCase() ?? '?';
+  const sizes = {
+    sm: 'w-8 h-8 rounded-full text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400',
+    md: 'w-10 h-10 rounded-xl text-sm bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900',
+    lg: 'w-16 h-16 rounded-2xl text-2xl shadow-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900',
+  };
+  return (
+    <div className={cn("flex items-center justify-center font-bold", sizes[size], className)}>
+      {initial}
+    </div>
+  );
+};
+
+// ── EmptyState ──
+export const EmptyState = ({ icon: Icon, title, description, action }: {
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) => (
+  <div className="flex flex-col items-center justify-center py-20 text-center">
+    {Icon && (
+      <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+        <Icon size={32} className="text-zinc-300" />
+      </div>
+    )}
+    <h3 className="text-lg font-bold mb-1 dark:text-zinc-100">{title}</h3>
+    {description && <p className="text-zinc-500 text-sm mb-6">{description}</p>}
+    {action}
+  </div>
+);
+
+// ── StatCard ──
+export const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, className }: {
+  label: string;
+  value: string | number;
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  iconBg?: string;
+  iconColor?: string;
+  className?: string;
+}) => (
+  <Card className={cn("p-4", className)}>
+    {Icon && (
+      <div className="flex items-center justify-between mb-3">
+        <div className={cn("p-2 rounded-xl", iconBg)}>
+          <Icon size={20} className={iconColor} />
+        </div>
+      </div>
+    )}
+    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{label}</p>
+    <p className="text-xl font-bold tracking-tight dark:text-zinc-100 mt-1">{String(value)}</p>
+  </Card>
+);
+
+// ── DataTable ──
+const DataTableRoot = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <table className={cn("w-full text-left border-collapse", className)}>{children}</table>
+);
+
+const DataTableHeader = ({ children }: { children: React.ReactNode }) => (
+  <thead><tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">{children}</tr></thead>
+);
+
+const DataTableBody = ({ children }: { children: React.ReactNode }) => (
+  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">{children}</tbody>
+);
+
+const DataTableRow = ({ children, className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) => (
+  <tr className={cn("hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors", className)} {...props}>{children}</tr>
+);
+
+const DataTableCell = ({ children, header, className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement> & { header?: boolean }) => {
+  if (header) return <th className={cn("px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider", className)} {...(props as any)}>{children}</th>;
+  return <td className={cn("px-6 py-4", className)} {...props}>{children}</td>;
+};
+
+export const DataTable = Object.assign(DataTableRoot, {
+  Header: DataTableHeader,
+  Body: DataTableBody,
+  Row: DataTableRow,
+  Cell: DataTableCell,
+});
+
+// ── Pagination ──
+export const Pagination = ({ currentPage, totalPages, total, itemsPerPage, onPageChange, className }: {
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  className?: string;
+}) => {
+  const { t } = useTranslation();
+  const from = Math.min((currentPage - 1) * itemsPerPage + 1, total);
+  const to = Math.min(currentPage * itemsPerPage, total);
+  const maxButtons = 5;
+  const startPage = Math.max(1, Math.min(currentPage - Math.floor(maxButtons / 2), totalPages - maxButtons + 1));
+  const pages = Array.from({ length: Math.min(maxButtons, totalPages) }, (_, i) => startPage + i);
+
+  if (totalPages <= 1 && total <= itemsPerPage) return null;
+
+  return (
+    <div className={cn("p-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/30 dark:bg-zinc-900/30", className)}>
+      <p className="text-xs text-zinc-500">
+        {t('common.showing')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{from}</span> {t('common.to')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{to}</span> {t('common.of')} <span className="font-bold text-zinc-900 dark:text-zinc-100">{total}</span> {t('common.results')}
+      </p>
+      <div className="flex items-center gap-2">
+        <button disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)} className="p-1.5 disabled:opacity-30 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+          <ChevronLeft size={16} />
+        </button>
+        <div className="flex items-center gap-1">
+          {pages.map(page => (
+            <button key={page} onClick={() => onPageChange(page)} className={cn("w-8 h-8 text-xs font-bold rounded-lg transition-all", currentPage === page ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500")}>
+              {page}
+            </button>
+          ))}
+        </div>
+        <button disabled={currentPage === totalPages || totalPages === 0} onClick={() => onPageChange(currentPage + 1)} className="p-1.5 disabled:opacity-30 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+          <ChevronRight size={16} />
+        </button>
+      </div>
+    </div>
+  );
+};
