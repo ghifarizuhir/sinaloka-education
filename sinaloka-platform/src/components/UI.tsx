@@ -221,7 +221,7 @@ export function Modal({ isOpen, onClose, title, children, className }: { isOpen:
   );
 }
 
-export const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, description, confirmLabel, cancelLabel, variant = 'danger', isLoading }: {
+export function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, confirmLabel, cancelLabel, variant = 'danger', isLoading }: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -231,7 +231,9 @@ export const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, description, 
   cancelLabel?: string;
   variant?: 'danger' | 'default';
   isLoading?: boolean;
-}) => (
+}) {
+  useOverlayClose(isOpen, onClose);
+  return (
   <AnimatePresence>
     {isOpen && (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -287,9 +289,12 @@ export const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, description, 
       </div>
     )}
   </AnimatePresence>
-);
+  );
+}
 
-export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) => (
+export function Drawer({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) {
+  useOverlayClose(isOpen, onClose);
+  return (
   <AnimatePresence>
     {isOpen && (
       <div className="fixed inset-0 z-50 flex justify-end">
@@ -325,4 +330,5 @@ export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean, 
       </div>
     )}
   </AnimatePresence>
-);
+  );
+}
