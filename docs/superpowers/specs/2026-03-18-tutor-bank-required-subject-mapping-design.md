@@ -18,11 +18,13 @@ Make `bank_name`, `bank_account_number`, `bank_account_holder` required in 3 flo
 
 | Flow | App | DTO | Current | Target |
 |------|-----|-----|---------|--------|
-| Admin edit tutor | sinaloka-platform | `UpdateTutorSchema` | optional | required |
-| Tutor accept invitation | sinaloka-tutors | `AcceptInviteSchema` | optional | required |
-| Tutor update profile | sinaloka-tutors | `UpdateTutorProfileSchema` | optional | required |
+| Admin edit tutor | sinaloka-platform | `UpdateTutorSchema` | `.optional().nullable()` | required (remove both) |
+| Tutor accept invitation | sinaloka-tutors | `AcceptInviteSchema` | `.optional()` | required (remove `.optional()`) |
+| Tutor update profile | sinaloka-tutors | `UpdateTutorProfileSchema` | `.optional().nullable()` | required (remove both) |
 
 **NOT** required at invite time (`InviteTutorSchema` stays as-is).
+
+**Important:** For `UpdateTutorSchema` and `UpdateTutorProfileSchema`, both `.optional()` AND `.nullable()` must be removed. Otherwise Zod would accept `null` as a valid value, defeating the requirement.
 
 ### Database
 
@@ -33,21 +35,21 @@ No schema change. Columns remain `String?` in Prisma since they are nullable at 
 **File: `sinaloka-backend/src/modules/tutor/tutor.dto.ts`**
 
 `UpdateTutorSchema`:
-- `bank_name`: `z.string().max(255)` → required (remove `.optional()`)
-- `bank_account_number`: `z.string().max(50)` → required (remove `.optional()`)
-- `bank_account_holder`: `z.string().max(255)` → required (remove `.optional()`)
+- `bank_name`: remove `.optional().nullable()` → `z.string().min(1).max(255)`
+- `bank_account_number`: remove `.optional().nullable()` → `z.string().min(1).max(50)`
+- `bank_account_holder`: remove `.optional().nullable()` → `z.string().min(1).max(255)`
 
 `UpdateTutorProfileSchema`:
-- `bank_name`: `z.string().max(255)` → required (remove `.optional()`)
-- `bank_account_number`: `z.string().max(50)` → required (remove `.optional()`)
-- `bank_account_holder`: `z.string().max(255)` → required (remove `.optional()`)
+- `bank_name`: remove `.optional().nullable()` → `z.string().min(1).max(255)`
+- `bank_account_number`: remove `.optional().nullable()` → `z.string().min(1).max(50)`
+- `bank_account_holder`: remove `.optional().nullable()` → `z.string().min(1).max(255)`
 
 **File: `sinaloka-backend/src/modules/invitation/invitation.dto.ts`**
 
 `AcceptInviteSchema`:
-- `bank_name`: `z.string().max(255)` → required (remove `.optional()`)
-- `bank_account_number`: `z.string().max(50)` → required (remove `.optional()`)
-- `bank_account_holder`: `z.string().max(255)` → required (remove `.optional()`)
+- `bank_name`: remove `.optional()` → `z.string().min(1).max(255)`
+- `bank_account_number`: remove `.optional()` → `z.string().min(1).max(50)`
+- `bank_account_holder`: remove `.optional()` → `z.string().min(1).max(255)`
 
 ### Frontend Changes
 
@@ -58,10 +60,12 @@ No schema change. Columns remain `String?` in Prisma since they are nullable at 
 **File: `sinaloka-tutors/src/pages/AcceptInvitePage.tsx`**
 - Change section label from "Info Bank (Opsional)" to "Info Bank"
 - Add `required` attribute to all 3 bank inputs
+- Remove `|| undefined` coercion on bank fields in submit handler (send raw string value, let backend validate)
 - Add frontend validation: all 3 bank fields must be non-empty before submit
 
 **File: `sinaloka-tutors/src/pages/ProfileEditPage.tsx`**
 - Add `required` attribute to all 3 bank inputs
+- Remove `|| null` coercion on bank fields in submit handler (send raw string value, let backend validate)
 - Add frontend validation: all 3 bank fields must be non-empty before submit
 
 ### Acceptance Criteria
@@ -70,7 +74,7 @@ No schema change. Columns remain `String?` in Prisma since they are nullable at 
 - Tutor cannot accept invitation without filling all 3 bank fields
 - Tutor cannot save profile without filling all 3 bank fields
 - Admin can still invite a tutor without bank info (invite flow unchanged)
-- Backend returns validation error if bank fields are missing in update/accept
+- Backend returns validation error if bank fields are missing or null in update/accept
 
 ---
 
@@ -105,15 +109,23 @@ Unique constraint: `(name, institution_id)` — no duplicate subjects per instit
 
 **Class model:**
 - Remove: `subject String`
-- Add: `subject_id UUID` (FK to subject)
+- Add: `subject_id UUID` (FK to subject, NOT NULL)
 - Add: `subject Subject` relation
 
 ### Data Migration
 
-1. Collect all unique subject strings from existing `tutor.subjects[]` arrays and `class.subject` strings, grouped by `institution_id`
-2. Insert unique subjects into `subject` table
-3. Create `tutor_subject` records by matching old tutor `subjects[]` strings to new subject IDs
-4. Set `class.subject_id` by matching old `class.subject` string to new subject IDs
+Migration must be done in stages to preserve data integrity:
+
+1. Create `subject` table and `tutor_subject` join table
+2. Add `class.subject_id` as **nullable** column initially
+3. Run data migration script:
+   a. Collect all unique subject strings from existing `tutor.subjects[]` arrays and `class.subject` strings, grouped by `institution_id`
+   b. Normalize casing (title-case) to prevent duplicates like "mathematics" vs "Mathematics"
+   c. Handle empty `tutor.subjects[]` arrays gracefully (skip, no error)
+   d. Insert unique subjects into `subject` table
+   e. Create `tutor_subject` records by matching old tutor `subjects[]` strings to new subject IDs
+   f. Set `class.subject_id` by matching old `class.subject` string to new subject IDs
+4. Alter `class.subject_id` to NOT NULL (all records now populated)
 5. Drop old `tutor.subjects` column and `class.subject` column
 
 ### New Backend Module: Subject
@@ -141,43 +153,51 @@ Unique constraint: `(name, institution_id)` — no duplicate subjects per instit
 ### Backend Changes to Existing Modules
 
 **Tutor module:**
-- `tutor.dto.ts`: `CreateTutorSchema.subjects` changes from `z.array(z.string())` to `z.array(z.string().uuid())` (subject IDs)
-- `tutor.dto.ts`: `UpdateTutorSchema.subjects` same change
-- `tutor.dto.ts`: `InviteTutorSchema.subjects` same change
+- `tutor.dto.ts`: `CreateTutorSchema.subjects` changes from `z.array(z.string())` to `z.array(z.string().uuid())` renamed to `subject_ids`
+- `tutor.dto.ts`: `UpdateTutorSchema.subjects` same change → `subject_ids`
+- `tutor.dto.ts`: `InviteTutorSchema.subjects` same change → `subject_ids`
 - `tutor.service.ts`: create/update tutor uses `tutor_subject` join table instead of `subjects` array
-- `tutor.service.ts`: `findAll` subject filter uses join table query instead of array `has`
+- `tutor.service.ts`: `findAll` subject filter rewrites from `{ subjects: { has: subject } }` to a join query on `tutor_subject` + `subject` table. The `TutorQuerySchema.subject` parameter changes from a name string to `subject_id` (UUID).
 
 **Class module:**
 - `class.dto.ts`: `CreateClassSchema.subject` changes from `z.string()` to `z.string().uuid()` renamed to `subject_id`
-- `class.dto.ts`: `UpdateClassSchema` same change
+- `class.dto.ts`: `UpdateClassSchema` same change → `subject_id` (optional UUID)
+- `class.dto.ts`: `ClassQuerySchema.sort_by` enum: replace `'subject'` with `'subject_name'`. The `findAll` query sorts by `subject.name` via relation instead of the old string column.
+- `class.dto.ts`: `ClassQuerySchema.subject` filter changes to accept `subject_id` (UUID) and filters via FK instead of string match
 - `class.service.ts`: validate that `subject_id` exists in the institution
 - `class.service.ts`: validate that the selected tutor teaches the given subject (check `tutor_subject` join table)
+- `class.service.ts`: on update — if only `tutor_id` changes, validate new tutor teaches the class's existing subject. If only `subject_id` changes, validate existing tutor teaches the new subject.
 - `class.service.ts`: include subject relation in responses
+- `class.service.ts`: update `findAll` filter logic from `where.subject = subject` to `where.subject_id = subjectId`
+
+**Removing tutor-subject association:** When removing a subject from a tutor's specializations, the system does NOT cascade-delete or block if existing classes reference that combination. The admin is responsible for reassigning classes. This is consistent with the existing behavior where tutor-class assignments are managed independently.
 
 ### Frontend Changes (sinaloka-platform)
 
 **Class form (`src/pages/Classes.tsx`):**
 - Subject dropdown: fetch from `GET /api/subjects` instead of hardcoded list
+- Remove `SUBJECT_COLORS` hardcoded map — replace with a hash-based color function that generates consistent colors from subject names
 - Tutor dropdown: when subject is selected, fetch from `GET /api/subjects/:id/tutors` (verified tutors only)
 - Tutor dropdown: disabled until subject is selected
 - Clear tutor selection when subject changes
+- Class list subject filter dropdown: populate from `GET /api/subjects` instead of extracting from loaded data. Filter by `subject_id`.
 
 **Tutor form (`src/pages/Tutors.tsx`):**
 - Subjects field: change from free-text comma-separated input to multi-select from `GET /api/subjects`
 - Display selected subjects as tags/chips
 
-**New hooks:**
+**New hooks (`src/hooks/`):**
 - `useSubjects()` — fetch subjects list
 - `useSubjectTutors(subjectId)` — fetch tutors for a subject
 
-**Types:**
-- Add `Subject` type: `{ id: string, name: string, institution_id: string }`
-- Update `Tutor` type: remove `subjects: string[]`, add `tutor_subjects: { subject: Subject }[]`
-- Update `Class` type: remove `subject: string`, add `subject_id: string, subject: Subject`
+**Types (`src/types/`):**
+- `src/types/subject.ts`: Add `Subject` type: `{ id: string, name: string, institution_id: string, created_at: string, updated_at: string }`
+- `src/types/tutor.ts`: Update `Tutor` type — remove `subjects: string[]`, add `tutor_subjects: { subject: Subject }[]`
+- `src/types/class.ts`: Update `Class` type — remove `subject: string`, add `subject_id: string, subject: Subject`
 
 ### Frontend Changes (sinaloka-tutors)
 
-- Update any displays of tutor subjects to read from the new `tutor_subjects` relation instead of the old `subjects[]` array
+- Update tutor subject displays to read from `tutor_subjects` relation instead of old `subjects[]` array (ProfilePage, any subject badge/tag components)
 - AcceptInvitePage: no subject selection needed (set during invite by admin)
 
 ### Acceptance Criteria
@@ -185,12 +205,17 @@ Unique constraint: `(name, institution_id)` — no duplicate subjects per instit
 - Subjects are managed as a dedicated entity per institution
 - Unique constraint prevents duplicate subject names within an institution
 - Tutor-subject is a proper many-to-many relation
-- Class-subject is a proper FK relation
+- Class-subject is a proper FK relation (NOT NULL)
 - Class form: subject-first flow — select subject, then pick from tutors who teach it
+- `GET /api/subjects/:id/tutors` returns only verified tutors
 - Class creation validates tutor teaches the selected subject
+- Class update validates tutor-subject consistency when either field changes independently
 - Tutor form: multi-select subjects from the subjects table
 - Data migration preserves all existing tutor-subject and class-subject associations
+- Data migration normalizes subject name casing
 - Deleting a subject is blocked if any class or tutor references it
+- Class list filter and sort work correctly with the new subject relation
+- Subject badge colors work dynamically (hash-based, not hardcoded)
 
 ## What's NOT Changing
 
@@ -203,9 +228,11 @@ Unique constraint: `(name, institution_id)` — no duplicate subjects per instit
 ## Testing
 
 - Backend: unit tests for new subject CRUD, updated tutor/class validation
-- Backend: test subject-tutor validation on class creation
+- Backend: test subject-tutor validation on class creation and update
 - Backend: test bank info required validation on update/accept endpoints
+- Backend: test class update with mismatched tutor-subject combination returns error
 - Frontend: verify class form subject→tutor flow
+- Frontend: verify class list filter/sort with new subject relation
 - Frontend: verify tutor form multi-select subjects
 - Frontend: verify bank info required on all 3 edit forms
-- Migration: verify existing data is preserved correctly
+- Migration: verify existing data is preserved correctly with case normalization
