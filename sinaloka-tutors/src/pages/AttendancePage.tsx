@@ -57,13 +57,13 @@ export function AttendancePage({
         <div className="flex items-center gap-4">
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white"
+            className="w-10 h-10 rounded-full bg-surface-muted border border-surface-border flex items-center justify-center text-white"
           >
             <X className="w-5 h-5" />
           </button>
           <div>
             <h1 className="text-xl font-semibold leading-none mb-1">{selectedClass.subject}</h1>
-            <div className="flex items-center gap-3 text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+            <div className="flex items-center gap-3 text-subtle text-[10px] font-bold uppercase tracking-widest">
               <span className="bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">Scheduled</span>
               <span>{tutorName}</span>
             </div>
@@ -71,41 +71,41 @@ export function AttendancePage({
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold tracking-tight leading-none">{presentCount} / {students.length}</p>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Present</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-subtle">Present</p>
         </div>
       </div>
 
       {/* Info Bar */}
-      <div className="flex flex-wrap gap-4 text-zinc-400 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 p-4 rounded-lg border border-zinc-800">
+      <div className="flex flex-wrap gap-4 text-subtle text-[10px] font-bold uppercase tracking-widest bg-surface-muted/50 p-4 rounded-lg border border-surface-border">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-3 h-3 text-zinc-600" />
+          <CalendarIcon className="w-3 h-3 text-subtle" />
           <span>{format(new Date(selectedClass.date), 'EEEE, MMM d, yyyy', { locale: id })}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Clock className="w-3 h-3 text-zinc-600" />
+          <Clock className="w-3 h-3 text-subtle" />
           <span>{selectedClass.startTime} - {selectedClass.endTime}</span>
         </div>
       </div>
 
       {/* Topic */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Topic Covered</label>
+        <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">Topic Covered</label>
         <input
           type="text"
           value={topicCovered}
           onChange={(e) => onSetTopicCovered(e.target.value)}
           placeholder="e.g., Algebraic Fractions"
-          className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+          className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
         />
       </div>
 
       {/* Student List */}
       <div className="space-y-4">
         <div className="flex justify-between items-center px-2">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Student List</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-subtle">Student List</h3>
           <button
             onClick={() => students.forEach((s) => onToggleAttendance(selectedClass.id, s.id, 'P'))}
-            className="text-[10px] font-bold uppercase tracking-wider text-lime-400 hover:text-lime-300"
+            className="text-[10px] font-bold uppercase tracking-wider text-brand hover:text-brand/80"
           >
             Mark All Present
           </button>
@@ -113,11 +113,11 @@ export function AttendancePage({
 
         <div className="space-y-3">
           {students.map((student) => (
-            <div key={student.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <div key={student.id} className="bg-surface-muted border border-surface-border rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h4 className="text-white font-semibold">{student.name}</h4>
-                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">{student.grade}</p>
+                  <p className="text-subtle text-[10px] font-bold uppercase tracking-widest">{student.grade}</p>
                 </div>
                 <div className="flex gap-1">
                   {(['P', 'A', 'L'] as const).map((status) => (
@@ -128,11 +128,11 @@ export function AttendancePage({
                         'w-8 h-8 rounded-lg text-[10px] font-bold transition-all border',
                         student.attendance === status
                           ? status === 'P'
-                            ? 'bg-lime-400 border-lime-400 text-black'
+                            ? 'bg-brand border-brand text-brand-foreground'
                             : status === 'A'
                               ? 'bg-red-500 border-red-500 text-white'
                               : 'bg-orange-400 border-orange-400 text-white'
-                          : 'bg-zinc-800 border-zinc-700 text-zinc-500',
+                          : 'bg-surface-border border-surface-border text-subtle',
                       )}
                     >
                       {status}
@@ -140,24 +140,24 @@ export function AttendancePage({
                   ))}
                 </div>
               </div>
-              <div className="pt-4 border-t border-zinc-800 space-y-3">
+              <div className="pt-4 border-t border-surface-border space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={student.homeworkDone || false}
                       onChange={() => onToggleHomework(selectedClass.id, student.id)}
-                      className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-lime-400 focus:ring-lime-400/20"
+                      className="w-4 h-4 rounded border-surface-border bg-surface-border text-brand focus:ring-brand-muted"
                     />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">HW Done</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-subtle">HW Done</span>
                   </div>
                   <button
                     onClick={() => toggleNoteExpanded(student.id)}
                     className={cn(
                       'w-8 h-8 rounded-lg flex items-center justify-center transition-all border',
                       student.note
-                        ? 'text-lime-400 border-lime-400/30 bg-lime-400/10'
-                        : 'text-zinc-500 border-zinc-700 bg-zinc-800'
+                        ? 'text-brand border-brand/30 bg-brand-muted'
+                        : 'text-subtle border-surface-border bg-surface-border'
                     )}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
@@ -170,7 +170,7 @@ export function AttendancePage({
                     onChange={(e) => onSetNote(selectedClass.id, student.id, e.target.value)}
                     placeholder="Add note..."
                     maxLength={500}
-                    className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+                    className="w-full px-4 py-2.5 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm"
                   />
                 )}
               </div>
@@ -181,13 +181,13 @@ export function AttendancePage({
 
       {/* Session Summary */}
       <div className="space-y-2">
-        <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">Session Summary</label>
+        <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">Session Summary</label>
         <textarea
           value={sessionSummary}
           onChange={(e) => onSetSessionSummary(e.target.value)}
           placeholder="Enter learning summary, materials taught, or important notes..."
           rows={4}
-          className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm resize-none"
+          className="w-full px-6 py-4 rounded-lg bg-surface-muted border border-surface-border focus:outline-none focus:border-brand transition-all text-white text-sm resize-none"
         />
       </div>
 

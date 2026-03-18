@@ -1,5 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Brand colors as Tailwind theme tokens */
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-muted: var(--brand-muted);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-border: var(--surface-border);
+  --color-subtle: var(--subtle);
 }
+
+/* ─── Sinaloka Tutors: Dark Theme (brand-aligned) ─── */
+:root {
+  /* Brand primary: Teal (from brand guidelines) */
+  --brand: oklch(0.680 0.155 180);
+  --brand-foreground: oklch(0.155 0.030 180);
+  --brand-muted: oklch(0.680 0.155 180 / 15%);
+
+  /* Warm dark surfaces */
+  --surface: oklch(0.155 0.012 260);
+  --surface-foreground: oklch(0.975 0.005 90);
+  --surface-muted: oklch(0.205 0.012 260);
+  --surface-border: oklch(1 0 0 / 10%);
+
+  /* Subtle text */
+  --subtle: oklch(0.550 0.010 260);
+
+  /* Status */
+  --color-success: oklch(0.680 0.155 160);
+  --color-warning: oklch(0.780 0.150 75);
+  --color-info: oklch(0.650 0.200 262);
+  --color-danger: oklch(0.704 0.191 22);
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--surface-foreground);
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom text selection — brand teal */
+::selection {
+  background-color: oklch(0.680 0.155 180 / 30%);
+  color: white;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

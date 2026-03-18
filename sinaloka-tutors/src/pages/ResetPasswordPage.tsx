@@ -60,15 +60,15 @@ export function ResetPasswordPage() {
 
   if (validating) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!token || !valid) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+      <div className="min-h-screen bg-surface text-white font-sans flex items-center justify-center selection:bg-brand/30 selection:text-white">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -83,7 +83,7 @@ export function ResetPasswordPage() {
           </div>
           <Link
             to="/forgot-password"
-            className="inline-flex items-center gap-2 text-lime-400 hover:text-lime-300 text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-brand hover:text-brand/80 text-sm font-medium transition-colors"
           >
             Minta Link Baru
           </Link>
@@ -101,7 +101,7 @@ export function ResetPasswordPage() {
       >
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Reset Password</h1>
-          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">{email}</p>
+          <p className="text-subtle text-xs font-medium uppercase tracking-wider">{email}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -113,7 +113,7 @@ export function ResetPasswordPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Password Baru
             </label>
             <PasswordInput
@@ -125,7 +125,7 @@ export function ResetPasswordPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-subtle ml-2">
               Konfirmasi Password
             </label>
             <PasswordInput
@@ -139,7 +139,7 @@ export function ResetPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
+            className="w-full bg-brand hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed text-brand-foreground font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
           >
             <Lock className="w-6 h-6" />
             {loading ? 'Menyimpan...' : 'Simpan Password Baru'}
@@ -147,7 +147,7 @@ export function ResetPasswordPage() {
 
           <Link
             to="/login"
-            className="w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 text-subtle hover:text-white text-sm font-medium transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Kembali ke Login
