@@ -299,6 +299,7 @@
     "searchPlaceholder": "Cari tutor...",
     "filtersLabel": "Filter:",
     "specialist": "Spesialis",
+    "noRatings": "Belum ada penilaian",
     "form": {
       "fullName": "Nama Lengkap",
       "namePlaceholder": "Dr. John Doe",
@@ -307,7 +308,7 @@
       "subjects": "Mata Pelajaran (pisahkan dengan koma)",
       "subjectsPlaceholder": "contoh: Matematika, Fisika",
       "rating": "Rating ({{value}})",
-      "yearsOfExperience": "Tahun Pengalaman ({{value}})",
+      "yearsOfExperience": "Tahun Pengalaman",
       "verifiedStatus": "Status Verifikasi",
       "markVerified": "Tandai tutor ini sebagai terverifikasi",
       "bankName": "Nama Bank",

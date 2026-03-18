@@ -299,6 +299,7 @@
     "searchPlaceholder": "Search tutors...",
     "filtersLabel": "Filters:",
     "specialist": "Specialist",
+    "noRatings": "No ratings yet",
     "form": {
       "fullName": "Full Name",
       "namePlaceholder": "Dr. John Doe",
@@ -307,7 +308,7 @@
       "subjects": "Subjects (comma-separated)",
       "subjectsPlaceholder": "e.g. Math, Physics",
       "rating": "Rating ({{value}})",
-      "yearsOfExperience": "Years of Experience ({{value}})",
+      "yearsOfExperience": "Years of Experience",
       "verifiedStatus": "Verified Status",
       "markVerified": "Mark this tutor as verified",
       "bankName": "Bank Name",
