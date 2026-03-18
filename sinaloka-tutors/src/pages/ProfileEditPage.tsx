@@ -31,11 +31,15 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
     setError(null);
     setLoading(true);
 
+    if (!bankName || !bankAccountNumber || !bankAccountHolder) {
+      return;
+    }
+
     try {
       await api.patch('/tutor/profile', {
-        bank_name: bankName || null,
-        bank_account_number: bankAccountNumber || null,
-        bank_account_holder: bankAccountHolder || null,
+        bank_name: bankName,
+        bank_account_number: bankAccountNumber,
+        bank_account_holder: bankAccountHolder,
       });
       onSaved();
     } catch (err: any) {
@@ -83,6 +87,7 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
             value={bankName}
             onChange={(e) => setBankName(e.target.value)}
             placeholder="e.g., BCA, BNI, Mandiri"
+            required
             className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
           />
         </div>
@@ -94,6 +99,7 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
             value={bankAccountNumber}
             onChange={(e) => setBankAccountNumber(e.target.value)}
             placeholder="e.g., 1234567890"
+            required
             className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
           />
         </div>
@@ -105,6 +111,7 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
             value={bankAccountHolder}
             onChange={(e) => setBankAccountHolder(e.target.value)}
             placeholder="e.g., Budi Santoso"
+            required
             className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
           />
         </div>
