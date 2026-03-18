@@ -8,6 +8,6 @@ export const Slider = ({ value, min = 0, max = 100, step = 1, onChange, classNam
     step={step}
     value={value}
     onChange={(e) => onChange(parseFloat(e.target.value))}
-    className={cn("w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-zinc-900 dark:accent-zinc-100", className)}
+    className={cn("w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary", className)}
   />
 );

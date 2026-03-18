@@ -6,14 +6,14 @@ export const Switch = ({ checked, onChange, disabled, className }: { checked: bo
     disabled={disabled}
     onClick={() => onChange(!checked)}
     className={cn(
-      "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 focus-visible:ring-offset-2 ring-offset-white dark:ring-offset-zinc-950 disabled:opacity-50 disabled:cursor-not-allowed",
-      checked ? "bg-zinc-900 dark:bg-zinc-100" : "bg-zinc-200 dark:bg-zinc-800",
+      "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed",
+      checked ? "bg-primary" : "bg-input",
       className
     )}
   >
     <span
       className={cn(
-        "pointer-events-none block h-4 w-4 rounded-full bg-white dark:bg-zinc-950 shadow-lg ring-0 transition-transform",
+        "pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform",
         checked ? "translate-x-4" : "translate-x-1"
       )}
     />
