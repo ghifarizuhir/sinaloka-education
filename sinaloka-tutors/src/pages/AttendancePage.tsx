@@ -64,7 +64,7 @@ export function AttendancePage({
           <div>
             <h1 className="text-xl font-semibold leading-none mb-1">{selectedClass.subject}</h1>
             <div className="flex items-center gap-3 text-subtle text-[10px] font-bold uppercase tracking-widest">
-              <span className="bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">Scheduled</span>
+              <span className="bg-surface-border px-2 py-0.5 rounded text-subtle">Scheduled</span>
               <span>{tutorName}</span>
             </div>
           </div>

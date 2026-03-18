@@ -79,7 +79,7 @@ export function ResetPasswordPage() {
               <AlertCircle className="w-8 h-8 text-red-400" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight mb-2">Link Tidak Valid</h1>
-            <p className="text-zinc-500 text-sm">Link reset password sudah kedaluwarsa atau tidak valid. Silakan minta link baru.</p>
+            <p className="text-subtle text-sm">Link reset password sudah kedaluwarsa atau tidak valid. Silakan minta link baru.</p>
           </div>
           <Link
             to="/forgot-password"
@@ -93,7 +93,7 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen bg-surface text-surface-foreground font-sans flex items-center justify-center selection:bg-brand/30 selection:text-white">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
