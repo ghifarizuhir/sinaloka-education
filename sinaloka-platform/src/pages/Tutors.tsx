@@ -43,6 +43,7 @@ import {
   useResendInvite,
   useCancelInvite,
 } from '@/src/hooks/useTutors';
+import { useSubjects } from '@/src/hooks/useSubjects';
 import type { Tutor } from '@/src/types/tutor';
 
 const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
@@ -52,11 +53,12 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
   isEditing: boolean;
 }) => {
   const { t } = useTranslation();
+  const { data: subjectsList } = useSubjects();
   const [formData, setFormData] = useState({
     name: initialData?.name ?? '',
     email: initialData?.email ?? '',
     password: '',
-    subjects: (initialData?.subjects ?? []).join(', '),
+    subject_ids: initialData?.tutor_subjects?.map(ts => ts.subject.id) ?? [],
     experience_years: initialData?.experience_years ?? 0,
     rating: initialData?.rating ?? 4.5,
     is_verified: initialData?.is_verified ?? false,
@@ -73,14 +75,10 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const subjectsArr = formData.subjects
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
     onSubmit({
       name: formData.name,
       email: formData.email,
-      subjects: subjectsArr,
+      subject_ids: formData.subject_ids,
       experience_years: Number(formData.experience_years),
       ...(isEditing ? { rating: Number(formData.rating), is_verified: formData.is_verified } : {}),
       bank_name: isEditing ? formData.bank_name : (formData.bank_name || undefined),
@@ -102,8 +100,31 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
           <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder={t('tutors.form.emailPlaceholder')} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="subjects">{t('tutors.form.subjects')}</Label>
-          <Input id="subjects" name="subjects" value={formData.subjects} onChange={handleChange} required placeholder={t('tutors.form.subjectsPlaceholder')} />
+          <Label>{t('tutors.form.subjects')}</Label>
+          <div className="flex flex-wrap gap-2 p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg min-h-[42px]">
+            {(subjectsList ?? []).map(subject => (
+              <label key={subject.id} className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm cursor-pointer transition-colors border",
+                formData.subject_ids.includes(subject.id)
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100"
+                  : "bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400"
+              )}>
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={formData.subject_ids.includes(subject.id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFormData(prev => ({ ...prev, subject_ids: [...prev.subject_ids, subject.id] }));
+                    } else {
+                      setFormData(prev => ({ ...prev, subject_ids: prev.subject_ids.filter(id => id !== subject.id) }));
+                    }
+                  }}
+                />
+                {subject.name}
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -227,7 +248,7 @@ export const Tutors = () => {
   const filteredTutors = useMemo(() => {
     return tutors
       .filter(t => {
-        const subs = t.subjects ?? [];
+        const subs = t.tutor_subjects.map(ts => ts.subject.name);
         const matchesSearch =
           t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           subs.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -244,11 +265,11 @@ export const Tutors = () => {
   }, [tutors, searchQuery, filterSubject, sortBy]);
 
   // collect unique subjects
-  const subjects = Array.from(new Set(tutors.flatMap(t => t.subjects ?? [])));
+  const subjects = Array.from(new Set(tutors.flatMap(t => t.tutor_subjects.map(ts => ts.subject.name))));
 
   const handleAddTutor = (data: any) => {
     inviteTutor.mutate(
-      { email: data.email, name: data.name, subjects: data.subjects, experience_years: data.experience_years },
+      { email: data.email, name: data.name, subject_ids: data.subject_ids, experience_years: data.experience_years },
       {
         onSuccess: () => {
           toast.success(t('tutors.toast.inviteSent'));
@@ -469,8 +490,8 @@ export const Tutors = () => {
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-lg dark:text-zinc-100">{tutor.name}</h4>
                     </div>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate" title={`${(tutor.subjects ?? []).slice(0, 2).join(', ')} ${t('tutors.specialist')}`}>
-                      {(tutor.subjects ?? []).slice(0, 2).join(', ')} {t('tutors.specialist')}
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate" title={`${tutor.tutor_subjects.map(ts => ts.subject.name).slice(0, 2).join(', ')} ${t('tutors.specialist')}`}>
+                      {tutor.tutor_subjects.map(ts => ts.subject.name).slice(0, 2).join(', ')} {t('tutors.specialist')}
                     </p>
                     <div className="mt-1">{getAvailabilityBadge(tutor)}</div>
                   </div>
@@ -494,7 +515,7 @@ export const Tutors = () => {
                   <div>
                     <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mb-1">{t('tutors.card.subjects')}</p>
                     <p className="text-sm font-bold dark:text-zinc-300 flex items-center gap-1">
-                      <Users size={12} className="text-zinc-400" /> {(tutor.subjects ?? []).length}
+                      <Users size={12} className="text-zinc-400" /> {tutor.tutor_subjects.length}
                     </p>
                   </div>
                 </div>
@@ -529,7 +550,7 @@ export const Tutors = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
-                      {(tutor.subjects ?? []).join(', ')}
+                      {tutor.tutor_subjects.map(ts => ts.subject.name).join(', ')}
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">{tutor.experience_years} {t('tutors.card.years')}</td>
                     <td className="px-6 py-4">

@@ -25,7 +25,7 @@ export const tutorsService = {
     api.patch<any>(`/api/admin/tutors/${id}`, data).then((r) => flattenTutor(r.data)),
   remove: (id: string) =>
     api.delete(`/api/admin/tutors/${id}`),
-  invite: (data: { email: string; name?: string; subjects: string[]; experience_years?: number }) =>
+  invite: (data: { email: string; name?: string; subject_ids: string[]; experience_years?: number }) =>
     api.post<any>('/api/admin/tutors/invite', data).then((r) => r.data),
   resendInvite: (id: string) =>
     api.post<any>(`/api/admin/tutors/${id}/resend-invite`).then((r) => r.data),
