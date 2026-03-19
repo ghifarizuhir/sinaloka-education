@@ -9,6 +9,7 @@ import {
   ForbiddenException,
   HttpCode,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -21,6 +22,8 @@ import { MidtransService } from './midtrans.service.js';
 
 @Controller('payments')
 export class PaymentGatewayController {
+  private readonly logger = new Logger(PaymentGatewayController.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
@@ -146,6 +149,11 @@ export class PaymentGatewayController {
     const gatewayConfig = await this.settingsService.getPaymentGatewayConfig(
       payment.institution_id,
     );
+
+    if (!gatewayConfig.midtrans_server_key) {
+      this.logger.warn(`Webhook for payment ${order_id} but gateway not configured`);
+      throw new BadRequestException('Payment gateway not configured for this institution');
+    }
 
     const signatureValid = this.midtransService.verifySignature({
       orderId: order_id,
