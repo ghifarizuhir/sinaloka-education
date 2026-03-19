@@ -80,3 +80,13 @@ export const UpdateAcademicSettingsSchema = z.object({
 export type UpdateAcademicSettingsDto = z.infer<
   typeof UpdateAcademicSettingsSchema
 >;
+
+export const UpdatePaymentGatewaySchema = z.object({
+  midtrans_server_key: z.string().min(1).optional(),
+  midtrans_client_key: z.string().min(1).optional(),
+  is_sandbox: z.boolean().optional(),
+});
+
+export type UpdatePaymentGatewayDto = z.infer<
+  typeof UpdatePaymentGatewaySchema
+>;

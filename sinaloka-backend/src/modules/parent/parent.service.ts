@@ -15,10 +15,14 @@ import {
   ChildSessionsQueryDto,
   ChildPaymentsQueryDto,
 } from './parent.dto.js';
+import { SettingsService } from '../settings/settings.service.js';
 
 @Injectable()
 export class ParentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly settingsService: SettingsService,
+  ) {}
 
   // --- Parent-facing methods ---
 
@@ -310,7 +314,7 @@ export class ParentService {
 
     if (status) where.status = status;
 
-    const [data, total] = await Promise.all([
+    const [data, total, gatewayConfig] = await Promise.all([
       this.prisma.payment.findMany({
         where,
         skip,
@@ -319,17 +323,19 @@ export class ParentService {
         include: {
           enrollment: {
             select: {
-              class: { select: { name: true, subject: true } },
+              class: { select: { name: true } },
             },
           },
         },
       }),
       this.prisma.payment.count({ where }),
+      this.settingsService.getPaymentGatewayConfig(institutionId),
     ]);
 
     return {
       data,
       meta: buildPaginationMeta(total, page, limit),
+      gateway_configured: !!gatewayConfig.midtrans_server_key,
     };
   }
 
