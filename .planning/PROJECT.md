@@ -25,16 +25,14 @@ Every feature visible in the admin UI must be functional — no mock data, no pl
 - ✓ Super Admin institution management — existing
 - ✓ JWT auth, multi-tenancy, RBAC — existing
 - ✓ i18n and Playwright E2E infrastructure — existing
+- ✓ Settings Academic tab: rooms CRUD, subject categories, grade levels, working days — Validated in Phase 1
+- ✓ Rooms from Settings used as dropdown in Class creation/edit form — Validated in Phase 1
+- ✓ Backend API endpoints for academic settings (rooms, subjects, grades, working days) — Validated in Phase 1
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Settings Academic tab: rooms CRUD with backend persistence
-- [ ] Settings Academic tab: subject categories management with backend persistence
-- [ ] Settings Academic tab: grade levels management with backend persistence
-- [ ] Settings Academic tab: working days configuration with backend persistence
-- [ ] Rooms from Settings used as dropdown in Class creation/edit form (replacing free-text input)
 - [ ] Settings Branding tab: primary color persists to backend
 - [ ] Settings Security tab: functional 2FA toggle, password policy settings
 - [ ] Settings Integrations tab: reflects actual integration status from backend
@@ -42,7 +40,6 @@ Every feature visible in the admin UI must be functional — no mock data, no pl
 - [ ] Attendance page: "View History" button functional
 - [ ] Student Payments: "Revenue Analytics", "Export PDF", "Resend Receipt" buttons functional (or removed if not needed)
 - [ ] Operating Expenses: "Export" and "Filters" buttons functional
-- [ ] Backend API endpoints for academic settings (rooms, subjects, grades, working days)
 - [ ] General quality pass: remove all placeholder toasts, connect or remove non-functional UI elements
 
 ### Out of Scope
