@@ -13,10 +13,7 @@ export class SubjectController {
   }
 
   @Get(':id/tutors')
-  async findTutors(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async findTutors(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.subjectService.findTutorsBySubject(user.institutionId!, id);
   }
 }

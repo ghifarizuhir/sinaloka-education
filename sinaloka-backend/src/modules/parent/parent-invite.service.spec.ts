@@ -19,7 +19,11 @@ describe('ParentInviteService', () => {
   beforeEach(async () => {
     prisma = {
       student: { findMany: jest.fn(), count: jest.fn() },
-      parentInvite: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+      parentInvite: {
+        create: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+      },
       user: { findUnique: jest.fn(), create: jest.fn() },
       parent: { create: jest.fn() },
       parentStudent: { createMany: jest.fn() },

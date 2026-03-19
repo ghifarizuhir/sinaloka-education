@@ -14,7 +14,12 @@ describe('ParentService', () => {
 
   beforeEach(async () => {
     prisma = {
-      parent: { findFirst: jest.fn(), findMany: jest.fn(), count: jest.fn(), delete: jest.fn() },
+      parent: {
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
+        delete: jest.fn(),
+      },
       parentStudent: {
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -34,10 +39,7 @@ describe('ParentService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ParentService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [ParentService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<ParentService>(ParentService);
@@ -54,7 +56,9 @@ describe('ParentService', () => {
               name: 'Child 1',
               grade: '5',
               status: 'ACTIVE',
-              enrollments: [{ class: { id: 'c1', name: 'Math', subject: 'Mathematics' } }],
+              enrollments: [
+                { class: { id: 'c1', name: 'Math', subject: 'Mathematics' } },
+              ],
               attendances: [
                 { status: 'PRESENT', homework_done: true },
                 { status: 'ABSENT', homework_done: false },
@@ -157,7 +161,12 @@ describe('ParentService', () => {
     it('should return parent with children', async () => {
       prisma.parent.findFirst.mockResolvedValue({
         id: 'parent-1',
-        user: { id: 'u1', name: 'Parent', email: 'p@test.com', is_active: true },
+        user: {
+          id: 'u1',
+          name: 'Parent',
+          email: 'p@test.com',
+          is_active: true,
+        },
         children: [],
       });
 

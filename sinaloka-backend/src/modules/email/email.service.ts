@@ -11,8 +11,12 @@ export class EmailService {
 
   constructor(private readonly configService: ConfigService) {
     this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY'));
-    this.from = this.configService.get<string>('EMAIL_FROM') || 'Sinaloka <noreply@sinaloka.com>';
-    this.tutorPortalUrl = this.configService.get<string>('TUTOR_PORTAL_URL') || 'http://localhost:5173';
+    this.from =
+      this.configService.get<string>('EMAIL_FROM') ||
+      'Sinaloka <noreply@sinaloka.com>';
+    this.tutorPortalUrl =
+      this.configService.get<string>('TUTOR_PORTAL_URL') ||
+      'http://localhost:5173';
   }
 
   async sendTutorInvitation(params: {
@@ -36,7 +40,10 @@ export class EmailService {
       });
       return { success: true };
     } catch (error) {
-      this.logger.error(`Failed to send invitation email to ${params.to}`, error);
+      this.logger.error(
+        `Failed to send invitation email to ${params.to}`,
+        error,
+      );
       return { success: false, error: 'Failed to send email' };
     }
   }
@@ -60,7 +67,10 @@ export class EmailService {
       });
       return { success: true };
     } catch (error) {
-      this.logger.error(`Failed to send password reset email to ${params.to}`, error);
+      this.logger.error(
+        `Failed to send password reset email to ${params.to}`,
+        error,
+      );
       return { success: false, error: 'Failed to send email' };
     }
   }

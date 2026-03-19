@@ -10,7 +10,13 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { JwtPayload } from '../../common/decorators/current-user.decorator.js';
-import { LoginDto, RefreshTokenDto, LogoutDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto.js';
+import {
+  LoginDto,
+  RefreshTokenDto,
+  LogoutDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './auth.dto.js';
 import { EmailService } from '../email/email.service.js';
 
 export interface TokenResponse {
@@ -55,7 +61,10 @@ export class AuthService {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(
+      dto.password,
+      user.password_hash,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -78,7 +87,10 @@ export class AuthService {
     const refreshTokenValue = crypto.randomBytes(64).toString('hex');
 
     // Parse refresh expiry for DB
-    const refreshExpiry = this.configService.get<string>('JWT_REFRESH_EXPIRY', '7d');
+    const refreshExpiry = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRY',
+      '7d',
+    );
     const expiresAt = this.calculateExpiry(refreshExpiry);
 
     await this.prisma.refreshToken.create({
@@ -121,7 +133,10 @@ export class AuthService {
       throw new UnauthorizedException('User account is inactive');
     }
 
-    if (refreshToken.user.institution && !refreshToken.user.institution.is_active) {
+    if (
+      refreshToken.user.institution &&
+      !refreshToken.user.institution.is_active
+    ) {
       throw new ForbiddenException(
         'Your institution has been deactivated. Contact support.',
       );
@@ -143,7 +158,10 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const newRefreshTokenValue = crypto.randomBytes(64).toString('hex');
 
-    const refreshExpiry = this.configService.get<string>('JWT_REFRESH_EXPIRY', '7d');
+    const refreshExpiry = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRY',
+      '7d',
+    );
     const expiresAt = this.calculateExpiry(refreshExpiry);
 
     await this.prisma.refreshToken.create({
@@ -218,7 +236,9 @@ export class AuthService {
 
     // Always return success to prevent email enumeration
     if (!user || !user.is_active) {
-      return { message: 'Jika email terdaftar, link reset password telah dikirim.' };
+      return {
+        message: 'Jika email terdaftar, link reset password telah dikirim.',
+      };
     }
 
     // Invalidate existing unused tokens
@@ -246,17 +266,27 @@ export class AuthService {
       resetToken: token,
     });
 
-    return { message: 'Jika email terdaftar, link reset password telah dikirim.' };
+    return {
+      message: 'Jika email terdaftar, link reset password telah dikirim.',
+    };
   }
 
-  async validateResetToken(token: string): Promise<{ valid: boolean; email: string }> {
+  async validateResetToken(
+    token: string,
+  ): Promise<{ valid: boolean; email: string }> {
     const resetToken = await this.prisma.passwordResetToken.findUnique({
       where: { token },
       include: { user: true },
     });
 
-    if (!resetToken || resetToken.used_at || resetToken.expires_at < new Date()) {
-      throw new UnauthorizedException('Token tidak valid atau sudah kedaluwarsa.');
+    if (
+      !resetToken ||
+      resetToken.used_at ||
+      resetToken.expires_at < new Date()
+    ) {
+      throw new UnauthorizedException(
+        'Token tidak valid atau sudah kedaluwarsa.',
+      );
     }
 
     return { valid: true, email: resetToken.user.email };
@@ -268,8 +298,14 @@ export class AuthService {
       include: { user: true },
     });
 
-    if (!resetToken || resetToken.used_at || resetToken.expires_at < new Date()) {
-      throw new UnauthorizedException('Token tidak valid atau sudah kedaluwarsa.');
+    if (
+      !resetToken ||
+      resetToken.used_at ||
+      resetToken.expires_at < new Date()
+    ) {
+      throw new UnauthorizedException(
+        'Token tidak valid atau sudah kedaluwarsa.',
+      );
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -303,8 +339,8 @@ export class AuthService {
       return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     }
 
-    const value = parseInt(match[1]!, 10);
-    const unit = match[2]!;
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
 
     switch (unit) {
       case 's':
@@ -324,8 +360,8 @@ export class AuthService {
     const match = expiry.match(/^(\d+)([smhd])$/);
     if (!match) return 900; // Default 15 minutes
 
-    const value = parseInt(match[1]!, 10);
-    const unit = match[2]!;
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
 
     switch (unit) {
       case 's':

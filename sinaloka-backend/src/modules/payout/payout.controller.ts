@@ -60,7 +60,8 @@ export class PayoutController {
   @Get('calculate')
   calculate(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(CalculatePayoutSchema)) query: CalculatePayoutDto,
+    @Query(new ZodValidationPipe(CalculatePayoutSchema))
+    query: CalculatePayoutDto,
   ) {
     return this.payoutService.calculatePayout(user.institutionId!, query);
   }
@@ -82,7 +83,10 @@ export class PayoutController {
   ) {
     const csv = await this.payoutService.exportAudit(user.institutionId!, id);
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="payout-audit-${id}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="payout-audit-${id}.csv"`,
+    );
     res.send(csv);
   }
 

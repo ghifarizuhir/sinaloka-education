@@ -120,7 +120,9 @@ describe('ReportController (integration)', () => {
 
   it('GET /admin/reports/student-progress — should return application/pdf', async () => {
     await request(app.getHttpServer())
-      .get('/admin/reports/student-progress?student_id=10000000-0000-4000-a000-000000000001')
+      .get(
+        '/admin/reports/student-progress?student_id=10000000-0000-4000-a000-000000000001',
+      )
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
       .expect('content-type', /application\/pdf/);

@@ -119,9 +119,9 @@ describe('ExpenseService', () => {
     it('should throw NotFoundException for missing expense', async () => {
       mockPrisma.expense.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.findOne(institutionId, 'bad-id'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(institutionId, 'bad-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

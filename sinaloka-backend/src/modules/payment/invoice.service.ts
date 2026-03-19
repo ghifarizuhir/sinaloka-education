@@ -91,7 +91,7 @@ export class InvoiceService {
     }
 
     const billing = await this.settingsService.getBilling(institutionId);
-    const lang = (institution.default_language === 'en' ? 'en' : 'id') as keyof typeof LABELS;
+    const lang = institution.default_language === 'en' ? 'en' : 'id';
     const l = LABELS[lang];
 
     const invoiceNumber = await this.generateInvoiceNumber(institutionId);
@@ -123,42 +123,47 @@ export class InvoiceService {
       },
     });
 
-    this.logger.log(`Invoice ${invoiceNumber} generated for payment ${paymentId}`);
+    this.logger.log(
+      `Invoice ${invoiceNumber} generated for payment ${paymentId}`,
+    );
     return updated;
   }
 
   private async generateInvoiceNumber(institutionId: string): Promise<string> {
     // Use a transaction with serializable isolation to prevent race conditions
-    return this.prisma.$transaction(async (tx) => {
-      const institution = await tx.institution.findUnique({
-        where: { id: institutionId },
-        select: { settings: true },
-      });
+    return this.prisma.$transaction(
+      async (tx) => {
+        const institution = await tx.institution.findUnique({
+          where: { id: institutionId },
+          select: { settings: true },
+        });
 
-      const settings = (institution?.settings as any) ?? {};
-      const billing = settings.billing ?? {};
-      const prefix = billing.invoice_prefix ?? 'INV-';
-      const counter = billing.invoice_counter ?? {};
+        const settings = (institution?.settings as any) ?? {};
+        const billing = settings.billing ?? {};
+        const prefix = billing.invoice_prefix ?? 'INV-';
+        const counter = billing.invoice_counter ?? {};
 
-      const now = new Date();
-      const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const yyyymm = monthKey.replace('-', '');
+        const now = new Date();
+        const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const yyyymm = monthKey.replace('-', '');
 
-      const currentCount = (counter[monthKey] ?? 0) + 1;
-      counter[monthKey] = currentCount;
+        const currentCount = (counter[monthKey] ?? 0) + 1;
+        counter[monthKey] = currentCount;
 
-      await tx.institution.update({
-        where: { id: institutionId },
-        data: {
-          settings: {
-            ...settings,
-            billing: { ...billing, invoice_counter: counter },
+        await tx.institution.update({
+          where: { id: institutionId },
+          data: {
+            settings: {
+              ...settings,
+              billing: { ...billing, invoice_counter: counter },
+            },
           },
-        },
-      });
+        });
 
-      return `${prefix}${yyyymm}-${String(currentCount).padStart(3, '0')}`;
-    }, { isolationLevel: 'Serializable' });
+        return `${prefix}${yyyymm}-${String(currentCount).padStart(3, '0')}`;
+      },
+      { isolationLevel: 'Serializable' },
+    );
   }
 
   private async generatePdf(params: {
@@ -169,7 +174,8 @@ export class InvoiceService {
     labels: (typeof LABELS)['id'];
     lang: string;
   }): Promise<Buffer> {
-    const { institution, payment, invoiceNumber, bankAccounts, labels } = params;
+    const { institution, payment, invoiceNumber, bankAccounts, labels } =
+      params;
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
     const chunks: Buffer[] = [];
     doc.on('data', (c: Buffer) => chunks.push(c));
@@ -190,7 +196,7 @@ export class InvoiceService {
       });
 
     // --- Header ---
-    let headerY = 50;
+    const headerY = 50;
     if (institution.logo_url) {
       try {
         const logoPath = path.resolve(this.uploadDir, institution.logo_url);
@@ -208,7 +214,10 @@ export class InvoiceService {
     }
 
     const textX = institution.logo_url ? 110 : 50;
-    doc.fontSize(16).font('Helvetica-Bold').text(institution.name, textX, headerY);
+    doc
+      .fontSize(16)
+      .font('Helvetica-Bold')
+      .text(institution.name, textX, headerY);
     doc.fontSize(9).font('Helvetica');
     if (institution.address) doc.text(institution.address, textX);
     const contactParts = [institution.phone, institution.email].filter(Boolean);
@@ -221,7 +230,10 @@ export class InvoiceService {
     doc.moveDown();
 
     // --- Invoice title ---
-    doc.fontSize(20).font('Helvetica-Bold').text(labels.invoice, { align: 'center' });
+    doc
+      .fontSize(20)
+      .font('Helvetica-Bold')
+      .text(labels.invoice, { align: 'center' });
     doc.moveDown(0.5);
     doc.fontSize(10).font('Helvetica');
     doc.text(`${labels.invoiceNumber}: ${invoiceNumber}`, { align: 'center' });
@@ -249,20 +261,31 @@ export class InvoiceService {
     doc.text(labels.description, 50, tableY);
     doc.text(labels.amount, 400, tableY, { align: 'right', width: 145 });
 
-    doc.moveTo(50, tableY + 18).lineTo(545, tableY + 18).stroke('#e4e4e7');
+    doc
+      .moveTo(50, tableY + 18)
+      .lineTo(545, tableY + 18)
+      .stroke('#e4e4e7');
 
     doc.font('Helvetica').fontSize(10);
     const itemY = tableY + 26;
     const className = payment.enrollment?.class?.name ?? 'Payment';
     doc.text(className, 50, itemY);
-    doc.text(formatAmount(Number(payment.amount)), 400, itemY, { align: 'right', width: 145 });
+    doc.text(formatAmount(Number(payment.amount)), 400, itemY, {
+      align: 'right',
+      width: 145,
+    });
 
     doc.moveDown(3);
 
     // Total
     doc.font('Helvetica-Bold');
     doc.text(labels.total, 300, doc.y);
-    doc.text(formatAmount(Number(payment.amount)), 400, doc.y - doc.currentLineHeight(), { align: 'right', width: 145 });
+    doc.text(
+      formatAmount(Number(payment.amount)),
+      400,
+      doc.y - doc.currentLineHeight(),
+      { align: 'right', width: 145 },
+    );
     doc.font('Helvetica');
     doc.moveDown();
 
@@ -273,7 +296,9 @@ export class InvoiceService {
       OVERDUE: labels.statusOverdue,
     };
     doc.text(`${labels.dueDate}: ${formatDate(payment.due_date)}`);
-    doc.text(`${labels.status}: ${statusMap[payment.status] ?? payment.status}`);
+    doc.text(
+      `${labels.status}: ${statusMap[payment.status] ?? payment.status}`,
+    );
     doc.moveDown();
 
     // --- Bank accounts ---
@@ -286,17 +311,27 @@ export class InvoiceService {
       doc.moveDown(0.5);
 
       for (const acc of bankAccounts) {
-        doc.text(`${acc.bank_name} — ${acc.account_number} a/n ${acc.account_holder}`);
+        doc.text(
+          `${acc.bank_name} — ${acc.account_number} a/n ${acc.account_holder}`,
+        );
       }
       doc.moveDown();
     }
 
     // --- Footer ---
-    doc.moveTo(50, doc.y + 10).lineTo(545, doc.y + 10).stroke('#e4e4e7');
+    doc
+      .moveTo(50, doc.y + 10)
+      .lineTo(545, doc.y + 10)
+      .stroke('#e4e4e7');
     doc.moveDown(2);
-    doc.fontSize(8).fillColor('#a1a1aa').text(labels.footer, { align: 'center' });
+    doc
+      .fontSize(8)
+      .fillColor('#a1a1aa')
+      .text(labels.footer, { align: 'center' });
 
     doc.end();
-    return new Promise((resolve) => doc.on('end', () => resolve(Buffer.concat(chunks))));
+    return new Promise((resolve) =>
+      doc.on('end', () => resolve(Buffer.concat(chunks))),
+    );
   }
 }

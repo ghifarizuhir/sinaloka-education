@@ -61,11 +61,7 @@ export class UploadController {
     ) {
       throw new ForbiddenException('Access denied');
     }
-    const abs = this.uploadService.getFilePath(
-      institutionId,
-      type,
-      filename,
-    );
+    const abs = this.uploadService.getFilePath(institutionId, type, filename);
     res.sendFile(abs);
   }
 }

@@ -23,8 +23,7 @@ describe('UploadService', () => {
   });
 
   afterAll(() => {
-    if (fs.existsSync(TEST_DIR))
-      fs.rmSync(TEST_DIR, { recursive: true });
+    if (fs.existsSync(TEST_DIR)) fs.rmSync(TEST_DIR, { recursive: true });
   });
 
   it('saves a valid file and returns relative path', async () => {
@@ -45,9 +44,9 @@ describe('UploadService', () => {
       size: 100,
       buffer: Buffer.alloc(0),
     } as Express.Multer.File;
-    await expect(
-      service.saveFile(file, 'inst-1', 'proofs'),
-    ).rejects.toThrow('not allowed');
+    await expect(service.saveFile(file, 'inst-1', 'proofs')).rejects.toThrow(
+      'not allowed',
+    );
   });
 
   it('rejects file exceeding 5MB', async () => {
@@ -56,21 +55,19 @@ describe('UploadService', () => {
       size: 6 * 1024 * 1024,
       buffer: Buffer.alloc(0),
     } as Express.Multer.File;
-    await expect(
-      service.saveFile(file, 'inst-1', 'proofs'),
-    ).rejects.toThrow('5MB');
+    await expect(service.saveFile(file, 'inst-1', 'proofs')).rejects.toThrow(
+      '5MB',
+    );
   });
 
   it('getFilePath rejects path traversal', () => {
-    expect(() =>
-      service.getFilePath('inst-1', '..', 'etc/passwd'),
-    ).toThrow();
+    expect(() => service.getFilePath('inst-1', '..', 'etc/passwd')).toThrow();
   });
 
   it('getFilePath rejects invalid extension', () => {
-    expect(() =>
-      service.getFilePath('inst-1', 'proofs', 'file.exe'),
-    ).toThrow('Invalid file type');
+    expect(() => service.getFilePath('inst-1', 'proofs', 'file.exe')).toThrow(
+      'Invalid file type',
+    );
   });
 
   it('getFilePath rejects non-existent file', () => {

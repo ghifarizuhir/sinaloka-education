@@ -85,10 +85,7 @@ describe('TutorService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        TutorService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [TutorService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<TutorService>(TutorService);
@@ -207,9 +204,9 @@ describe('TutorService', () => {
     it('should throw NotFoundException if tutor not found', async () => {
       prisma.tutor.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.findOne('inst-1', 'nonexistent'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('inst-1', 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -264,7 +261,9 @@ describe('TutorService', () => {
       prisma.$transaction.mockImplementation(async (fn: Function) => {
         const tx = {
           tutor: { delete: jest.fn().mockResolvedValue(mockTutor) },
-          refreshToken: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+          refreshToken: {
+            deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+          },
           user: { delete: jest.fn().mockResolvedValue(mockUser) },
         };
         return fn(tx);
@@ -278,9 +277,9 @@ describe('TutorService', () => {
     it('should throw NotFoundException if tutor not found', async () => {
       prisma.tutor.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.delete('inst-1', 'nonexistent'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.delete('inst-1', 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -196,9 +196,9 @@ describe('PayoutController (integration)', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(
-      res.body.data.every((p: any) => p.status === 'PROCESSING'),
-    ).toBe(true);
+    expect(res.body.data.every((p: any) => p.status === 'PROCESSING')).toBe(
+      true,
+    );
   });
 
   it('GET /admin/payouts/:id — should return 404 for nonexistent', async () => {
@@ -226,8 +226,6 @@ describe('PayoutController (integration)', () => {
   });
 
   it('GET /admin/payouts — should return 401 without token', async () => {
-    await request(app.getHttpServer())
-      .get('/admin/payouts')
-      .expect(401);
+    await request(app.getHttpServer()).get('/admin/payouts').expect(401);
   });
 });

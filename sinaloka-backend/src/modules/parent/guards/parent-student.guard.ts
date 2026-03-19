@@ -42,9 +42,7 @@ export class ParentStudentGuard implements CanActivate {
     });
 
     if (!link) {
-      throw new ForbiddenException(
-        'You do not have access to this student',
-      );
+      throw new ForbiddenException('You do not have access to this student');
     }
 
     return true;

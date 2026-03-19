@@ -58,8 +58,24 @@ describe('EnrollmentService', () => {
     institution_id: 'inst-1',
     name: 'Class A',
     schedules: [
-      { id: 'sched-a1', day: 'Monday', start_time: '14:00', end_time: '15:30', class_id: 'class-a', created_at: new Date(), updated_at: new Date() },
-      { id: 'sched-a2', day: 'Wednesday', start_time: '14:00', end_time: '15:30', class_id: 'class-a', created_at: new Date(), updated_at: new Date() },
+      {
+        id: 'sched-a1',
+        day: 'Monday',
+        start_time: '14:00',
+        end_time: '15:30',
+        class_id: 'class-a',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        id: 'sched-a2',
+        day: 'Wednesday',
+        start_time: '14:00',
+        end_time: '15:30',
+        class_id: 'class-a',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
     ],
   };
 
@@ -68,7 +84,15 @@ describe('EnrollmentService', () => {
     institution_id: 'inst-1',
     name: 'Class B',
     schedules: [
-      { id: 'sched-b1', day: 'Monday', start_time: '15:00', end_time: '16:30', class_id: 'class-b', created_at: new Date(), updated_at: new Date() },
+      {
+        id: 'sched-b1',
+        day: 'Monday',
+        start_time: '15:00',
+        end_time: '16:30',
+        class_id: 'class-b',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
     ],
   };
 
@@ -77,8 +101,24 @@ describe('EnrollmentService', () => {
     institution_id: 'inst-1',
     name: 'Class C',
     schedules: [
-      { id: 'sched-c1', day: 'Tuesday', start_time: '14:00', end_time: '15:30', class_id: 'class-c', created_at: new Date(), updated_at: new Date() },
-      { id: 'sched-c2', day: 'Thursday', start_time: '14:00', end_time: '15:30', class_id: 'class-c', created_at: new Date(), updated_at: new Date() },
+      {
+        id: 'sched-c1',
+        day: 'Tuesday',
+        start_time: '14:00',
+        end_time: '15:30',
+        class_id: 'class-c',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        id: 'sched-c2',
+        day: 'Thursday',
+        start_time: '14:00',
+        end_time: '15:30',
+        class_id: 'class-c',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
     ],
   };
 
@@ -157,7 +197,15 @@ describe('EnrollmentService', () => {
         id: 'class-d',
         name: 'Class D',
         schedules: [
-          { id: 'sched-d1', day: 'Monday', start_time: '16:00', end_time: '17:00', class_id: 'class-d', created_at: new Date(), updated_at: new Date() },
+          {
+            id: 'sched-d1',
+            day: 'Monday',
+            start_time: '16:00',
+            end_time: '17:00',
+            class_id: 'class-d',
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
         ],
       };
 
@@ -181,7 +229,15 @@ describe('EnrollmentService', () => {
         institution_id: 'inst-1',
         name: 'Adjacent',
         schedules: [
-          { id: 'sched-adj1', day: 'Monday', start_time: '15:30', end_time: '17:00', class_id: 'class-adj', created_at: new Date(), updated_at: new Date() },
+          {
+            id: 'sched-adj1',
+            day: 'Monday',
+            start_time: '15:30',
+            end_time: '17:00',
+            class_id: 'class-adj',
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
         ],
       };
 
@@ -363,9 +419,9 @@ describe('EnrollmentService', () => {
     it('should throw NotFoundException if enrollment not found', async () => {
       prisma.enrollment.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.findOne('inst-1', 'nonexistent'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('inst-1', 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -416,9 +472,9 @@ describe('EnrollmentService', () => {
     it('should throw NotFoundException if enrollment not found', async () => {
       prisma.enrollment.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.delete('inst-1', 'nonexistent'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.delete('inst-1', 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

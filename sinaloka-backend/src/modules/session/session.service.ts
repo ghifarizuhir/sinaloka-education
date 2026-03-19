@@ -17,7 +17,14 @@ import type {
 } from './session.dto.js';
 import { SessionStatus } from '../../../generated/prisma/client.js';
 import { PayoutService } from '../payout/payout.service.js';
-import { addDays, getDay, isAfter, isBefore, isEqual, startOfDay } from 'date-fns';
+import {
+  addDays,
+  getDay,
+  isAfter,
+  isBefore,
+  isEqual,
+  startOfDay,
+} from 'date-fns';
 
 const DAY_MAP: Record<string, number> = {
   Sunday: 0,
@@ -38,7 +45,9 @@ export class SessionService {
 
   private readonly sessionInclude = {
     class: {
-      include: { tutor: { include: { user: { select: { id: true, name: true } } } } },
+      include: {
+        tutor: { include: { user: { select: { id: true, name: true } } } },
+      },
     },
   };
 
@@ -50,14 +59,20 @@ export class SessionService {
             ...session.class,
             fee: Number(session.class.fee),
             tutor: session.class.tutor
-              ? { id: session.class.tutor.id, name: session.class.tutor.user.name }
+              ? {
+                  id: session.class.tutor.id,
+                  name: session.class.tutor.user.name,
+                }
               : null,
           }
         : null,
     };
   }
 
-  private async validateClassForSession(classId: string, institutionId: string) {
+  private async validateClassForSession(
+    classId: string,
+    institutionId: string,
+  ) {
     const classRecord = await this.prisma.class.findUnique({
       where: { id: classId, institution_id: institutionId },
       include: { schedules: true },
@@ -92,7 +107,16 @@ export class SessionService {
   }
 
   async findAll(institutionId: string, query: SessionQueryDto) {
-    const { page, limit, class_id, status, date_from, date_to, sort_by, sort_order } = query;
+    const {
+      page,
+      limit,
+      class_id,
+      status,
+      date_from,
+      date_to,
+      sort_by,
+      sort_order,
+    } = query;
 
     const where: any = { institution_id: institutionId };
 
@@ -134,10 +158,18 @@ export class SessionService {
       where: { id, institution_id: institutionId },
       include: {
         class: {
-          include: { tutor: { include: { user: { select: { id: true, name: true, email: true } } } } },
+          include: {
+            tutor: {
+              include: {
+                user: { select: { id: true, name: true, email: true } },
+              },
+            },
+          },
         },
         attendances: {
-          include: { student: { select: { id: true, name: true, grade: true } } },
+          include: {
+            student: { select: { id: true, name: true, grade: true } },
+          },
           orderBy: { created_at: 'desc' },
         },
       },
@@ -154,7 +186,11 @@ export class SessionService {
             ...session.class,
             fee: Number(session.class.fee),
             tutor: session.class.tutor
-              ? { id: session.class.tutor.id, name: session.class.tutor.user.name, email: session.class.tutor.user.email }
+              ? {
+                  id: session.class.tutor.id,
+                  name: session.class.tutor.user.name,
+                  email: session.class.tutor.user.email,
+                }
               : null,
           }
         : null,
@@ -172,13 +208,14 @@ export class SessionService {
     const existing = await this.findOne(institutionId, id);
 
     if (existing.status === 'COMPLETED') {
-      throw new BadRequestException(
-        'Cannot edit a completed session',
-      );
+      throw new BadRequestException('Cannot edit a completed session');
     }
 
     const sessionDate = new Date(existing.date);
-    if (isBefore(sessionDate, startOfDay(new Date())) && dto.status !== 'COMPLETED') {
+    if (
+      isBefore(sessionDate, startOfDay(new Date())) &&
+      dto.status !== 'COMPLETED'
+    ) {
       throw new BadRequestException(
         'Cannot edit a session whose date has already passed',
       );
@@ -190,7 +227,13 @@ export class SessionService {
     if (dto.status === 'COMPLETED') {
       const sessionClass = await this.prisma.class.findUnique({
         where: { id: existing.class?.id ?? '' },
-        select: { tutor_fee: true, tutor_fee_mode: true, tutor_fee_per_student: true, tutor_id: true, name: true },
+        select: {
+          tutor_fee: true,
+          tutor_fee_mode: true,
+          tutor_fee_per_student: true,
+          tutor_id: true,
+          name: true,
+        },
       });
       if (sessionClass?.tutor_fee) {
         data.tutor_fee_amount = sessionClass.tutor_fee;
@@ -219,7 +262,10 @@ export class SessionService {
             period_end: sessionDate,
           });
         }
-      } else if (feeMode === 'PER_STUDENT_ATTENDANCE' && sessionClass?.tutor_id) {
+      } else if (
+        feeMode === 'PER_STUDENT_ATTENDANCE' &&
+        sessionClass?.tutor_id
+      ) {
         const feePerStudent = Number(sessionClass.tutor_fee_per_student ?? 0);
         if (feePerStudent > 0) {
           const attendingCount = await this.prisma.attendance.count({
@@ -276,7 +322,9 @@ export class SessionService {
     );
 
     if (isAfter(dto.date_from, dto.date_to)) {
-      throw new BadRequestException('date_from must be before or equal to date_to');
+      throw new BadRequestException(
+        'date_from must be before or equal to date_to',
+      );
     }
 
     // Build a map of day-of-week number → schedule (with start_time/end_time)
@@ -357,7 +405,8 @@ export class SessionService {
       throw new NotFoundException('Tutor profile not found');
     }
 
-    const { page, limit, status, date_from, date_to, sort_by, sort_order } = query;
+    const { page, limit, status, date_from, date_to, sort_by, sort_order } =
+      query;
 
     const where: any = {
       class: { tutor_id: tutor.id },
@@ -526,7 +575,9 @@ export class SessionService {
     });
 
     if (!tutor || session.class.tutor_id !== tutor.id) {
-      throw new ForbiddenException('You can only view students for your own sessions');
+      throw new ForbiddenException(
+        'You can only view students for your own sessions',
+      );
     }
 
     const enrollments = await this.prisma.enrollment.findMany({
@@ -549,9 +600,7 @@ export class SessionService {
       where: { session_id: sessionId },
     });
 
-    const attendanceMap = new Map(
-      attendances.map((a) => [a.student_id, a]),
-    );
+    const attendanceMap = new Map(attendances.map((a) => [a.student_id, a]));
 
     return {
       students: enrollments.map((e) => {
@@ -594,9 +643,7 @@ export class SessionService {
       where: { session_id: sessionId },
     });
 
-    const attendanceMap = new Map(
-      attendances.map((a) => [a.student_id, a]),
-    );
+    const attendanceMap = new Map(attendances.map((a) => [a.student_id, a]));
 
     return {
       students: enrollments.map((e) => {
@@ -614,7 +661,11 @@ export class SessionService {
     };
   }
 
-  async completeSession(userId: string, sessionId: string, dto: CompleteSessionDto) {
+  async completeSession(
+    userId: string,
+    sessionId: string,
+    dto: CompleteSessionDto,
+  ) {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
       include: this.sessionInclude,
@@ -641,7 +692,12 @@ export class SessionService {
     // Copy tutor fee from class
     const classForFee = await this.prisma.class.findUnique({
       where: { id: session.class_id },
-      select: { tutor_fee: true, tutor_fee_mode: true, tutor_fee_per_student: true, name: true },
+      select: {
+        tutor_fee: true,
+        tutor_fee_mode: true,
+        tutor_fee_per_student: true,
+        name: true,
+      },
     });
 
     const tutorFee = Number(classForFee?.tutor_fee ?? 0);

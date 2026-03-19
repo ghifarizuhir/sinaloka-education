@@ -34,7 +34,11 @@ export class EnrollmentService {
   ): boolean {
     for (const a of schedulesA) {
       for (const b of schedulesB) {
-        if (a.day === b.day && a.start_time < b.end_time && b.start_time < a.end_time) {
+        if (
+          a.day === b.day &&
+          a.start_time < b.end_time &&
+          b.start_time < a.end_time
+        ) {
           return true;
         }
       }
@@ -50,9 +54,7 @@ export class EnrollmentService {
     });
 
     if (!targetClass) {
-      throw new NotFoundException(
-        `Class with ID "${dto.class_id}" not found`,
-      );
+      throw new NotFoundException(`Class with ID "${dto.class_id}" not found`);
     }
 
     // 2. Get all student's existing ACTIVE/TRIAL enrollments with class schedule
@@ -77,7 +79,9 @@ export class EnrollmentService {
     for (const enrollment of existingEnrollments) {
       const enrolledClass = enrollment.class;
 
-      if (this.schedulesConflict(targetClass.schedules, enrolledClass.schedules)) {
+      if (
+        this.schedulesConflict(targetClass.schedules, enrolledClass.schedules)
+      ) {
         conflictingClasses.push({
           id: enrolledClass.id,
           name: enrolledClass.name,
@@ -118,9 +122,7 @@ export class EnrollmentService {
     });
 
     if (existing) {
-      throw new ConflictException(
-        'Student is already enrolled in this class',
-      );
+      throw new ConflictException('Student is already enrolled in this class');
     }
 
     const enrollment = await this.prisma.enrollment.create({
@@ -255,7 +257,10 @@ export class EnrollmentService {
     });
   }
 
-  async exportToCsv(query: Record<string, any>, institutionId: string): Promise<string> {
+  async exportToCsv(
+    query: Record<string, any>,
+    institutionId: string,
+  ): Promise<string> {
     const where: any = { institution_id: institutionId };
     if (query.status) where.status = query.status;
     if (query.class_id) where.class_id = query.class_id;
@@ -343,7 +348,10 @@ export class EnrollmentService {
           where: { id: student_id, institution_id: institutionId },
         });
         if (!student) {
-          errors.push({ row: rowNum, message: `Student ${student_id} not found in institution` });
+          errors.push({
+            row: rowNum,
+            message: `Student ${student_id} not found in institution`,
+          });
           continue;
         }
 
@@ -352,7 +360,10 @@ export class EnrollmentService {
           where: { id: class_id, institution_id: institutionId },
         });
         if (!cls) {
-          errors.push({ row: rowNum, message: `Class ${class_id} not found in institution` });
+          errors.push({
+            row: rowNum,
+            message: `Class ${class_id} not found in institution`,
+          });
           continue;
         }
 
@@ -362,7 +373,10 @@ export class EnrollmentService {
         });
         if (existing) {
           skipped++;
-          errors.push({ row: rowNum, message: `Student already enrolled in this class` });
+          errors.push({
+            row: rowNum,
+            message: `Student already enrolled in this class`,
+          });
           continue;
         }
 
@@ -376,7 +390,10 @@ export class EnrollmentService {
             .map((c) => c.name)
             .join(', ');
           skipped++;
-          errors.push({ row: rowNum, message: `Schedule conflict with: ${names}` });
+          errors.push({
+            row: rowNum,
+            message: `Schedule conflict with: ${names}`,
+          });
           continue;
         }
 

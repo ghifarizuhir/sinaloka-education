@@ -37,10 +37,7 @@ describe('StudentService CSV', () => {
     };
 
     const mod: TestingModule = await Test.createTestingModule({
-      providers: [
-        StudentService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [StudentService, { provide: PrismaService, useValue: prisma }],
     }).compile();
     service = mod.get(StudentService);
     jest.clearAllMocks();

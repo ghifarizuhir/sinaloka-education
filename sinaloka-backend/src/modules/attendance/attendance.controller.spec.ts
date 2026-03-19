@@ -21,10 +21,7 @@ describe('AttendanceController (integration)', () => {
   let studentId: string;
   let attendanceId: string;
 
-  const testEmails = [
-    'att-ctrl-admin@test.com',
-    'att-ctrl-tutor@test.com',
-  ];
+  const testEmails = ['att-ctrl-admin@test.com', 'att-ctrl-tutor@test.com'];
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -134,9 +131,7 @@ describe('AttendanceController (integration)', () => {
         capacity: 20,
         fee: 100000,
         schedules: {
-          create: [
-            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
-          ],
+          create: [{ day: 'Monday', start_time: '14:00', end_time: '15:30' }],
         },
         status: 'ACTIVE',
       },

@@ -45,10 +45,7 @@ describe('InstitutionController (integration)', () => {
       where: {
         user: {
           email: {
-            in: [
-              'inst-super-admin@test.com',
-              'inst-admin@test.com',
-            ],
+            in: ['inst-super-admin@test.com', 'inst-admin@test.com'],
           },
         },
       },
@@ -56,10 +53,7 @@ describe('InstitutionController (integration)', () => {
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: [
-            'inst-super-admin@test.com',
-            'inst-admin@test.com',
-          ],
+          in: ['inst-super-admin@test.com', 'inst-admin@test.com'],
         },
       },
     });

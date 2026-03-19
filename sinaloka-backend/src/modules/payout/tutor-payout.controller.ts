@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  NotFoundException,
-} from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';

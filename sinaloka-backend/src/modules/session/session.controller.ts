@@ -87,17 +87,28 @@ export class SessionController {
   @Post('generate')
   generate(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(GenerateSessionsSchema)) dto: GenerateSessionsDto,
+    @Body(new ZodValidationPipe(GenerateSessionsSchema))
+    dto: GenerateSessionsDto,
   ) {
-    return this.sessionService.generateSessions(user.institutionId!, user.userId, dto);
+    return this.sessionService.generateSessions(
+      user.institutionId!,
+      user.userId,
+      dto,
+    );
   }
 
   @Patch(':id/approve')
   approveReschedule(
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(new ZodValidationPipe(ApproveRescheduleSchema)) dto: ApproveRescheduleDto,
+    @Body(new ZodValidationPipe(ApproveRescheduleSchema))
+    dto: ApproveRescheduleDto,
   ) {
-    return this.sessionService.approveReschedule(user.institutionId!, user.userId, id, dto);
+    return this.sessionService.approveReschedule(
+      user.institutionId!,
+      user.userId,
+      id,
+      dto,
+    );
   }
 }

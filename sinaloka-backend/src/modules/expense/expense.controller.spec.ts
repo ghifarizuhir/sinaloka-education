@@ -166,9 +166,7 @@ describe('ExpenseController (integration)', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(
-      res.body.data.every((e: any) => e.category === 'RENT'),
-    ).toBe(true);
+    expect(res.body.data.every((e: any) => e.category === 'RENT')).toBe(true);
   });
 
   it('GET /admin/expenses/:id — should return 404 for nonexistent', async () => {
@@ -195,8 +193,6 @@ describe('ExpenseController (integration)', () => {
   });
 
   it('GET /admin/expenses — should return 401 without token', async () => {
-    await request(app.getHttpServer())
-      .get('/admin/expenses')
-      .expect(401);
+    await request(app.getHttpServer()).get('/admin/expenses').expect(401);
   });
 });

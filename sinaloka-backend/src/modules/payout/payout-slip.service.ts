@@ -91,7 +91,7 @@ export class PayoutSlipService {
       throw new NotFoundException('Institution not found');
     }
 
-    const lang = (institution.default_language === 'en' ? 'en' : 'id') as keyof typeof LABELS;
+    const lang = institution.default_language === 'en' ? 'en' : 'id';
     const l = LABELS[lang];
 
     const slipNumber = await this.generateSlipNumber(institutionId);
@@ -138,40 +138,45 @@ export class PayoutSlipService {
       },
     });
 
-    this.logger.log(`Payout slip ${slipNumber} generated for payout ${payoutId}`);
+    this.logger.log(
+      `Payout slip ${slipNumber} generated for payout ${payoutId}`,
+    );
     return this.flattenPayoutTutor(updated);
   }
 
   private async generateSlipNumber(institutionId: string): Promise<string> {
-    return this.prisma.$transaction(async (tx) => {
-      const institution = await tx.institution.findUnique({
-        where: { id: institutionId },
-        select: { settings: true },
-      });
+    return this.prisma.$transaction(
+      async (tx) => {
+        const institution = await tx.institution.findUnique({
+          where: { id: institutionId },
+          select: { settings: true },
+        });
 
-      const settings = (institution?.settings as any) ?? {};
-      const billing = settings.billing ?? {};
-      const counter = billing.payout_slip_counter ?? {};
+        const settings = (institution?.settings as any) ?? {};
+        const billing = settings.billing ?? {};
+        const counter = billing.payout_slip_counter ?? {};
 
-      const now = new Date();
-      const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const yyyymm = monthKey.replace('-', '');
+        const now = new Date();
+        const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const yyyymm = monthKey.replace('-', '');
 
-      const currentCount = (counter[monthKey] ?? 0) + 1;
-      counter[monthKey] = currentCount;
+        const currentCount = (counter[monthKey] ?? 0) + 1;
+        counter[monthKey] = currentCount;
 
-      await tx.institution.update({
-        where: { id: institutionId },
-        data: {
-          settings: {
-            ...settings,
-            billing: { ...billing, payout_slip_counter: counter },
+        await tx.institution.update({
+          where: { id: institutionId },
+          data: {
+            settings: {
+              ...settings,
+              billing: { ...billing, payout_slip_counter: counter },
+            },
           },
-        },
-      });
+        });
 
-      return `PAY-${yyyymm}-${String(currentCount).padStart(3, '0')}`;
-    }, { isolationLevel: 'Serializable' });
+        return `PAY-${yyyymm}-${String(currentCount).padStart(3, '0')}`;
+      },
+      { isolationLevel: 'Serializable' },
+    );
   }
 
   private async generatePdf(params: {
@@ -203,7 +208,7 @@ export class PayoutSlipService {
       });
 
     // --- Header ---
-    let headerY = 50;
+    const headerY = 50;
     if (institution.logo_url) {
       try {
         const logoPath = path.resolve(this.uploadDir, institution.logo_url);
@@ -220,7 +225,10 @@ export class PayoutSlipService {
     }
 
     const textX = institution.logo_url ? 110 : 50;
-    doc.fontSize(16).font('Helvetica-Bold').text(institution.name, textX, headerY);
+    doc
+      .fontSize(16)
+      .font('Helvetica-Bold')
+      .text(institution.name, textX, headerY);
     doc.fontSize(9).font('Helvetica');
     if (institution.address) doc.text(institution.address, textX);
     const contactParts = [institution.phone, institution.email].filter(Boolean);
@@ -233,7 +241,10 @@ export class PayoutSlipService {
     doc.moveDown();
 
     // --- Slip title ---
-    doc.fontSize(20).font('Helvetica-Bold').text(labels.payoutSlip, { align: 'center' });
+    doc
+      .fontSize(20)
+      .font('Helvetica-Bold')
+      .text(labels.payoutSlip, { align: 'center' });
     doc.moveDown(0.5);
     doc.fontSize(10).font('Helvetica');
     doc.text(`${labels.slipNumber}: ${slipNumber}`, { align: 'center' });
@@ -245,7 +256,10 @@ export class PayoutSlipService {
 
     // --- Pay To ---
     const tutorName = payout.tutor?.user?.name ?? payout.tutor?.name ?? '-';
-    const bankInfo = [payout.tutor?.bank_name, payout.tutor?.bank_account_number]
+    const bankInfo = [
+      payout.tutor?.bank_name,
+      payout.tutor?.bank_account_number,
+    ]
       .filter(Boolean)
       .join(' - ');
 
@@ -275,17 +289,25 @@ export class PayoutSlipService {
       doc.text(labels.className, 170, tableY, { width: 220 });
       doc.text(labels.fee, 390, tableY, { align: 'right', width: 155 });
 
-      doc.moveTo(50, tableY + 16).lineTo(545, tableY + 16).stroke('#e4e4e7');
+      doc
+        .moveTo(50, tableY + 16)
+        .lineTo(545, tableY + 16)
+        .stroke('#e4e4e7');
 
       doc.font('Helvetica').fontSize(9);
       let rowY = tableY + 24;
       for (const session of sessions) {
         doc.text(formatDate(session.date), 50, rowY, { width: 120 });
         doc.text(session.class?.name ?? '-', 170, rowY, { width: 220 });
-        doc.text(formatAmount(Number(session.tutor_fee_amount ?? 0)), 390, rowY, {
-          align: 'right',
-          width: 155,
-        });
+        doc.text(
+          formatAmount(Number(session.tutor_fee_amount ?? 0)),
+          390,
+          rowY,
+          {
+            align: 'right',
+            width: 155,
+          },
+        );
         rowY += 18;
       }
 
@@ -318,12 +340,20 @@ export class PayoutSlipService {
     doc.moveDown();
 
     // --- Footer ---
-    doc.moveTo(50, doc.y + 10).lineTo(545, doc.y + 10).stroke('#e4e4e7');
+    doc
+      .moveTo(50, doc.y + 10)
+      .lineTo(545, doc.y + 10)
+      .stroke('#e4e4e7');
     doc.moveDown(2);
-    doc.fontSize(8).fillColor('#a1a1aa').text(labels.footer, { align: 'center' });
+    doc
+      .fontSize(8)
+      .fillColor('#a1a1aa')
+      .text(labels.footer, { align: 'center' });
 
     doc.end();
-    return new Promise((resolve) => doc.on('end', () => resolve(Buffer.concat(chunks))));
+    return new Promise((resolve) =>
+      doc.on('end', () => resolve(Buffer.concat(chunks))),
+    );
   }
 
   private flattenPayoutTutor(payout: any) {

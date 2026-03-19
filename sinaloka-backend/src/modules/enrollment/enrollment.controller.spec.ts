@@ -170,9 +170,7 @@ describe('EnrollmentController (integration)', () => {
         capacity: 25,
         fee: 400000,
         schedules: {
-          create: [
-            { day: 'Monday', start_time: '15:00', end_time: '16:30' },
-          ],
+          create: [{ day: 'Monday', start_time: '15:00', end_time: '16:30' }],
         },
       },
     });
@@ -227,10 +225,7 @@ describe('EnrollmentController (integration)', () => {
         where: {
           user: {
             email: {
-              in: [
-                'enroll-ctrl-admin@test.com',
-                'enroll-ctrl-tutor@test.com',
-              ],
+              in: ['enroll-ctrl-admin@test.com', 'enroll-ctrl-tutor@test.com'],
             },
           },
         },
@@ -238,10 +233,7 @@ describe('EnrollmentController (integration)', () => {
       await prisma.user.deleteMany({
         where: {
           email: {
-            in: [
-              'enroll-ctrl-admin@test.com',
-              'enroll-ctrl-tutor@test.com',
-            ],
+            in: ['enroll-ctrl-admin@test.com', 'enroll-ctrl-tutor@test.com'],
           },
         },
       });

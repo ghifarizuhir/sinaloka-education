@@ -132,30 +132,37 @@ export class PaymentService {
       _count: { id: true },
     });
 
-    const overdue_count = overdueByStudent.reduce((sum, s) => sum + s._count.id, 0);
+    const overdue_count = overdueByStudent.reduce(
+      (sum, s) => sum + s._count.id,
+      0,
+    );
     const total_overdue_amount = overdueByStudent.reduce(
-      (sum, s) => sum + Number(s._sum.amount ?? 0), 0,
+      (sum, s) => sum + Number(s._sum.amount ?? 0),
+      0,
     );
 
-    let flaggedStudentIds = overdueByStudent.map(s => s.student_id);
+    let flaggedStudentIds = overdueByStudent.map((s) => s.student_id);
     if (billing.late_payment_auto_lock && billing.late_payment_threshold > 0) {
       flaggedStudentIds = overdueByStudent
-        .filter(s => Number(s._sum.amount ?? 0) >= billing.late_payment_threshold)
-        .map(s => s.student_id);
+        .filter(
+          (s) => Number(s._sum.amount ?? 0) >= billing.late_payment_threshold,
+        )
+        .map((s) => s.student_id);
     }
 
-    const students = flaggedStudentIds.length > 0
-      ? await this.prisma.student.findMany({
-          where: { id: { in: flaggedStudentIds } },
-          select: { id: true, name: true },
-        })
-      : [];
+    const students =
+      flaggedStudentIds.length > 0
+        ? await this.prisma.student.findMany({
+            where: { id: { in: flaggedStudentIds } },
+            select: { id: true, name: true },
+          })
+        : [];
 
-    const studentMap = new Map(students.map(s => [s.id, s.name]));
+    const studentMap = new Map(students.map((s) => [s.id, s.name]));
 
     const flagged_students = overdueByStudent
-      .filter(s => flaggedStudentIds.includes(s.student_id))
-      .map(s => ({
+      .filter((s) => flaggedStudentIds.includes(s.student_id))
+      .map((s) => ({
         student_id: s.student_id,
         student_name: studentMap.get(s.student_id) ?? 'Unknown',
         total_debt: Number(s._sum.amount ?? 0),

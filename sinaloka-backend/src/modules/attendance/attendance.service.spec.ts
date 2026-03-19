@@ -60,8 +60,18 @@ describe('AttendanceService', () => {
       });
 
       const records = [
-        { student_id: 'student-1', status: 'PRESENT' as const, homework_done: true, notes: null },
-        { student_id: 'student-2', status: 'ABSENT' as const, homework_done: false, notes: 'Sick' },
+        {
+          student_id: 'student-1',
+          status: 'PRESENT' as const,
+          homework_done: true,
+          notes: null,
+        },
+        {
+          student_id: 'student-2',
+          status: 'ABSENT' as const,
+          homework_done: false,
+          notes: 'Sick',
+        },
       ];
 
       const createdRecords = records.map((r, i) => ({
@@ -103,7 +113,11 @@ describe('AttendanceService', () => {
         service.batchCreate(userId, {
           session_id: 'session-uuid-1',
           records: [
-            { student_id: 'student-1', status: 'PRESENT', homework_done: false },
+            {
+              student_id: 'student-1',
+              status: 'PRESENT',
+              homework_done: false,
+            },
           ],
         }),
       ).rejects.toThrow(ForbiddenException);
@@ -116,7 +130,11 @@ describe('AttendanceService', () => {
         service.batchCreate(userId, {
           session_id: 'nonexistent',
           records: [
-            { student_id: 'student-1', status: 'PRESENT', homework_done: false },
+            {
+              student_id: 'student-1',
+              status: 'PRESENT',
+              homework_done: false,
+            },
           ],
         }),
       ).rejects.toThrow(NotFoundException);
@@ -136,14 +154,22 @@ describe('AttendanceService', () => {
       });
       // Existing attendance record for student-1
       mockPrisma.attendance.findMany.mockResolvedValue([
-        { id: 'existing-att', session_id: 'session-uuid-1', student_id: 'student-1' },
+        {
+          id: 'existing-att',
+          session_id: 'session-uuid-1',
+          student_id: 'student-1',
+        },
       ]);
 
       await expect(
         service.batchCreate(userId, {
           session_id: 'session-uuid-1',
           records: [
-            { student_id: 'student-1', status: 'PRESENT', homework_done: false },
+            {
+              student_id: 'student-1',
+              status: 'PRESENT',
+              homework_done: false,
+            },
           ],
         }),
       ).rejects.toThrow(ConflictException);
@@ -163,7 +189,10 @@ describe('AttendanceService', () => {
       ];
       mockPrisma.attendance.findMany.mockResolvedValue(records);
 
-      const result = await service.findBySession(institutionId, 'session-uuid-1');
+      const result = await service.findBySession(
+        institutionId,
+        'session-uuid-1',
+      );
 
       expect(result).toEqual(records);
       expect(mockPrisma.attendance.findMany).toHaveBeenCalledWith({

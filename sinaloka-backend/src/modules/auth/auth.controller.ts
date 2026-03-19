@@ -9,8 +9,22 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { LoginSchema, RefreshTokenSchema, LogoutSchema, ParentRegisterSchema, ForgotPasswordSchema, ResetPasswordSchema } from './auth.dto.js';
-import type { LoginDto, RefreshTokenDto, LogoutDto, ParentRegisterDto, ForgotPasswordDto, ResetPasswordDto } from './auth.dto.js';
+import {
+  LoginSchema,
+  RefreshTokenSchema,
+  LogoutSchema,
+  ParentRegisterSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
+} from './auth.dto.js';
+import type {
+  LoginDto,
+  RefreshTokenDto,
+  LogoutDto,
+  ParentRegisterDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './auth.dto.js';
 import { ParentInviteService } from '../parent/parent-invite.service.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';

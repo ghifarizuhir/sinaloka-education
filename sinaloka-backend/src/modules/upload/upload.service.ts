@@ -38,19 +38,14 @@ export class UploadService {
     return `${institutionId}/${type}/${filename}`;
   }
 
-  getFilePath(
-    institutionId: string,
-    type: string,
-    filename: string,
-  ): string {
+  getFilePath(institutionId: string, type: string, filename: string): string {
     const ext = path.extname(filename).toLowerCase();
     if (!ALLOWED_EXT.includes(ext))
       throw new BadRequestException('Invalid file type');
     const abs = path.resolve(this.baseDir, institutionId, type, filename);
     if (!abs.startsWith(path.resolve(this.baseDir)))
       throw new BadRequestException('Invalid path');
-    if (!fs.existsSync(abs))
-      throw new BadRequestException('File not found');
+    if (!fs.existsSync(abs)) throw new BadRequestException('File not found');
     return abs;
   }
 }

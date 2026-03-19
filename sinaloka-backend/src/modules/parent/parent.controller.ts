@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
@@ -47,9 +41,14 @@ export class ParentController {
   async getChildAttendance(
     @CurrentUser() user: JwtPayload,
     @Param('studentId') studentId: string,
-    @Query(new ZodValidationPipe(ChildAttendanceQuerySchema)) query: ChildAttendanceQueryDto,
+    @Query(new ZodValidationPipe(ChildAttendanceQuerySchema))
+    query: ChildAttendanceQueryDto,
   ) {
-    return this.parentService.getChildAttendance(user.institutionId!, studentId, query);
+    return this.parentService.getChildAttendance(
+      user.institutionId!,
+      studentId,
+      query,
+    );
   }
 
   @Get('children/:studentId/sessions')
@@ -57,9 +56,14 @@ export class ParentController {
   async getChildSessions(
     @CurrentUser() user: JwtPayload,
     @Param('studentId') studentId: string,
-    @Query(new ZodValidationPipe(ChildSessionsQuerySchema)) query: ChildSessionsQueryDto,
+    @Query(new ZodValidationPipe(ChildSessionsQuerySchema))
+    query: ChildSessionsQueryDto,
   ) {
-    return this.parentService.getChildSessions(user.institutionId!, studentId, query);
+    return this.parentService.getChildSessions(
+      user.institutionId!,
+      studentId,
+      query,
+    );
   }
 
   @Get('children/:studentId/payments')
@@ -67,9 +71,14 @@ export class ParentController {
   async getChildPayments(
     @CurrentUser() user: JwtPayload,
     @Param('studentId') studentId: string,
-    @Query(new ZodValidationPipe(ChildPaymentsQuerySchema)) query: ChildPaymentsQueryDto,
+    @Query(new ZodValidationPipe(ChildPaymentsQuerySchema))
+    query: ChildPaymentsQueryDto,
   ) {
-    return this.parentService.getChildPayments(user.institutionId!, studentId, query);
+    return this.parentService.getChildPayments(
+      user.institutionId!,
+      studentId,
+      query,
+    );
   }
 
   @Get('children/:studentId/enrollments')
@@ -78,6 +87,9 @@ export class ParentController {
     @CurrentUser() user: JwtPayload,
     @Param('studentId') studentId: string,
   ) {
-    return this.parentService.getChildEnrollments(user.institutionId!, studentId);
+    return this.parentService.getChildEnrollments(
+      user.institutionId!,
+      studentId,
+    );
   }
 }

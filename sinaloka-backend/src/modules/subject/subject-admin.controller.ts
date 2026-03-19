@@ -42,10 +42,7 @@ export class SubjectAdminController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     await this.subjectService.delete(user.institutionId!, id);
   }
 }

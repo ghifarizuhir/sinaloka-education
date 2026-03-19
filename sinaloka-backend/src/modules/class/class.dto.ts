@@ -70,10 +70,9 @@ export const UpdateClassSchema = z.object({
   schedules: z
     .array(ScheduleItemSchema)
     .min(1)
-    .refine(
-      (items) => new Set(items.map((i) => i.day)).size === items.length,
-      { message: 'Duplicate schedule days are not allowed' },
-    )
+    .refine((items) => new Set(items.map((i) => i.day)).size === items.length, {
+      message: 'Duplicate schedule days are not allowed',
+    })
     .optional(),
   room: z.string().max(100).optional().nullable(),
   package_fee: z.number().min(0).optional().nullable(),

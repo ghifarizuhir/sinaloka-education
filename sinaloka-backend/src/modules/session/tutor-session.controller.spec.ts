@@ -128,9 +128,7 @@ describe('TutorSessionController (integration)', () => {
         capacity: 20,
         fee: 100000,
         schedules: {
-          create: [
-            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
-          ],
+          create: [{ day: 'Monday', start_time: '14:00', end_time: '15:30' }],
         },
         status: 'ACTIVE',
       },
@@ -286,7 +284,9 @@ describe('TutorSessionController (integration)', () => {
         start_time: '14:00',
         end_time: '15:30',
         status: 'SCHEDULED',
-        created_by: (await prisma.user.findFirst({ where: { email: 'tutor-sched-tutor@test.com' } }))!.id,
+        created_by: (await prisma.user.findFirst({
+          where: { email: 'tutor-sched-tutor@test.com' },
+        }))!.id,
       },
     });
 

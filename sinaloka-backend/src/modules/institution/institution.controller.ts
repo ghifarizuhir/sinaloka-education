@@ -57,7 +57,8 @@ export class InstitutionController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(UpdateInstitutionSchema)) dto: UpdateInstitutionDto,
+    @Body(new ZodValidationPipe(UpdateInstitutionSchema))
+    dto: UpdateInstitutionDto,
   ) {
     return this.institutionService.update(id, dto);
   }

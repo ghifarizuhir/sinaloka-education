@@ -18,7 +18,12 @@ describe('ClassController (integration)', () => {
   let testInstitutionId: string;
   let testTutorId: string;
   let createdClassId: string;
-  let testSubjectIds: { math: string; physics: string; chemistry: string; temp: string };
+  let testSubjectIds: {
+    math: string;
+    physics: string;
+    chemistry: string;
+    temp: string;
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -40,7 +45,10 @@ describe('ClassController (integration)', () => {
     prisma = app.get(PrismaService);
 
     // Clean up test data
-    const testEmails = ['class-ctrl-admin@test.com', 'class-ctrl-tutor@test.com'];
+    const testEmails = [
+      'class-ctrl-admin@test.com',
+      'class-ctrl-tutor@test.com',
+    ];
     await prisma.enrollment.deleteMany({
       where: { institution: { slug: 'class-ctrl-inst' } },
     });
@@ -160,10 +168,20 @@ describe('ClassController (integration)', () => {
         where: { institution_id: testInstitutionId },
       });
       await prisma.refreshToken.deleteMany({
-        where: { user: { email: { in: ['class-ctrl-admin@test.com', 'class-ctrl-tutor@test.com'] } } },
+        where: {
+          user: {
+            email: {
+              in: ['class-ctrl-admin@test.com', 'class-ctrl-tutor@test.com'],
+            },
+          },
+        },
       });
       await prisma.user.deleteMany({
-        where: { email: { in: ['class-ctrl-admin@test.com', 'class-ctrl-tutor@test.com'] } },
+        where: {
+          email: {
+            in: ['class-ctrl-admin@test.com', 'class-ctrl-tutor@test.com'],
+          },
+        },
       });
       await prisma.institution.deleteMany({
         where: { id: testInstitutionId },
@@ -263,9 +281,7 @@ describe('ClassController (integration)', () => {
           capacity: 20,
           fee: 350000,
           schedules: {
-            create: [
-              { day: 'Friday', start_time: '09:00', end_time: '10:30' },
-            ],
+            create: [{ day: 'Friday', start_time: '09:00', end_time: '10:30' }],
           },
           status: 'ARCHIVED',
         },
@@ -338,9 +354,7 @@ describe('ClassController (integration)', () => {
           capacity: 10,
           fee: 100,
           schedules: {
-            create: [
-              { day: 'Monday', start_time: '08:00', end_time: '09:00' },
-            ],
+            create: [{ day: 'Monday', start_time: '08:00', end_time: '09:00' }],
           },
         },
       });

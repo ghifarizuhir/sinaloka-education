@@ -49,10 +49,7 @@ export class ClassController {
   }
 
   @Get(':id')
-  async findOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.classService.findOne(user.institutionId!, id);
   }
 
@@ -67,10 +64,7 @@ export class ClassController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     await this.classService.delete(user.institutionId!, id);
   }
 }

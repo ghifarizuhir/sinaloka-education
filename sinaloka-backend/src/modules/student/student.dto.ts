@@ -24,7 +24,9 @@ export const StudentQuerySchema = z.object({
   search: z.string().optional(),
   grade: z.string().optional(),
   status: StudentStatus.optional(),
-  sort_by: z.enum(['name', 'grade', 'enrolled_at', 'created_at']).default('created_at'),
+  sort_by: z
+    .enum(['name', 'grade', 'enrolled_at', 'created_at'])
+    .default('created_at'),
   sort_order: z.enum(['asc', 'desc']).default('desc'),
 });
 export type StudentQueryDto = z.infer<typeof StudentQuerySchema>;
