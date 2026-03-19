@@ -28,8 +28,10 @@ import { SettingsModule } from './modules/settings/settings.module.js';
 import { SubjectModule } from './modules/subject/subject.module.js';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
+import { HealthController } from './health.controller.js';
 
 @Module({
+  controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
