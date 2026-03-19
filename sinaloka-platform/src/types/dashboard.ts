@@ -11,3 +11,12 @@ export interface ActivityItem {
   description: string;
   created_at: string;
 }
+
+export interface UpcomingSession {
+  id: string;
+  date: string;
+  start_time: string;
+  subject_name: string;
+  tutor_name: string;
+  class_name: string;
+}
