@@ -19,4 +19,9 @@ export class DashboardController {
   getActivity(@CurrentUser() user: JwtPayload) {
     return this.dashboardService.getActivity(user.institutionId!);
   }
+
+  @Get('upcoming-sessions')
+  getUpcomingSessions(@CurrentUser() user: JwtPayload) {
+    return this.dashboardService.getUpcomingSessions(user.institutionId!);
+  }
 }
