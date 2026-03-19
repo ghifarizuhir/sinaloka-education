@@ -8,11 +8,7 @@
 CREATE TYPE "TutorFeeMode" AS ENUM ('FIXED_PER_SESSION', 'PER_STUDENT_ATTENDANCE', 'MONTHLY_SALARY');
 
 -- AlterEnum
-ALTER TYPE "PaymentStatus" ADD VALUE 'NEW';
-
--- Commit the enum addition before using the new value
-COMMIT;
-BEGIN;
+ALTER TYPE "PaymentStatus" ADD VALUE IF NOT EXISTS 'NEW';
 
 -- AlterTable
 ALTER TABLE "classes" ADD COLUMN     "package_fee" DECIMAL(65,30),
