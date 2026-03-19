@@ -8,8 +8,6 @@ import type { BankAccount, Room, RoomType, RoomStatus, SubjectCategory, GradeLev
 export const useSettingsPage = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('general');
-
   // General settings form state
   const { data: generalSettings, isLoading: isLoadingGeneral } = useGeneralSettings();
   const updateSettings = useUpdateGeneralSettings();
@@ -291,8 +289,6 @@ export const useSettingsPage = () => {
     t,
     i18n,
     user,
-    activeTab,
-    setActiveTab,
     isLoadingGeneral,
     updateSettings,
     formName,
