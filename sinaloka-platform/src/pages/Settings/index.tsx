@@ -121,7 +121,7 @@ export const SettingsPage = () => {
         <AcademicTab
           t={state.t}
           rooms={state.rooms}
-          subjectCategories={state.subjectCategories}
+          subjects={state.subjects}
           gradeLevels={state.gradeLevels}
           workingDays={state.workingDays}
           isLoadingAcademic={state.isLoadingAcademic}

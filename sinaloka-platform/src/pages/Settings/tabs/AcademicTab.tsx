@@ -10,7 +10,7 @@ import type { SettingsPageState } from '../useSettingsPage';
 import type { RoomType, RoomStatus } from '../../../types/settings';
 
 type AcademicTabProps = Pick<SettingsPageState,
-  't' | 'rooms' | 'subjectCategories' | 'gradeLevels' | 'workingDays' |
+  't' | 'rooms' | 'subjects' | 'gradeLevels' | 'workingDays' |
   'isLoadingAcademic' | 'updateAcademic' |
   'showRoomModal' | 'setShowRoomModal' | 'editingRoom' | 'setEditingRoom' |
   'roomFormName' | 'setRoomFormName' | 'roomFormType' | 'setRoomFormType' |
@@ -35,7 +35,7 @@ const DAYS = [
 ];
 
 export const AcademicTab = ({
-  t, rooms, subjectCategories, gradeLevels, workingDays,
+  t, rooms, subjects, gradeLevels, workingDays,
   isLoadingAcademic, updateAcademic,
   showRoomModal, setShowRoomModal, editingRoom, setEditingRoom,
   roomFormName, setRoomFormName, roomFormType, setRoomFormType,
@@ -104,10 +104,10 @@ export const AcademicTab = ({
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {subjectCategories.length === 0 && !showCategoryInput && (
+                {subjects.length === 0 && !showCategoryInput && (
                   <p className="text-sm text-muted-foreground">{t('settings.academic.noCategories')}</p>
                 )}
-                {subjectCategories.map(cat => (
+                {subjects.map(cat => (
                   <Badge key={cat.id} variant="default" className="gap-1 pr-1">
                     {cat.name}
                     <button
