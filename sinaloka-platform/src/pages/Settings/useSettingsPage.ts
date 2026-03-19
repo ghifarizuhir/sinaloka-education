@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAuth } from '@/src/hooks/useAuth';
 import { useGeneralSettings, useUpdateGeneralSettings, useBillingSettings, useUpdateBillingSettings, useAcademicSettings, useUpdateAcademicSettings, usePaymentGatewaySettings, useUpdatePaymentGatewaySettings } from '@/src/hooks/useSettings';
-import type { BankAccount, Room, RoomType, RoomStatus, SubjectCategory, GradeLevel } from '@/src/types/settings';
+import type { BankAccount, Room, RoomType, RoomStatus, GradeLevel } from '@/src/types/settings';
+import { useSubjects, useCreateSubject, useDeleteSubject } from '@/src/hooks/useSubjects';
 
 export const useSettingsPage = () => {
   const { t, i18n } = useTranslation();
@@ -130,15 +131,18 @@ export const useSettingsPage = () => {
   const { data: academicSettings, isLoading: isLoadingAcademic } = useAcademicSettings();
   const updateAcademic = useUpdateAcademicSettings();
 
+  // Subjects from real subjects table (not settings JSON blob)
+  const { data: subjects = [] } = useSubjects();
+  const createSubject = useCreateSubject();
+  const deleteSubject = useDeleteSubject();
+
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [subjectCategories, setSubjectCategories] = useState<SubjectCategory[]>([]);
   const [gradeLevels, setGradeLevels] = useState<GradeLevel[]>([]);
   const [workingDays, setWorkingDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
 
   useEffect(() => {
     if (academicSettings) {
       setRooms(academicSettings.rooms);
-      setSubjectCategories(academicSettings.subject_categories);
       setGradeLevels(academicSettings.grade_levels);
       setWorkingDays(academicSettings.working_days);
     }
@@ -205,21 +209,15 @@ export const useSettingsPage = () => {
     });
   };
 
-  // Subject category handlers
+  // Subject handlers (wired to real subjects table)
   const [showCategoryInput, setShowCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
   const handleAddSubjectCategory = () => {
     const name = newCategoryName.trim();
     if (!name) return;
-    if (subjectCategories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
-    const newCat: SubjectCategory = {
-      id: crypto.randomUUID(),
-      name,
-      order: subjectCategories.length,
-    };
-    const updated = [...subjectCategories, newCat];
-    updateAcademic.mutate({ subject_categories: updated }, {
+    if (subjects.some(s => s.name.toLowerCase() === name.toLowerCase())) return;
+    createSubject.mutate(name, {
       onSuccess: () => {
         toast.success(t('settings.academic.categorySaved'));
         setNewCategoryName('');
@@ -230,10 +228,12 @@ export const useSettingsPage = () => {
   };
 
   const handleRemoveSubjectCategory = (id: string) => {
-    const updated = subjectCategories.filter(c => c.id !== id);
-    updateAcademic.mutate({ subject_categories: updated }, {
+    deleteSubject.mutate(id, {
       onSuccess: () => toast.success(t('settings.academic.categorySaved')),
-      onError: () => toast.error(t('settings.academic.settingsSaveFailed')),
+      onError: (error: any) => {
+        const message = error?.response?.data?.message || t('settings.academic.settingsSaveFailed');
+        toast.error(message);
+      },
     });
   };
 
@@ -370,7 +370,7 @@ export const useSettingsPage = () => {
     handleAddBankAccount,
     handleRemoveBankAccount,
     rooms,
-    subjectCategories,
+    subjects,
     gradeLevels,
     workingDays,
     isLoadingAcademic,
