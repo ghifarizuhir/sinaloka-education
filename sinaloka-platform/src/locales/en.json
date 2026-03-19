@@ -425,6 +425,7 @@
       "roomPlaceholder": "e.g. Room 101",
       "roomMismatchWarning": "This class has a custom room value '{{value}}'. Please select a room from the list below.",
       "selectRoom": "Select a room",
+      "noRoomsAvailable": "No rooms configured — add rooms in Settings > Academic",
       "schedulePreview": "Schedule Preview",
       "selectTutorForPreview": "Select a tutor to view schedule"
     },

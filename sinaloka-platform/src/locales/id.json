@@ -425,6 +425,7 @@
       "roomPlaceholder": "contoh: Ruang 101",
       "roomMismatchWarning": "Kelas ini memiliki nilai ruangan kustom '{{value}}'. Silakan pilih ruangan dari daftar di bawah.",
       "selectRoom": "Pilih ruangan",
+      "noRoomsAvailable": "Belum ada ruangan — tambahkan ruangan di Pengaturan > Akademik",
       "schedulePreview": "Pratinjau Jadwal",
       "selectTutorForPreview": "Pilih tutor untuk melihat jadwal"
     },

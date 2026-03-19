@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   Button,
@@ -13,9 +14,10 @@ import { cn } from '../../lib/utils';
 import { ScheduleWeekPreview } from '../../components/ScheduleWeekPreview';
 import { DAYS_OF_WEEK } from './useClassesPage';
 import type { Class, ScheduleDay, ClassScheduleItem } from '@/src/types/class';
+import type { Room } from '@/src/types/settings';
 
 interface ClassFormModalProps {
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
   showModal: boolean;
   setShowModal: (show: boolean) => void;
   editingClass: Class | null;
@@ -50,6 +52,7 @@ interface ClassFormModalProps {
   createClass: { isPending: boolean };
   updateClass: { isPending: boolean };
   tutorClasses: any[];
+  availableRooms: Room[];
   toggleScheduleDay: (day: ScheduleDay) => void;
   handleFormSubmit: () => void;
 }
@@ -90,9 +93,17 @@ export const ClassFormModal = ({
   createClass,
   updateClass,
   tutorClasses,
+  availableRooms,
   toggleScheduleDay,
   handleFormSubmit,
 }: ClassFormModalProps) => {
+  const roomOptions = availableRooms.map(r => ({
+    value: r.name,
+    label: `${r.name} (${r.type}${r.capacity ? `, ${r.capacity} seats` : ', unlimited'})`,
+  }));
+
+  const hasRoomMismatch = editingClass?.room && !availableRooms.some(r => r.name === editingClass.room);
+
   return (
     <Modal
       isOpen={showModal}
@@ -288,12 +299,25 @@ export const ClassFormModal = ({
 
         <div className="space-y-1.5">
           <Label htmlFor="room">{t('classes.form.room')}</Label>
-          <Input
-            id="room"
-            placeholder={t('classes.form.roomPlaceholder')}
+          {hasRoomMismatch && (
+            <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 rounded-lg p-3 text-sm">
+              <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+              <span>{t('classes.form.roomMismatchWarning', { value: editingClass?.room })}</span>
+            </div>
+          )}
+          <Select
+            className="w-full"
             value={formRoom}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormRoom(e.target.value)}
+            onChange={(val) => setFormRoom(val)}
+            options={roomOptions}
+            placeholder={t('classes.form.selectRoom')}
+            disabled={availableRooms.length === 0}
           />
+          {availableRooms.length === 0 && (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {t('classes.form.noRoomsAvailable')}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3 mt-8">
