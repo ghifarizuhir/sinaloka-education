@@ -56,6 +56,7 @@ export interface PaymentRecord {
   paid_date: string | null;
   status: 'PAID' | 'PENDING' | 'OVERDUE';
   method: string | null;
+  gateway_configured: boolean;
   enrollment: {
     class: { name: string; subject: string };
   };

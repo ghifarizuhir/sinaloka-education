@@ -65,6 +65,7 @@ export function mapPayment(raw: any): PaymentRecord {
     paid_date: raw.paid_date ? new Date(raw.paid_date).toISOString().split('T')[0] : null,
     status: raw.status,
     method: raw.method ?? null,
+    gateway_configured: raw.gateway_configured ?? false,
     enrollment: raw.enrollment,
   };
 }

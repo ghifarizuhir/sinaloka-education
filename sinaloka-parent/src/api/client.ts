@@ -67,3 +67,9 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export const checkoutPayment = (id: string) =>
+  api.post<{ snap_token: string; redirect_url: string }>(`/payments/${id}/checkout`).then((r) => r.data);
+
+export const getPaymentStatus = (id: string) =>
+  api.get<{ id: string; status: string; paid_date: string | null; method: string | null }>(`/payments/${id}/status`).then((r) => r.data);
