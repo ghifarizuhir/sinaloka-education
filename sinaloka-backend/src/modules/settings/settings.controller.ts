@@ -5,8 +5,8 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { SettingsService } from './settings.service.js';
-import { UpdateGeneralSettingsSchema, UpdateBillingSettingsSchema } from './settings.dto.js';
-import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto } from './settings.dto.js';
+import { UpdateGeneralSettingsSchema, UpdateBillingSettingsSchema, UpdateAcademicSettingsSchema } from './settings.dto.js';
+import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto, UpdateAcademicSettingsDto } from './settings.dto.js';
 
 @Controller('settings')
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)
@@ -39,5 +39,19 @@ export class SettingsController {
     dto: UpdateBillingSettingsDto,
   ) {
     return this.settingsService.updateBilling(user.institutionId!, dto);
+  }
+
+  @Get('academic')
+  async getAcademic(@CurrentUser() user: JwtPayload) {
+    return this.settingsService.getAcademic(user.institutionId!);
+  }
+
+  @Patch('academic')
+  async updateAcademic(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(UpdateAcademicSettingsSchema))
+    dto: UpdateAcademicSettingsDto,
+  ) {
+    return this.settingsService.updateAcademic(user.institutionId!, dto);
   }
 }

@@ -37,3 +37,32 @@ export const UpdateBillingSettingsSchema = z.object({
 });
 
 export type UpdateBillingSettingsDto = z.infer<typeof UpdateBillingSettingsSchema>;
+
+const RoomSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  type: z.enum(['Classroom', 'Laboratory', 'Studio', 'Online']),
+  capacity: z.number().int().min(1).nullable(),
+  status: z.enum(['Available', 'Maintenance', 'Unavailable']),
+});
+
+const SubjectCategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  order: z.number().int().min(0),
+});
+
+const GradeLevelSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  order: z.number().int().min(0),
+});
+
+export const UpdateAcademicSettingsSchema = z.object({
+  rooms: z.array(RoomSchema).optional(),
+  subject_categories: z.array(SubjectCategorySchema).optional(),
+  grade_levels: z.array(GradeLevelSchema).optional(),
+  working_days: z.array(z.number().int().min(0).max(6)).min(1).max(7).optional(),
+});
+
+export type UpdateAcademicSettingsDto = z.infer<typeof UpdateAcademicSettingsSchema>;
