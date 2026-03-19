@@ -12,7 +12,7 @@ The admin platform has a working CRUD foundation but four Settings tabs are non-
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Academic Settings** - Backend API + full frontend for rooms, subjects, grades, and working days — including rooms dropdown in Classes
+- [x] **Phase 1: Academic Settings** - Backend API + full frontend for rooms, subjects, grades, and working days — including rooms dropdown in Classes (completed 2026-03-19)
 - [ ] **Phase 2: Settings Completion** - Branding color persistence, Security tab cleanup, Integrations real status, Delete Institution guard
 - [ ] **Phase 3: Feature Completion** - All Finance and Attendance placeholder buttons made functional
 - [ ] **Phase 4: Quality Polish** - Full sweep to eliminate remaining placeholder buttons and mock data
@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Admin can toggle working days (Mon–Sun) in Settings Academic tab and the configuration persists
   4. Class creation and edit forms show a room dropdown populated from the institution's saved rooms instead of a free-text field
   5. All academic settings are stored per-institution (multi-tenant) via backend API endpoints against the Institution.settings JSON blob
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Backend API + frontend data layer (types, service, hooks) for academic settings
@@ -77,7 +77,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Academic Settings | 2/3 | Executing | - |
+| 1. Academic Settings | 3/3 | Complete   | 2026-03-19 |
 | 2. Settings Completion | 0/TBD | Not started | - |
 | 3. Feature Completion | 0/TBD | Not started | - |
 | 4. Quality Polish | 0/TBD | Not started | - |
