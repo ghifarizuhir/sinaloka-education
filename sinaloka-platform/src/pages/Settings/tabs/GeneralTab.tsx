@@ -3,7 +3,7 @@ import {
   Card, Button, Input, Label, Skeleton
 } from '../../../components/UI';
 import {
-  Building2, Save, Trash2, AlertCircle
+  Building2, Save
 } from 'lucide-react';
 import type { SettingsPageState } from '../useSettingsPage';
 
@@ -86,20 +86,6 @@ export const GeneralTab = ({
             </div>
           </>
         )}
-      </Card>
-
-      <Card className="border-rose-100 dark:border-rose-900/30">
-        <h3 className="text-lg font-bold mb-2 text-rose-600 flex items-center gap-2">
-          <AlertCircle size={20} />
-          {t('settings.general.dangerZone')}
-        </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
-          {t('settings.general.dangerZoneDesc')}
-        </p>
-        <Button variant="outline" className="text-rose-600 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-600 gap-2">
-          <Trash2 size={16} />
-          {t('settings.general.deleteInstitution')}
-        </Button>
       </Card>
     </div>
   );

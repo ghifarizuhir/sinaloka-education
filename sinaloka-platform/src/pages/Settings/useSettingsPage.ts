@@ -9,7 +9,6 @@ export const useSettingsPage = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('general');
-  const [primaryColor, setPrimaryColor] = useState('#0f172a');
 
   // General settings form state
   const { data: generalSettings, isLoading: isLoadingGeneral } = useGeneralSettings();
@@ -294,8 +293,6 @@ export const useSettingsPage = () => {
     user,
     activeTab,
     setActiveTab,
-    primaryColor,
-    setPrimaryColor,
     isLoadingGeneral,
     updateSettings,
     formName,

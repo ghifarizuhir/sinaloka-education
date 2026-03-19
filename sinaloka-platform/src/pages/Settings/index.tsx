@@ -1,16 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Building2, CreditCard, Palette, GraduationCap, ShieldCheck, Puzzle
+  Building2, CreditCard, GraduationCap
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSettingsPage } from './useSettingsPage';
 import { GeneralTab } from './tabs/GeneralTab';
 import { BillingTab } from './tabs/BillingTab';
-import { BrandingTab } from './tabs/BrandingTab';
 import { AcademicTab } from './tabs/AcademicTab';
-import { SecurityTab } from './tabs/SecurityTab';
-import { IntegrationsTab } from './tabs/IntegrationsTab';
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
@@ -19,10 +16,7 @@ export const SettingsPage = () => {
   const tabs = [
     { id: 'general', label: t('settings.tabs.general'), icon: Building2 },
     { id: 'billing', label: t('settings.tabs.billing'), icon: CreditCard },
-    { id: 'branding', label: t('settings.tabs.branding'), icon: Palette },
     { id: 'academic', label: t('settings.tabs.academic'), icon: GraduationCap },
-    { id: 'security', label: t('settings.tabs.security'), icon: ShieldCheck },
-    { id: 'integrations', label: t('settings.tabs.integrations'), icon: Puzzle },
   ];
 
   const renderTabContent = () => {
@@ -83,14 +77,6 @@ export const SettingsPage = () => {
             handleRemoveBankAccount={state.handleRemoveBankAccount}
           />
         );
-      case 'branding':
-        return (
-          <BrandingTab
-            t={state.t}
-            primaryColor={state.primaryColor}
-            setPrimaryColor={state.setPrimaryColor}
-          />
-        );
       case 'academic':
         return (
           <AcademicTab
@@ -132,18 +118,6 @@ export const SettingsPage = () => {
             handleRemoveGrade={state.handleRemoveGrade}
             handleToggleWorkingDay={state.handleToggleWorkingDay}
             handleSaveWorkingDays={state.handleSaveWorkingDays}
-          />
-        );
-      case 'security':
-        return (
-          <SecurityTab
-            t={state.t}
-          />
-        );
-      case 'integrations':
-        return (
-          <IntegrationsTab
-            t={state.t}
           />
         );
       default:
