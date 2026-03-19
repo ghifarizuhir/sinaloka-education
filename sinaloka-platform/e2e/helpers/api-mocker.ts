@@ -93,6 +93,7 @@ export async function setupExpenseMocks(mockApi: MockApi, data = expensesData) {
 export async function setupDashboardMocks(mockApi: MockApi, data = dashboardData) {
   await mockApi.onGet('**/api/admin/dashboard/stats').respondWith(200, data.stats);
   await mockApi.onGet('**/api/admin/dashboard/activity').respondWith(200, data.activity);
+  await mockApi.onGet('**/api/admin/dashboard/upcoming-sessions').respondWith(200, data.upcoming_sessions_list);
 }
 
 export async function setupAllMocks(mockApi: MockApi) {

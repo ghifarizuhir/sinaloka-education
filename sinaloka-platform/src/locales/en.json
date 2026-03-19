@@ -155,6 +155,7 @@
     "attendanceRecords": "Attendance Records",
     "recentActivity": "Recent Activity",
     "noRecentActivity": "No recent activity",
+    "noUpcomingSessions": "No sessions scheduled",
     "activityCategory": {
       "operations": "Operations",
       "finance": "Finance",

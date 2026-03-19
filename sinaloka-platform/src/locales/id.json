@@ -155,6 +155,7 @@
     "attendanceRecords": "Catatan Kehadiran",
     "recentActivity": "Aktivitas Terbaru",
     "noRecentActivity": "Tidak ada aktivitas terbaru",
+    "noUpcomingSessions": "Belum ada sesi terjadwal",
     "activityCategory": {
       "operations": "Operasional",
       "finance": "Keuangan",

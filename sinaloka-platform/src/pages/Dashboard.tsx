@@ -286,7 +286,7 @@ export const Dashboard = () => {
             </div>
             <div className="space-y-1">
               {upcomingSessions && upcomingSessions.length > 0 ? (
-                upcomingSessions.map((session) => (
+                upcomingSessions.slice(0, 5).map((session) => (
                   <div
                     key={session.id}
                     className="flex items-center gap-3 px-3 py-2.5 -mx-3 rounded-xl hover:bg-muted/50 transition-colors"
