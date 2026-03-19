@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAuth } from '@/src/hooks/useAuth';
-import { useGeneralSettings, useUpdateGeneralSettings, useBillingSettings, useUpdateBillingSettings } from '@/src/hooks/useSettings';
-import type { BankAccount } from '@/src/types/settings';
+import { useGeneralSettings, useUpdateGeneralSettings, useBillingSettings, useUpdateBillingSettings, useAcademicSettings, useUpdateAcademicSettings } from '@/src/hooks/useSettings';
+import type { BankAccount, Room, RoomType, RoomStatus, SubjectCategory, GradeLevel } from '@/src/types/settings';
 
 export const useSettingsPage = () => {
   const { t, i18n } = useTranslation();
@@ -129,11 +129,164 @@ export const useSettingsPage = () => {
     setFormBankAccounts(formBankAccounts.filter(a => a.id !== id));
   };
 
-  const [rooms, setRooms] = useState([
-    { id: 'R1', name: 'Room A (Main)', capacity: 20, type: 'Classroom', status: 'Available' },
-    { id: 'R2', name: 'Science Lab', capacity: 15, type: 'Laboratory', status: 'Available' },
-    { id: 'R3', name: 'Music Studio', capacity: 5, type: 'Studio', status: 'Maintenance' },
-  ]);
+  // Academic settings
+  const { data: academicSettings, isLoading: isLoadingAcademic } = useAcademicSettings();
+  const updateAcademic = useUpdateAcademicSettings();
+
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [subjectCategories, setSubjectCategories] = useState<SubjectCategory[]>([]);
+  const [gradeLevels, setGradeLevels] = useState<GradeLevel[]>([]);
+  const [workingDays, setWorkingDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
+
+  useEffect(() => {
+    if (academicSettings) {
+      setRooms(academicSettings.rooms);
+      setSubjectCategories(academicSettings.subject_categories);
+      setGradeLevels(academicSettings.grade_levels);
+      setWorkingDays(academicSettings.working_days);
+    }
+  }, [academicSettings]);
+
+  // Room modal form state
+  const [showRoomModal, setShowRoomModal] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [roomFormName, setRoomFormName] = useState('');
+  const [roomFormType, setRoomFormType] = useState<RoomType>('Classroom');
+  const [roomFormCapacity, setRoomFormCapacity] = useState('');
+  const [roomFormStatus, setRoomFormStatus] = useState<RoomStatus>('Available');
+
+  const handleOpenRoomModal = (room?: Room) => {
+    if (room) {
+      setEditingRoom(room);
+      setRoomFormName(room.name);
+      setRoomFormType(room.type);
+      setRoomFormCapacity(room.capacity !== null ? String(room.capacity) : '');
+      setRoomFormStatus(room.status);
+    } else {
+      setEditingRoom(null);
+      setRoomFormName('');
+      setRoomFormType('Classroom');
+      setRoomFormCapacity('');
+      setRoomFormStatus('Available');
+    }
+    setShowRoomModal(true);
+  };
+
+  const handleSaveRoom = () => {
+    const capacity = roomFormType === 'Online' ? null : parseInt(roomFormCapacity, 10) || null;
+    const newRoom: Room = {
+      id: editingRoom?.id ?? crypto.randomUUID(),
+      name: roomFormName.trim(),
+      type: roomFormType,
+      capacity,
+      status: roomFormStatus,
+    };
+    const updatedRooms = editingRoom
+      ? rooms.map(r => r.id === editingRoom.id ? newRoom : r)
+      : [...rooms, newRoom];
+    updateAcademic.mutate({ rooms: updatedRooms }, {
+      onSuccess: () => {
+        toast.success(t(editingRoom ? 'settings.academic.roomUpdated' : 'settings.academic.roomSaved'));
+        setShowRoomModal(false);
+        setEditingRoom(null);
+      },
+      onError: () => toast.error(t('settings.academic.roomSaveFailed')),
+    });
+  };
+
+  const [roomToDelete, setRoomToDelete] = useState<Room | null>(null);
+
+  const handleDeleteRoom = () => {
+    if (!roomToDelete) return;
+    const updatedRooms = rooms.filter(r => r.id !== roomToDelete.id);
+    updateAcademic.mutate({ rooms: updatedRooms }, {
+      onSuccess: () => {
+        toast.success(t('settings.academic.roomDeleted'));
+        setRoomToDelete(null);
+      },
+      onError: () => toast.error(t('settings.academic.roomSaveFailed')),
+    });
+  };
+
+  // Subject category handlers
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  const handleAddSubjectCategory = () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    if (subjectCategories.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
+    const newCat: SubjectCategory = {
+      id: crypto.randomUUID(),
+      name,
+      order: subjectCategories.length,
+    };
+    const updated = [...subjectCategories, newCat];
+    updateAcademic.mutate({ subject_categories: updated }, {
+      onSuccess: () => {
+        toast.success(t('settings.academic.categorySaved'));
+        setNewCategoryName('');
+        setShowCategoryInput(false);
+      },
+      onError: () => toast.error(t('settings.academic.settingsSaveFailed')),
+    });
+  };
+
+  const handleRemoveSubjectCategory = (id: string) => {
+    const updated = subjectCategories.filter(c => c.id !== id);
+    updateAcademic.mutate({ subject_categories: updated }, {
+      onSuccess: () => toast.success(t('settings.academic.categorySaved')),
+      onError: () => toast.error(t('settings.academic.settingsSaveFailed')),
+    });
+  };
+
+  // Grade level handlers
+  const [showGradeInput, setShowGradeInput] = useState(false);
+  const [newGradeName, setNewGradeName] = useState('');
+
+  const handleAddGrade = () => {
+    const name = newGradeName.trim();
+    if (!name) return;
+    if (gradeLevels.some(g => g.name.toLowerCase() === name.toLowerCase())) return;
+    const newGrade: GradeLevel = {
+      id: crypto.randomUUID(),
+      name,
+      order: gradeLevels.length,
+    };
+    const updated = [...gradeLevels, newGrade];
+    updateAcademic.mutate({ grade_levels: updated }, {
+      onSuccess: () => {
+        toast.success(t('settings.academic.gradeSaved'));
+        setNewGradeName('');
+        setShowGradeInput(false);
+      },
+      onError: () => toast.error(t('settings.academic.settingsSaveFailed')),
+    });
+  };
+
+  const handleRemoveGrade = (id: string) => {
+    const updated = gradeLevels.filter(g => g.id !== id);
+    updateAcademic.mutate({ grade_levels: updated }, {
+      onSuccess: () => toast.success(t('settings.academic.gradeSaved')),
+      onError: () => toast.error(t('settings.academic.settingsSaveFailed')),
+    });
+  };
+
+  // Working days handlers
+  const handleToggleWorkingDay = (day: number) => {
+    const updated = workingDays.includes(day)
+      ? workingDays.filter(d => d !== day)
+      : [...workingDays, day].sort();
+    if (updated.length === 0) return; // Minimum 1 day
+    setWorkingDays(updated);
+  };
+
+  const handleSaveWorkingDays = () => {
+    updateAcademic.mutate({ working_days: workingDays }, {
+      onSuccess: () => toast.success(t('settings.academic.settingsSaved')),
+      onError: () => toast.error(t('settings.academic.settingsSaveFailed')),
+    });
+  };
 
   return {
     t,
@@ -190,7 +343,42 @@ export const useSettingsPage = () => {
     handleAddBankAccount,
     handleRemoveBankAccount,
     rooms,
-    setRooms,
+    subjectCategories,
+    gradeLevels,
+    workingDays,
+    isLoadingAcademic,
+    updateAcademic,
+    showRoomModal,
+    setShowRoomModal,
+    editingRoom,
+    setEditingRoom,
+    roomFormName,
+    setRoomFormName,
+    roomFormType,
+    setRoomFormType,
+    roomFormCapacity,
+    setRoomFormCapacity,
+    roomFormStatus,
+    setRoomFormStatus,
+    handleOpenRoomModal,
+    handleSaveRoom,
+    roomToDelete,
+    setRoomToDelete,
+    handleDeleteRoom,
+    showCategoryInput,
+    setShowCategoryInput,
+    newCategoryName,
+    setNewCategoryName,
+    handleAddSubjectCategory,
+    handleRemoveSubjectCategory,
+    showGradeInput,
+    setShowGradeInput,
+    newGradeName,
+    setNewGradeName,
+    handleAddGrade,
+    handleRemoveGrade,
+    handleToggleWorkingDay,
+    handleSaveWorkingDays,
   };
 };
 
