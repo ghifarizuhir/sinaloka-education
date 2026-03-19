@@ -7,3 +7,4 @@ dist
 
 # Runtime upload directory (user-generated files)
 uploads/
+.claude/worktrees/
