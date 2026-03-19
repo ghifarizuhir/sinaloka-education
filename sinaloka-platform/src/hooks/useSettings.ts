@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { settingsService } from '@/src/services/settings.service';
-import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto } from '@/src/types/settings';
+import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto, UpdateAcademicSettingsDto } from '@/src/types/settings';
 
 export function useGeneralSettings() {
   return useQuery({
@@ -32,5 +32,20 @@ export function useUpdateBillingSettings() {
   return useMutation({
     mutationFn: (data: UpdateBillingSettingsDto) => settingsService.updateBilling(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings', 'billing'] }),
+  });
+}
+
+export function useAcademicSettings() {
+  return useQuery({
+    queryKey: ['settings', 'academic'],
+    queryFn: settingsService.getAcademic,
+  });
+}
+
+export function useUpdateAcademicSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateAcademicSettingsDto) => settingsService.updateAcademic(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings', 'academic'] }),
   });
 }
