@@ -13,7 +13,7 @@ The admin platform has a working CRUD foundation but four Settings tabs are non-
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Academic Settings** - Backend API + full frontend for rooms, subjects, grades, and working days — including rooms dropdown in Classes (completed 2026-03-19)
-- [ ] **Phase 2: Settings Completion** - Branding color persistence, Security tab cleanup, Integrations real status, Delete Institution guard
+- [ ] **Phase 2: Settings Completion** - Remove non-functional Branding, Security, and Integrations tabs plus Delete Institution danger zone
 - [ ] **Phase 3: Feature Completion** - All Finance and Attendance placeholder buttons made functional
 - [ ] **Phase 4: Quality Polish** - Full sweep to eliminate remaining placeholder buttons and mock data
 
@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Success Criteria** (what must be TRUE):
   1. Admin can create, edit, and delete rooms (including an "Online" type) in Settings Academic tab and the list persists after page refresh
   2. Admin can manage subject categories and grade levels in Settings Academic tab with changes surviving reload
-  3. Admin can toggle working days (Mon–Sun) in Settings Academic tab and the configuration persists
+  3. Admin can toggle working days (Mon-Sun) in Settings Academic tab and the configuration persists
   4. Class creation and edit forms show a room dropdown populated from the institution's saved rooms instead of a free-text field
   5. All academic settings are stored per-institution (multi-tenant) via backend API endpoints against the Institution.settings JSON blob
 **Plans:** 3/3 plans complete
@@ -37,15 +37,18 @@ Plans:
 - [ ] 01-03-PLAN.md — Class form room dropdown replacing free-text input + human verification
 
 ### Phase 2: Settings Completion
-**Goal**: All remaining Settings tabs either work correctly or are honestly represented — no fake toggles, no missing persistence
+**Goal**: Remove all non-functional Settings tabs and danger zone — Settings page has only 3 working tabs (General, Billing, Academic)
 **Depends on**: Phase 1
 **Requirements**: BRND-01, SETT-01, SETT-02, SETT-03
 **Success Criteria** (what must be TRUE):
-  1. Admin can pick a primary color in the Branding tab and it persists to the backend and is still set after a hard refresh
-  2. Security tab does not show fake toggles — it is either removed or replaced with a "coming soon" state
-  3. Integrations tab shows "connected" for WhatsApp when credentials exist in institution settings, and "not configured" otherwise
-  4. "Delete Institution" button in General tab is hidden for non-SUPER_ADMIN users or triggers a proper confirmation dialog when shown
-**Plans**: TBD
+  1. Branding tab is removed entirely (non-functional UI eliminated) — satisfies BRND-01
+  2. Security tab is removed entirely (no fake toggles) — satisfies SETT-01
+  3. Integrations tab is removed entirely (WhatsApp has its own dedicated page) — satisfies SETT-02
+  4. Delete Institution danger zone is removed from General tab — satisfies SETT-03
+**Plans:** 1 plan
+
+Plans:
+- [ ] 02-01-PLAN.md — Remove Branding/Security/Integrations tabs, delete danger zone from General tab
 
 ### Phase 3: Feature Completion
 **Goal**: All Finance and Attendance buttons that exist in the UI do something useful — no more no-op clicks
@@ -78,6 +81,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Academic Settings | 3/3 | Complete   | 2026-03-19 |
-| 2. Settings Completion | 0/TBD | Not started | - |
+| 2. Settings Completion | 0/1 | Not started | - |
 | 3. Feature Completion | 0/TBD | Not started | - |
 | 4. Quality Polish | 0/TBD | Not started | - |
