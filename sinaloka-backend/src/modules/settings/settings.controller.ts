@@ -9,11 +9,13 @@ import {
   UpdateGeneralSettingsSchema,
   UpdateBillingSettingsSchema,
   UpdateAcademicSettingsSchema,
+  UpdatePaymentGatewaySchema,
 } from './settings.dto.js';
 import type {
   UpdateGeneralSettingsDto,
   UpdateBillingSettingsDto,
   UpdateAcademicSettingsDto,
+  UpdatePaymentGatewayDto,
 } from './settings.dto.js';
 
 @Controller('settings')
@@ -61,5 +63,19 @@ export class SettingsController {
     dto: UpdateAcademicSettingsDto,
   ) {
     return this.settingsService.updateAcademic(user.institutionId!, dto);
+  }
+
+  @Get('payment-gateway')
+  async getPaymentGateway(@CurrentUser() user: JwtPayload) {
+    return this.settingsService.getPaymentGateway(user.institutionId!);
+  }
+
+  @Patch('payment-gateway')
+  async updatePaymentGateway(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(UpdatePaymentGatewaySchema))
+    dto: UpdatePaymentGatewayDto,
+  ) {
+    return this.settingsService.updatePaymentGateway(user.institutionId!, dto);
   }
 }

@@ -4,7 +4,15 @@ import type {
   UpdateGeneralSettingsDto,
   UpdateBillingSettingsDto,
   UpdateAcademicSettingsDto,
+  UpdatePaymentGatewayDto,
 } from './settings.dto.js';
+
+const PAYMENT_GATEWAY_DEFAULTS = {
+  provider: 'midtrans' as const,
+  midtrans_server_key: '',
+  midtrans_client_key: '',
+  is_sandbox: true,
+};
 
 const BILLING_DEFAULTS = {
   billing_mode: 'manual' as const,
@@ -153,5 +161,72 @@ export class SettingsService {
     });
 
     return { ...ACADEMIC_DEFAULTS, ...updatedAcademic };
+  }
+
+  async getPaymentGateway(institutionId: string) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { settings: true },
+    });
+
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+
+    const stored = (institution.settings as any)?.payment_gateway ?? {};
+    const config = { ...PAYMENT_GATEWAY_DEFAULTS, ...stored };
+
+    const maskedServerKey = config.midtrans_server_key
+      ? `${config.midtrans_server_key.slice(0, 4)}${'*'.repeat(Math.max(0, config.midtrans_server_key.length - 4))}`
+      : '';
+
+    return {
+      provider: config.provider,
+      midtrans_server_key: maskedServerKey,
+      midtrans_client_key: config.midtrans_client_key,
+      is_sandbox: config.is_sandbox,
+      is_configured: !!config.midtrans_server_key && !!config.midtrans_client_key,
+    };
+  }
+
+  async updatePaymentGateway(
+    institutionId: string,
+    dto: UpdatePaymentGatewayDto,
+  ) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { settings: true },
+    });
+
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+
+    const currentSettings = (institution.settings as any) ?? {};
+    const currentGateway = currentSettings.payment_gateway ?? {};
+    const updatedGateway = { ...currentGateway, ...dto };
+
+    await this.prisma.institution.update({
+      where: { id: institutionId },
+      data: {
+        settings: { ...currentSettings, payment_gateway: updatedGateway },
+      },
+    });
+
+    return this.getPaymentGateway(institutionId);
+  }
+
+  async getPaymentGatewayConfig(institutionId: string) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { settings: true },
+    });
+
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+
+    const stored = (institution.settings as any)?.payment_gateway ?? {};
+    return { ...PAYMENT_GATEWAY_DEFAULTS, ...stored };
   }
 }
