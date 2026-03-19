@@ -223,7 +223,10 @@ export const useSettingsPage = () => {
         setNewCategoryName('');
         setShowCategoryInput(false);
       },
-      onError: () => toast.error(t('settings.academic.settingsSaveFailed')),
+      onError: (error: any) => {
+        const message = error?.response?.data?.message || t('settings.academic.settingsSaveFailed');
+        toast.error(message);
+      },
     });
   };
 
@@ -371,6 +374,8 @@ export const useSettingsPage = () => {
     handleRemoveBankAccount,
     rooms,
     subjects,
+    createSubjectPending: createSubject.isPending,
+    deleteSubjectPending: deleteSubject.isPending,
     gradeLevels,
     workingDays,
     isLoadingAcademic,

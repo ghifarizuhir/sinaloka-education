@@ -149,6 +149,8 @@ export const SettingsPage = () => {
           setNewCategoryName={state.setNewCategoryName}
           handleAddSubjectCategory={state.handleAddSubjectCategory}
           handleRemoveSubjectCategory={state.handleRemoveSubjectCategory}
+          createSubjectPending={state.createSubjectPending}
+          deleteSubjectPending={state.deleteSubjectPending}
           showGradeInput={state.showGradeInput}
           setShowGradeInput={state.setShowGradeInput}
           newGradeName={state.newGradeName}

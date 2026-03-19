@@ -19,6 +19,7 @@ type AcademicTabProps = Pick<SettingsPageState,
   'roomToDelete' | 'setRoomToDelete' | 'handleDeleteRoom' |
   'showCategoryInput' | 'setShowCategoryInput' | 'newCategoryName' | 'setNewCategoryName' |
   'handleAddSubjectCategory' | 'handleRemoveSubjectCategory' |
+  'createSubjectPending' | 'deleteSubjectPending' |
   'showGradeInput' | 'setShowGradeInput' | 'newGradeName' | 'setNewGradeName' |
   'handleAddGrade' | 'handleRemoveGrade' |
   'handleToggleWorkingDay' | 'handleSaveWorkingDays'
@@ -44,6 +45,7 @@ export const AcademicTab = ({
   roomToDelete, setRoomToDelete, handleDeleteRoom,
   showCategoryInput, setShowCategoryInput, newCategoryName, setNewCategoryName,
   handleAddSubjectCategory, handleRemoveSubjectCategory,
+  createSubjectPending, deleteSubjectPending,
   showGradeInput, setShowGradeInput, newGradeName, setNewGradeName,
   handleAddGrade, handleRemoveGrade,
   handleToggleWorkingDay, handleSaveWorkingDays,
@@ -113,7 +115,8 @@ export const AcademicTab = ({
                     <button
                       onClick={() => handleRemoveSubjectCategory(cat.id)}
                       aria-label={`Remove ${cat.name}`}
-                      className="hover:text-destructive transition-colors"
+                      disabled={deleteSubjectPending}
+                      className="hover:text-destructive transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <X size={10} />
                     </button>
@@ -124,9 +127,10 @@ export const AcademicTab = ({
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddSubjectCategory();
+                      if (e.key === 'Enter' && !createSubjectPending) handleAddSubjectCategory();
                       if (e.key === 'Escape') setShowCategoryInput(false);
                     }}
+                    disabled={createSubjectPending}
                     autoFocus
                     placeholder="Category name"
                     className="w-40 h-7 text-xs"
