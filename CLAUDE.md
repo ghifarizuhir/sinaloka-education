@@ -10,6 +10,7 @@ Sinaloka is a multi-tenant tutoring institution management system. It consists o
 - **sinaloka-platform** — React admin dashboard (Vite, port 3000)
 - **sinaloka-tutors** — React tutor-facing app (Vite, port 5173)
 - **sinaloka-parent** — React parent-facing mobile-first app (Vite, port 5174)
+- **sinaloka-landing** — React landing page / marketing site (Vite, port 4000)
 
 ## Common Commands
 
@@ -47,6 +48,13 @@ npm run lint               # TypeScript type-check
 ### Parent (`cd sinaloka-parent`)
 ```bash
 npm run dev                # Dev server (port 5174)
+npm run build              # Production build
+npm run lint               # TypeScript type-check
+```
+
+### Landing (`cd sinaloka-landing`)
+```bash
+npm run dev                # Dev server (port 4000)
 npm run build              # Production build
 npm run lint               # TypeScript type-check
 ```
@@ -146,10 +154,76 @@ All PRs to `master`/`main` are checked for:
 
 ### Deployment
 
-- **Staging**: Auto-deploys on push to `master`/`main` (only changed apps)
-- **Production**: Manual trigger via GitHub Actions `workflow_dispatch` — requires environment approval
-- Deploy workflows use concurrency control to cancel stale in-progress deploys
-- Frontend deploy uses smart change detection (`dorny/paths-filter`) to only deploy affected apps
+> Full details in `DEPLOYMENT.md` — emergency procedures, rollback steps, migration fixes, and manual deploy commands.
+
+#### Production Architecture
+
+| Service | Platform | URL | Auto-deploy |
+|---------|----------|-----|-------------|
+| Backend (NestJS) | Railway (Docker) | https://api.sinaloka.com | Push to master (Railway native) |
+| Postgres | Railway | Internal only | N/A |
+| Platform (React) | Cloudflare Pages | https://platform.sinaloka.com | Push to master (GitHub Actions) |
+| Tutors (React) | Cloudflare Pages | https://tutors.sinaloka.com | Push to master (GitHub Actions) |
+| Parent (React) | Cloudflare Pages | https://parent.sinaloka.com | Push to master (GitHub Actions) |
+
+#### How auto-deploy works
+
+- **Backend:** Railway detects changes in `/sinaloka-backend`, builds Docker image, runs `prisma migrate deploy`, checks `/api/health`. If healthcheck fails for 5 minutes → automatic rollback.
+- **Frontends:** GitHub Actions (`deploy-frontend.yml`) detects changes per app directory, builds with `VITE_API_URL`, deploys to Cloudflare Pages via `wrangler pages deploy`.
+- **Path filters:** Only changes within an app's directory trigger its deploy. Docs, specs, and plans do NOT trigger deploys.
+
+#### Manual deploy (emergency)
+
+```bash
+# Frontend (if GitHub Actions is down)
+cd sinaloka-platform  # or sinaloka-tutors / sinaloka-parent
+VITE_API_URL=https://api.sinaloka.com npm run build
+npx wrangler pages deploy dist --project-name=sinaloka-platform --commit-dirty=true
+```
+
+#### Rollback
+
+- **Backend:** Railway dashboard → Deployments → select previous deploy → Rollback
+- **Frontend:** Cloudflare dashboard → Workers & Pages → select project → Deployments → Rollback
+- Database migrations are NOT auto-rolled back — fix forward with a new migration
+
+#### Dashboard access
+
+| Platform | URL |
+|----------|-----|
+| Railway | https://railway.com (project: sinaloka-education) |
+| Cloudflare | https://dash.cloudflare.com (Workers & Pages) |
+| GitHub Actions | https://github.com/ghifarizuhir/sinaloka-education/actions |
+| Hostinger DNS | https://hpanel.hostinger.com (domain: sinaloka.com) |
+
+#### Environment Variables
+
+**Backend (Railway):**
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `JWT_SECRET` | Yes | JWT access token signing secret |
+| `JWT_REFRESH_SECRET` | Yes | JWT refresh token signing secret |
+| `JWT_EXPIRY` | Yes | Access token expiry (e.g. `15m`) |
+| `JWT_REFRESH_EXPIRY` | Yes | Refresh token expiry (e.g. `7d`) |
+| `PORT` | Yes | Backend port (`5000`) |
+| `CORS_ORIGINS` | Yes | Comma-separated allowed origins |
+| `UPLOAD_DIR` | Yes | Upload directory path (`./uploads`) |
+| `UPLOAD_MAX_SIZE` | Yes | Max upload size in bytes (`5242880`) |
+| `RESEND_API_KEY` | Yes | Resend email API key |
+| `EMAIL_FROM` | Yes | Email sender address |
+| `TUTOR_PORTAL_URL` | Yes | Tutor app URL for email links |
+| `PARENT_PORTAL_URL` | Yes | Parent app URL for email links |
+| `WHATSAPP_*` | No | WhatsApp Cloud API vars (no-op if not set) |
+
+**Frontends (GitHub Actions → Cloudflare Pages):**
+
+| Variable | Where | Description |
+|----------|-------|-------------|
+| `VITE_API_URL` | GitHub Actions variable (`API_URL`) | Backend API URL |
+| `CLOUDFLARE_API_TOKEN` | GitHub Actions secret | Cloudflare Pages deploy token |
+| `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secret | Cloudflare account ID |
 
 ### CI/CD Rules for Development
 
@@ -194,4 +268,7 @@ When spawning subagents, choose the model based on task complexity to balance co
 - All database queries in services must scope by `tenantId` (institution isolation)
 - Prisma model names use `snake_case` with `@@map()` to PostgreSQL table names
 - Frontend env: `VITE_API_URL` points to the backend
-- Backend env: `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `UPLOAD_DIR`
+- Backend env: see Environment Variables table in Deployment section
+- Landing page is a standalone marketing site — no backend API dependency
+- **Never run `prisma migrate reset` on production** — destroys all data
+- Database migration safety: migrations run automatically on deploy, only applies pending ones, never destructive. If migration fails → deploy fails → previous version stays live (no downtime)
