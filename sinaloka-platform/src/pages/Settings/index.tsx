@@ -38,7 +38,7 @@ export const SettingsPage = () => {
       </div>
 
       {/* Sticky horizontal tab bar */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-zinc-950 -mx-1 px-1">
+      <div className="sticky top-16 z-10 bg-white dark:bg-zinc-950 -mx-1 px-1">
         <nav className="flex gap-7 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto">
           {tabs.map((tab) => (
             <button
@@ -59,7 +59,7 @@ export const SettingsPage = () => {
       </div>
 
       {/* All sections rendered — scroll-spy determines active tab */}
-      <section id="general" className="scroll-mt-16">
+      <section id="general" className="scroll-mt-32">
         <GeneralTab
           t={state.t}
           isLoadingGeneral={state.isLoadingGeneral}
@@ -80,7 +80,7 @@ export const SettingsPage = () => {
         />
       </section>
 
-      <section id="billing" className="scroll-mt-16">
+      <section id="billing" className="scroll-mt-32">
         <BillingTab
           t={state.t}
           isLoadingBilling={state.isLoadingBilling}
@@ -115,7 +115,7 @@ export const SettingsPage = () => {
         />
       </section>
 
-      <section id="academic" className="scroll-mt-16">
+      <section id="academic" className="scroll-mt-32">
         <AcademicTab
           t={state.t}
           rooms={state.rooms}

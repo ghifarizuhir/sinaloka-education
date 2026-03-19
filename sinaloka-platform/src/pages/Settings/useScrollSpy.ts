@@ -25,7 +25,7 @@ export function useScrollSpy(sectionIds: string[]): string {
         }
       },
       {
-        rootMargin: '-64px 0px 0px 0px', // offset for sticky bar height (4rem)
+        rootMargin: '-128px 0px 0px 0px', // offset for app header (4rem) + tab bar (4rem)
         threshold: 0.3,
       },
     );
