@@ -5,8 +5,16 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { SettingsService } from './settings.service.js';
-import { UpdateGeneralSettingsSchema, UpdateBillingSettingsSchema, UpdateAcademicSettingsSchema } from './settings.dto.js';
-import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto, UpdateAcademicSettingsDto } from './settings.dto.js';
+import {
+  UpdateGeneralSettingsSchema,
+  UpdateBillingSettingsSchema,
+  UpdateAcademicSettingsSchema,
+} from './settings.dto.js';
+import type {
+  UpdateGeneralSettingsDto,
+  UpdateBillingSettingsDto,
+  UpdateAcademicSettingsDto,
+} from './settings.dto.js';
 
 @Controller('settings')
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)

@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto, UpdateAcademicSettingsDto } from './settings.dto.js';
+import type {
+  UpdateGeneralSettingsDto,
+  UpdateBillingSettingsDto,
+  UpdateAcademicSettingsDto,
+} from './settings.dto.js';
 
 const BILLING_DEFAULTS = {
   billing_mode: 'manual' as const,
@@ -59,10 +63,7 @@ export class SettingsService {
     return institution;
   }
 
-  async updateGeneral(
-    institutionId: string,
-    dto: UpdateGeneralSettingsDto,
-  ) {
+  async updateGeneral(institutionId: string, dto: UpdateGeneralSettingsDto) {
     const institution = await this.prisma.institution.findUnique({
       where: { id: institutionId },
     });
