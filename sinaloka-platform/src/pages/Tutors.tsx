@@ -124,7 +124,14 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
             max={50}
             step={1}
             value={formData.experience_years}
-            onChange={(e) => setFormData(prev => ({ ...prev, experience_years: Number(e.target.value) || 0 }))}
+            onChange={(e) => {
+              const val = e.target.value;
+              // Strip leading zeros: replace raw value in DOM to prevent "05"
+              if (val.length > 1 && val.startsWith('0')) {
+                e.target.value = String(Number(val));
+              }
+              setFormData(prev => ({ ...prev, experience_years: Number(e.target.value) || 0 }));
+            }}
             placeholder="e.g. 5"
           />
         </div>
