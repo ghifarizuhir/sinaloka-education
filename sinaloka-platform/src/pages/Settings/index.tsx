@@ -121,7 +121,7 @@ export const SettingsPage = () => {
         <AcademicTab
           t={state.t}
           rooms={state.rooms}
-          subjectCategories={state.subjectCategories}
+          subjects={state.subjects}
           gradeLevels={state.gradeLevels}
           workingDays={state.workingDays}
           isLoadingAcademic={state.isLoadingAcademic}
@@ -149,6 +149,8 @@ export const SettingsPage = () => {
           setNewCategoryName={state.setNewCategoryName}
           handleAddSubjectCategory={state.handleAddSubjectCategory}
           handleRemoveSubjectCategory={state.handleRemoveSubjectCategory}
+          createSubjectPending={state.createSubjectPending}
+          deleteSubjectPending={state.deleteSubjectPending}
           showGradeInput={state.showGradeInput}
           setShowGradeInput={state.setShowGradeInput}
           newGradeName={state.newGradeName}

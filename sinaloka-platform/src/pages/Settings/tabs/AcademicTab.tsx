@@ -10,7 +10,7 @@ import type { SettingsPageState } from '../useSettingsPage';
 import type { RoomType, RoomStatus } from '../../../types/settings';
 
 type AcademicTabProps = Pick<SettingsPageState,
-  't' | 'rooms' | 'subjectCategories' | 'gradeLevels' | 'workingDays' |
+  't' | 'rooms' | 'subjects' | 'gradeLevels' | 'workingDays' |
   'isLoadingAcademic' | 'updateAcademic' |
   'showRoomModal' | 'setShowRoomModal' | 'editingRoom' | 'setEditingRoom' |
   'roomFormName' | 'setRoomFormName' | 'roomFormType' | 'setRoomFormType' |
@@ -19,6 +19,7 @@ type AcademicTabProps = Pick<SettingsPageState,
   'roomToDelete' | 'setRoomToDelete' | 'handleDeleteRoom' |
   'showCategoryInput' | 'setShowCategoryInput' | 'newCategoryName' | 'setNewCategoryName' |
   'handleAddSubjectCategory' | 'handleRemoveSubjectCategory' |
+  'createSubjectPending' | 'deleteSubjectPending' |
   'showGradeInput' | 'setShowGradeInput' | 'newGradeName' | 'setNewGradeName' |
   'handleAddGrade' | 'handleRemoveGrade' |
   'handleToggleWorkingDay' | 'handleSaveWorkingDays'
@@ -35,7 +36,7 @@ const DAYS = [
 ];
 
 export const AcademicTab = ({
-  t, rooms, subjectCategories, gradeLevels, workingDays,
+  t, rooms, subjects, gradeLevels, workingDays,
   isLoadingAcademic, updateAcademic,
   showRoomModal, setShowRoomModal, editingRoom, setEditingRoom,
   roomFormName, setRoomFormName, roomFormType, setRoomFormType,
@@ -44,6 +45,7 @@ export const AcademicTab = ({
   roomToDelete, setRoomToDelete, handleDeleteRoom,
   showCategoryInput, setShowCategoryInput, newCategoryName, setNewCategoryName,
   handleAddSubjectCategory, handleRemoveSubjectCategory,
+  createSubjectPending, deleteSubjectPending,
   showGradeInput, setShowGradeInput, newGradeName, setNewGradeName,
   handleAddGrade, handleRemoveGrade,
   handleToggleWorkingDay, handleSaveWorkingDays,
@@ -104,16 +106,17 @@ export const AcademicTab = ({
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {subjectCategories.length === 0 && !showCategoryInput && (
+                {subjects.length === 0 && !showCategoryInput && (
                   <p className="text-sm text-muted-foreground">{t('settings.academic.noCategories')}</p>
                 )}
-                {subjectCategories.map(cat => (
+                {subjects.map(cat => (
                   <Badge key={cat.id} variant="default" className="gap-1 pr-1">
                     {cat.name}
                     <button
                       onClick={() => handleRemoveSubjectCategory(cat.id)}
                       aria-label={`Remove ${cat.name}`}
-                      className="hover:text-destructive transition-colors"
+                      disabled={deleteSubjectPending}
+                      className="hover:text-destructive transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <X size={10} />
                     </button>
@@ -124,9 +127,10 @@ export const AcademicTab = ({
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddSubjectCategory();
+                      if (e.key === 'Enter' && !createSubjectPending) handleAddSubjectCategory();
                       if (e.key === 'Escape') setShowCategoryInput(false);
                     }}
+                    disabled={createSubjectPending}
                     autoFocus
                     placeholder="Category name"
                     className="w-40 h-7 text-xs"
