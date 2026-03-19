@@ -6,10 +6,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import {
-  CreateParentInviteDto,
-  ParentRegisterDto,
-} from './parent.dto.js';
+import { CreateParentInviteDto, ParentRegisterDto } from './parent.dto.js';
 
 @Injectable()
 export class ParentInviteService {

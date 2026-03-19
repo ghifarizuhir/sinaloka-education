@@ -8,7 +8,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import type { WhatsappMessagesQueryDto, UpdateWhatsappSettingsDto } from './whatsapp.dto.js';
+import type {
+  WhatsappMessagesQueryDto,
+  UpdateWhatsappSettingsDto,
+} from './whatsapp.dto.js';
 
 const GRAPH_API_URL = 'https://graph.facebook.com/v21.0';
 
@@ -55,11 +58,13 @@ export class WhatsappService {
 
   verifyWebhookSignature(payload: string, signature: string): boolean {
     if (!this.appSecret || !signature) return false;
-    const expected = 'sha256=' + crypto
-      .createHmac('sha256', this.appSecret)
-      .update(payload)
-      .digest('hex');
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+    const expected =
+      'sha256=' +
+      crypto.createHmac('sha256', this.appSecret).update(payload).digest('hex');
+    return crypto.timingSafeEqual(
+      Buffer.from(expected),
+      Buffer.from(signature),
+    );
   }
 
   async sendTemplate(params: {
@@ -135,8 +140,12 @@ export class WhatsappService {
           },
         });
 
-        this.logger.error(`WhatsApp send failed: ${errorMsg}`, { messageId: message.id });
-        return this.prisma.whatsappMessage.findUnique({ where: { id: message.id } });
+        this.logger.error(`WhatsApp send failed: ${errorMsg}`, {
+          messageId: message.id,
+        });
+        return this.prisma.whatsappMessage.findUnique({
+          where: { id: message.id },
+        });
       }
 
       const waMessageId = data?.messages?.[0]?.id;
@@ -158,8 +167,12 @@ export class WhatsappService {
         },
       });
 
-      this.logger.error(`WhatsApp send error: ${error.message}`, { messageId: message.id });
-      return this.prisma.whatsappMessage.findUnique({ where: { id: message.id } });
+      this.logger.error(`WhatsApp send error: ${error.message}`, {
+        messageId: message.id,
+      });
+      return this.prisma.whatsappMessage.findUnique({
+        where: { id: message.id },
+      });
     }
   }
 
@@ -319,20 +332,32 @@ export class WhatsappService {
     });
 
     if (recentMessage) {
-      this.logger.debug(`Skipping payment ${paymentId} — reminder already sent`);
+      this.logger.debug(
+        `Skipping payment ${paymentId} — reminder already sent`,
+      );
       return recentMessage;
     }
 
     const lang = payment.institution.default_language || 'id';
-    const amount = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(Number(payment.amount));
-    const dueDate = new Date(payment.due_date).toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-    const statusLabel = payment.status === 'OVERDUE'
-      ? (lang === 'id' ? 'Terlambat' : 'Overdue')
-      : (lang === 'id' ? 'Menunggu' : 'Pending');
+    const amount = new Intl.NumberFormat('id-ID', {
+      maximumFractionDigits: 0,
+    }).format(Number(payment.amount));
+    const dueDate = new Date(payment.due_date).toLocaleDateString(
+      lang === 'id' ? 'id-ID' : 'en-US',
+      {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      },
+    );
+    const statusLabel =
+      payment.status === 'OVERDUE'
+        ? lang === 'id'
+          ? 'Terlambat'
+          : 'Overdue'
+        : lang === 'id'
+          ? 'Menunggu'
+          : 'Pending';
 
     return this.sendTemplate({
       institutionId,

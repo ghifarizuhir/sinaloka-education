@@ -28,7 +28,9 @@ export class AttendanceService {
     });
 
     if (!session) {
-      throw new NotFoundException(`Session with id ${dto.session_id} not found`);
+      throw new NotFoundException(
+        `Session with id ${dto.session_id} not found`,
+      );
     }
 
     // Verify tutor owns the session
@@ -209,9 +211,7 @@ export class AttendanceService {
     const homework_done = records.filter((r) => r.homework_done).length;
 
     const attendance_rate =
-      total_records > 0
-        ? ((present + late) / total_records) * 100
-        : 0;
+      total_records > 0 ? ((present + late) / total_records) * 100 : 0;
 
     return {
       total_records,

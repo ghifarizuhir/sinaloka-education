@@ -42,9 +42,7 @@ export class InvoiceGeneratorService {
       });
       if (!session) return;
 
-      const sessionDateStr = new Date(session.date)
-        .toISOString()
-        .split('T')[0];
+      const sessionDateStr = new Date(session.date).toISOString().split('T')[0];
 
       // Look up enrollment for this student + class
       const enrollment = await this.prisma.enrollment.findFirst({
@@ -88,15 +86,11 @@ export class InvoiceGeneratorService {
         `Auto-payment created for student ${params.studentId}, session ${sessionDateStr}`,
       );
     } catch (error) {
-      this.logger.error(
-        `Failed to generate per-session payment: ${error}`,
-      );
+      this.logger.error(`Failed to generate per-session payment: ${error}`);
     }
   }
 
-  async generatePackagePayment(
-    params: PackagePaymentParams,
-  ): Promise<void> {
+  async generatePackagePayment(params: PackagePaymentParams): Promise<void> {
     try {
       const billing = await this.settingsService.getBilling(
         params.institutionId,

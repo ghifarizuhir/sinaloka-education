@@ -7,3 +7,9 @@ export function useDashboardStats() {
 export function useDashboardActivity() {
   return useQuery({ queryKey: ['dashboard', 'activity'], queryFn: dashboardService.getActivity });
 }
+export function useDashboardUpcomingSessions() {
+  return useQuery({
+    queryKey: ['dashboard', 'upcoming-sessions'],
+    queryFn: dashboardService.getUpcomingSessions,
+  });
+}

@@ -169,7 +169,8 @@ export class UserService {
       data.password_hash = await bcrypt.hash(dto.password, 10);
     }
     if (dto.role !== undefined) data.role = dto.role;
-    if (dto.institution_id !== undefined) data.institution_id = dto.institution_id;
+    if (dto.institution_id !== undefined)
+      data.institution_id = dto.institution_id;
     if (dto.is_active !== undefined) data.is_active = dto.is_active;
 
     return this.prisma.user.update({

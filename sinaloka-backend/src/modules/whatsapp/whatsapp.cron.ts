@@ -43,7 +43,9 @@ export class WhatsappCron {
       return;
     }
 
-    const maxRemindDays = Math.max(...activeInstitutions.map(i => i.remindDays));
+    const maxRemindDays = Math.max(
+      ...activeInstitutions.map((i) => i.remindDays),
+    );
     const remindDate = new Date();
     remindDate.setDate(remindDate.getDate() + maxRemindDays);
     remindDate.setHours(23, 59, 59, 999);
@@ -51,7 +53,7 @@ export class WhatsappCron {
     // Find payments needing reminders
     const payments = await this.prisma.payment.findMany({
       where: {
-        institution_id: { in: activeInstitutions.map(i => i.id) },
+        institution_id: { in: activeInstitutions.map((i) => i.id) },
         OR: [
           { status: 'PENDING', due_date: { lte: remindDate } },
           { status: 'OVERDUE' },
@@ -94,7 +96,7 @@ export class WhatsappCron {
         retry_count: { lt: 3 },
         related_type: 'payment',
         created_at: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-        institution_id: { in: activeInstitutions.map(i => i.id) },
+        institution_id: { in: activeInstitutions.map((i) => i.id) },
       },
     });
 

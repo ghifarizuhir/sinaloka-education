@@ -143,7 +143,7 @@ describe('DashboardController (integration)', () => {
 
     expect(res.body).toHaveProperty('total_students');
     expect(res.body).toHaveProperty('active_tutors');
-    expect(res.body).toHaveProperty('total_revenue');
+    expect(res.body).toHaveProperty('monthly_revenue');
     expect(res.body).toHaveProperty('attendance_rate');
     expect(res.body).toHaveProperty('upcoming_sessions');
   });

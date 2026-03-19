@@ -63,7 +63,11 @@ describe('InstitutionService', () => {
       prisma.institution.findMany.mockResolvedValue([mockInstitution]);
       prisma.institution.count.mockResolvedValue(1);
 
-      const result = await service.findAll({ page: 1, limit: 20, sort_order: 'asc' as const });
+      const result = await service.findAll({
+        page: 1,
+        limit: 20,
+        sort_order: 'asc' as const,
+      });
 
       expect(result.data).toHaveLength(1);
       expect(result.meta.total).toBe(1);
@@ -77,7 +81,12 @@ describe('InstitutionService', () => {
       prisma.institution.findMany.mockResolvedValue([]);
       prisma.institution.count.mockResolvedValue(0);
 
-      await service.findAll({ page: 1, limit: 20, search: 'test', sort_order: 'asc' as const });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        search: 'test',
+        sort_order: 'asc' as const,
+      });
 
       expect(prisma.institution.findMany).toHaveBeenCalledWith(
         expect.objectContaining({

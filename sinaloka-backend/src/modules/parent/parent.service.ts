@@ -4,7 +4,10 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { buildPaginationMeta, PaginatedResponse } from '../../common/dto/pagination.dto.js';
+import {
+  buildPaginationMeta,
+  PaginatedResponse,
+} from '../../common/dto/pagination.dto.js';
 import {
   ParentQueryDto,
   LinkStudentsDto,
@@ -70,19 +73,20 @@ export class ParentService {
       link.student.enrollments.map((e: any) => e.class.id),
     );
 
-    const nextSessions = classIds.length > 0
-      ? await this.prisma.session.findMany({
-          where: {
-            class_id: { in: classIds },
-            status: 'SCHEDULED',
-            date: { gte: new Date() },
-          },
-          orderBy: { date: 'asc' },
-          include: {
-            class: { select: { id: true, name: true, subject: true } },
-          },
-        })
-      : [];
+    const nextSessions =
+      classIds.length > 0
+        ? await this.prisma.session.findMany({
+            where: {
+              class_id: { in: classIds },
+              status: 'SCHEDULED',
+              date: { gte: new Date() },
+            },
+            orderBy: { date: 'asc' },
+            include: {
+              class: { select: { id: true, name: true, subject: true } },
+            },
+          })
+        : [];
 
     return parent.children.map((link) => {
       const s = link.student;
@@ -96,8 +100,12 @@ export class ParentService {
           ? Math.round((presentCount / totalAttendance) * 100)
           : 0;
 
-      const pendingPayments = s.payments.filter((p) => p.status === 'PENDING').length;
-      const overduePayments = s.payments.filter((p) => p.status === 'OVERDUE').length;
+      const pendingPayments = s.payments.filter(
+        (p) => p.status === 'PENDING',
+      ).length;
+      const overduePayments = s.payments.filter(
+        (p) => p.status === 'OVERDUE',
+      ).length;
 
       // Find next upcoming session for this child's enrolled classes
       const childClassIds = s.enrollments.map((e: any) => e.class.id);
@@ -220,7 +228,14 @@ export class ParentService {
 
     return {
       data,
-      summary: { present, absent, late, homework_done: homeworkDone, attendance_rate: attendanceRate, homework_rate: homeworkRate },
+      summary: {
+        present,
+        absent,
+        late,
+        homework_done: homeworkDone,
+        attendance_rate: attendanceRate,
+        homework_rate: homeworkRate,
+      },
       meta: buildPaginationMeta(total, page, limit),
     };
   }
@@ -340,7 +355,10 @@ export class ParentService {
 
   // --- Admin methods ---
 
-  async findAll(institutionId: string, query: ParentQueryDto): Promise<PaginatedResponse<any>> {
+  async findAll(
+    institutionId: string,
+    query: ParentQueryDto,
+  ): Promise<PaginatedResponse<any>> {
     const { page, limit, search, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 
@@ -408,7 +426,11 @@ export class ParentService {
     return parent;
   }
 
-  async linkStudents(institutionId: string, parentId: string, dto: LinkStudentsDto) {
+  async linkStudents(
+    institutionId: string,
+    parentId: string,
+    dto: LinkStudentsDto,
+  ) {
     await this.findOne(institutionId, parentId);
 
     const count = await this.prisma.student.count({
@@ -435,7 +457,11 @@ export class ParentService {
     return this.findOne(institutionId, parentId);
   }
 
-  async unlinkStudent(institutionId: string, parentId: string, studentId: string) {
+  async unlinkStudent(
+    institutionId: string,
+    parentId: string,
+    studentId: string,
+  ) {
     await this.findOne(institutionId, parentId);
 
     const link = await this.prisma.parentStudent.findFirst({

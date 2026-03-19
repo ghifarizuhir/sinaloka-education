@@ -8,10 +8,7 @@ export default function globalSetup() {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
 
   // Store original for teardown
-  fs.writeFileSync(
-    pkgPath + '.bak',
-    JSON.stringify(pkg, null, 2),
-  );
+  fs.writeFileSync(pkgPath + '.bak', JSON.stringify(pkg, null, 2));
 
   // Remove "type": "module" so jest treats .ts files as CJS
   delete pkg.type;

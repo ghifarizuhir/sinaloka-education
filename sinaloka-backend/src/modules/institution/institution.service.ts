@@ -1,8 +1,19 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { PaginationDto, buildPaginationMeta, PaginatedResponse } from '../../common/dto/pagination.dto.js';
-import { CreateInstitutionDto, UpdateInstitutionDto } from './institution.dto.js';
+import {
+  PaginationDto,
+  buildPaginationMeta,
+  PaginatedResponse,
+} from '../../common/dto/pagination.dto.js';
+import {
+  CreateInstitutionDto,
+  UpdateInstitutionDto,
+} from './institution.dto.js';
 
 @Injectable()
 export class InstitutionService {
@@ -71,7 +82,11 @@ export class InstitutionService {
       const hashedPassword = await bcrypt.hash(admin.password, 10);
       return this.prisma.$transaction(async (tx) => {
         const institution = await tx.institution.create({
-          data: { ...institutionData, settings: institutionData.settings as any, slug },
+          data: {
+            ...institutionData,
+            settings: institutionData.settings as any,
+            slug,
+          },
         });
         await tx.user.create({
           data: {
@@ -96,7 +111,11 @@ export class InstitutionService {
     }
 
     return this.prisma.institution.create({
-      data: { ...institutionData, settings: institutionData.settings as any, slug },
+      data: {
+        ...institutionData,
+        settings: institutionData.settings as any,
+        slug,
+      },
     });
   }
 

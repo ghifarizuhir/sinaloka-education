@@ -34,7 +34,7 @@ test.describe('Dashboard', () => {
     await setupDashboardMocks(mockApi);
     // Mock pages we navigate to
     await mockApi.onGet('**/api/admin/students').respondWith(200, { data: [], meta: { page: 1, limit: 10, total: 0, total_pages: 0 } });
-    await mockApi.onGet('**/api/admin/dashboard/stats').respondWith(200, { total_students: 0, active_tutors: 0, total_revenue: 0, attendance_rate: 0, upcoming_sessions: 0 });
+    await mockApi.onGet('**/api/admin/dashboard/stats').respondWith(200, { total_students: 0, active_tutors: 0, monthly_revenue: 0, attendance_rate: 0, upcoming_sessions: 0 });
 
     const dashboardPage = new DashboardPage(page);
     await dashboardPage.goto();

@@ -29,7 +29,8 @@ export class TutorAttendanceController {
   @Post()
   batchCreate(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(BatchCreateAttendanceSchema)) dto: BatchCreateAttendanceDto,
+    @Body(new ZodValidationPipe(BatchCreateAttendanceSchema))
+    dto: BatchCreateAttendanceDto,
   ) {
     return this.attendanceService.batchCreate(user.userId, dto);
   }
@@ -38,7 +39,8 @@ export class TutorAttendanceController {
   update(
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(new ZodValidationPipe(UpdateAttendanceSchema)) dto: UpdateAttendanceDto,
+    @Body(new ZodValidationPipe(UpdateAttendanceSchema))
+    dto: UpdateAttendanceDto,
   ) {
     return this.attendanceService.updateByTutor(user.userId, id, dto);
   }

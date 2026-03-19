@@ -17,25 +17,20 @@ import {
   Search,
   Command,
   X,
-  Sparkles,
-  BookOpen,
   CreditCard,
   Activity,
-  Sun,
-  Moon,
-  Sunset
 } from 'lucide-react';
 import { Card, Button, Skeleton } from '../components/UI';
 import { cn, formatCurrencyShort, formatCurrency } from '../lib/utils';
-import { useDashboardStats, useDashboardActivity } from '@/src/hooks/useDashboard';
+import { useDashboardStats, useDashboardActivity, useDashboardUpcomingSessions } from '@/src/hooks/useDashboard';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
 import { AuthContext } from '@/src/contexts/AuthContext';
 
 const getGreeting = () => {
   const h = new Date().getHours();
-  if (h < 12) return { key: 'morning' as const, icon: Sun, gradient: 'from-amber-200 via-orange-100 to-yellow-50 dark:from-amber-950/40 dark:via-orange-950/20 dark:to-transparent' };
-  if (h < 17) return { key: 'afternoon' as const, icon: Sunset, gradient: 'from-sky-200 via-blue-100 to-indigo-50 dark:from-sky-950/40 dark:via-blue-950/20 dark:to-transparent' };
-  return { key: 'evening' as const, icon: Moon, gradient: 'from-indigo-200 via-purple-100 to-violet-50 dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-transparent' };
+  if (h < 12) return 'morning';
+  if (h < 17) return 'afternoon';
+  return 'evening';
 };
 
 const getActivityIcon = (type: string) => {
@@ -65,10 +60,13 @@ export const Dashboard = () => {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: activity, isLoading: activityLoading } = useDashboardActivity();
   const { data: overdueSummary } = useOverdueSummary();
+  const { data: upcomingSessions } = useDashboardUpcomingSessions();
 
   const isLoading = statsLoading || activityLoading;
   const greeting = getGreeting();
   const userName = auth?.user?.name?.split(' ')[0] ?? '';
+  const institutionName = auth?.user?.institution?.name ?? 'Dashboard';
+  const institutionInitial = institutionName.charAt(0).toUpperCase();
 
   const getTimeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -82,7 +80,7 @@ export const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-40 rounded-3xl" />
+        <Skeleton className="h-24 rounded-2xl" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
         </div>
@@ -96,80 +94,62 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* ─── Hero Greeting ─── */}
+      {/* ─── Institution Overview ─── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className={cn(
-          "relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br",
-          greeting.gradient
-        )}>
-          {/* Decorative circles */}
-          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/20 dark:bg-white/5 blur-2xl" />
-          <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-white/30 dark:bg-white/5 blur-xl" />
-
-          <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-foreground/60">
-                <greeting.icon size={16} />
-                <span className="text-xs font-semibold uppercase tracking-widest">{t(`dashboard.greeting_${greeting.key}`)}</span>
+        <Card className="p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                {institutionInitial}
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-                {userName ? `${userName} 👋` : t('dashboard.greeting')}
-              </h1>
-              <p className="text-sm text-foreground/60 max-w-md">
-                {t('dashboard.subtitle')}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                className="bg-background/60 backdrop-blur-sm border-border/50"
-                onClick={() => navigate('/schedules')}
-              >
-                <Calendar size={16} />
-                {t('dashboard.schedule')}
-              </Button>
-              <Button
-                className="bg-foreground text-background hover:bg-foreground/90"
-                onClick={() => setIsCommandPaletteOpen(true)}
-              >
-                <Zap size={16} />
-                {t('dashboard.quickActions')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ─── Overdue Alert ─── */}
-      {overdueSummary && overdueSummary.overdue_count > 0 && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <div className="flex items-center gap-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
-              <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{t('payments.overdueAlert.title')}</p>
-              <p className="text-xs text-amber-700/80 dark:text-amber-400/70 truncate">
-                {t('payments.overdueAlert.students', { count: overdueSummary.flagged_students.length })} · {t('payments.overdueAlert.totalDebt', { amount: formatCurrency(overdueSummary.total_overdue_amount, i18n.language) })}
-              </p>
+              <div>
+                <h1 className="text-lg font-bold tracking-tight text-foreground">
+                  {institutionName}
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  {t(`dashboard.greeting_${greeting}`)}
+                  {userName ? `, ${userName}` : ''}
+                </p>
+              </div>
             </div>
             <Button
-              variant="ghost"
-              size="sm"
-              className="text-amber-700 hover:text-amber-900 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-900/30 shrink-0"
-              onClick={() => navigate('/finance/payments')}
+              className="bg-foreground text-background hover:bg-foreground/90 shrink-0"
+              onClick={() => setIsCommandPaletteOpen(true)}
             >
-              {t('payments.overdueAlert.viewDetails')}
-              <ChevronRight size={14} />
+              <Zap size={16} />
+              {t('dashboard.quickActions')}
             </Button>
           </div>
-        </motion.div>
-      )}
+
+          {/* Contextual Alert Chips */}
+          {((overdueSummary && overdueSummary.overdue_count > 0) || (stats?.upcoming_sessions != null && stats.upcoming_sessions > 0)) && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {overdueSummary && overdueSummary.overdue_count > 0 && (
+                <button
+                  onClick={() => navigate('/finance/payments')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 text-xs font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40 transition-colors"
+                >
+                  <AlertTriangle size={12} />
+                  {t('payments.overdueAlert.students', { count: overdueSummary.flagged_students.length })} {t('payments.overdueAlert.title').toLowerCase()}
+                </button>
+              )}
+              {stats?.upcoming_sessions != null && stats.upcoming_sessions > 0 && (
+                <button
+                  onClick={() => navigate('/schedules')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 text-xs font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/40 transition-colors"
+                >
+                  <Calendar size={12} />
+                  {stats.upcoming_sessions} {t('dashboard.upcomingSessions').toLowerCase()}
+                </button>
+              )}
+            </div>
+          )}
+        </Card>
+      </motion.div>
 
       {/* ─── Bento Stats Grid ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -200,7 +180,7 @@ export const Dashboard = () => {
           },
           {
             label: t('dashboard.monthlyRevenue'),
-            value: stats?.total_revenue != null ? formatCurrencyShort(stats.total_revenue, i18n.language) : '—',
+            value: stats?.monthly_revenue != null ? formatCurrencyShort(stats.monthly_revenue, i18n.language) : '—',
             icon: TrendingUp,
             accent: 'text-violet-600 dark:text-violet-400',
             accentBg: 'bg-violet-500/10',
@@ -229,50 +209,13 @@ export const Dashboard = () => {
       {/* ─── Main Content: 2/3 + 1/3 Layout ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        {/* Left: Sessions & Metrics */}
+        {/* Left: Activity Feed */}
         <motion.div
           className="lg:col-span-2 space-y-4"
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5, duration: 0.4 }}
         >
-          {/* Revenue + Sessions Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Revenue Card */}
-            <Card className="p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-violet-500/5 to-transparent rounded-bl-full" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-lg bg-violet-500/10">
-                    <CreditCard size={16} className="text-violet-600 dark:text-violet-400" />
-                  </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('dashboard.monthlyRevenue')}</span>
-                </div>
-                <p className="text-3xl font-bold tracking-tight text-foreground">
-                  {stats?.total_revenue != null ? formatCurrency(stats.total_revenue, i18n.language) : '—'}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">{t('finance.basedOnTotalRevenue')}</p>
-              </div>
-            </Card>
-
-            {/* Sessions Card */}
-            <Card className="p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/5 to-transparent rounded-bl-full" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-lg bg-blue-500/10">
-                    <BookOpen size={16} className="text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('dashboard.upcomingSessions')}</span>
-                </div>
-                <p className="text-3xl font-bold tracking-tight text-foreground">
-                  {stats?.upcoming_sessions ?? '—'}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">{t('dashboard.sessionsPlanned')}</p>
-              </div>
-            </Card>
-          </div>
-
           {/* Activity Feed */}
           <Card className="p-5">
             <div className="flex items-center justify-between mb-5">
@@ -330,10 +273,46 @@ export const Dashboard = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.6, duration: 0.4 }}
         >
+          {/* Upcoming Sessions */}
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Clock size={14} className="text-muted-foreground" />
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.upcomingSessions')}</h3>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/schedules')}>
+                {t('common.viewAll')}
+              </Button>
+            </div>
+            <div className="space-y-1">
+              {upcomingSessions && upcomingSessions.length > 0 ? (
+                upcomingSessions.slice(0, 5).map((session) => (
+                  <div
+                    key={session.id}
+                    className="flex items-center gap-3 px-3 py-2.5 -mx-3 rounded-xl hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="p-2 rounded-lg bg-blue-500/10">
+                      <Calendar size={14} className="text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{session.subject_name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {session.start_time} · {session.tutor_name}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-muted-foreground text-sm">
+                  {t('dashboard.noUpcomingSessions')}
+                </div>
+              )}
+            </div>
+          </Card>
+
           {/* Quick Navigate */}
           <Card className="p-5">
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={14} className="text-muted-foreground" />
               <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.quickLinks')}</h3>
             </div>
             <div className="space-y-1">
@@ -354,29 +333,6 @@ export const Dashboard = () => {
                   <span className="text-sm font-medium text-foreground flex-1">{link.label}</span>
                   <ChevronRight size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all" />
                 </button>
-              ))}
-            </div>
-          </Card>
-
-          {/* Metrics Summary */}
-          <Card className="p-5 bg-gradient-to-br from-card to-muted/30">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={14} className="text-muted-foreground" />
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.overview')}</h3>
-            </div>
-            <div className="space-y-3">
-              {[
-                { label: t('dashboard.monthlyRevenue'), value: stats?.total_revenue != null ? formatCurrencyShort(stats.total_revenue, i18n.language) : '—', icon: Receipt, color: 'text-violet-500' },
-                { label: t('dashboard.activeTutors'), value: stats?.active_tutors?.toString() ?? '—', icon: GraduationCap, color: 'text-emerald-500' },
-                { label: t('dashboard.upcomingSessions'), value: stats?.upcoming_sessions?.toString() ?? '—', icon: Clock, color: 'text-blue-500' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2.5">
-                    <item.icon size={14} className={item.color} />
-                    <span className="text-xs text-muted-foreground">{item.label}</span>
-                  </div>
-                  <span className="text-sm font-bold text-foreground tabular-nums">{item.value}</span>
-                </div>
               ))}
             </div>
           </Card>

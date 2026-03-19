@@ -158,6 +158,7 @@ export const Classes = () => {
         createClass={state.createClass}
         updateClass={state.updateClass}
         tutorClasses={state.tutorClasses}
+        availableRooms={state.availableRooms}
         toggleScheduleDay={state.toggleScheduleDay}
         handleFormSubmit={state.handleFormSubmit}
       />

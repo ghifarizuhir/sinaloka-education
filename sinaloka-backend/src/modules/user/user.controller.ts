@@ -17,7 +17,11 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { UserService } from './user.service.js';
-import { CreateUserSchema, UpdateUserSchema, UserQuerySchema } from './user.dto.js';
+import {
+  CreateUserSchema,
+  UpdateUserSchema,
+  UserQuerySchema,
+} from './user.dto.js';
 import type { CreateUserDto, UpdateUserDto, UserQueryDto } from './user.dto.js';
 
 @Controller('admin/users')
@@ -34,10 +38,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.userService.findOne(id, user.institutionId);
   }
 
@@ -58,10 +59,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     await this.userService.remove(id, user.institutionId);
   }
 }

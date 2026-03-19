@@ -16,7 +16,9 @@ export const WhatsappMessagesQuerySchema = z.object({
   date_to: z.string().optional(),
   related_type: z.string().optional(),
 });
-export type WhatsappMessagesQueryDto = z.infer<typeof WhatsappMessagesQuerySchema>;
+export type WhatsappMessagesQueryDto = z.infer<
+  typeof WhatsappMessagesQuerySchema
+>;
 
 export const WhatsappStatsQuerySchema = z.object({
   date_from: z.string().optional(),
@@ -28,4 +30,6 @@ export const UpdateWhatsappSettingsSchema = z.object({
   auto_reminders: z.boolean().optional(),
   remind_days_before: z.coerce.number().int().min(1).max(7).optional(),
 });
-export type UpdateWhatsappSettingsDto = z.infer<typeof UpdateWhatsappSettingsSchema>;
+export type UpdateWhatsappSettingsDto = z.infer<
+  typeof UpdateWhatsappSettingsSchema
+>;

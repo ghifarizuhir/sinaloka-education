@@ -141,9 +141,7 @@ describe('PaymentController (integration)', () => {
         capacity: 20,
         fee: 100000,
         schedules: {
-          create: [
-            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
-          ],
+          create: [{ day: 'Monday', start_time: '14:00', end_time: '15:30' }],
         },
         status: 'ACTIVE',
       },
@@ -201,10 +199,16 @@ describe('PaymentController (integration)', () => {
         where: { institution_id: testInstitutionId },
       });
       await prisma.refreshToken.deleteMany({
-        where: { user: { email: { in: [...testEmails, 'pay-ctrl-tutor-helper@test.com'] } } },
+        where: {
+          user: {
+            email: { in: [...testEmails, 'pay-ctrl-tutor-helper@test.com'] },
+          },
+        },
       });
       await prisma.user.deleteMany({
-        where: { email: { in: [...testEmails, 'pay-ctrl-tutor-helper@test.com'] } },
+        where: {
+          email: { in: [...testEmails, 'pay-ctrl-tutor-helper@test.com'] },
+        },
       });
       await prisma.institution.deleteMany({
         where: { id: testInstitutionId },
@@ -301,8 +305,6 @@ describe('PaymentController (integration)', () => {
   });
 
   it('GET /admin/payments — should return 401 without token', async () => {
-    await request(app.getHttpServer())
-      .get('/admin/payments')
-      .expect(401);
+    await request(app.getHttpServer()).get('/admin/payments').expect(401);
   });
 });

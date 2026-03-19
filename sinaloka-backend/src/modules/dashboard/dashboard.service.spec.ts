@@ -20,7 +20,10 @@ describe('DashboardService', () => {
       ]),
       findMany: jest.fn().mockResolvedValue([]),
     },
-    session: { count: jest.fn().mockResolvedValue(5) },
+    session: {
+      count: jest.fn().mockResolvedValue(5),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
     enrollment: { findMany: jest.fn().mockResolvedValue([]) },
   };
 
@@ -49,6 +52,7 @@ describe('DashboardService', () => {
     ]);
     mockPrisma.attendance.findMany.mockResolvedValue([]);
     mockPrisma.session.count.mockResolvedValue(5);
+    mockPrisma.session.findMany.mockResolvedValue([]);
     mockPrisma.enrollment.findMany.mockResolvedValue([]);
   });
 
@@ -57,7 +61,7 @@ describe('DashboardService', () => {
       const stats = await service.getStats(instId);
       expect(stats.total_students).toBe(10);
       expect(stats.active_tutors).toBe(3);
-      expect(stats.total_revenue).toBe(5000);
+      expect(stats.monthly_revenue).toBe(5000);
       expect(stats.attendance_rate).toBe(90);
       expect(stats.upcoming_sessions).toBe(5);
     });
@@ -69,9 +73,11 @@ describe('DashboardService', () => {
     });
 
     it('should return 0 revenue when no payments', async () => {
-      mockPrisma.payment.aggregate.mockResolvedValue({ _sum: { amount: null } });
+      mockPrisma.payment.aggregate.mockResolvedValue({
+        _sum: { amount: null },
+      });
       const stats = await service.getStats(instId);
-      expect(stats.total_revenue).toBe(0);
+      expect(stats.monthly_revenue).toBe(0);
     });
 
     it('should scope queries to institution_id', async () => {
@@ -82,6 +88,65 @@ describe('DashboardService', () => {
       expect(mockPrisma.tutor.count).toHaveBeenCalledWith({
         where: expect.objectContaining({ institution_id: instId }),
       });
+    });
+  });
+
+  describe('getUpcomingSessions', () => {
+    it('should return upcoming sessions with class, subject, and tutor details', async () => {
+      const mockSessions = [
+        {
+          id: 'session-1',
+          date: new Date('2026-03-20'),
+          start_time: '10:00',
+          class: {
+            name: 'Math Advanced',
+            subject: { name: 'Mathematics' },
+            tutor: { user: { name: 'Pak Budi' } },
+          },
+        },
+        {
+          id: 'session-2',
+          date: new Date('2026-03-20'),
+          start_time: '13:00',
+          class: {
+            name: 'English Basic',
+            subject: { name: 'English' },
+            tutor: { user: { name: 'Bu Ani' } },
+          },
+        },
+      ];
+      mockPrisma.session.findMany.mockResolvedValue(mockSessions);
+
+      const result = await service.getUpcomingSessions(instId);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        id: 'session-1',
+        date: expect.any(Date),
+        start_time: '10:00',
+        subject_name: 'Mathematics',
+        tutor_name: 'Pak Budi',
+        class_name: 'Math Advanced',
+      });
+    });
+
+    it('should scope query to institution_id', async () => {
+      mockPrisma.session.findMany.mockResolvedValue([]);
+      await service.getUpcomingSessions(instId);
+
+      expect(mockPrisma.session.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            institution_id: instId,
+          }),
+        }),
+      );
+    });
+
+    it('should return empty array when no upcoming sessions', async () => {
+      mockPrisma.session.findMany.mockResolvedValue([]);
+      const result = await service.getUpcomingSessions(instId);
+      expect(result).toEqual([]);
     });
   });
 
@@ -96,10 +161,19 @@ describe('DashboardService', () => {
       const now = new Date();
       const earlier = new Date(now.getTime() - 10000);
       mockPrisma.enrollment.findMany.mockResolvedValue([
-        { student: { name: 'Ali' }, class: { name: 'Math' }, created_at: earlier },
+        {
+          student: { name: 'Ali' },
+          class: { name: 'Math' },
+          created_at: earlier,
+        },
       ]);
       mockPrisma.payment.findMany.mockResolvedValue([
-        { student: { name: 'Ali' }, status: 'PAID', amount: 100, created_at: now },
+        {
+          student: { name: 'Ali' },
+          status: 'PAID',
+          amount: 100,
+          created_at: now,
+        },
       ]);
       mockPrisma.attendance.findMany.mockResolvedValue([]);
 

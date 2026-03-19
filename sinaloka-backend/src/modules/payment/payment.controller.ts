@@ -58,7 +58,8 @@ export class PaymentController {
   @Post('batch-record')
   batchRecord(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(BatchRecordPaymentSchema)) dto: BatchRecordPaymentDto,
+    @Body(new ZodValidationPipe(BatchRecordPaymentSchema))
+    dto: BatchRecordPaymentDto,
   ) {
     return this.paymentService.batchRecord(user.institutionId!, dto);
   }

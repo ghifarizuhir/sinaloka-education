@@ -42,3 +42,40 @@ export interface UpdateBillingSettingsDto {
   expense_categories?: string[];
   bank_accounts?: BankAccount[];
 }
+
+export type RoomType = 'Classroom' | 'Laboratory' | 'Studio' | 'Online';
+export type RoomStatus = 'Available' | 'Maintenance' | 'Unavailable';
+
+export interface Room {
+  id: string;
+  name: string;
+  type: RoomType;
+  capacity: number | null;
+  status: RoomStatus;
+}
+
+export interface SubjectCategory {
+  id: string;
+  name: string;
+  order: number;
+}
+
+export interface GradeLevel {
+  id: string;
+  name: string;
+  order: number;
+}
+
+export interface AcademicSettings {
+  rooms: Room[];
+  subject_categories: SubjectCategory[];
+  grade_levels: GradeLevel[];
+  working_days: number[];
+}
+
+export interface UpdateAcademicSettingsDto {
+  rooms?: Room[];
+  subject_categories?: SubjectCategory[];
+  grade_levels?: GradeLevel[];
+  working_days?: number[];
+}

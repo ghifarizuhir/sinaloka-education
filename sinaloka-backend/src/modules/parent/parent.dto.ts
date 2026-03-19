@@ -4,12 +4,16 @@ import { z } from 'zod';
 
 export const CreateParentInviteSchema = z.object({
   email: z.string().email(),
-  student_ids: z.array(z.string().uuid()).min(1, 'At least one student is required'),
+  student_ids: z
+    .array(z.string().uuid())
+    .min(1, 'At least one student is required'),
 });
 export type CreateParentInviteDto = z.infer<typeof CreateParentInviteSchema>;
 
 export const LinkStudentsSchema = z.object({
-  student_ids: z.array(z.string().uuid()).min(1, 'At least one student is required'),
+  student_ids: z
+    .array(z.string().uuid())
+    .min(1, 'At least one student is required'),
 });
 export type LinkStudentsDto = z.infer<typeof LinkStudentsSchema>;
 
@@ -40,7 +44,9 @@ export const ChildAttendanceQuerySchema = z.object({
   date_to: z.string().date().optional(),
   class_id: z.string().uuid().optional(),
 });
-export type ChildAttendanceQueryDto = z.infer<typeof ChildAttendanceQuerySchema>;
+export type ChildAttendanceQueryDto = z.infer<
+  typeof ChildAttendanceQuerySchema
+>;
 
 export const ChildSessionsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

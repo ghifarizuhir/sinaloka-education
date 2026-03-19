@@ -61,10 +61,7 @@ export class StudentController {
     @CurrentUser() user: JwtPayload,
   ) {
     if (!file) throw new BadRequestException('CSV file required');
-    if (
-      file.mimetype !== 'text/csv' &&
-      !file.originalname.endsWith('.csv')
-    ) {
+    if (file.mimetype !== 'text/csv' && !file.originalname.endsWith('.csv')) {
       throw new BadRequestException('File must be a CSV');
     }
     return this.studentService.importFromCsv(file.buffer, user.institutionId!);
@@ -88,10 +85,7 @@ export class StudentController {
   }
 
   @Get(':id')
-  async findOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.studentService.findOne(user.institutionId!, id);
   }
 
@@ -106,10 +100,7 @@ export class StudentController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     await this.studentService.delete(user.institutionId!, id);
   }
 }

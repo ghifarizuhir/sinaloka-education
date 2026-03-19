@@ -90,8 +90,15 @@ export class TutorService {
     institutionId: string,
     query: TutorQueryDto,
   ): Promise<PaginatedResponse<any>> {
-    const { page, limit, search, subject_id, is_verified, sort_by, sort_order } =
-      query;
+    const {
+      page,
+      limit,
+      search,
+      subject_id,
+      is_verified,
+      sort_by,
+      sort_order,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {

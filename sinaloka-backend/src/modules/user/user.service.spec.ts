@@ -62,10 +62,7 @@ describe('UserService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [UserService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<UserService>(UserService);
@@ -103,7 +100,9 @@ describe('UserService', () => {
       // Should not have institution_id in where clause
       expect(prisma.user.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.not.objectContaining({ institution_id: expect.anything() }),
+          where: expect.not.objectContaining({
+            institution_id: expect.anything(),
+          }),
         }),
       );
     });

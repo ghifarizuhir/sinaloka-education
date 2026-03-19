@@ -19,7 +19,9 @@ export class PayoutCronService {
     for (const inst of institutions) {
       const result = await this.payoutService.generateMonthlySalaries(inst.id);
       if (result.created > 0) {
-        console.log(`[PayoutCron] Generated ${result.created} salary payouts for institution ${inst.id}`);
+        console.log(
+          `[PayoutCron] Generated ${result.created} salary payouts for institution ${inst.id}`,
+        );
       }
     }
   }

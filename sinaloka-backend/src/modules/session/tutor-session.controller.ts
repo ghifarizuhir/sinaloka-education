@@ -32,7 +32,8 @@ export class TutorSessionController {
   @Get()
   getSchedule(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(TutorScheduleQuerySchema)) query: TutorScheduleQueryDto,
+    @Query(new ZodValidationPipe(TutorScheduleQuerySchema))
+    query: TutorScheduleQueryDto,
   ) {
     return this.sessionService.getTutorSchedule(user.userId, query);
   }
@@ -41,7 +42,8 @@ export class TutorSessionController {
   requestReschedule(
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(new ZodValidationPipe(RequestRescheduleSchema)) dto: RequestRescheduleDto,
+    @Body(new ZodValidationPipe(RequestRescheduleSchema))
+    dto: RequestRescheduleDto,
   ) {
     return this.sessionService.requestReschedule(user.userId, id, dto);
   }

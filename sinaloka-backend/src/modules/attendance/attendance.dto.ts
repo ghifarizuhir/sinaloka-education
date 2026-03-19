@@ -13,7 +13,9 @@ export const BatchCreateAttendanceSchema = z.object({
   session_id: z.string().uuid(),
   records: z.array(CreateAttendanceRecordSchema).min(1),
 });
-export type BatchCreateAttendanceDto = z.infer<typeof BatchCreateAttendanceSchema>;
+export type BatchCreateAttendanceDto = z.infer<
+  typeof BatchCreateAttendanceSchema
+>;
 
 export const UpdateAttendanceSchema = z.object({
   status: AttendanceStatus.optional(),
@@ -32,4 +34,6 @@ export const AttendanceSummaryQuerySchema = z.object({
   date_from: z.coerce.date(),
   date_to: z.coerce.date(),
 });
-export type AttendanceSummaryQueryDto = z.infer<typeof AttendanceSummaryQuerySchema>;
+export type AttendanceSummaryQueryDto = z.infer<
+  typeof AttendanceSummaryQuerySchema
+>;

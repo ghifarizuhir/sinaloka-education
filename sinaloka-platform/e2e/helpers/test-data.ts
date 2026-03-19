@@ -71,7 +71,7 @@ export function createMockAttendance(overrides: Record<string, unknown> = {}) {
 
 export function createMockDashboardStats(overrides: Record<string, unknown> = {}) {
   return {
-    total_students: 150, active_tutors: 12, total_revenue: 75000000,
+    total_students: 150, active_tutors: 12, monthly_revenue: 75000000,
     attendance_rate: 92.5, upcoming_sessions: 8, ...overrides,
   };
 }

@@ -110,7 +110,9 @@ describe('WhatsappService', () => {
     });
 
     it('should strip parens and spaces from (081) 234 567 890', () => {
-      expect(service.normalizePhone('(081) 234 567 890')).toBe('+6281234567890');
+      expect(service.normalizePhone('(081) 234 567 890')).toBe(
+        '+6281234567890',
+      );
     });
 
     it('should prepend +62 to bare number 81234567890', () => {
@@ -143,9 +145,9 @@ describe('WhatsappService', () => {
       const payload = '{"test":"data"}';
       // Must be same byte length as a real sha256 hex digest (64 hex chars)
       const fakeSignature = 'sha256=' + 'a'.repeat(64);
-      expect(
-        service.verifyWebhookSignature(payload, fakeSignature),
-      ).toBe(false);
+      expect(service.verifyWebhookSignature(payload, fakeSignature)).toBe(
+        false,
+      );
     });
 
     it('should return false when no signature provided', () => {

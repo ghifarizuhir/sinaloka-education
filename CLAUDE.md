@@ -171,6 +171,22 @@ All PRs to `master`/`main` are checked for:
 | Docs, specs, plans, README | Direct push OK |
 | Config/tooling (`.gitignore`, etc.) | Direct push OK |
 
+## Agent Model Routing
+
+When spawning subagents, choose the model based on task complexity to balance cost and quality:
+
+| Model | When to use | Examples |
+|-------|------------|---------|
+| **opus** | Deep reasoning, architecture, complex debugging, security review | Planning multi-module features, debugging race conditions, reviewing auth/tenant logic, designing DB schema changes |
+| **sonnet** | Standard implementation, refactoring, test writing, code exploration | Writing services/controllers, adding CRUD endpoints, writing unit tests, codebase search, standard code review |
+| **haiku** | Quick lookups, simple searches, formatting, trivial tasks | Finding file paths, checking imports, simple grep tasks, listing files |
+
+**Rules:**
+- Default to **sonnet** when unsure — it covers most tasks well
+- Use **opus** only when the task genuinely requires deep reasoning or cross-module analysis
+- Use **haiku** for fast, throwaway lookups where quality doesn't matter
+- For parallel agents doing mixed work, assign models individually per agent
+
 ## Key Conventions
 
 - Backend API prefix is `/api` — all routes are under this prefix

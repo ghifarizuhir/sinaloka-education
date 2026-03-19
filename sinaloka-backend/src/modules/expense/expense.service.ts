@@ -18,7 +18,16 @@ export class ExpenseService {
   }
 
   async findAll(institutionId: string, query: ExpenseQueryDto) {
-    const { page, limit, category, date_from, date_to, search, sort_by, sort_order } = query;
+    const {
+      page,
+      limit,
+      category,
+      date_from,
+      date_to,
+      search,
+      sort_by,
+      sort_order,
+    } = query;
     const where: any = { institution_id: institutionId };
     if (category) where.category = category;
     if (date_from || date_to) {
@@ -65,7 +74,9 @@ export class ExpenseService {
     return this.prisma.expense.delete({ where: { id } });
   }
 
-  async processRecurringExpenses(institutionId: string): Promise<{ processed: number; created: number }> {
+  async processRecurringExpenses(
+    institutionId: string,
+  ): Promise<{ processed: number; created: number }> {
     const recurringExpenses = await this.prisma.expense.findMany({
       where: { institution_id: institutionId, is_recurring: true },
     });
@@ -77,7 +88,10 @@ export class ExpenseService {
 
     for (const expense of recurringExpenses) {
       processed++;
-      const frequency = expense.recurrence_frequency as 'weekly' | 'monthly' | null;
+      const frequency = expense.recurrence_frequency as
+        | 'weekly'
+        | 'monthly'
+        | null;
       if (!frequency) continue;
 
       const endDate = expense.recurrence_end_date
@@ -90,7 +104,7 @@ export class ExpenseService {
 
       // Generate all occurrence dates from baseDate up to min(endDate, today)
       const upperBound = endDate < today ? endDate : today;
-      let current = new Date(baseDate);
+      const current = new Date(baseDate);
 
       // Advance to next occurrence after the base
       if (frequency === 'weekly') {

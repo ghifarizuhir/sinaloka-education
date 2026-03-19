@@ -76,7 +76,10 @@ export class EnrollmentController {
     @CurrentUser() user: JwtPayload,
     @Res() res: Response,
   ) {
-    const csv = await this.enrollmentService.exportToCsv(query, user.institutionId!);
+    const csv = await this.enrollmentService.exportToCsv(
+      query,
+      user.institutionId!,
+    );
     res.set({
       'Content-Type': 'text/csv',
       'Content-Disposition': `attachment; filename=enrollments_${new Date().toISOString().split('T')[0]}.csv`,
@@ -94,13 +97,17 @@ export class EnrollmentController {
     if (file.mimetype !== 'text/csv' && !file.originalname.endsWith('.csv')) {
       throw new BadRequestException('File must be a CSV');
     }
-    return this.enrollmentService.importFromCsv(file.buffer, user.institutionId!);
+    return this.enrollmentService.importFromCsv(
+      file.buffer,
+      user.institutionId!,
+    );
   }
 
   @Patch('bulk')
   async bulkUpdate(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(BulkUpdateEnrollmentSchema)) dto: BulkUpdateEnrollmentDto,
+    @Body(new ZodValidationPipe(BulkUpdateEnrollmentSchema))
+    dto: BulkUpdateEnrollmentDto,
   ) {
     return this.enrollmentService.bulkUpdate(user.institutionId!, dto);
   }
@@ -108,16 +115,14 @@ export class EnrollmentController {
   @Delete('bulk')
   async bulkDelete(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(BulkDeleteEnrollmentSchema)) dto: BulkDeleteEnrollmentDto,
+    @Body(new ZodValidationPipe(BulkDeleteEnrollmentSchema))
+    dto: BulkDeleteEnrollmentDto,
   ) {
     return this.enrollmentService.bulkDelete(user.institutionId!, dto.ids);
   }
 
   @Get(':id')
-  async findOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.enrollmentService.findOne(user.institutionId!, id);
   }
 
@@ -133,10 +138,7 @@ export class EnrollmentController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     await this.enrollmentService.delete(user.institutionId!, id);
   }
 }

@@ -7,7 +7,11 @@ import {
   PaginatedResponse,
 } from '../../common/dto/pagination.dto.js';
 import { CreateStudentSchema } from './student.dto.js';
-import type { CreateStudentDto, UpdateStudentDto, StudentQueryDto } from './student.dto.js';
+import type {
+  CreateStudentDto,
+  UpdateStudentDto,
+  StudentQueryDto,
+} from './student.dto.js';
 
 @Injectable()
 export class StudentService {

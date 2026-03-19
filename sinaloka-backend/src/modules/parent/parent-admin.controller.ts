@@ -38,7 +38,8 @@ export class ParentAdminController {
   @Post('invite')
   async createInvite(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(CreateParentInviteSchema)) dto: CreateParentInviteDto,
+    @Body(new ZodValidationPipe(CreateParentInviteSchema))
+    dto: CreateParentInviteDto,
   ) {
     return this.parentInviteService.createInvite(user.institutionId!, dto);
   }
@@ -52,19 +53,13 @@ export class ParentAdminController {
   }
 
   @Get(':id')
-  async findOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.parentService.findOne(user.institutionId!, id);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     await this.parentService.deleteParent(user.institutionId!, id);
   }
 
@@ -84,6 +79,10 @@ export class ParentAdminController {
     @Param('parentId') parentId: string,
     @Param('studentId') studentId: string,
   ) {
-    await this.parentService.unlinkStudent(user.institutionId!, parentId, studentId);
+    await this.parentService.unlinkStudent(
+      user.institutionId!,
+      parentId,
+      studentId,
+    );
   }
 }

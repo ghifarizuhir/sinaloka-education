@@ -71,7 +71,11 @@ export class PayoutService {
     return this.prisma.payout.delete({ where: { id } });
   }
 
-  async findByTutor(institutionId: string, tutorId: string, query: PayoutQueryDto) {
+  async findByTutor(
+    institutionId: string,
+    tutorId: string,
+    query: PayoutQueryDto,
+  ) {
     const { page, limit, status, sort_by, sort_order } = query;
     const where: any = { institution_id: institutionId, tutor_id: tutorId };
     if (status) where.status = status;

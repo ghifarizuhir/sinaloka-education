@@ -32,9 +32,13 @@ export class AttendanceController {
   @Get()
   findBySession(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(AttendanceQuerySchema)) query: AttendanceQueryDto,
+    @Query(new ZodValidationPipe(AttendanceQuerySchema))
+    query: AttendanceQueryDto,
   ) {
-    return this.attendanceService.findBySession(user.institutionId!, query.session_id);
+    return this.attendanceService.findBySession(
+      user.institutionId!,
+      query.session_id,
+    );
   }
 
   @Get('summary')
@@ -50,7 +54,8 @@ export class AttendanceController {
   update(
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(new ZodValidationPipe(UpdateAttendanceSchema)) dto: UpdateAttendanceDto,
+    @Body(new ZodValidationPipe(UpdateAttendanceSchema))
+    dto: UpdateAttendanceDto,
   ) {
     return this.attendanceService.update(user.institutionId!, id, dto);
   }

@@ -249,7 +249,7 @@ describe('SessionController (integration)', () => {
       .send({
         class_id: classId,
         date_from: '2026-05-04', // Monday
-        date_to: '2026-05-15',   // Friday — Mon 4, Wed 6, Mon 11, Wed 13 = 4
+        date_to: '2026-05-15', // Friday — Mon 4, Wed 6, Mon 11, Wed 13 = 4
       })
       .expect(201);
 

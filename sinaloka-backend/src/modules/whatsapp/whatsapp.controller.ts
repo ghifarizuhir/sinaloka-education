@@ -68,7 +68,10 @@ export class WhatsappController {
       for (const change of changes) {
         const statuses = change?.value?.statuses ?? [];
         for (const status of statuses) {
-          await this.whatsappService.handleStatusUpdate(status.id, status.status);
+          await this.whatsappService.handleStatusUpdate(
+            status.id,
+            status.status,
+          );
         }
       }
     }
@@ -95,7 +98,8 @@ export class WhatsappController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   async getMessages(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(WhatsappMessagesQuerySchema)) query: WhatsappMessagesQueryDto,
+    @Query(new ZodValidationPipe(WhatsappMessagesQuerySchema))
+    query: WhatsappMessagesQueryDto,
   ) {
     return this.whatsappService.getMessages(user.institutionId!, query);
   }
@@ -120,7 +124,8 @@ export class WhatsappController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   async updateSettings(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(UpdateWhatsappSettingsSchema)) dto: UpdateWhatsappSettingsDto,
+    @Body(new ZodValidationPipe(UpdateWhatsappSettingsSchema))
+    dto: UpdateWhatsappSettingsDto,
   ) {
     return this.whatsappService.updateSettings(user.institutionId!, dto);
   }

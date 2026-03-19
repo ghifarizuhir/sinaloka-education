@@ -20,10 +20,7 @@ describe('TutorAttendanceController (integration)', () => {
   let studentId1: string;
   let studentId2: string;
 
-  const testEmails = [
-    'tutor-att-tutor@test.com',
-    'tutor-att-other@test.com',
-  ];
+  const testEmails = ['tutor-att-tutor@test.com', 'tutor-att-other@test.com'];
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -116,7 +113,9 @@ describe('TutorAttendanceController (integration)', () => {
 
     // Handle potential undefined – but in integration test the login should work
     if (!tutorLogin.body.access_token) {
-      throw new Error('Failed to get tutor token: ' + JSON.stringify(tutorLogin.body));
+      throw new Error(
+        'Failed to get tutor token: ' + JSON.stringify(tutorLogin.body),
+      );
     }
     tutorToken = tutorLogin.body.access_token;
 
@@ -138,9 +137,7 @@ describe('TutorAttendanceController (integration)', () => {
         capacity: 20,
         fee: 100000,
         schedules: {
-          create: [
-            { day: 'Monday', start_time: '14:00', end_time: '15:30' },
-          ],
+          create: [{ day: 'Monday', start_time: '14:00', end_time: '15:30' }],
         },
         status: 'ACTIVE',
       },
@@ -228,8 +225,18 @@ describe('TutorAttendanceController (integration)', () => {
       .send({
         session_id: sessionId,
         records: [
-          { student_id: studentId1, status: 'PRESENT', homework_done: true, notes: 'Great' },
-          { student_id: studentId2, status: 'ABSENT', homework_done: false, notes: 'Sick' },
+          {
+            student_id: studentId1,
+            status: 'PRESENT',
+            homework_done: true,
+            notes: 'Great',
+          },
+          {
+            student_id: studentId2,
+            status: 'ABSENT',
+            homework_done: false,
+            notes: 'Sick',
+          },
         ],
       })
       .expect(201);
@@ -310,7 +317,11 @@ describe('TutorAttendanceController (integration)', () => {
       .send({
         session_id: sessionId,
         records: [
-          { student_id: newStudent.id, status: 'PRESENT', homework_done: false },
+          {
+            student_id: newStudent.id,
+            status: 'PRESENT',
+            homework_done: false,
+          },
         ],
       })
       .expect(403);

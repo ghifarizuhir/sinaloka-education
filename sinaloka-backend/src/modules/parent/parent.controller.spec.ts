@@ -49,15 +49,23 @@ describe('Parent (integration)', () => {
       where: { institution: { slug: 'parent-test-inst' } },
     });
     await prisma.refreshToken.deleteMany({
-      where: { user: { email: { in: ['parent-admin@test.com', 'parent-user@test.com'] } } },
+      where: {
+        user: {
+          email: { in: ['parent-admin@test.com', 'parent-user@test.com'] },
+        },
+      },
     });
     await prisma.user.deleteMany({
-      where: { email: { in: ['parent-admin@test.com', 'parent-user@test.com'] } },
+      where: {
+        email: { in: ['parent-admin@test.com', 'parent-user@test.com'] },
+      },
     });
     await prisma.student.deleteMany({
       where: { institution: { slug: 'parent-test-inst' } },
     });
-    await prisma.institution.deleteMany({ where: { slug: 'parent-test-inst' } });
+    await prisma.institution.deleteMany({
+      where: { slug: 'parent-test-inst' },
+    });
 
     // Seed test data
     const institution = await prisma.institution.create({
@@ -99,15 +107,27 @@ describe('Parent (integration)', () => {
       await prisma.parentStudent.deleteMany({
         where: { parent: { institution_id: institutionId } },
       });
-      await prisma.parentInvite.deleteMany({ where: { institution_id: institutionId } });
-      await prisma.parent.deleteMany({ where: { institution_id: institutionId } });
+      await prisma.parentInvite.deleteMany({
+        where: { institution_id: institutionId },
+      });
+      await prisma.parent.deleteMany({
+        where: { institution_id: institutionId },
+      });
       await prisma.refreshToken.deleteMany({
-        where: { user: { email: { in: ['parent-admin@test.com', 'parent-user@test.com'] } } },
+        where: {
+          user: {
+            email: { in: ['parent-admin@test.com', 'parent-user@test.com'] },
+          },
+        },
       });
       await prisma.user.deleteMany({
-        where: { email: { in: ['parent-admin@test.com', 'parent-user@test.com'] } },
+        where: {
+          email: { in: ['parent-admin@test.com', 'parent-user@test.com'] },
+        },
       });
-      await prisma.student.deleteMany({ where: { institution_id: institutionId } });
+      await prisma.student.deleteMany({
+        where: { institution_id: institutionId },
+      });
       await prisma.institution.deleteMany({ where: { id: institutionId } });
     }
     if (app) await app.close();

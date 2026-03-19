@@ -29,10 +29,14 @@ export class ReportController {
   @Get('attendance')
   async attendance(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(AttendanceReportQuerySchema)) q: AttendanceReportQueryDto,
+    @Query(new ZodValidationPipe(AttendanceReportQuerySchema))
+    q: AttendanceReportQueryDto,
     @Res() res: Response,
   ) {
-    const buf = await this.reportService.generateAttendanceReport(user.institutionId!, q);
+    const buf = await this.reportService.generateAttendanceReport(
+      user.institutionId!,
+      q,
+    );
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'inline; filename="attendance-report.pdf"',
@@ -43,10 +47,14 @@ export class ReportController {
   @Get('finance')
   async finance(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(FinanceReportQuerySchema)) q: FinanceReportQueryDto,
+    @Query(new ZodValidationPipe(FinanceReportQuerySchema))
+    q: FinanceReportQueryDto,
     @Res() res: Response,
   ) {
-    const buf = await this.reportService.generateFinanceReport(user.institutionId!, q);
+    const buf = await this.reportService.generateFinanceReport(
+      user.institutionId!,
+      q,
+    );
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'inline; filename="finance-report.pdf"',
@@ -57,7 +65,8 @@ export class ReportController {
   @Get('student-progress')
   async studentProgress(
     @CurrentUser() user: JwtPayload,
-    @Query(new ZodValidationPipe(StudentProgressQuerySchema)) q: StudentProgressQueryDto,
+    @Query(new ZodValidationPipe(StudentProgressQuerySchema))
+    q: StudentProgressQueryDto,
     @Res() res: Response,
   ) {
     const buf = await this.reportService.generateStudentProgressReport(
@@ -78,7 +87,11 @@ export class ReportController {
     @CurrentUser() user: JwtPayload,
     @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
   ) {
-    return this.reportService.getFinancialSummary(user.institutionId!, q.period_start, q.period_end);
+    return this.reportService.getFinancialSummary(
+      user.institutionId!,
+      q.period_start,
+      q.period_end,
+    );
   }
 
   @Get('revenue-breakdown')
@@ -86,7 +99,11 @@ export class ReportController {
     @CurrentUser() user: JwtPayload,
     @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
   ) {
-    return this.reportService.getRevenueBreakdown(user.institutionId!, q.period_start, q.period_end);
+    return this.reportService.getRevenueBreakdown(
+      user.institutionId!,
+      q.period_start,
+      q.period_end,
+    );
   }
 
   @Get('expense-breakdown')
@@ -94,7 +111,11 @@ export class ReportController {
     @CurrentUser() user: JwtPayload,
     @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
   ) {
-    return this.reportService.getExpenseBreakdown(user.institutionId!, q.period_start, q.period_end);
+    return this.reportService.getExpenseBreakdown(
+      user.institutionId!,
+      q.period_start,
+      q.period_end,
+    );
   }
 
   @Get('export-csv')
@@ -103,7 +124,12 @@ export class ReportController {
     @Query(new ZodValidationPipe(ExportCsvSchema)) q: ExportCsvDto,
     @Res() res: Response,
   ) {
-    const csv = await this.reportService.exportCsv(user.institutionId!, q.type, q.period_start, q.period_end);
+    const csv = await this.reportService.exportCsv(
+      user.institutionId!,
+      q.type,
+      q.period_start,
+      q.period_end,
+    );
     res.set({
       'Content-Type': 'text/csv',
       'Content-Disposition': `attachment; filename="${q.type}_export_${new Date().toISOString().split('T')[0]}.csv"`,

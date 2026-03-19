@@ -23,13 +23,19 @@ describe('ReportService', () => {
       ]),
     },
     payment: {
-      aggregate: jest.fn().mockResolvedValue({ _sum: { amount: 5000 }, _count: 3 }),
+      aggregate: jest
+        .fn()
+        .mockResolvedValue({ _sum: { amount: 5000 }, _count: 3 }),
     },
     payout: {
-      aggregate: jest.fn().mockResolvedValue({ _sum: { amount: 2000 }, _count: 1 }),
+      aggregate: jest
+        .fn()
+        .mockResolvedValue({ _sum: { amount: 2000 }, _count: 1 }),
     },
     expense: {
-      aggregate: jest.fn().mockResolvedValue({ _sum: { amount: 500 }, _count: 2 }),
+      aggregate: jest
+        .fn()
+        .mockResolvedValue({ _sum: { amount: 500 }, _count: 2 }),
     },
     student: {
       findFirstOrThrow: jest.fn().mockResolvedValue({ id: 's1', name: 'Ali' }),
@@ -37,7 +43,10 @@ describe('ReportService', () => {
   };
 
   const instId = 'inst-uuid';
-  const range = { date_from: new Date('2026-01-01'), date_to: new Date('2026-03-31') };
+  const range = {
+    date_from: new Date('2026-01-01'),
+    date_to: new Date('2026-03-31'),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -76,9 +85,18 @@ describe('ReportService', () => {
   });
 
   it('generateFinanceReport handles null sums', async () => {
-    mockPrisma.payment.aggregate.mockResolvedValueOnce({ _sum: { amount: null }, _count: 0 });
-    mockPrisma.payout.aggregate.mockResolvedValueOnce({ _sum: { amount: null }, _count: 0 });
-    mockPrisma.expense.aggregate.mockResolvedValueOnce({ _sum: { amount: null }, _count: 0 });
+    mockPrisma.payment.aggregate.mockResolvedValueOnce({
+      _sum: { amount: null },
+      _count: 0,
+    });
+    mockPrisma.payout.aggregate.mockResolvedValueOnce({
+      _sum: { amount: null },
+      _count: 0,
+    });
+    mockPrisma.expense.aggregate.mockResolvedValueOnce({
+      _sum: { amount: null },
+      _count: 0,
+    });
     const buf = await service.generateFinanceReport(instId, range);
     expect(Buffer.isBuffer(buf)).toBe(true);
     expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
