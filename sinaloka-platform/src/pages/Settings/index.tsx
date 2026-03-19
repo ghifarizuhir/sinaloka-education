@@ -47,7 +47,7 @@ export const SettingsPage = () => {
               className={cn(
                 'flex items-center gap-2 whitespace-nowrap pb-3 pt-2 text-sm font-medium transition-colors border-b-2 -mb-px',
                 activeSection === tab.id
-                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100'
+                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold'
                   : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300',
               )}
             >
