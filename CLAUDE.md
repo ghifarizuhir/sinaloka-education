@@ -181,6 +181,10 @@ VITE_API_URL=https://api.sinaloka.com npm run build
 npx wrangler pages deploy dist --project-name=sinaloka-platform --commit-dirty=true
 ```
 
+#### After frontend deploy
+
+Cloudflare Pages caches aggressively. After a frontend deploy, remind the user to **hard refresh** (`Ctrl + Shift + R` / `Cmd + Shift + R`) or open an incognito window to see changes.
+
 #### Rollback
 
 - **Backend:** Railway dashboard → Deployments → select previous deploy → Rollback
