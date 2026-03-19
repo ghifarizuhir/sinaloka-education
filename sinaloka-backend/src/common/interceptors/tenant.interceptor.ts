@@ -28,8 +28,7 @@ export class TenantInterceptor implements NestInterceptor {
 
     if (user.role === Role.SUPER_ADMIN) {
       // SUPER_ADMIN can optionally scope to an institution via query param
-      request.tenantId =
-        (request.query['institution_id'] as string) || null;
+      request.tenantId = (request.query['institution_id'] as string) || null;
     } else if (
       user.role === Role.ADMIN ||
       user.role === Role.TUTOR ||
