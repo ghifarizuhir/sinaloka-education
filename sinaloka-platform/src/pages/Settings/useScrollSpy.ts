@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * Returns the id of the section currently in view.
+ * `sectionIds` must be a stable reference (module-level constant or useMemo).
+ */
 export function useScrollSpy(sectionIds: string[]): string {
   const [activeId, setActiveId] = useState(sectionIds[0] ?? '');
 
@@ -21,7 +25,7 @@ export function useScrollSpy(sectionIds: string[]): string {
         }
       },
       {
-        rootMargin: '-64px 0px 0px 0px',
+        rootMargin: '-64px 0px 0px 0px', // offset for sticky bar height (4rem)
         threshold: 0.3,
       },
     );
