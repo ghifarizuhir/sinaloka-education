@@ -81,11 +81,12 @@ jobs:
         env:
           VITE_API_URL: ${{ vars.API_URL }}
 
-      # -------------------------------------------------------
-      # Replace with your hosting deployment (Vercel, Netlify, S3, etc.)
-      # -------------------------------------------------------
-      - name: Deploy platform
-        run: echo "🚀 Deploy platform to ${{ github.event.inputs.environment || 'staging' }}"
+      - name: Deploy platform to Cloudflare Pages
+        run: npx wrangler pages deploy dist --project-name=sinaloka-platform
+        working-directory: sinaloka-platform
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-tutors:
     name: Deploy Tutors
@@ -115,8 +116,12 @@ jobs:
         env:
           VITE_API_URL: ${{ vars.API_URL }}
 
-      - name: Deploy tutors
-        run: echo "🚀 Deploy tutors to ${{ github.event.inputs.environment || 'staging' }}"
+      - name: Deploy tutors to Cloudflare Pages
+        run: npx wrangler pages deploy dist --project-name=sinaloka-tutors
+        working-directory: sinaloka-tutors
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-parent:
     name: Deploy Parent
@@ -146,5 +151,9 @@ jobs:
         env:
           VITE_API_URL: ${{ vars.API_URL }}
 
-      - name: Deploy parent
-        run: echo "🚀 Deploy parent to ${{ github.event.inputs.environment || 'staging' }}"
+      - name: Deploy parent to Cloudflare Pages
+        run: npx wrangler pages deploy dist --project-name=sinaloka-parent
+        working-directory: sinaloka-parent
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
