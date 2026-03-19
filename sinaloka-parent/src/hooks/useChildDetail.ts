@@ -45,7 +45,8 @@ export function useChildDetail(studentId: string | null) {
     setIsLoading(true);
     try {
       const res = await api.get(`/parent/children/${studentId}/payments`, { params: { limit: 50 } });
-      setPayments(res.data.data.map(mapPayment));
+      const gatewayConfigured = res.data.gateway_configured ?? false;
+      setPayments(res.data.data.map((p: any) => ({ ...mapPayment(p), gateway_configured: gatewayConfigured })));
     } catch { /* silently fail */ }
     finally { setIsLoading(false); }
   }, [studentId]);
