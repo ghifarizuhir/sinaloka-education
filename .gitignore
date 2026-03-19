@@ -1,4 +1,6 @@
 # Tool-generated scratch files
 .superpowers/
 .coordination/
+.claude/
+.mcp.json
 tunnels.sh
