@@ -1,8 +1,10 @@
 import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -41,7 +43,7 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   try {
-    const response = await axios.post('/api/auth/refresh', {
+    const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
       refresh_token: refreshToken,
     });
     const { access_token, refresh_token } = response.data;
