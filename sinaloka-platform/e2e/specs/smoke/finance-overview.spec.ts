@@ -17,7 +17,7 @@ test.describe('Finance Overview', () => {
     await expect(financeOverviewPage.statsGrid).toBeVisible();
 
     // Revenue This Month stat card should show a value from dashboard stats
-    // total_revenue: 75000000 → rendered as "Rp 75.0M"
+    // monthly_revenue: 75000000 → rendered as "Rp 75.0M"
     await expect(page.getByText(/Rp 75\.0M/).first()).toBeVisible();
 
     // "Revenue This Month" label should be present

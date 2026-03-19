@@ -2,7 +2,7 @@
   "stats": {
     "total_students": 150,
     "active_tutors": 12,
-    "total_revenue": 75000000,
+    "monthly_revenue": 75000000,
     "attendance_rate": 92.5,
     "upcoming_sessions": 8
   },

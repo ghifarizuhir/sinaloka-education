@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { addDays } from 'date-fns';
+import { addDays, startOfMonth, endOfMonth } from 'date-fns';
 
 @Injectable()
 export class DashboardService {
@@ -18,7 +18,14 @@ export class DashboardService {
       this.prisma.student.count({ where }),
       this.prisma.tutor.count({ where: { ...where, is_verified: true } }),
       this.prisma.payment.aggregate({
-        where: { ...where, status: 'PAID' },
+        where: {
+          ...where,
+          status: 'PAID',
+          paid_date: {
+            gte: startOfMonth(new Date()),
+            lte: endOfMonth(new Date()),
+          },
+        },
         _sum: { amount: true },
       }),
       this.prisma.attendance.groupBy({
@@ -44,7 +51,7 @@ export class DashboardService {
     return {
       total_students: totalStudents,
       active_tutors: activeTutors,
-      total_revenue: revenueAgg._sum.amount ?? 0,
+      monthly_revenue: revenueAgg._sum.amount ?? 0,
       attendance_rate:
         total > 0 ? Math.round(((present + late) / total) * 10000) / 100 : 0,
       upcoming_sessions: upcomingSessions,

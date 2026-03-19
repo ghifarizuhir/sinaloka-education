@@ -66,7 +66,7 @@ authTest.describe('Auth – authenticated flows', () => {
         // First call returns 401 to trigger refresh
         await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message: 'Unauthorized' }) });
       } else {
-        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ total_students: 150, active_tutors: 12, total_revenue: 75000000, attendance_rate: 92.5, upcoming_sessions: 8 }) });
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ total_students: 150, active_tutors: 12, monthly_revenue: 75000000, attendance_rate: 92.5, upcoming_sessions: 8 }) });
       }
     });
 

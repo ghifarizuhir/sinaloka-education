@@ -61,7 +61,7 @@ describe('DashboardService', () => {
       const stats = await service.getStats(instId);
       expect(stats.total_students).toBe(10);
       expect(stats.active_tutors).toBe(3);
-      expect(stats.total_revenue).toBe(5000);
+      expect(stats.monthly_revenue).toBe(5000);
       expect(stats.attendance_rate).toBe(90);
       expect(stats.upcoming_sessions).toBe(5);
     });
@@ -77,7 +77,7 @@ describe('DashboardService', () => {
         _sum: { amount: null },
       });
       const stats = await service.getStats(instId);
-      expect(stats.total_revenue).toBe(0);
+      expect(stats.monthly_revenue).toBe(0);
     });
 
     it('should scope queries to institution_id', async () => {

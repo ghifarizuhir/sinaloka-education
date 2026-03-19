@@ -180,7 +180,7 @@ export const Dashboard = () => {
           },
           {
             label: t('dashboard.monthlyRevenue'),
-            value: stats?.total_revenue != null ? formatCurrencyShort(stats.total_revenue, i18n.language) : '—',
+            value: stats?.monthly_revenue != null ? formatCurrencyShort(stats.monthly_revenue, i18n.language) : '—',
             icon: TrendingUp,
             accent: 'text-violet-600 dark:text-violet-400',
             accentBg: 'bg-violet-500/10',
