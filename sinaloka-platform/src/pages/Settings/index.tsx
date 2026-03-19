@@ -96,6 +96,42 @@ export const SettingsPage = () => {
           <AcademicTab
             t={state.t}
             rooms={state.rooms}
+            subjectCategories={state.subjectCategories}
+            gradeLevels={state.gradeLevels}
+            workingDays={state.workingDays}
+            isLoadingAcademic={state.isLoadingAcademic}
+            updateAcademic={state.updateAcademic}
+            showRoomModal={state.showRoomModal}
+            setShowRoomModal={state.setShowRoomModal}
+            editingRoom={state.editingRoom}
+            setEditingRoom={state.setEditingRoom}
+            roomFormName={state.roomFormName}
+            setRoomFormName={state.setRoomFormName}
+            roomFormType={state.roomFormType}
+            setRoomFormType={state.setRoomFormType}
+            roomFormCapacity={state.roomFormCapacity}
+            setRoomFormCapacity={state.setRoomFormCapacity}
+            roomFormStatus={state.roomFormStatus}
+            setRoomFormStatus={state.setRoomFormStatus}
+            handleOpenRoomModal={state.handleOpenRoomModal}
+            handleSaveRoom={state.handleSaveRoom}
+            roomToDelete={state.roomToDelete}
+            setRoomToDelete={state.setRoomToDelete}
+            handleDeleteRoom={state.handleDeleteRoom}
+            showCategoryInput={state.showCategoryInput}
+            setShowCategoryInput={state.setShowCategoryInput}
+            newCategoryName={state.newCategoryName}
+            setNewCategoryName={state.setNewCategoryName}
+            handleAddSubjectCategory={state.handleAddSubjectCategory}
+            handleRemoveSubjectCategory={state.handleRemoveSubjectCategory}
+            showGradeInput={state.showGradeInput}
+            setShowGradeInput={state.setShowGradeInput}
+            newGradeName={state.newGradeName}
+            setNewGradeName={state.setNewGradeName}
+            handleAddGrade={state.handleAddGrade}
+            handleRemoveGrade={state.handleRemoveGrade}
+            handleToggleWorkingDay={state.handleToggleWorkingDay}
+            handleSaveWorkingDays={state.handleSaveWorkingDays}
           />
         );
       case 'security':
