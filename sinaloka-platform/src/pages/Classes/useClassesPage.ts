@@ -9,7 +9,7 @@ import {
   useDeleteClass
 } from '@/src/hooks/useClasses';
 import { useSubjects, useSubjectTutors } from '@/src/hooks/useSubjects';
-import { useBillingSettings } from '@/src/hooks/useSettings';
+import { useBillingSettings, useAcademicSettings } from '@/src/hooks/useSettings';
 import { useGenerateSessions } from '@/src/hooks/useSessions';
 import { format, addDays, getDay } from 'date-fns';
 import type { Class, CreateClassDto, ScheduleDay, ClassScheduleItem } from '@/src/types/class';
@@ -69,7 +69,9 @@ export function useClassesPage() {
   const { data: subjectsList } = useSubjects();
   const { data: subjectTutors } = useSubjectTutors(formSubjectId || null);
   const { data: billingSettings } = useBillingSettings();
+  const { data: academicSettings } = useAcademicSettings();
   const billingMode = billingSettings?.billing_mode ?? 'manual';
+  const availableRooms = (academicSettings?.rooms ?? []).filter(r => r.status === 'Available');
   const createClass = useCreateClass();
   const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
@@ -359,6 +361,7 @@ export function useClassesPage() {
     confirmDeleteClass,
     estimateSessionCount,
     handleGenerateSessions,
+    availableRooms,
     currentPage,
     totalPages,
   };
