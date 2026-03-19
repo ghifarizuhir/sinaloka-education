@@ -9,10 +9,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Academic Settings
 
-- [ ] **ACAD-01**: Admin can create, edit, and delete rooms in Settings Academic tab with backend persistence (including an "Online" room type option for virtual classes)
-- [ ] **ACAD-02**: Admin can manage subject categories in Settings Academic tab with backend persistence
-- [ ] **ACAD-03**: Admin can manage grade levels in Settings Academic tab with backend persistence
-- [ ] **ACAD-04**: Admin can configure working days (Mon-Sun toggles) in Settings Academic tab with backend persistence
+- [x] **ACAD-01**: Admin can create, edit, and delete rooms in Settings Academic tab with backend persistence (including an "Online" room type option for virtual classes)
+- [x] **ACAD-02**: Admin can manage subject categories in Settings Academic tab with backend persistence
+- [x] **ACAD-03**: Admin can manage grade levels in Settings Academic tab with backend persistence
+- [x] **ACAD-04**: Admin can configure working days (Mon-Sun toggles) in Settings Academic tab with backend persistence
 - [ ] **ACAD-05**: Class creation/edit form shows room dropdown populated from institution's rooms in Settings (replacing free-text input)
 - [x] **ACAD-06**: Backend API endpoints exist for academic settings CRUD (rooms, subject categories, grade levels, working days) stored in Institution.settings JSON blob
 
@@ -81,10 +81,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ACAD-01 | Phase 1 | Pending |
-| ACAD-02 | Phase 1 | Pending |
-| ACAD-03 | Phase 1 | Pending |
-| ACAD-04 | Phase 1 | Pending |
+| ACAD-01 | Phase 1 | Complete |
+| ACAD-02 | Phase 1 | Complete |
+| ACAD-03 | Phase 1 | Complete |
+| ACAD-04 | Phase 1 | Complete |
 | ACAD-05 | Phase 1 | Pending |
 | ACAD-06 | Phase 1 | Complete |
 | BRND-01 | Phase 2 | Pending |

@@ -77,7 +77,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Academic Settings | 0/3 | Planning complete | - |
+| 1. Academic Settings | 2/3 | Executing | - |
 | 2. Settings Completion | 0/TBD | Not started | - |
 | 3. Feature Completion | 0/TBD | Not started | - |
 | 4. Quality Polish | 0/TBD | Not started | - |
