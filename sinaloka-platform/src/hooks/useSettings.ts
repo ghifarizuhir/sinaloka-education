@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { settingsService } from '@/src/services/settings.service';
-import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto, UpdateAcademicSettingsDto } from '@/src/types/settings';
+import type { UpdateGeneralSettingsDto, UpdateBillingSettingsDto, UpdateAcademicSettingsDto, UpdatePaymentGatewayDto } from '@/src/types/settings';
 
 export function useGeneralSettings() {
   return useQuery({
@@ -47,5 +47,20 @@ export function useUpdateAcademicSettings() {
   return useMutation({
     mutationFn: (data: UpdateAcademicSettingsDto) => settingsService.updateAcademic(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings', 'academic'] }),
+  });
+}
+
+export function usePaymentGatewaySettings() {
+  return useQuery({
+    queryKey: ['settings', 'payment-gateway'],
+    queryFn: settingsService.getPaymentGateway,
+  });
+}
+
+export function useUpdatePaymentGatewaySettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdatePaymentGatewayDto) => settingsService.updatePaymentGateway(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings', 'payment-gateway'] }),
   });
 }

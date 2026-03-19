@@ -59,7 +59,10 @@
     "proFeature": "Fitur Pro",
     "allRecords": "Semua Data",
     "required": "wajib",
-    "optional": "opsional"
+    "optional": "opsional",
+    "copyLink": "Salin Tautan",
+    "copied": "Tersalin!",
+    "copyFailed": "Gagal menyalin ke clipboard"
   },
 
   "nav": {
@@ -961,7 +964,10 @@
       "afterDiscount": "Setelah Diskon",
       "confirmPayment": "Konfirmasi Pembayaran",
       "batchRecordTitle": "Catat Pembayaran Massal",
-      "batchRecordSubtitle": "Catat {{count}} pembayaran terpilih sebagai lunas"
+      "batchRecordSubtitle": "Catat {{count}} pembayaran terpilih sebagai lunas",
+      "invoiceLinkTitle": "Tautan Pembayaran",
+      "invoiceLinkSubtitle": "Bagikan tautan ini ke orang tua untuk menyelesaikan pembayaran via Midtrans.",
+      "openLink": "Buka Tautan"
     },
     "drawer": {
       "title": "Detail Pembayaran",
@@ -989,9 +995,11 @@
     "tooltip": {
       "recordPayment": "Catat Pembayaran",
       "sendReminder": "Kirim Pengingat",
+      "sendInvoiceLink": "Dapatkan Tautan Pembayaran",
       "viewDetails": "Lihat Detail",
       "delete": "Hapus"
     },
+    "checkoutFailed": "Gagal membuat tautan pembayaran",
     "overdueAlert": {
       "title": "Pembayaran Terlambat",
       "students": "{{count}} siswa",
@@ -1156,8 +1164,26 @@
       "billing": "Penagihan",
       "branding": "Branding",
       "academic": "Akademik",
+      "paymentGateway": "Payment Gateway",
       "security": "Keamanan",
       "integrations": "Integrasi"
+    },
+    "paymentGateway": {
+      "title": "Payment Gateway",
+      "subtitle": "Konfigurasi Midtrans untuk pemrosesan pembayaran online.",
+      "serverKey": "Server Key",
+      "serverKeyPlaceholder": "SB-Mid-server-xxxx atau Mid-server-xxxx",
+      "serverKeyHint": "Rahasiakan ini — jangan pernah ekspos ke frontend.",
+      "clientKey": "Client Key",
+      "clientKeyPlaceholder": "SB-Mid-client-xxxx atau Mid-client-xxxx",
+      "clientKeyHint": "Digunakan di frontend untuk membuka popup pembayaran Snap.",
+      "sandboxMode": "Mode Sandbox",
+      "sandboxModeDesc": "Aktifkan untuk pengujian. Nonaktifkan untuk transaksi nyata.",
+      "statusConnected": "Terhubung",
+      "statusNotConfigured": "Belum Dikonfigurasi",
+      "notConfiguredWarning": "Simpan Server Key dan Client Key untuk mengaktifkan tautan pembayaran online untuk faktur.",
+      "saveSuccess": "Pengaturan payment gateway disimpan",
+      "saveFailed": "Gagal menyimpan pengaturan payment gateway"
     },
     "general": {
       "institutionInfo": "Informasi Institusi",

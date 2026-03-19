@@ -79,3 +79,18 @@ export interface UpdateAcademicSettingsDto {
   grade_levels?: GradeLevel[];
   working_days?: number[];
 }
+
+export interface PaymentGatewaySettings {
+  provider: string;
+  midtrans_server_key: string;
+  midtrans_client_key: string;
+  midtrans_server_key_masked: string;
+  is_sandbox: boolean;
+  is_configured: boolean;
+}
+
+export interface UpdatePaymentGatewayDto {
+  midtrans_server_key?: string;
+  midtrans_client_key?: string;
+  is_sandbox?: boolean;
+}

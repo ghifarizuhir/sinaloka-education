@@ -1,14 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, CreditCard, GraduationCap } from 'lucide-react';
+import { Building2, CreditCard, GraduationCap, Wallet } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSettingsPage } from './useSettingsPage';
 import { useScrollSpy } from './useScrollSpy';
 import { GeneralTab } from './tabs/GeneralTab';
 import { BillingTab } from './tabs/BillingTab';
 import { AcademicTab } from './tabs/AcademicTab';
+import { PaymentGatewayTab } from './tabs/PaymentGatewayTab';
 
-const SECTION_IDS = ['general', 'billing', 'academic'];
+const SECTION_IDS = ['general', 'billing', 'academic', 'payment-gateway'];
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ export const SettingsPage = () => {
     { id: 'general', label: t('settings.tabs.general'), icon: Building2 },
     { id: 'billing', label: t('settings.tabs.billing'), icon: CreditCard },
     { id: 'academic', label: t('settings.tabs.academic'), icon: GraduationCap },
+    { id: 'payment-gateway', label: t('settings.tabs.paymentGateway'), icon: Wallet },
   ];
 
   const handleTabClick = (id: string) => {
@@ -155,6 +157,22 @@ export const SettingsPage = () => {
           handleRemoveGrade={state.handleRemoveGrade}
           handleToggleWorkingDay={state.handleToggleWorkingDay}
           handleSaveWorkingDays={state.handleSaveWorkingDays}
+        />
+      </section>
+
+      <section id="payment-gateway" className="scroll-mt-32">
+        <PaymentGatewayTab
+          t={state.t}
+          isLoadingPaymentGateway={state.isLoadingPaymentGateway}
+          updatePaymentGateway={state.updatePaymentGateway}
+          formServerKey={state.formServerKey}
+          setFormServerKey={state.setFormServerKey}
+          formClientKey={state.formClientKey}
+          setFormClientKey={state.setFormClientKey}
+          formIsSandbox={state.formIsSandbox}
+          setFormIsSandbox={state.setFormIsSandbox}
+          paymentGatewayConfigured={state.paymentGatewayConfigured}
+          handleSavePaymentGateway={state.handleSavePaymentGateway}
         />
       </section>
     </div>

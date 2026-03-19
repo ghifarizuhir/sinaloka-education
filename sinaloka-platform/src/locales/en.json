@@ -59,7 +59,10 @@
     "proFeature": "Pro Feature",
     "allRecords": "All Records",
     "required": "required",
-    "optional": "optional"
+    "optional": "optional",
+    "copyLink": "Copy Link",
+    "copied": "Copied!",
+    "copyFailed": "Failed to copy to clipboard"
   },
 
   "nav": {
@@ -961,7 +964,10 @@
       "afterDiscount": "After Discount",
       "confirmPayment": "Confirm Payment",
       "batchRecordTitle": "Batch Record Payments",
-      "batchRecordSubtitle": "Record {{count}} selected payment(s) as paid"
+      "batchRecordSubtitle": "Record {{count}} selected payment(s) as paid",
+      "invoiceLinkTitle": "Payment Link",
+      "invoiceLinkSubtitle": "Share this link with the parent to complete payment via Midtrans.",
+      "openLink": "Open Link"
     },
     "drawer": {
       "title": "Payment Details",
@@ -989,9 +995,11 @@
     "tooltip": {
       "recordPayment": "Record Payment",
       "sendReminder": "Send Reminder",
+      "sendInvoiceLink": "Get Payment Link",
       "viewDetails": "View Details",
       "delete": "Delete"
     },
+    "checkoutFailed": "Failed to generate payment link",
     "overdueAlert": {
       "title": "Overdue Payments",
       "students": "{{count}} students",
@@ -1156,8 +1164,26 @@
       "billing": "Billing",
       "branding": "Branding",
       "academic": "Academic",
+      "paymentGateway": "Payment Gateway",
       "security": "Security",
       "integrations": "Integrations"
+    },
+    "paymentGateway": {
+      "title": "Payment Gateway",
+      "subtitle": "Configure Midtrans for online payment processing.",
+      "serverKey": "Server Key",
+      "serverKeyPlaceholder": "SB-Mid-server-xxxx or Mid-server-xxxx",
+      "serverKeyHint": "Keep this secret — never expose it on the frontend.",
+      "clientKey": "Client Key",
+      "clientKeyPlaceholder": "SB-Mid-client-xxxx or Mid-client-xxxx",
+      "clientKeyHint": "Used on the frontend to initialize the Snap payment popup.",
+      "sandboxMode": "Sandbox Mode",
+      "sandboxModeDesc": "Enable for testing. Disable to process real transactions.",
+      "statusConnected": "Connected",
+      "statusNotConfigured": "Not Configured",
+      "notConfiguredWarning": "Save your Server Key and Client Key to enable online payment links for invoices.",
+      "saveSuccess": "Payment gateway settings saved",
+      "saveFailed": "Failed to save payment gateway settings"
     },
     "general": {
       "institutionInfo": "Institution Information",

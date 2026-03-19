@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAuth } from '@/src/hooks/useAuth';
-import { useGeneralSettings, useUpdateGeneralSettings, useBillingSettings, useUpdateBillingSettings, useAcademicSettings, useUpdateAcademicSettings } from '@/src/hooks/useSettings';
+import { useGeneralSettings, useUpdateGeneralSettings, useBillingSettings, useUpdateBillingSettings, useAcademicSettings, useUpdateAcademicSettings, usePaymentGatewaySettings, useUpdatePaymentGatewaySettings } from '@/src/hooks/useSettings';
 import type { BankAccount, Room, RoomType, RoomStatus, SubjectCategory, GradeLevel } from '@/src/types/settings';
 
 export const useSettingsPage = () => {
@@ -269,6 +269,40 @@ export const useSettingsPage = () => {
     });
   };
 
+  // Payment gateway settings
+  const { data: paymentGatewaySettings, isLoading: isLoadingPaymentGateway } = usePaymentGatewaySettings();
+  const updatePaymentGateway = useUpdatePaymentGatewaySettings();
+
+  const [formServerKey, setFormServerKey] = useState('');
+  const [formClientKey, setFormClientKey] = useState('');
+  const [formIsSandbox, setFormIsSandbox] = useState(true);
+  const [paymentGatewayConfigured, setPaymentGatewayConfigured] = useState(false);
+
+  useEffect(() => {
+    if (paymentGatewaySettings) {
+      setFormServerKey('');
+      setFormClientKey(paymentGatewaySettings.midtrans_client_key ?? '');
+      setFormIsSandbox(paymentGatewaySettings.is_sandbox);
+      setPaymentGatewayConfigured(paymentGatewaySettings.is_configured);
+    }
+  }, [paymentGatewaySettings]);
+
+  const handleSavePaymentGateway = () => {
+    const dto: { midtrans_server_key?: string; midtrans_client_key?: string; is_sandbox?: boolean } = {
+      is_sandbox: formIsSandbox,
+    };
+    if (formServerKey) dto.midtrans_server_key = formServerKey;
+    if (formClientKey) dto.midtrans_client_key = formClientKey;
+    updatePaymentGateway.mutate(dto, {
+      onSuccess: (data) => {
+        toast.success(t('settings.paymentGateway.saveSuccess'));
+        setFormServerKey('');
+        setPaymentGatewayConfigured(data.is_configured);
+      },
+      onError: () => toast.error(t('settings.paymentGateway.saveFailed')),
+    });
+  };
+
   // Working days handlers
   const handleToggleWorkingDay = (day: number) => {
     const updated = workingDays.includes(day)
@@ -372,6 +406,16 @@ export const useSettingsPage = () => {
     handleRemoveGrade,
     handleToggleWorkingDay,
     handleSaveWorkingDays,
+    isLoadingPaymentGateway,
+    updatePaymentGateway,
+    formServerKey,
+    setFormServerKey,
+    formClientKey,
+    setFormClientKey,
+    formIsSandbox,
+    setFormIsSandbox,
+    paymentGatewayConfigured,
+    handleSavePaymentGateway,
   };
 };
 

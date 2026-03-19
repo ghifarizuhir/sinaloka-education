@@ -1,5 +1,5 @@
 import api from '@/src/lib/api';
-import type { GeneralSettings, UpdateGeneralSettingsDto, BillingSettings, UpdateBillingSettingsDto, AcademicSettings, UpdateAcademicSettingsDto } from '@/src/types/settings';
+import type { GeneralSettings, UpdateGeneralSettingsDto, BillingSettings, UpdateBillingSettingsDto, AcademicSettings, UpdateAcademicSettingsDto, PaymentGatewaySettings, UpdatePaymentGatewayDto } from '@/src/types/settings';
 
 export const settingsService = {
   getGeneral: () =>
@@ -14,4 +14,8 @@ export const settingsService = {
     api.get<AcademicSettings>('/api/settings/academic').then((r) => r.data),
   updateAcademic: (data: UpdateAcademicSettingsDto) =>
     api.patch<AcademicSettings>('/api/settings/academic', data).then((r) => r.data),
+  getPaymentGateway: () =>
+    api.get<PaymentGatewaySettings>('/api/settings/payment-gateway').then((r) => r.data),
+  updatePaymentGateway: (data: UpdatePaymentGatewayDto) =>
+    api.patch<PaymentGatewaySettings>('/api/settings/payment-gateway', data).then((r) => r.data),
 };
