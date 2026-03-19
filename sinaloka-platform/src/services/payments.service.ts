@@ -21,4 +21,6 @@ export const paymentsService = {
     api.post<{ updated: number }>('/api/admin/payments/batch-record', data).then((r) => r.data),
   remind: (id: string) =>
     api.post<{ reminded: boolean }>(`/api/admin/payments/${id}/remind`).then((r) => r.data),
+  checkout: (id: string) =>
+    api.post<{ snap_token: string; redirect_url: string }>(`/api/payments/${id}/checkout`).then((r) => r.data),
 };

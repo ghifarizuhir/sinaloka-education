@@ -5,7 +5,7 @@ import {
   Filter, DollarSign, History,
   Send, Receipt, AlertCircle, TrendingUp, Download,
   MoreVertical, CheckCircle2, Clock, Trash2, Mail,
-  FileText, FileDown, Search
+  FileText, FileDown, Search, Link, Copy, Check
 } from 'lucide-react';
 import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton, ConfirmDialog, PageHeader, Select, Pagination } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
@@ -36,6 +36,9 @@ export const StudentPayments = () => {
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'TRANSFER' | 'OTHER'>('TRANSFER');
   const [sendReceipt, setSendReceipt] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -124,6 +127,30 @@ export const StudentPayments = () => {
       toast.success(t('payments.reminderSent'));
     } catch {
       toast.error(t('payments.reminderFailed'));
+    }
+  };
+
+  const handleCheckout = async (paymentId: string) => {
+    setCheckoutLoading(paymentId);
+    try {
+      const result = await paymentsService.checkout(paymentId);
+      setCheckoutUrl(result.redirect_url);
+      setCopiedLink(false);
+    } catch {
+      toast.error(t('payments.checkoutFailed'));
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!checkoutUrl) return;
+    try {
+      await navigator.clipboard.writeText(checkoutUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch {
+      toast.error(t('common.copyFailed'));
     }
   };
 
@@ -306,6 +333,14 @@ export const StudentPayments = () => {
                             title={t('payments.tooltip.sendReminder')}
                           >
                             <Send size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleCheckout(p.id)}
+                            disabled={checkoutLoading === p.id}
+                            className="p-2 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all disabled:opacity-50"
+                            title={t('payments.tooltip.sendInvoiceLink')}
+                          >
+                            <Link size={18} />
                           </button>
                         </>
                       )}
@@ -614,6 +649,64 @@ export const StudentPayments = () => {
         cancelLabel={t('common.cancel', 'Cancel')}
         isLoading={deletePayment.isPending}
       />
+
+      {/* Send Invoice Link Modal */}
+      <AnimatePresence>
+        {checkoutUrl && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setCheckoutUrl(null)}
+              className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative z-10 border border-zinc-100 dark:border-zinc-800"
+            >
+              <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
+                <h3 className="text-xl font-bold dark:text-zinc-100 flex items-center gap-2">
+                  <Link size={18} className="text-blue-500" />
+                  {t('payments.modal.invoiceLinkTitle')}
+                </h3>
+                <p className="text-xs text-zinc-500 mt-1">{t('payments.modal.invoiceLinkSubtitle')}</p>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 flex-1 truncate font-mono">{checkoutUrl}</span>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    {copiedLink ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                    {copiedLink ? t('common.copied') : t('common.copyLink')}
+                  </button>
+                  <button
+                    onClick={() => window.open(checkoutUrl, '_blank')}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+                  >
+                    <Link size={16} />
+                    {t('payments.modal.openLink')}
+                  </button>
+                </div>
+              </div>
+              <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800">
+                <button
+                  onClick={() => setCheckoutUrl(null)}
+                  className="w-full py-2 text-sm text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+                >
+                  {t('common.close')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
