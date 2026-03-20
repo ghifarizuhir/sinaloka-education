@@ -8,7 +8,7 @@ import {
   FileText, FileDown, Search, Link, Copy, Check
 } from 'lucide-react';
 import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton, ConfirmDialog, PageHeader, Select, Pagination } from '../../components/UI';
-import { cn, formatDate, formatCurrency } from '../../lib/utils';
+import { cn, formatDate, formatCurrency, downloadFile } from '../../lib/utils';
 import { usePayments, useUpdatePayment, useDeletePayment, useGenerateInvoice, useOverdueSummary } from '@/src/hooks/usePayments';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -347,7 +347,7 @@ export const StudentPayments = () => {
                       {p.invoice_url ? (
                         <button
                           title={t('payments.downloadInvoice')}
-                          onClick={(e) => { e.stopPropagation(); window.open(`${import.meta.env.VITE_API_URL}/api/uploads/${p.invoice_url}`, '_blank'); }}
+                          onClick={(e) => { e.stopPropagation(); downloadFile(p.invoice_url!, p.invoice_url!.split('/').pop() ?? 'invoice.pdf'); }}
                           className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                         >
                           <FileDown size={16} />
@@ -626,7 +626,7 @@ export const StudentPayments = () => {
                 <Button
                   variant="outline"
                   className="w-full justify-center gap-2"
-                  onClick={() => window.open(`${import.meta.env.VITE_API_URL}/api/uploads/${selectedPayment.invoice_url}`, '_blank')}
+                  onClick={() => downloadFile(selectedPayment.invoice_url!, selectedPayment.invoice_url!.split('/').pop() ?? 'invoice.pdf')}
                 >
                   <FileDown size={16} />
                   {t('payments.downloadInvoice')}
