@@ -171,6 +171,8 @@ jobs:
       needs.detect-changes.outputs.landing == 'true' ||
       github.event.inputs.app == 'landing' ||
       github.event.inputs.app == 'all'
+    environment:
+      name: ${{ github.event.inputs.environment || 'staging' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -185,6 +187,8 @@ jobs:
 
       - run: npm run build
         working-directory: sinaloka-landing
+        env:
+          VITE_API_URL: ${{ vars.API_URL }}
 
       - name: Deploy landing to Cloudflare Pages
         run: npx wrangler pages deploy dist --project-name=sinaloka-landing
