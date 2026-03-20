@@ -52,7 +52,7 @@ authTest.describe('Auth – authenticated flows', () => {
     await expect(page).not.toHaveURL(/\/login/);
 
     // Click the logout button in the sidebar
-    await page.getByRole('button', { name: /log out/i }).click();
+    await page.locator('button[title="Log out"]').click();
     await expect(page).toHaveURL(/\/login/);
   });
 
