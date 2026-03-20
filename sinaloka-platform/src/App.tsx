@@ -27,6 +27,7 @@ import { OperatingExpenses } from './pages/Finance/OperatingExpenses';
 import { SettingsPage } from './pages/Settings/index';
 import { NotFound } from './pages/NotFound';
 import { WhatsApp } from './pages/WhatsApp';
+import { Registrations } from './pages/Registrations';
 
 // --- Super Admin Pages ---
 import Institutions from './pages/SuperAdmin/Institutions';
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="/classes" element={<Classes />} />
             <Route path="/schedules" element={<Schedules />} />
             <Route path="/enrollments" element={<Enrollments />} />
+            <Route path="/registrations" element={<Registrations />} />
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/finance" element={<FinanceOverview />} />
             <Route path="/finance/payments" element={<StudentPayments />} />
