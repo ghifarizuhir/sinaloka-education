@@ -19,20 +19,38 @@ export function Navbar() {
     <nav
       className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-300",
-        scrolled ? "bg-white/85 backdrop-blur-md border-b border-[#E5E5E5]" : "bg-transparent"
+        scrolled
+          ? "bg-white/85 backdrop-blur-md border-b border-[#E5E5E5]"
+          : "bg-transparent"
       )}
     >
-      <div className="max-w-6xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
-        <a href="#" className="text-xl font-bold text-[#111]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+        <a
+          href="#"
+          className={cn(
+            "text-xl font-bold transition-colors duration-300",
+            scrolled ? "text-[#111]" : "text-white"
+          )}
+        >
           Sinaloka
         </a>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-[#666]">
+        <div
+          className={cn(
+            "hidden md:flex items-center gap-8 text-sm font-medium transition-colors duration-300",
+            scrolled ? "text-[#666]" : "text-accent-200/70"
+          )}
+        >
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="hover:text-accent-600 transition-colors"
+              className={cn(
+                "transition-colors",
+                scrolled
+                  ? "hover:text-accent-600"
+                  : "hover:text-white"
+              )}
             >
               {link.label}
             </a>
@@ -44,7 +62,12 @@ export function Navbar() {
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-accent-600 hover:bg-accent-700 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors"
+            className={cn(
+              "flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors",
+              scrolled
+                ? "bg-accent-600 hover:bg-accent-700 text-white"
+                : "bg-accent-500 hover:bg-accent-400 text-accent-950"
+            )}
           >
             <WhatsAppIcon className="w-4 h-4" />
             Hubungi Kami
@@ -52,7 +75,10 @@ export function Navbar() {
         </div>
 
         <button
-          className="md:hidden p-2 text-[#111]"
+          className={cn(
+            "md:hidden p-2 transition-colors duration-300",
+            scrolled ? "text-[#111]" : "text-white"
+          )}
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Menu"
         >
