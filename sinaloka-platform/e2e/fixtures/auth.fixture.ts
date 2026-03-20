@@ -34,11 +34,12 @@ export const test = mockTest.extend<AuthFixtures>({
       await mockApi.onGet('**/api/auth/me').respondWith(200, TEST_USER);
       await mockApi.onPost('**/api/auth/refresh').respondWith(200, TEST_TOKENS);
 
-      // Inject tokens into localStorage before navigating
+      // Inject tokens and set English locale before navigating
       await page.addInitScript(
         (tokens) => {
           localStorage.setItem('access_token', tokens.access_token);
           localStorage.setItem('refresh_token', tokens.refresh_token);
+          localStorage.setItem('sinaloka-lang', 'en');
         },
         TEST_TOKENS,
       );

@@ -68,6 +68,7 @@ export async function setupPaymentMocks(mockApi: MockApi, data = paymentsData) {
   await mockApi.onPost('**/api/admin/payments').respondWith(201, data.data[0]);
   await mockApi.onPatch('**/api/admin/payments/*').respondWith(200, data.data[0]);
   await mockApi.onDelete('**/api/admin/payments/*').respondWith(200, {});
+  await mockApi.onGet('**/api/admin/payments/overdue-summary').respondWith(200, { overdue_count: 1, flagged_students: [{ student_id: 'stu-003', student_name: 'Fajar Hidayat', overdue_count: 1 }] });
 }
 
 export async function setupPayoutMocks(mockApi: MockApi, data = payoutsData) {
@@ -94,6 +95,7 @@ export async function setupDashboardMocks(mockApi: MockApi, data = dashboardData
   await mockApi.onGet('**/api/admin/dashboard/stats').respondWith(200, data.stats);
   await mockApi.onGet('**/api/admin/dashboard/activity').respondWith(200, data.activity);
   await mockApi.onGet('**/api/admin/dashboard/upcoming-sessions').respondWith(200, data.upcoming_sessions_list);
+  await mockApi.onGet('**/api/admin/payments/overdue-summary').respondWith(200, { overdue_count: 0, flagged_students: [] });
 }
 
 export async function setupAllMocks(mockApi: MockApi) {

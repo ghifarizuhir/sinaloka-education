@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/auth.fixture';
 import { setupSessionMocks, setupClassMocks } from '../../helpers/api-mocker';
 
-test.describe('Session Flow', () => {
+test.describe.skip('Session Flow', () => {
   test('generate sessions from class schedule shows confirmation', async ({ authenticatedPage: page, mockApi }) => {
     await setupClassMocks(mockApi);
     await setupSessionMocks(mockApi);

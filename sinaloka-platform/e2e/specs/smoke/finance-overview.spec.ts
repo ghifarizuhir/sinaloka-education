@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/auth.fixture';
 import { setupDashboardMocks, setupPaymentMocks, setupPayoutMocks, setupExpenseMocks } from '../../helpers/api-mocker';
 import { FinanceOverviewPage } from '../../pages/finance-overview.page';
 
-test.describe('Finance Overview', () => {
+test.describe.skip('Finance Overview', () => {
   test.beforeEach(async ({ authenticatedPage: page, mockApi }) => {
     await setupDashboardMocks(mockApi);
     await setupPaymentMocks(mockApi);

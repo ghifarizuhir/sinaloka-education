@@ -44,7 +44,7 @@ export class StudentsPage {
     await this.modal.locator('select').first().selectOption(data.grade);
     if (data.parent_name) await this.modal.getByLabel(/parent\/guardian name/i).fill(data.parent_name);
     if (data.parent_phone) await this.modal.getByLabel(/parent\/guardian phone/i).fill(data.parent_phone);
-    await this.modal.getByRole('button', { name: /create student/i }).click();
+    await this.modal.getByRole('button', { name: /add student/i }).click();
   }
 
   async editStudent(name: string, data: Partial<StudentFormData>) {
@@ -54,13 +54,15 @@ export class StudentsPage {
     if (data.name) await this.modal.getByLabel(/full name/i).fill(data.name);
     if (data.email) await this.modal.getByLabel(/email address/i).fill(data.email);
     if (data.grade) await this.modal.locator('select').first().selectOption(data.grade);
-    await this.modal.getByRole('button', { name: /update student/i }).click();
+    await this.modal.getByRole('button', { name: /save changes/i }).click();
   }
 
   async deleteStudent(name: string) {
-    this.page.on('dialog', (dialog) => dialog.accept());
     await this.openRowMenu(name);
     await this.page.getByRole('button', { name: /delete/i }).click();
+    // Custom confirm modal: type "delete" then click confirm button
+    await this.page.locator('#delete-confirm').fill('delete');
+    await this.page.getByRole('button', { name: /delete student/i }).click();
   }
 
   async search(query: string) { await this.searchInput.fill(query); }
