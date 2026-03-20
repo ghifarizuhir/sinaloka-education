@@ -455,6 +455,16 @@
       "generateSuccess": "{{count}} sesi dibuat",
       "generateError": "Gagal membuat sesi"
     },
+    "validation": {
+      "nameRequired": "Nama kelas wajib diisi",
+      "subjectRequired": "Mata pelajaran wajib dipilih",
+      "tutorRequired": "Tutor wajib dipilih",
+      "scheduleDayRequired": "Minimal satu hari jadwal harus dipilih",
+      "capacityRequired": "Kapasitas harus lebih dari 0",
+      "feeRequired": "Biaya tidak boleh kosong",
+      "tutorFeeRequired": "Biaya tutor wajib diisi",
+      "perStudentFeeRequired": "Biaya per murid wajib diisi dan lebih dari 0"
+    },
     "modal": {
       "editTitle": "Edit Kelas",
       "createTitle": "Tambah Kelas",

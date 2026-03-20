@@ -455,6 +455,16 @@
       "generateSuccess": "{{count}} sessions generated",
       "generateError": "Failed to generate sessions"
     },
+    "validation": {
+      "nameRequired": "Class name is required",
+      "subjectRequired": "Subject is required",
+      "tutorRequired": "Tutor is required",
+      "scheduleDayRequired": "At least one schedule day is required",
+      "capacityRequired": "Capacity must be greater than 0",
+      "feeRequired": "Fee is required",
+      "tutorFeeRequired": "Tutor fee is required",
+      "perStudentFeeRequired": "Per-student fee is required and must be greater than 0"
+    },
     "modal": {
       "editTitle": "Edit Class",
       "createTitle": "Add Class",
