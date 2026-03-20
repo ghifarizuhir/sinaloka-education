@@ -254,7 +254,7 @@ function MainAppContent() {
                 </button>
               </div>
               <div className="p-6">
-                <img src={selectedProof} alt="Proof" className="w-full rounded-lg shadow-2xl" referrerPolicy="no-referrer" />
+                <img src={`${import.meta.env.VITE_API_URL}/api/uploads/${selectedProof}`} alt="Proof" className="w-full rounded-lg shadow-2xl" referrerPolicy="no-referrer" />
               </div>
             </motion.div>
           </div>

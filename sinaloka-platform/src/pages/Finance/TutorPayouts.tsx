@@ -8,7 +8,7 @@ import {
   ArrowLeft, BadgeCheck, X, AlertTriangle
 } from 'lucide-react';
 import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog, PageHeader, Select } from '../../components/UI';
-import { cn, formatCurrency, formatDate, downloadFile } from '../../lib/utils';
+import { cn, formatCurrency, formatDate, openFile } from '../../lib/utils';
 import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout, useGenerateSalaries } from '@/src/hooks/usePayouts';
 import { useTutors } from '@/src/hooks/useTutors';
 import { toast } from 'sonner';
@@ -165,7 +165,7 @@ export const TutorPayouts = () => {
       const updated = await payoutsService.generateSlip(selectedPayout.id);
       setSelectedPayout(updated);
       if (updated.slip_url) {
-        downloadFile(updated.slip_url, updated.slip_url.split('/').pop() ?? 'payout-slip.pdf');
+        openFile(updated.slip_url);
       }
       toast.success(t('payouts.toast.slipGenerated', { defaultValue: 'Payout slip generated' }));
     } catch {
@@ -177,7 +177,7 @@ export const TutorPayouts = () => {
 
   const handleDownloadSlip = () => {
     if (!selectedPayout?.slip_url) return;
-    downloadFile(selectedPayout.slip_url, selectedPayout.slip_url.split('/').pop() ?? 'payout-slip.pdf');
+    openFile(selectedPayout.slip_url);
   };
 
   const handleExportAudit = async () => {
