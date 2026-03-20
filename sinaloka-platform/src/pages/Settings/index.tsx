@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { Building2, CreditCard, GraduationCap, Zap } from 'lucide-react';
+import { Building2, ClipboardList, CreditCard, GraduationCap, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSettingsPage } from './useSettingsPage';
 import { GeneralTab } from './tabs/GeneralTab';
 import { BillingTab } from './tabs/BillingTab';
 import { AcademicTab } from './tabs/AcademicTab';
 import { PlansTab } from './tabs/PlansTab';
+import { RegistrationTab } from './tabs/RegistrationTab';
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
@@ -26,6 +27,7 @@ export const SettingsPage = () => {
     { id: 'general', label: t('settings.tabs.general'), icon: Building2 },
     { id: 'billing', label: t('settings.tabs.billing'), icon: CreditCard },
     { id: 'academic', label: t('settings.tabs.academic'), icon: GraduationCap },
+    { id: 'registration', label: t('registration.settings'), icon: ClipboardList },
     { id: 'plans', label: t('settings.tabs.plans'), icon: Zap },
   ];
 
@@ -104,6 +106,10 @@ export const SettingsPage = () => {
           handleAddBankAccount={state.handleAddBankAccount}
           handleRemoveBankAccount={state.handleRemoveBankAccount}
         />
+      )}
+
+      {activeTab === 'registration' && (
+        <RegistrationTab />
       )}
 
       {activeTab === 'plans' && (
