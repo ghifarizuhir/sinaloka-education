@@ -494,7 +494,13 @@ export const StudentPayments = () => {
                       <Input
                         type="number"
                         value={paymentAmount}
-                        onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val.length > 1 && val.startsWith('0')) {
+                            e.target.value = String(Number(val));
+                          }
+                          setPaymentAmount(Number(e.target.value) || 0);
+                        }}
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -502,7 +508,13 @@ export const StudentPayments = () => {
                       <Input
                         type="number"
                         value={discount}
-                        onChange={(e) => setDiscount(Number(e.target.value))}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val.length > 1 && val.startsWith('0')) {
+                            e.target.value = String(Number(val));
+                          }
+                          setDiscount(Number(e.target.value) || 0);
+                        }}
                       />
                     </div>
                   </div>
