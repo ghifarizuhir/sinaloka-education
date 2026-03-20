@@ -32,7 +32,7 @@ export function FinalCTA() {
             </a>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-white/40">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-white/70">
             <span className="flex items-center gap-1.5">
               <CheckCircle2 size={12} /> Gratis untuk bimbel kecil
             </span>
