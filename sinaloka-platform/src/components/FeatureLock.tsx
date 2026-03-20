@@ -14,11 +14,11 @@ export function FeatureLock({ feature, children }: FeatureLockProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  if (isLoading) {
+  if (isLoading || !plan) {
     return null;
   }
 
-  if (plan?.planConfig.features[feature]) {
+  if (plan.planConfig.features[feature]) {
     return <>{children}</>;
   }
 
