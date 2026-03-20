@@ -45,7 +45,13 @@ const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any
   </Link>
 );
 
-const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMinimized, userInitials, t, i18n, toggleLanguage }: {
+const planBadgeColors: Record<string, string> = {
+  STARTER: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
+  GROWTH: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  BUSINESS: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+};
+
+const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMinimized, userInitials, t, i18n, toggleLanguage, plan }: {
   title: string,
   isDarkMode: boolean,
   toggleDarkMode: () => void,
@@ -54,7 +60,8 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
   userInitials: string,
   t: (key: string) => string,
   i18n: { language: string },
-  toggleLanguage: () => void
+  toggleLanguage: () => void,
+  plan: ReturnType<typeof usePlan>['data']
 }) => (
   <header className="h-16 border-b border-border flex items-center justify-between px-8 sticky top-0 bg-background/80 backdrop-blur-md z-10 transition-colors">
     <div className="flex items-center gap-4">
@@ -65,6 +72,11 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
         {isSidebarMinimized ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
       </button>
       <h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
+      {plan && (
+        <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', planBadgeColors[plan.currentPlan])}>
+          {plan.planConfig.label}
+        </span>
+      )}
     </div>
     <div className="flex items-center gap-4">
       <div className="relative hidden md:block">
@@ -160,6 +172,7 @@ export const Layout = () => {
   const navigate = useNavigate();
   const auth = useAuth();
   const { t, i18n } = useTranslation();
+  const { data: plan } = usePlan();
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -310,6 +323,7 @@ export const Layout = () => {
           t={t}
           i18n={i18n}
           toggleLanguage={toggleLanguage}
+          plan={plan}
         />
         <PlanWarningBanner />
         <div className="p-8 max-w-7xl mx-auto w-full">
