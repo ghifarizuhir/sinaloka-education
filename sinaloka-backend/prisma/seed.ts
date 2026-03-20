@@ -50,6 +50,7 @@ async function main() {
       name: 'Admin Cerdas',
       role: 'ADMIN',
       institution_id: inst1.id,
+      must_change_password: true,
     },
   });
   const admin2 = await prisma.user.create({
@@ -59,6 +60,7 @@ async function main() {
       name: 'Admin Prima',
       role: 'ADMIN',
       institution_id: inst2.id,
+      must_change_password: true,
     },
   });
   console.log('Users created');
