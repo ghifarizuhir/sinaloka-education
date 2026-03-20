@@ -28,6 +28,7 @@ import { EmailModule } from './modules/email/email.module.js';
 import { InvitationModule } from './modules/invitation/invitation.module.js';
 import { SettingsModule } from './modules/settings/settings.module.js';
 import { SubjectModule } from './modules/subject/subject.module.js';
+import { PlanModule } from './modules/plan/plan.module.js';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
 import { HealthController } from './health.controller.js';
@@ -57,6 +58,7 @@ import { HealthController } from './health.controller.js';
     ParentModule,
     SettingsModule,
     SubjectModule,
+    PlanModule,
     ScheduleModule.forRoot(),
     WhatsappModule,
   ],
