@@ -10,11 +10,15 @@ interface FeatureLockProps {
 }
 
 export function FeatureLock({ feature, children }: FeatureLockProps) {
-  const { data: plan } = usePlan();
+  const { data: plan, isLoading } = usePlan();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  if (!plan || plan.planConfig.features[feature]) {
+  if (isLoading) {
+    return null;
+  }
+
+  if (plan?.planConfig.features[feature]) {
     return <>{children}</>;
   }
 
