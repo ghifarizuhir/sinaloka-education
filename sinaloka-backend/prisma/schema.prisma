@@ -198,7 +198,8 @@ model User {
   avatar_url      String?
   role            Role
   is_active       Boolean   @default(true)
-  last_login_at   DateTime?
+  last_login_at         DateTime?
+  must_change_password  Boolean   @default(false)
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
