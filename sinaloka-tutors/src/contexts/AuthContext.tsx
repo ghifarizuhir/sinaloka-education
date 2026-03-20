@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import axios from 'axios';
 import api, {
   setAccessToken,
   setRefreshToken,
@@ -28,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(async () => {
     try {
-      const res = await api.get('/tutor/profile');
+      const res = await api.get('/api/tutor/profile');
       setProfile(mapProfile(res.data));
       setIsAuthenticated(true);
     } catch {
@@ -38,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await api.post('/auth/login', { email, password });
+    const res = await api.post('/api/auth/login', { email, password });
     setAccessToken(res.data.access_token);
     setRefreshToken(res.data.refresh_token);
     await fetchProfile();
@@ -48,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshToken = getRefreshToken();
     try {
       if (refreshToken) {
-        await api.post('/auth/logout', { refresh_token: refreshToken });
+        await api.post('/api/auth/logout', { refresh_token: refreshToken });
       }
     } catch {
       // Ignore — always clear local tokens
@@ -59,11 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Try to restore session on mount using bare axios (not intercepted)
+  // Try to restore session on mount
   useEffect(() => {
     const refreshToken = getRefreshToken();
     if (refreshToken) {
-      axios.post('/api/auth/refresh', { refresh_token: refreshToken })
+      api.post('/api/auth/refresh', { refresh_token: refreshToken })
         .then((res) => {
           setAccessToken(res.data.access_token);
           setRefreshToken(res.data.refresh_token);
