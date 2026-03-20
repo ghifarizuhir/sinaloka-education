@@ -55,6 +55,8 @@ interface ClassFormModalProps {
   availableRooms: Room[];
   toggleScheduleDay: (day: ScheduleDay) => void;
   handleFormSubmit: () => void;
+  errors: Record<string, string>;
+  clearError: (field: string) => void;
 }
 
 export const ClassFormModal = ({
@@ -96,6 +98,8 @@ export const ClassFormModal = ({
   availableRooms,
   toggleScheduleDay,
   handleFormSubmit,
+  errors,
+  clearError,
 }: ClassFormModalProps) => {
   const roomOptions = availableRooms.map(r => ({
     value: r.name,
@@ -103,6 +107,9 @@ export const ClassFormModal = ({
   }));
 
   const hasRoomMismatch = editingClass?.room && !availableRooms.some(r => r.name === editingClass.room);
+
+  const FieldError = ({ field }: { field: string }) =>
+    errors[field] ? <p className="text-red-500 text-sm mt-1">{errors[field]}</p> : null;
 
   return (
     <Modal
@@ -120,18 +127,20 @@ export const ClassFormModal = ({
               id="class-name"
               placeholder={t('classes.form.classNamePlaceholder')}
               value={formName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormName(e.target.value); clearError('name'); }}
             />
+            <FieldError field="name" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="subject">{t('classes.form.subject')}</Label>
             <Select
               className="w-full"
               value={formSubjectId}
-              onChange={(val) => { setFormSubjectId(val); setFormTutorId(''); }}
+              onChange={(val) => { setFormSubjectId(val); setFormTutorId(''); clearError('subject_id'); }}
               options={(subjectsList ?? []).map(s => ({ value: s.id, label: s.name }))}
               placeholder={t('classes.form.selectSubject')}
             />
+            <FieldError field="subject_id" />
           </div>
         </div>
 
@@ -141,7 +150,7 @@ export const ClassFormModal = ({
             <Select
               className="w-full"
               value={formTutorId}
-              onChange={(val) => setFormTutorId(val)}
+              onChange={(val) => { setFormTutorId(val); clearError('tutor_id'); }}
               disabled={!formSubjectId}
               options={(subjectTutors ?? []).map((tutor: { id: string; name?: string; user?: { name: string } }) => ({
                 value: tutor.id,
@@ -149,6 +158,7 @@ export const ClassFormModal = ({
               }))}
               placeholder={t('classes.form.selectTutor')}
             />
+            <FieldError field="tutor_id" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="status">{t('classes.form.status')}</Label>
@@ -171,7 +181,7 @@ export const ClassFormModal = ({
               <button
                 key={day}
                 type="button"
-                onClick={() => toggleScheduleDay(day)}
+                onClick={() => { toggleScheduleDay(day); clearError('schedules'); }}
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-xs font-bold border transition-all',
                   formSchedules.some(s => s.day === day)
@@ -212,6 +222,7 @@ export const ClassFormModal = ({
                 </button>
               </div>
             ))}
+            <FieldError field="schedules" />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -222,8 +233,9 @@ export const ClassFormModal = ({
               type="number"
               placeholder="25"
               value={formCapacity}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormCapacity(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormCapacity(e.target.value); clearError('capacity'); }}
             />
+            <FieldError field="capacity" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="fee">
@@ -238,8 +250,9 @@ export const ClassFormModal = ({
               type="number"
               placeholder="500000"
               value={formFee}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormFee(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormFee(e.target.value); clearError('fee'); }}
             />
+            <FieldError field="fee" />
           </div>
         </div>
 
@@ -275,8 +288,9 @@ export const ClassFormModal = ({
               placeholder="200000"
               required
               value={formTutorFee}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFee(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormTutorFee(e.target.value); clearError('tutor_fee'); }}
             />
+            <FieldError field="tutor_fee" />
           </div>
         )}
         {formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' && (
@@ -287,8 +301,9 @@ export const ClassFormModal = ({
               placeholder="30000"
               required
               value={formTutorFeePerStudent}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTutorFeePerStudent(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormTutorFeePerStudent(e.target.value); clearError('tutor_fee_per_student'); }}
             />
+            <FieldError field="tutor_fee_per_student" />
           </div>
         )}
         {formTutorFeeMode === 'MONTHLY_SALARY' && (
