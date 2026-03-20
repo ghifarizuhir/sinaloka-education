@@ -18,7 +18,7 @@ export function useChildren() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await api.get('/parent/children');
+      const res = await api.get('/api/parent/children');
       setData(res.data.map(mapChild));
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Gagal memuat data anak');

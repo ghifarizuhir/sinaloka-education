@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Lock, AlertCircle, ArrowLeft } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/client';
 import { PasswordInput } from '../components/PasswordInput';
 
 export function ResetPasswordPage({ token, onBack }: { token: string; onBack: () => void }) {
@@ -15,7 +15,7 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    axios.get(`/api/auth/reset-password/${token}`)
+    api.get(`/api/auth/reset-password/${token}`)
       .then((res) => {
         setValid(true);
         setEmail(res.data.email);
@@ -39,7 +39,7 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
 
     setLoading(true);
     try {
-      await axios.post('/api/auth/reset-password', { token, password });
+      await api.post('/api/auth/reset-password', { token, password });
       setSuccess(true);
       // Clear the token from URL and go back to login after a short delay
       window.history.replaceState({}, '', window.location.pathname);
