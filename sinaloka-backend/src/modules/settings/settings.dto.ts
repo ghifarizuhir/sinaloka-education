@@ -90,3 +90,12 @@ export const UpdatePaymentGatewaySchema = z.object({
 export type UpdatePaymentGatewayDto = z.infer<
   typeof UpdatePaymentGatewaySchema
 >;
+
+export const UpdateRegistrationSettingsSchema = z.object({
+  student_enabled: z.boolean().optional(),
+  tutor_enabled: z.boolean().optional(),
+});
+
+export type UpdateRegistrationSettingsDto = z.infer<
+  typeof UpdateRegistrationSettingsSchema
+>;

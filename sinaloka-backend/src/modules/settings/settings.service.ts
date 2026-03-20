@@ -5,7 +5,13 @@ import type {
   UpdateBillingSettingsDto,
   UpdateAcademicSettingsDto,
   UpdatePaymentGatewayDto,
+  UpdateRegistrationSettingsDto,
 } from './settings.dto.js';
+
+const REGISTRATION_DEFAULTS = {
+  student_enabled: false,
+  tutor_enabled: false,
+};
 
 const PAYMENT_GATEWAY_DEFAULTS = {
   provider: 'midtrans' as const,
@@ -214,6 +220,47 @@ export class SettingsService {
     });
 
     return this.getPaymentGateway(institutionId);
+  }
+
+  async getRegistration(institutionId: string) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { settings: true },
+    });
+
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+
+    const stored = (institution.settings as any)?.registration ?? {};
+    return { ...REGISTRATION_DEFAULTS, ...stored };
+  }
+
+  async updateRegistration(
+    institutionId: string,
+    dto: UpdateRegistrationSettingsDto,
+  ) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { settings: true },
+    });
+
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+
+    const currentSettings = (institution.settings as any) ?? {};
+    const currentRegistration = currentSettings.registration ?? {};
+    const updatedRegistration = { ...currentRegistration, ...dto };
+
+    await this.prisma.institution.update({
+      where: { id: institutionId },
+      data: {
+        settings: { ...currentSettings, registration: updatedRegistration },
+      },
+    });
+
+    return { ...REGISTRATION_DEFAULTS, ...updatedRegistration };
   }
 
   async getPaymentGatewayConfig(institutionId: string) {
