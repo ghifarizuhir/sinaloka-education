@@ -11,6 +11,8 @@ import {
 import { useSubjects, useSubjectTutors } from '@/src/hooks/useSubjects';
 import { useBillingSettings, useAcademicSettings } from '@/src/hooks/useSettings';
 import { useGenerateSessions } from '@/src/hooks/useSessions';
+import { useFormErrors } from '@/src/hooks/useFormErrors';
+import { mapBackendErrors } from '@/src/lib/form-errors';
 import { format, addDays, getDay } from 'date-fns';
 import type { Class, CreateClassDto, ScheduleDay, ClassScheduleItem } from '@/src/types/class';
 import { useQuery } from '@tanstack/react-query';
@@ -63,6 +65,8 @@ export function useClassesPage() {
   const [formSchedules, setFormSchedules] = useState<ClassScheduleItem[]>([]);
   const [formRoom, setFormRoom] = useState('');
   const [formStatus, setFormStatus] = useState<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
+
+  const formErrors = useFormErrors();
 
   const { data, isLoading } = useClasses({ page, limit });
   const { data: allClassesData } = useClasses({ page: 1, limit: 100 });
@@ -120,6 +124,7 @@ export function useClassesPage() {
   }, [classes]);
 
   const openAddModal = () => {
+    formErrors.clearAll();
     setEditingClass(null);
     setFormName('');
     setFormSubjectId('');
@@ -137,6 +142,7 @@ export function useClassesPage() {
   };
 
   const openEditModal = (cls: Class) => {
+    formErrors.clearAll();
     setEditingClass(cls);
     setFormName(cls.name);
     setFormSubjectId(cls.subject_id);
@@ -162,16 +168,20 @@ export function useClassesPage() {
   };
 
   const handleFormSubmit = () => {
-    if (!formTutorId) {
-      toast.error(t('classes.toast.selectTutor'));
-      return;
-    }
-    if (formSchedules.length === 0) {
-      toast.error(t('classes.toast.selectScheduleDay'));
-      return;
-    }
+    const isValid = formErrors.validate([
+      [!formName.trim(), 'name', t('classes.validation.nameRequired')],
+      [!formSubjectId, 'subject_id', t('classes.validation.subjectRequired')],
+      [!formTutorId, 'tutor_id', t('classes.validation.tutorRequired')],
+      [formSchedules.length === 0, 'schedules', t('classes.validation.scheduleDayRequired')],
+      [!formCapacity || Number(formCapacity) <= 0 || isNaN(Number(formCapacity)), 'capacity', t('classes.validation.capacityRequired')],
+      [isNaN(Number(formFee)) || Number(formFee) < 0, 'fee', t('classes.validation.feeRequired')],
+      [formTutorFeeMode === 'FIXED_PER_SESSION' && (formTutorFee === '' || isNaN(Number(formTutorFee))), 'tutor_fee', t('classes.validation.tutorFeeRequired')],
+      [formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' && (!formTutorFeePerStudent || Number(formTutorFeePerStudent) <= 0 || isNaN(Number(formTutorFeePerStudent))), 'tutor_fee_per_student', t('classes.validation.perStudentFeeRequired')],
+    ]);
 
-    // Check for tutor schedule conflicts
+    if (!isValid) return;
+
+    // Tutor schedule conflict check (toast-based, cross-entity)
     const otherClasses = tutorClasses.filter(c => c.id !== editingClass?.id);
     for (const schedule of formSchedules) {
       for (const cls of otherClasses) {
@@ -217,7 +227,14 @@ export function useClassesPage() {
             setShowModal(false);
             setEditingClass(null);
           },
-          onError: () => toast.error(t('classes.toast.updateError')),
+          onError: (err) => {
+            const fieldErrors = mapBackendErrors(err);
+            if (fieldErrors) {
+              formErrors.setErrors(fieldErrors);
+            } else {
+              toast.error(t('classes.toast.updateError'));
+            }
+          },
         }
       );
     } else {
@@ -226,7 +243,14 @@ export function useClassesPage() {
           toast.success(t('classes.toast.created'));
           setShowModal(false);
         },
-        onError: () => toast.error(t('classes.toast.createError')),
+        onError: (err) => {
+          const fieldErrors = mapBackendErrors(err);
+          if (fieldErrors) {
+            formErrors.setErrors(fieldErrors);
+          } else {
+            toast.error(t('classes.toast.createError'));
+          }
+        },
       });
     }
   };
@@ -338,6 +362,7 @@ export function useClassesPage() {
     setFormRoom,
     formStatus,
     setFormStatus,
+    formErrors,
     isLoading,
     subjectsList,
     subjectTutors,
