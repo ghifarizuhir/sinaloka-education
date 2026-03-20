@@ -5,8 +5,9 @@ import { WHATSAPP_URL, PRICING_TIERS } from "../lib/constants";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="py-24 lg:py-32">
-      <div className="max-w-6xl mx-auto px-6 lg:px-10">
+    <section id="pricing" className="py-24 lg:py-32 relative overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-accent-50/40 blur-[120px] pointer-events-none" />
+      <div className="relative max-w-6xl mx-auto px-6 lg:px-10">
         <Reveal className="text-center max-w-xl mx-auto mb-16">
           <p className="text-accent-600 font-medium text-xs tracking-[0.15em] uppercase mb-4">
             Harga Transparan
@@ -73,6 +74,7 @@ export function Pricing() {
           ))}
         </div>
       </div>
+      <div className="absolute -bottom-32 -right-32 w-[350px] h-[350px] rounded-full bg-accent-100/20 blur-[90px] pointer-events-none" />
     </section>
   );
 }

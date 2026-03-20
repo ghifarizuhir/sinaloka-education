@@ -40,4 +40,9 @@
 
 @layer utilities {
   .text-balance { text-wrap: balance; }
+
+  .bg-grid {
+    background-image: radial-gradient(circle at 1px 1px, #e5e5e5 0.5px, transparent 0);
+    background-size: 24px 24px;
+  }
 }

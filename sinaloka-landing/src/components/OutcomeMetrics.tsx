@@ -3,8 +3,9 @@ import { METRICS } from "../lib/constants";
 
 export function OutcomeMetrics() {
   return (
-    <section id="results" className="py-24 lg:py-32">
-      <div className="max-w-6xl mx-auto px-6 lg:px-10">
+    <section id="results" className="py-24 lg:py-32 relative overflow-hidden">
+      <div className="absolute -top-32 -left-32 w-[450px] h-[450px] rounded-full bg-accent-100/15 blur-[100px] pointer-events-none" />
+      <div className="relative max-w-6xl mx-auto px-6 lg:px-10">
         <Reveal className="text-center max-w-xl mx-auto mb-16">
           <p className="text-accent-600 font-medium text-xs tracking-[0.15em] uppercase mb-4">
             Hasil Nyata

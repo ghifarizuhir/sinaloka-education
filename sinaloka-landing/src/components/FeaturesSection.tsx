@@ -3,8 +3,9 @@ import { FEATURES } from "../lib/constants";
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 lg:py-32">
-      <div className="max-w-6xl mx-auto px-6 lg:px-10">
+    <section id="features" className="py-24 lg:py-32 relative overflow-hidden">
+      <div className="absolute -top-20 -right-40 w-[500px] h-[500px] rounded-full bg-accent-100/20 blur-[100px] pointer-events-none" />
+      <div className="relative max-w-6xl mx-auto px-6 lg:px-10">
         <Reveal className="text-center max-w-xl mx-auto mb-16">
           <p className="text-accent-600 font-medium text-xs tracking-[0.15em] uppercase mb-4">
             Fitur Lengkap
@@ -59,6 +60,7 @@ export function FeaturesSection() {
           ))}
         </div>
       </div>
+      <div className="absolute -bottom-20 -left-40 w-[400px] h-[400px] rounded-full bg-accent-50/30 blur-[80px] pointer-events-none" />
     </section>
   );
 }

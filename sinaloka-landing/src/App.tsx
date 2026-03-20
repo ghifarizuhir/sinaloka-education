@@ -12,7 +12,9 @@ import { FloatingWhatsApp } from "./components/FloatingWhatsApp";
 
 export default function App() {
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden relative">
+      {/* Global background grid */}
+      <div className="fixed inset-0 bg-grid opacity-30 pointer-events-none" />
       <Navbar />
       <Hero />
       <ProblemSection />
