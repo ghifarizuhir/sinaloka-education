@@ -25,3 +25,4 @@ export { EmptyState } from './empty-state';
 export { StatCard } from './stat-card';
 export { DataTable } from './data-table';
 export { Pagination } from './pagination';
+export { ConfirmChangesModal, type FieldChange } from './confirm-changes-modal';
