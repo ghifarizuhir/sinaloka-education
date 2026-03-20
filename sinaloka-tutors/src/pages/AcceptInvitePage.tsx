@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { UserPlus, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/client';
 import { PasswordInput } from '../components/PasswordInput';
 
 interface InvitationInfo {
@@ -39,7 +39,7 @@ export function AcceptInvitePage() {
       return;
     }
 
-    axios
+    api
       .get(`/api/invitation/${token}`)
       .then((res) => {
         const invitation: InvitationInfo = res.data;
@@ -91,7 +91,7 @@ export function AcceptInvitePage() {
     setPageState({ status: 'submitting' });
 
     try {
-      await axios.post('/api/invitation/accept', {
+      await api.post('/api/invitation/accept', {
         token,
         name: fullName,
         password,

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Mail, AlertCircle, CheckCircle2, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/client';
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -45,7 +45,7 @@ export function ForgotPasswordPage() {
     }
 
     try {
-      await axios.post('/api/auth/forgot-password', { email });
+      await api.post('/api/auth/forgot-password', { email });
       setSent(true);
       startCooldown();
     } catch (err: any) {
@@ -59,7 +59,7 @@ export function ForgotPasswordPage() {
     setError(null);
     setLoading(true);
     try {
-      await axios.post('/api/auth/forgot-password', { email });
+      await api.post('/api/auth/forgot-password', { email });
       startCooldown();
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Terjadi kesalahan. Coba lagi.');
