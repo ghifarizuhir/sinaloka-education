@@ -84,7 +84,8 @@
     "operatingExpenses": "Operating Expenses",
     "settings": "Settings",
     "messaging": "Messaging",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "registrations": "Registrations"
   },
 
   "layout": {
@@ -1438,6 +1439,35 @@
     "downloadPdf": "Download PDF",
     "selectFiltersHint": "Select filters and click Generate",
     "pdfPreviewHint": "PDF preview will appear here"
+  },
+
+  "registration": {
+    "title": "Registrations",
+    "student": "Student",
+    "tutor": "Tutor",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveStudentConfirm": "Approve and add as active student?",
+    "approveTutorConfirm": "Approve and send invitation email to {email}?",
+    "rejectReason": "Reason (optional)",
+    "noRegistrations": "No registrations",
+    "submitted": "Registration submitted successfully!",
+    "closed": "Registration is currently closed",
+    "alreadyRegistered": "You have already registered",
+    "settings": "Registration",
+    "studentEnabled": "Open student registration",
+    "tutorEnabled": "Open tutor registration",
+    "copyLink": "Copy registration link",
+    "linkCopied": "Link copied!",
+    "approveSuccess": "Registration approved",
+    "approveFailed": "Failed to approve registration",
+    "rejectSuccess": "Registration rejected",
+    "rejectFailed": "Failed to reject registration",
+    "settingsUpdated": "Registration settings updated",
+    "settingsFailed": "Failed to update registration settings"
   },
 
   "plan": {

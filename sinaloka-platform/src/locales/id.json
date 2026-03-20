@@ -84,7 +84,8 @@
     "operatingExpenses": "Biaya Operasional",
     "settings": "Pengaturan",
     "messaging": "Perpesanan",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "registrations": "Pendaftaran"
   },
 
   "layout": {
@@ -1438,6 +1439,35 @@
     "downloadPdf": "Unduh PDF",
     "selectFiltersHint": "Pilih filter dan klik Buat",
     "pdfPreviewHint": "Pratinjau PDF akan muncul di sini"
+  },
+
+  "registration": {
+    "title": "Pendaftaran",
+    "student": "Murid",
+    "tutor": "Tutor",
+    "pending": "Menunggu",
+    "approved": "Disetujui",
+    "rejected": "Ditolak",
+    "approve": "Setujui",
+    "reject": "Tolak",
+    "approveStudentConfirm": "Setujui dan tambahkan sebagai murid aktif?",
+    "approveTutorConfirm": "Setujui dan kirim email undangan ke {email}?",
+    "rejectReason": "Alasan (opsional)",
+    "noRegistrations": "Tidak ada pendaftaran",
+    "submitted": "Pendaftaran berhasil dikirim!",
+    "closed": "Pendaftaran sedang ditutup",
+    "alreadyRegistered": "Anda sudah mendaftar",
+    "settings": "Pendaftaran",
+    "studentEnabled": "Buka pendaftaran murid",
+    "tutorEnabled": "Buka pendaftaran tutor",
+    "copyLink": "Salin link pendaftaran",
+    "linkCopied": "Link disalin!",
+    "approveSuccess": "Pendaftaran disetujui",
+    "approveFailed": "Gagal menyetujui pendaftaran",
+    "rejectSuccess": "Pendaftaran ditolak",
+    "rejectFailed": "Gagal menolak pendaftaran",
+    "settingsUpdated": "Pengaturan pendaftaran diperbarui",
+    "settingsFailed": "Gagal memperbarui pengaturan pendaftaran"
   },
 
   "plan": {
