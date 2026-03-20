@@ -56,6 +56,7 @@ export class TutorController {
     return this.tutorService.findAll(user.institutionId!, query);
   }
 
+  @PlanLimit('tutors')
   @Post('invite')
   async invite(
     @CurrentUser() user: JwtPayload,
