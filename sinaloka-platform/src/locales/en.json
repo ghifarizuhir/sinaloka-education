@@ -1175,7 +1175,8 @@
       "academic": "Academic",
       "paymentGateway": "Payment Gateway",
       "security": "Security",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "plans": "Plans & Pricing"
     },
     "paymentGateway": {
       "title": "Payment Gateway",

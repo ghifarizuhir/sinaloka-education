@@ -1175,7 +1175,8 @@
       "academic": "Akademik",
       "paymentGateway": "Payment Gateway",
       "security": "Keamanan",
-      "integrations": "Integrasi"
+      "integrations": "Integrasi",
+      "plans": "Paket & Harga"
     },
     "paymentGateway": {
       "title": "Payment Gateway",
