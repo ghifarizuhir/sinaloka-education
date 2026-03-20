@@ -239,6 +239,28 @@ export class TutorService {
       });
       await tx.user.delete({ where: { id: existing.user_id } });
     });
+
+    // Reset plan grace period if count drops below limit
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { plan_type: true, plan_limit_reached_at: true },
+    });
+
+    if (institution?.plan_limit_reached_at) {
+      const { PLAN_LIMITS } = await import('../../common/constants/plans.js');
+      const planConfig = PLAN_LIMITS[institution.plan_type as any];
+      if (planConfig.maxTutors !== null) {
+        const count = await this.prisma.tutor.count({
+          where: { institution_id: institutionId },
+        });
+        if (count < planConfig.maxTutors) {
+          await this.prisma.institution.update({
+            where: { id: institutionId },
+            data: { plan_limit_reached_at: null },
+          });
+        }
+      }
+    }
   }
 
   async getProfile(userId: string) {

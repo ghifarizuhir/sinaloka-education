@@ -100,9 +100,33 @@ export class StudentService {
   async delete(institutionId: string, id: string) {
     await this.findOne(institutionId, id);
 
-    return this.prisma.student.delete({
+    const result = await this.prisma.student.delete({
       where: { id },
     });
+
+    // Reset plan grace period if count drops below limit
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { plan_type: true, plan_limit_reached_at: true },
+    });
+
+    if (institution?.plan_limit_reached_at) {
+      const { PLAN_LIMITS } = await import('../../common/constants/plans.js');
+      const planConfig = PLAN_LIMITS[institution.plan_type as any];
+      if (planConfig.maxStudents !== null) {
+        const count = await this.prisma.student.count({
+          where: { institution_id: institutionId, status: 'ACTIVE' },
+        });
+        if (count < planConfig.maxStudents) {
+          await this.prisma.institution.update({
+            where: { id: institutionId },
+            data: { plan_limit_reached_at: null },
+          });
+        }
+      }
+    }
+
+    return result;
   }
 
   async importFromCsv(buffer: Buffer, institutionId: string) {
