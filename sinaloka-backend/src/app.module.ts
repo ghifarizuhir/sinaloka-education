@@ -4,7 +4,9 @@ import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from './common/prisma/prisma.module.js';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { RolesGuard } from './common/guards/roles.guard.js';
+import { PlanGuard } from './common/guards/plan.guard.js';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor.js';
+import { PlanWarningInterceptor } from './common/interceptors/plan-warning.interceptor.js';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { InstitutionModule } from './modules/institution/institution.module.js';
@@ -26,6 +28,7 @@ import { EmailModule } from './modules/email/email.module.js';
 import { InvitationModule } from './modules/invitation/invitation.module.js';
 import { SettingsModule } from './modules/settings/settings.module.js';
 import { SubjectModule } from './modules/subject/subject.module.js';
+import { PlanModule } from './modules/plan/plan.module.js';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
 import { HealthController } from './health.controller.js';
@@ -55,6 +58,7 @@ import { HealthController } from './health.controller.js';
     ParentModule,
     SettingsModule,
     SubjectModule,
+    PlanModule,
     ScheduleModule.forRoot(),
     WhatsappModule,
   ],
@@ -72,8 +76,16 @@ import { HealthController } from './health.controller.js';
       useClass: RolesGuard,
     },
     {
+      provide: APP_GUARD,
+      useClass: PlanGuard,
+    },
+    {
       provide: APP_INTERCEPTOR,
       useClass: TenantInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: PlanWarningInterceptor,
     },
   ],
 })

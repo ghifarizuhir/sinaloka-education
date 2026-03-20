@@ -15,6 +15,7 @@ import {
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
+import { PlanFeature } from '../../common/decorators/plan.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
@@ -28,6 +29,7 @@ import {
 import type { Request } from 'express';
 
 @Controller()
+@PlanFeature('whatsappNotification')
 export class WhatsappController {
   constructor(private readonly whatsappService: WhatsappService) {}
 

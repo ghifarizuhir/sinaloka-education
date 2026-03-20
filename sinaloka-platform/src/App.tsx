@@ -33,6 +33,7 @@ import Institutions from './pages/SuperAdmin/Institutions';
 import InstitutionForm from './pages/SuperAdmin/InstitutionForm';
 import InstitutionDetail from './pages/SuperAdmin/InstitutionDetail';
 import SuperAdminUsers from './pages/SuperAdmin/Users';
+import UpgradeRequests from './pages/SuperAdmin/UpgradeRequests';
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="institutions/new" element={<InstitutionForm />} />
             <Route path="institutions/:id" element={<InstitutionDetail />} />
             <Route path="users" element={<SuperAdminUsers />} />
+            <Route path="upgrade-requests" element={<UpgradeRequests />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute />}>

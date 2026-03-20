@@ -6,6 +6,7 @@ import { cn, formatDate, formatCurrency } from '../lib/utils';
 import { toast } from 'sonner';
 import { useWhatsappMessages, useWhatsappStats, useWhatsappSettings, useUpdateWhatsappSettings, useSendPaymentReminder } from '@/src/hooks/useWhatsapp';
 import { usePayments } from '@/src/hooks/usePayments';
+import { FeatureLock } from '../components/FeatureLock';
 
 const STATUS_BADGE: Record<string, { variant: 'default' | 'success' | 'warning' | 'error' | 'outline'; className?: string }> = {
   SENT: { variant: 'outline', className: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
@@ -105,6 +106,7 @@ export const WhatsApp = () => {
 
   return (
     <div className="space-y-6">
+      <FeatureLock feature="whatsappNotification">
       <PageHeader title={t('layout.pageTitle.whatsapp')} subtitle={t('whatsapp.send.title')} />
 
       {/* Not-configured banner */}
@@ -474,6 +476,7 @@ export const WhatsApp = () => {
           </div>
         </Card>
       )}
+      </FeatureLock>
     </div>
   );
 };

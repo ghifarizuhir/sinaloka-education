@@ -1,23 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
-import { Building2, CreditCard, GraduationCap } from 'lucide-react';
+import { useSearchParams, useLocation } from 'react-router-dom';
+import { Building2, CreditCard, GraduationCap, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSettingsPage } from './useSettingsPage';
 import { GeneralTab } from './tabs/GeneralTab';
 import { BillingTab } from './tabs/BillingTab';
 import { AcademicTab } from './tabs/AcademicTab';
+import { PlansTab } from './tabs/PlansTab';
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
   const state = useSettingsPage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const activeTab = searchParams.get('tab') || 'general';
+
+  useEffect(() => {
+    if ((location.state as { tab?: string } | null)?.tab === 'plans') {
+      setSearchParams({ tab: 'plans' });
+    }
+  }, [location.state]);
 
   const tabs = [
     { id: 'general', label: t('settings.tabs.general'), icon: Building2 },
     { id: 'billing', label: t('settings.tabs.billing'), icon: CreditCard },
     { id: 'academic', label: t('settings.tabs.academic'), icon: GraduationCap },
+    { id: 'plans', label: t('settings.tabs.plans'), icon: Zap },
   ];
 
   return (
@@ -95,6 +104,10 @@ export const SettingsPage = () => {
           handleAddBankAccount={state.handleAddBankAccount}
           handleRemoveBankAccount={state.handleRemoveBankAccount}
         />
+      )}
+
+      {activeTab === 'plans' && (
+        <PlansTab />
       )}
 
       {activeTab === 'academic' && (

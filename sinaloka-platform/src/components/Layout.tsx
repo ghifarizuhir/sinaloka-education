@@ -24,8 +24,10 @@ import {
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
+import { usePlan } from '../hooks/usePlan';
 import { cn } from '../lib/utils';
 import ImpersonationBanner from './ImpersonationBanner';
+import { PlanWarningBanner } from './PlanWarningBanner';
 
 const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any, label: string, href: string, active: boolean, minimized: boolean }) => (
   <Link
@@ -43,7 +45,13 @@ const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any
   </Link>
 );
 
-const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMinimized, userInitials, t, i18n, toggleLanguage }: {
+const planBadgeColors: Record<string, string> = {
+  STARTER: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
+  GROWTH: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  BUSINESS: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+};
+
+const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMinimized, userInitials, t, i18n, toggleLanguage, plan }: {
   title: string,
   isDarkMode: boolean,
   toggleDarkMode: () => void,
@@ -52,7 +60,8 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
   userInitials: string,
   t: (key: string) => string,
   i18n: { language: string },
-  toggleLanguage: () => void
+  toggleLanguage: () => void,
+  plan: ReturnType<typeof usePlan>['data']
 }) => (
   <header className="h-16 border-b border-border flex items-center justify-between px-8 sticky top-0 bg-background/80 backdrop-blur-md z-10 transition-colors">
     <div className="flex items-center gap-4">
@@ -63,6 +72,11 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
         {isSidebarMinimized ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
       </button>
       <h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
+      {plan && (
+        <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', planBadgeColors[plan.currentPlan])}>
+          {plan.planConfig.label}
+        </span>
+      )}
     </div>
     <div className="flex items-center gap-4">
       <div className="relative hidden md:block">
@@ -100,11 +114,65 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
   </header>
 );
 
+function SidebarPlanWidget() {
+  const { t } = useTranslation();
+  const { data: plan } = usePlan();
+  const navigate = useNavigate();
+
+  if (!plan) return null;
+
+  const { usage, planConfig } = plan;
+  const studentPercent = planConfig.maxStudents
+    ? Math.round((usage.students.current / planConfig.maxStudents) * 100)
+    : 0;
+
+  const planColors: Record<string, string> = {
+    STARTER: 'text-zinc-500',
+    GROWTH: 'text-blue-500',
+    BUSINESS: 'text-amber-500',
+  };
+
+  return (
+    <div className="p-4 border-t border-border/50">
+      <div className="p-4 bg-muted/50 rounded-2xl">
+        <p className={cn('text-xs font-bold mb-1', planColors[plan.currentPlan])}>
+          {planConfig.label}
+        </p>
+        <p className="text-[10px] text-muted-foreground mb-3">
+          {planConfig.maxStudents
+            ? `${usage.students.current}/${planConfig.maxStudents} ${t('plan.maxStudents').toLowerCase()}`
+            : `${usage.students.current} ${t('plan.maxStudents').toLowerCase()} (${t('plan.unlimited').toLowerCase()})`}
+        </p>
+        {planConfig.maxStudents && (
+          <div className="w-full h-1 bg-muted rounded-full overflow-hidden mb-4">
+            <div
+              className={cn(
+                'h-full rounded-full transition-all',
+                studentPercent >= 100 ? 'bg-red-500' : studentPercent >= 80 ? 'bg-amber-500' : 'bg-primary',
+              )}
+              style={{ width: `${Math.min(studentPercent, 100)}%` }}
+            />
+          </div>
+        )}
+        {plan.currentPlan !== 'BUSINESS' && (
+          <button
+            onClick={() => navigate('/settings', { state: { tab: 'plans' } })}
+            className="text-[10px] font-bold text-foreground hover:underline"
+          >
+            {t('layout.upgradeNow')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useAuth();
   const { t, i18n } = useTranslation();
+  const { data: plan } = usePlan();
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -222,18 +290,7 @@ export const Layout = () => {
           </div>
         </nav>
 
-        {!isSidebarMinimized && (
-          <div className="p-4 border-t border-border/50">
-            <div className="p-4 bg-muted/50 rounded-2xl">
-              <p className="text-xs font-bold text-foreground mb-1">{t('layout.proPlan')}</p>
-              <p className="text-[10px] text-muted-foreground mb-3">{t('layout.storageUsage')}</p>
-              <div className="w-full h-1 bg-muted rounded-full overflow-hidden mb-4">
-                <div className="w-4/5 h-full bg-primary"></div>
-              </div>
-              <button className="text-[10px] font-bold text-foreground hover:underline">{t('layout.upgradeNow')}</button>
-            </div>
-          </div>
-        )}
+        {!isSidebarMinimized && <SidebarPlanWidget />}
 
         <div className={cn("px-4 pb-4", isSidebarMinimized && "px-3")}>
           <button
@@ -266,7 +323,9 @@ export const Layout = () => {
           t={t}
           i18n={i18n}
           toggleLanguage={toggleLanguage}
+          plan={plan}
         />
+        <PlanWarningBanner />
         <div className="p-8 max-w-7xl mx-auto w-full">
           <Outlet />
         </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Building2,
   Users,
+  TrendingUp,
   PanelLeftClose,
   PanelLeftOpen,
   Sun,
@@ -76,6 +77,7 @@ export default function SuperAdminLayout() {
     if (path === '/super/institutions/new') return t('superAdmin.createInstitution');
     if (path.match(/^\/super\/institutions\/[^/]+$/)) return t('superAdmin.institutionDetail');
     if (path === '/super/users') return t('superAdmin.users');
+    if (path === '/super/upgrade-requests') return t('plan.upgradeRequests');
     return t('superAdmin.institutions');
   })();
 
@@ -101,6 +103,7 @@ export default function SuperAdminLayout() {
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
           <SidebarItem icon={Building2} label={t('superAdmin.institutions')} href="/super/institutions" active={location.pathname.startsWith('/super/institutions')} minimized={isSidebarMinimized} />
           <SidebarItem icon={Users} label={t('superAdmin.users')} href="/super/users" active={location.pathname === '/super/users'} minimized={isSidebarMinimized} />
+          <SidebarItem icon={TrendingUp} label={t('plan.upgradeRequests')} href="/super/upgrade-requests" active={location.pathname === '/super/upgrade-requests'} minimized={isSidebarMinimized} />
         </nav>
 
         <div className={cn("px-4 pb-4", isSidebarMinimized && "px-3")}>
