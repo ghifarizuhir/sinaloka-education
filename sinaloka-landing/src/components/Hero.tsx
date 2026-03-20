@@ -85,7 +85,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="mt-6 text-base lg:text-lg text-accent-200/60 max-w-[440px] leading-relaxed"
+              className="mt-6 text-base lg:text-lg text-accent-200/70 max-w-[440px] leading-relaxed"
             >
               Jadwal, absensi, pembayaran, sampai laporan ke orang tua &mdash;
               semua beres dari satu tempat.

@@ -52,7 +52,7 @@ export function HowItWorks() {
                 <h3 className="font-semibold text-white text-base mb-2">
                   {step.title}
                 </h3>
-                <p className="text-sm text-accent-200/50 leading-relaxed">
+                <p className="text-sm text-accent-200/70 leading-relaxed">
                   {step.desc}
                 </p>
               </div>

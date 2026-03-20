@@ -1,18 +1,18 @@
 import { motion } from "motion/react";
 
 const PARTNERS = [
-  "Bimbel Cerdas Bangsa",
-  "Primagama",
-  "Bimbel Prestasi",
-  "Ganesha Operation",
-  "Bimbel Quantum",
-  "Nurul Fikri",
-  "Bimbel Teknos Genius",
-  "Inten",
-  "Bimbel Alumni",
-  "Bimbel Bintang Pelajar",
-  "SSC Intersolusi",
-  "Bimbel Salemba Group",
+  "Bimbel Cerdas Ilmu",
+  "Bimbel Karya Pintar",
+  "Bimbel Maju Bersama",
+  "Bimbel Tunas Harapan",
+  "Bimbel Cahaya Prestasi",
+  "Bimbel Generasi Unggul",
+  "Bimbel Sinar Edukasi",
+  "Bimbel Rajawali",
+  "Bimbel Prestasi Gemilang",
+  "Bimbel Cipta Ilmu",
+  "Bimbel Lentera Bangsa",
+  "Bimbel Karsa Mandiri",
 ];
 
 function MarqueeRow({
@@ -61,7 +61,7 @@ export function PartnerMarquee() {
       <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-accent-950 to-transparent z-10 pointer-events-none" />
 
       <p className="text-center text-[11px] font-semibold uppercase tracking-[0.25em] text-accent-400/50 mb-6">
-        Official Partner Bimbel di Seluruh Indonesia
+        Dipercaya Bimbel di Seluruh Indonesia
       </p>
 
       <div className="space-y-4">

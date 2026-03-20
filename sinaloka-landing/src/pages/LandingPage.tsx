@@ -14,8 +14,6 @@ import { FloatingWhatsApp } from "../components/FloatingWhatsApp";
 export default function LandingPage() {
   return (
     <div className="min-h-screen overflow-x-hidden relative bg-white">
-      {/* Background grid — starts after hero */}
-      <div className="fixed inset-0 bg-grid opacity-30 pointer-events-none" />
       <Navbar />
       <Hero />
       <PartnerMarquee />

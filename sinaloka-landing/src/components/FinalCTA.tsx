@@ -38,7 +38,7 @@ export function FinalCTA() {
             <br />
             <span className="text-accent-400">tanpa pusing?</span>
           </h2>
-          <p className="mt-6 text-accent-200/50 text-base md:text-lg">
+          <p className="mt-6 text-accent-200/70 text-base md:text-lg">
             150+ bimbel sudah merasakan bedanya. Ceritakan kebutuhan Anda — kami
             bantu dari awal, gratis.
           </p>
@@ -59,7 +59,7 @@ export function FinalCTA() {
             </a>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-accent-300/50">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-accent-300/70">
             <span className="flex items-center gap-1.5">
               <CheckCircle2 size={12} /> Gratis untuk bimbel kecil
             </span>
