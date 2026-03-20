@@ -1293,14 +1293,24 @@
       "addGrade": "Tambah Tingkat Kelas"
     },
     "security": {
-      "securityTitle": "Keamanan & Kontrol Akses",
-      "twoFactorAuth": "Autentikasi Dua Faktor (2FA)",
-      "twoFactorAuthDesc": "Memerlukan kode dari ponsel Anda untuk login",
-      "passwordPolicy": "Kebijakan Kata Sandi",
-      "minChars": "Minimal 8 karakter",
-      "includeNumbers": "Harus menyertakan angka",
-      "includeSpecialChars": "Harus menyertakan karakter khusus",
-      "requirePasswordChange": "Wajibkan perubahan kata sandi setiap 90 hari"
+      "title": "Ubah Password",
+      "subtitle": "Pastikan password baru minimal 8 karakter dengan huruf besar dan angka.",
+      "currentPassword": "Password Saat Ini",
+      "newPassword": "Password Baru",
+      "confirmPassword": "Konfirmasi Password Baru",
+      "updateButton": "Update Password",
+      "forceChangeAlert": "Anda harus mengganti password default sebelum melanjutkan.",
+      "successMessage": "Password berhasil diubah",
+      "successWelcome": "Password berhasil diubah. Selamat datang!",
+      "errorCurrentWrong": "Password saat ini salah",
+      "errorSamePassword": "Password baru harus berbeda dari password saat ini",
+      "errorMismatch": "Password tidak cocok",
+      "validationTitle": "Syarat password:",
+      "validation": {
+        "minLength": "Minimal 8 karakter",
+        "uppercase": "Mengandung huruf besar",
+        "digit": "Mengandung angka"
+      }
     },
     "integrations": {
       "connectedServices": "Layanan Terhubung",
