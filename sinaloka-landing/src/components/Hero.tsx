@@ -1,9 +1,23 @@
+import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "./shared/WhatsAppIcon";
 import { WHATSAPP_URL } from "../lib/constants";
 
 export function Hero() {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 4, y: -1 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: -y * 8, y: x * 6 });
+  };
+
+  const handleMouseLeave = () => setTilt({ x: 4, y: -1 });
+
   return (
     <section className="py-24 lg:py-32 pt-32 lg:pt-40">
       <div className="max-w-6xl mx-auto px-6 lg:px-10">
@@ -67,14 +81,26 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Dashboard mock preview */}
+        {/* Dashboard mock preview — 3D perspective */}
         <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 48, rotateX: 8 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="mt-16 max-w-[960px] mx-auto"
+          style={{ perspective: 1200 }}
         >
-          <div className="bg-white border border-[#E5E5E5] rounded-xl shadow-lg overflow-hidden">
+          <div
+            ref={cardRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className="bg-white border border-[#E5E5E5] rounded-xl overflow-hidden"
+            style={{
+              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+              transformStyle: "preserve-3d",
+              transition: "transform 0.3s ease-out",
+              boxShadow: `0 ${20 + tilt.x * 4}px 60px -15px rgba(0,0,0,0.12), 0 ${10 + tilt.x * 2}px 30px -8px rgba(13,148,136,0.08)`,
+            }}
+          >
             {/* Browser chrome */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-[#F0F0F0] bg-[#FAFAFA]">
               <div className="flex gap-1.5">
