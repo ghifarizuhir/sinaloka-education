@@ -1,35 +1,27 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, CreditCard, GraduationCap, Wallet } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Building2, CreditCard, GraduationCap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSettingsPage } from './useSettingsPage';
-import { useScrollSpy } from './useScrollSpy';
 import { GeneralTab } from './tabs/GeneralTab';
 import { BillingTab } from './tabs/BillingTab';
 import { AcademicTab } from './tabs/AcademicTab';
-import { PaymentGatewayTab } from './tabs/PaymentGatewayTab';
-
-const SECTION_IDS = ['general', 'billing', 'academic', 'payment-gateway'];
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
   const state = useSettingsPage();
-  const activeSection = useScrollSpy(SECTION_IDS);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'general';
 
   const tabs = [
     { id: 'general', label: t('settings.tabs.general'), icon: Building2 },
     { id: 'billing', label: t('settings.tabs.billing'), icon: CreditCard },
     { id: 'academic', label: t('settings.tabs.academic'), icon: GraduationCap },
-    { id: 'payment-gateway', label: t('settings.tabs.paymentGateway'), icon: Wallet },
   ];
-
-  const handleTabClick = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
     <div className="space-y-6">
-      {/* Page header — scrolls away */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight dark:text-zinc-100">
@@ -39,18 +31,17 @@ export const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Sticky horizontal tab bar */}
       <div className="sticky top-16 z-10 bg-white dark:bg-zinc-950 -mx-1 px-1">
-        <nav className="flex gap-7 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto">
+        <nav className="flex gap-2 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto pb-px">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => handleTabClick(tab.id)}
+              onClick={() => setSearchParams({ tab: tab.id })}
               className={cn(
-                'flex items-center gap-2 whitespace-nowrap pb-3 pt-2 text-sm font-medium transition-colors border-b-2 -mb-px',
-                activeSection === tab.id
-                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300',
+                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                activeTab === tab.id
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
               <tab.icon size={16} />
@@ -60,8 +51,7 @@ export const SettingsPage = () => {
         </nav>
       </div>
 
-      {/* All sections rendered — scroll-spy determines active tab */}
-      <section id="general" className="scroll-mt-32">
+      {activeTab === 'general' && (
         <GeneralTab
           t={state.t}
           isLoadingGeneral={state.isLoadingGeneral}
@@ -80,9 +70,9 @@ export const SettingsPage = () => {
           setFormLanguage={state.setFormLanguage}
           handleSaveGeneral={state.handleSaveGeneral}
         />
-      </section>
+      )}
 
-      <section id="billing" className="scroll-mt-32">
+      {activeTab === 'billing' && (
         <BillingTab
           t={state.t}
           isLoadingBilling={state.isLoadingBilling}
@@ -115,9 +105,9 @@ export const SettingsPage = () => {
           handleAddBankAccount={state.handleAddBankAccount}
           handleRemoveBankAccount={state.handleRemoveBankAccount}
         />
-      </section>
+      )}
 
-      <section id="academic" className="scroll-mt-32">
+      {activeTab === 'academic' && (
         <AcademicTab
           t={state.t}
           rooms={state.rooms}
@@ -160,23 +150,7 @@ export const SettingsPage = () => {
           handleToggleWorkingDay={state.handleToggleWorkingDay}
           handleSaveWorkingDays={state.handleSaveWorkingDays}
         />
-      </section>
-
-      <section id="payment-gateway" className="scroll-mt-32">
-        <PaymentGatewayTab
-          t={state.t}
-          isLoadingPaymentGateway={state.isLoadingPaymentGateway}
-          updatePaymentGateway={state.updatePaymentGateway}
-          formServerKey={state.formServerKey}
-          setFormServerKey={state.setFormServerKey}
-          formClientKey={state.formClientKey}
-          setFormClientKey={state.setFormClientKey}
-          formIsSandbox={state.formIsSandbox}
-          setFormIsSandbox={state.setFormIsSandbox}
-          paymentGatewayConfigured={state.paymentGatewayConfigured}
-          handleSavePaymentGateway={state.handleSavePaymentGateway}
-        />
-      </section>
+      )}
     </div>
   );
 };
