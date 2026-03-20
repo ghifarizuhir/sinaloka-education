@@ -161,6 +161,8 @@ export const Classes = () => {
         availableRooms={state.availableRooms}
         toggleScheduleDay={state.toggleScheduleDay}
         handleFormSubmit={state.handleFormSubmit}
+        errors={state.formErrors.errors}
+        clearError={state.formErrors.clearError}
       />
 
       {/* Delete Confirmation Modal */}
