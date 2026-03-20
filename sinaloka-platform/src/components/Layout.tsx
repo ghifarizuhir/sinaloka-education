@@ -27,6 +27,7 @@ import { useAuth } from '@/src/hooks/useAuth';
 import { usePlan } from '../hooks/usePlan';
 import { cn } from '../lib/utils';
 import ImpersonationBanner from './ImpersonationBanner';
+import { PlanWarningBanner } from './PlanWarningBanner';
 
 const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any, label: string, href: string, active: boolean, minimized: boolean }) => (
   <Link
@@ -310,6 +311,7 @@ export const Layout = () => {
           i18n={i18n}
           toggleLanguage={toggleLanguage}
         />
+        <PlanWarningBanner />
         <div className="p-8 max-w-7xl mx-auto w-full">
           <Outlet />
         </div>
