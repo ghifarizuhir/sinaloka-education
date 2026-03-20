@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
-  Card, Button, Input, Label, Skeleton
+  Card, Button, Input, Label, Skeleton, ConfirmChangesModal
 } from '../../../components/UI';
+import type { FieldChange } from '../../../components/UI';
 import {
   Building2, Save
 } from 'lucide-react';
+import { collectChanges, detectScalarChange } from '../../../lib/change-detection';
+import { toast } from 'sonner';
 import type { SettingsPageState } from '../useSettingsPage';
 
 type GeneralTabProps = Pick<SettingsPageState,
@@ -22,6 +25,44 @@ export const GeneralTab = ({
   formTimezone, setFormTimezone, formLanguage, setFormLanguage,
   handleSaveGeneral,
 }: GeneralTabProps) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<FieldChange[]>([]);
+  const initialRef = useRef<Record<string, string> | null>(null);
+
+  if (!isLoadingGeneral && !initialRef.current) {
+    initialRef.current = {
+      name: formName, email: formEmail, phone: formPhone,
+      address: formAddress, timezone: formTimezone, language: formLanguage,
+    };
+  }
+
+  const handleSaveClick = () => {
+    if (!initialRef.current) return;
+    const changes = collectChanges(
+      detectScalarChange('Nama', initialRef.current.name, formName),
+      detectScalarChange('Email', initialRef.current.email, formEmail),
+      detectScalarChange('Telepon', initialRef.current.phone, formPhone),
+      detectScalarChange('Alamat', initialRef.current.address, formAddress),
+      detectScalarChange('Timezone', initialRef.current.timezone, formTimezone),
+      detectScalarChange('Bahasa', initialRef.current.language, formLanguage),
+    );
+    if (changes.length === 0) {
+      toast.info('Tidak ada perubahan');
+      return;
+    }
+    setPendingChanges(changes);
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = () => {
+    handleSaveGeneral();
+    setShowConfirm(false);
+    initialRef.current = {
+      name: formName, email: formEmail, phone: formPhone,
+      address: formAddress, timezone: formTimezone, language: formLanguage,
+    };
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -79,7 +120,7 @@ export const GeneralTab = ({
               </div>
             </div>
             <div className="mt-8 flex justify-end">
-              <Button className="gap-2" onClick={handleSaveGeneral} disabled={updateSettings.isPending}>
+              <Button className="gap-2" onClick={handleSaveClick} disabled={updateSettings.isPending}>
                 <Save size={16} />
                 {updateSettings.isPending ? t('common.saving') : t('common.saveChanges')}
               </Button>
@@ -87,6 +128,14 @@ export const GeneralTab = ({
           </>
         )}
       </Card>
+
+      <ConfirmChangesModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleConfirm}
+        changes={pendingChanges}
+        isLoading={updateSettings.isPending}
+      />
     </div>
   );
 };

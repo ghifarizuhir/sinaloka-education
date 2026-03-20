@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
-  Card, Button, Input, Badge, Skeleton
+  Card, Button, Input, Badge, Skeleton, ConfirmChangesModal
 } from '../../../components/UI';
+import type { FieldChange } from '../../../components/UI';
 import {
   Building2, Save, Trash2,
   Plus, X, Tag
 } from 'lucide-react';
+import { collectChanges, detectArrayChange } from '../../../lib/change-detection';
+import { toast } from 'sonner';
 import type { SettingsPageState } from '../useSettingsPage';
 
 type BillingTabProps = Pick<SettingsPageState,
@@ -27,6 +30,44 @@ export const BillingTab = ({
   newBankHolder, setNewBankHolder,
   handleAddBankAccount, handleRemoveBankAccount,
 }: BillingTabProps) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<FieldChange[]>([]);
+  const initialRef = useRef<{ categories: string[]; bankAccounts: string[] } | null>(null);
+
+  if (!isLoadingBilling && !initialRef.current) {
+    initialRef.current = {
+      categories: [...formExpenseCategories],
+      bankAccounts: formBankAccounts.map(a => `${a.bank_name} - ${a.account_number}`),
+    };
+  }
+
+  const handleSaveClick = () => {
+    if (!initialRef.current) return;
+    const changes = collectChanges(
+      detectArrayChange('Kategori Pengeluaran', initialRef.current.categories, formExpenseCategories),
+      detectArrayChange(
+        'Rekening Bank',
+        initialRef.current.bankAccounts,
+        formBankAccounts.map(a => `${a.bank_name} - ${a.account_number}`),
+      ),
+    );
+    if (changes.length === 0) {
+      toast.info('Tidak ada perubahan');
+      return;
+    }
+    setPendingChanges(changes);
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = () => {
+    handleSaveBilling();
+    setShowConfirm(false);
+    initialRef.current = {
+      categories: [...formExpenseCategories],
+      bankAccounts: formBankAccounts.map(a => `${a.bank_name} - ${a.account_number}`),
+    };
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -121,11 +162,19 @@ export const BillingTab = ({
       </Card>
 
       <div className="flex justify-end">
-        <Button className="gap-2" onClick={handleSaveBilling} disabled={updateBilling.isPending}>
+        <Button className="gap-2" onClick={handleSaveClick} disabled={updateBilling.isPending}>
           <Save size={16} />
           {updateBilling.isPending ? t('common.saving') : t('common.saveChanges')}
         </Button>
       </div>
+
+      <ConfirmChangesModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleConfirm}
+        changes={pendingChanges}
+        isLoading={updateBilling.isPending}
+      />
     </div>
   );
 };

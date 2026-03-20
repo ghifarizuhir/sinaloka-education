@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { CreditCard, Wallet, Save, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { Card, Button, Input, Label, Switch, Badge, Skeleton } from '../../components/UI';
+import { Card, Button, Input, Label, Switch, Badge, Skeleton, ConfirmChangesModal } from '../../components/UI';
+import type { FieldChange } from '../../components/UI';
 import { cn } from '../../lib/utils';
+import { collectChanges, detectScalarChange, detectSecretChange } from '../../lib/change-detection';
 import api from '@/src/lib/api';
 import type { BillingSettings, PaymentGatewaySettings } from '@/src/types/settings';
 
@@ -34,6 +36,14 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
   const [formClientKey, setFormClientKey] = useState('');
   const [formIsSandbox, setFormIsSandbox] = useState(true);
 
+  // Confirm modal state
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<FieldChange[]>([]);
+
+  // Initial state refs for change detection
+  const initialBillingRef = useRef<Record<string, string> | null>(null);
+  const initialPGRef = useRef<Record<string, string> | null>(null);
+
   // Fetch billing settings
   const { data: billing, isLoading: isLoadingBilling } = useQuery({
     queryKey: ['settings', 'billing', institutionId],
@@ -60,13 +70,22 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
   useEffect(() => {
     if (!billing) return;
     const mode = billing.billing_mode;
-    if (mode === 'per_session' || mode === 'package' || mode === 'subscription') {
-      setFormBillingMode(mode);
-    }
+    const resolvedMode: BillingMode =
+      mode === 'per_session' || mode === 'package' || mode === 'subscription' ? mode : 'per_session';
+    setFormBillingMode(resolvedMode);
     setFormCurrency(billing.currency ?? 'IDR');
     setFormInvoicePrefix(billing.invoice_prefix ?? 'INV');
     setFormLatePaymentAutoLock(billing.late_payment_auto_lock ?? false);
     setFormLatePaymentThreshold(billing.late_payment_threshold ?? 7);
+    // Capture initial state after sync
+    initialBillingRef.current = {
+      billing_mode: resolvedMode,
+      currency: billing.currency ?? 'IDR',
+      invoice_prefix: billing.invoice_prefix ?? 'INV',
+      late_payment: billing.late_payment_auto_lock
+        ? `Aktif (${billing.late_payment_threshold} hari)`
+        : 'Nonaktif',
+    };
   }, [billing]);
 
   // Sync fetched payment gateway data into form state
@@ -75,6 +94,10 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
     setFormClientKey(paymentGateway.midtrans_client_key ?? '');
     setFormIsSandbox(paymentGateway.is_sandbox ?? true);
     // Server key is masked — don't pre-fill
+    initialPGRef.current = {
+      client_key: paymentGateway.midtrans_client_key ?? '',
+      is_sandbox: paymentGateway.is_sandbox ? 'Aktif' : 'Nonaktif',
+    };
   }, [paymentGateway]);
 
   // Save mutation — calls both PATCH endpoints
@@ -110,6 +133,45 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
   });
 
   const isLoading = isLoadingBilling || isLoadingPG;
+
+  const handleSaveClick = () => {
+    const changes = collectChanges(
+      initialBillingRef.current ? detectScalarChange('Billing Mode', initialBillingRef.current.billing_mode, formBillingMode) : null,
+      initialBillingRef.current ? detectScalarChange('Currency', initialBillingRef.current.currency, formCurrency) : null,
+      initialBillingRef.current ? detectScalarChange('Invoice Prefix', initialBillingRef.current.invoice_prefix, formInvoicePrefix) : null,
+      initialBillingRef.current ? detectScalarChange(
+        'Late Payment Auto-Lock',
+        initialBillingRef.current.late_payment,
+        formLatePaymentAutoLock ? `Aktif (${formLatePaymentThreshold} hari)` : 'Nonaktif',
+      ) : null,
+      detectSecretChange('Midtrans Server Key', formServerKey),
+      initialPGRef.current ? detectScalarChange('Midtrans Client Key', initialPGRef.current.client_key, formClientKey) : null,
+      initialPGRef.current ? detectScalarChange('Mode Sandbox', initialPGRef.current.is_sandbox, formIsSandbox ? 'Aktif' : 'Nonaktif') : null,
+    );
+    if (changes.length === 0) {
+      toast.info('Tidak ada perubahan');
+      return;
+    }
+    setPendingChanges(changes);
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = () => {
+    initialBillingRef.current = {
+      billing_mode: formBillingMode,
+      currency: formCurrency,
+      invoice_prefix: formInvoicePrefix,
+      late_payment: formLatePaymentAutoLock
+        ? `Aktif (${formLatePaymentThreshold} hari)`
+        : 'Nonaktif',
+    };
+    initialPGRef.current = {
+      client_key: formClientKey,
+      is_sandbox: formIsSandbox ? 'Aktif' : 'Nonaktif',
+    };
+    saveMutation.mutate();
+    setShowConfirm(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -318,13 +380,21 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
       <div className="flex justify-end">
         <Button
           className="gap-2"
-          onClick={() => saveMutation.mutate()}
+          onClick={handleSaveClick}
           disabled={saveMutation.isPending || isLoading}
         >
           <Save size={16} />
           {saveMutation.isPending ? 'Menyimpan...' : 'Simpan'}
         </Button>
       </div>
+
+      <ConfirmChangesModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleConfirm}
+        changes={pendingChanges}
+        isLoading={saveMutation.isPending}
+      />
     </div>
   );
 }

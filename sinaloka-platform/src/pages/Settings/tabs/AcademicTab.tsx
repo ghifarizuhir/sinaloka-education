@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
-  Card, Button, Badge, Label, Input, Modal, ConfirmDialog, Select, EmptyState, Spinner
+  Card, Button, Badge, Label, Input, Modal, ConfirmDialog, Select, EmptyState, Spinner, ConfirmChangesModal
 } from '../../../components/UI';
+import type { FieldChange } from '../../../components/UI';
 import {
   Calendar, Plus, Pencil, Trash2, X, Users, Building2
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { collectChanges, detectArrayChange } from '../../../lib/change-detection';
+import { toast } from 'sonner';
 import type { SettingsPageState } from '../useSettingsPage';
 import type { RoomType, RoomStatus } from '../../../types/settings';
 
@@ -24,6 +27,11 @@ type AcademicTabProps = Pick<SettingsPageState,
   'handleAddGrade' | 'handleRemoveGrade' |
   'handleToggleWorkingDay' | 'handleSaveWorkingDays'
 >;
+
+const DAY_LABELS: Record<string, string> = {
+  '0': 'Minggu', '1': 'Senin', '2': 'Selasa', '3': 'Rabu',
+  '4': 'Kamis', '5': 'Jumat', '6': 'Sabtu',
+};
 
 const DAYS = [
   { num: 1, label: 'Mon' },
@@ -50,6 +58,40 @@ export const AcademicTab = ({
   handleAddGrade, handleRemoveGrade,
   handleToggleWorkingDay, handleSaveWorkingDays,
 }: AcademicTabProps) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<FieldChange[]>([]);
+  const initialRef = useRef<{ workingDays: string[] } | null>(null);
+
+  if (!isLoadingAcademic && !initialRef.current) {
+    initialRef.current = {
+      workingDays: workingDays.map(String),
+    };
+  }
+
+  const formatDays = (days: number[]) => days.map(d => DAY_LABELS[String(d)] || String(d));
+
+  const handleSaveWorkingDaysClick = () => {
+    if (!initialRef.current) return;
+    const initialWorkingDays = initialRef.current.workingDays.map(Number);
+    const changes = collectChanges(
+      detectArrayChange('Hari Kerja', formatDays(initialWorkingDays), formatDays(workingDays)),
+    );
+    if (changes.length === 0) {
+      toast.info('Tidak ada perubahan');
+      return;
+    }
+    setPendingChanges(changes);
+    setShowConfirm(true);
+  };
+
+  const handleConfirmWorkingDays = () => {
+    handleSaveWorkingDays();
+    setShowConfirm(false);
+    initialRef.current = {
+      workingDays: workingDays.map(String),
+    };
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -84,7 +126,7 @@ export const AcademicTab = ({
             </div>
             <div className="flex items-center gap-4">
               <p className="text-[10px] text-muted-foreground italic">{t('settings.academic.workingDaysNote')}</p>
-              <Button variant="outline" size="sm" onClick={handleSaveWorkingDays} disabled={updateAcademic.isPending}>
+              <Button variant="outline" size="sm" onClick={handleSaveWorkingDaysClick} disabled={updateAcademic.isPending}>
                 {updateAcademic.isPending && <Spinner size="sm" className="mr-2" />}
                 {t('settings.academic.saveWorkingDays')}
               </Button>
@@ -340,6 +382,15 @@ export const AcademicTab = ({
         confirmLabel={t('common.delete')}
         cancelLabel={t('settings.academic.keepRoom')}
         variant="danger"
+        isLoading={updateAcademic.isPending}
+      />
+
+      {/* Working Days Confirm Modal */}
+      <ConfirmChangesModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleConfirmWorkingDays}
+        changes={pendingChanges}
         isLoading={updateAcademic.isPending}
       />
     </div>
