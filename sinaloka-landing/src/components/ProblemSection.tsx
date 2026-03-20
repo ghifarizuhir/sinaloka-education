@@ -21,11 +21,11 @@ export function ProblemSection() {
         <div className="grid sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
           {PAIN_POINTS.map((pain, i) => (
             <Reveal key={i} delay={i * 0.07}>
-              <div className="bg-white/[0.04] border border-white/10 rounded-xl px-5 py-4 flex items-start gap-3 hover:bg-white/[0.07] transition-colors">
-                <span className="text-lg leading-none mt-0.5 shrink-0">
+              <div className="group bg-white/[0.04] border border-white/10 rounded-xl px-5 py-4 flex items-start gap-3 hover:bg-white/[0.07] hover:border-white/20 transition-all cursor-default">
+                <span className="text-lg leading-none mt-0.5 shrink-0 group-hover:scale-110 transition-transform">
                   {pain.icon}
                 </span>
-                <span className="text-sm text-white/70 leading-snug font-semibold">
+                <span className="text-sm text-white/70 leading-snug font-semibold group-hover:text-white/90 transition-colors">
                   {pain.text}
                 </span>
               </div>

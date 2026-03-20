@@ -25,7 +25,7 @@ export function FAQ() {
         <div className="max-w-[720px] mx-auto space-y-0 divide-y divide-[#E5E5E5]">
           {FAQ_ITEMS.map((faq, i) => (
             <Reveal key={i} delay={i * 0.05}>
-              <div>
+              <div className={`transition-colors rounded-lg -mx-3 px-3 ${open === i ? "bg-accent-50/50" : "hover:bg-[#F8F8F8]"}`}>
                 <button
                   onClick={() => setOpen(open === i ? null : i)}
                   className="w-full flex items-center justify-between py-5 text-left"
@@ -41,7 +41,7 @@ export function FAQ() {
                     animate={{ rotate: open === i ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <ChevronDown size={18} className="text-[#999] shrink-0" />
+                    <ChevronDown size={18} className={`shrink-0 transition-colors ${open === i ? "text-accent-600" : "text-[#999]"}`} />
                   </motion.div>
                 </button>
                 <AnimatePresence>
@@ -53,7 +53,7 @@ export function FAQ() {
                       transition={{ duration: 0.25, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <p className="pb-5 text-sm text-[#666] leading-relaxed">
+                      <p className="pb-5 pl-3 text-sm text-[#666] leading-relaxed border-l-2 border-accent-300 ml-0.5">
                         {faq.a}
                       </p>
                     </motion.div>

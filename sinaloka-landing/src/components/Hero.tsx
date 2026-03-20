@@ -80,11 +80,21 @@ export function Hero() {
             </a>
             <a
               href="#features"
-              className="text-[#666] hover:text-accent-600 font-medium text-sm border border-[#E5E5E5] px-7 py-3.5 rounded-lg transition-colors"
+              className="text-[#666] hover:text-accent-600 hover:border-accent-200 font-medium text-sm border border-[#E5E5E5] px-7 py-3.5 rounded-lg transition-all"
             >
               Lihat Fitur
             </a>
           </motion.div>
+
+          {/* Micro trust */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mt-6 text-xs text-[#999]"
+          >
+            Dipercaya 150+ bimbel di seluruh Indonesia
+          </motion.p>
         </div>
 
         {/* Dashboard mock preview — 3D perspective */}

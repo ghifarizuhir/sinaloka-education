@@ -16,11 +16,15 @@ export function HowItWorks() {
 
         <div className="grid md:grid-cols-3 gap-6 relative">
           {/* Connecting line (desktop) */}
-          <div className="absolute top-8 left-[16.67%] right-[16.67%] border-t border-dashed border-[#E5E5E5] hidden md:block" />
+          <div className="absolute top-12 left-[16.67%] right-[16.67%] hidden md:flex items-center">
+            <div className="flex-1 border-t-2 border-dashed border-accent-200/50" />
+            <div className="w-2 h-2 rounded-full bg-accent-300/50 mx-1" />
+            <div className="flex-1 border-t-2 border-dashed border-accent-200/50" />
+          </div>
 
           {STEPS.map((step, i) => (
             <Reveal key={step.num} delay={i * 0.12}>
-              <div className="relative bg-white rounded-xl p-8 border border-[#E5E5E5]">
+              <div className="relative bg-white rounded-xl p-8 border border-[#E5E5E5] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 {/* Step number pill */}
                 <div className="w-8 h-8 rounded-full bg-accent-50 text-accent-600 font-bold text-sm flex items-center justify-center mb-4 relative z-10">
                   {step.num}
