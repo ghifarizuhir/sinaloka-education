@@ -13,7 +13,7 @@ export function usePayouts() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await api.get('/tutor/payouts', { params: { limit: '100' } });
+      const res = await api.get('/api/tutor/payouts', { params: { limit: '100' } });
       setData(res.data.data.map(mapPayout));
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Gagal memuat data payout');

@@ -12,7 +12,7 @@ export function useAttendance() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await api.get(`/tutor/schedule/${sessionId}/students`);
+      const res = await api.get(`/api/tutor/schedule/${sessionId}/students`);
       setStudents(res.data.students.map(mapStudent));
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Gagal memuat data siswa');
@@ -29,10 +29,10 @@ export function useAttendance() {
   ) => {
     // Step 1: Submit attendance records
     const payload = mapAttendanceToBackend(sessionId, studentList);
-    await api.post('/tutor/attendance', payload);
+    await api.post('/api/tutor/attendance', payload);
 
     // Step 2: Complete the session
-    await api.patch(`/tutor/schedule/${sessionId}/complete`, {
+    await api.patch(`/api/tutor/schedule/${sessionId}/complete`, {
       topic_covered: topicCovered,
       session_summary: sessionSummary || null,
     });
