@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Lock, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/client';
 import { PasswordInput } from '../components/PasswordInput';
 
 export function ResetPasswordPage() {
@@ -23,7 +23,7 @@ export function ResetPasswordPage() {
       setValidating(false);
       return;
     }
-    axios.get(`/api/auth/reset-password/${token}`)
+    api.get(`/api/auth/reset-password/${token}`)
       .then((res) => {
         setValid(true);
         setEmail(res.data.email);
@@ -49,7 +49,7 @@ export function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      await axios.post('/api/auth/reset-password', { token, password });
+      await api.post('/api/auth/reset-password', { token, password });
       navigate('/login?reset=true');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Gagal mereset password.');
