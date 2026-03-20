@@ -16,9 +16,10 @@ interface InstitutionFormProps {
   institution?: Institution;
 }
 
-type BillingMode = 'per_session' | 'package' | 'subscription';
+type BillingMode = 'manual' | 'per_session' | 'package' | 'subscription';
 
 const BILLING_MODES: { key: BillingMode; label: string; description: string }[] = [
+  { key: 'manual', label: 'Manual', description: 'Tagihan dibuat dan dikelola secara manual' },
   { key: 'per_session', label: 'Per Sesi', description: 'Tagihan dihitung per sesi belajar' },
   { key: 'package', label: 'Paket', description: 'Tagihan berdasarkan paket yang dipilih' },
   { key: 'subscription', label: 'Langganan', description: 'Tagihan berulang secara berkala' },

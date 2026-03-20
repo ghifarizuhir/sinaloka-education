@@ -13,9 +13,10 @@ interface BillingPaymentTabProps {
   institutionId: string;
 }
 
-type BillingMode = 'per_session' | 'package' | 'subscription';
+type BillingMode = 'manual' | 'per_session' | 'package' | 'subscription';
 
 const BILLING_MODES: { key: BillingMode; label: string; description: string }[] = [
+  { key: 'manual', label: 'Manual', description: 'Tagihan dibuat dan dikelola secara manual' },
   { key: 'per_session', label: 'Per Sesi', description: 'Tagihan dihitung per sesi belajar' },
   { key: 'package', label: 'Paket', description: 'Tagihan berdasarkan paket yang dipilih' },
   { key: 'subscription', label: 'Langganan', description: 'Tagihan berulang secara berkala' },
@@ -70,16 +71,17 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
   useEffect(() => {
     if (!billing) return;
     const mode = billing.billing_mode;
-    const resolvedMode: BillingMode =
-      mode === 'per_session' || mode === 'package' || mode === 'subscription' ? mode : 'per_session';
-    setFormBillingMode(resolvedMode);
+    if (mode === 'manual' || mode === 'per_session' || mode === 'package' || mode === 'subscription') {
+      setFormBillingMode(mode);
+    }
+
     setFormCurrency(billing.currency ?? 'IDR');
     setFormInvoicePrefix(billing.invoice_prefix ?? 'INV');
     setFormLatePaymentAutoLock(billing.late_payment_auto_lock ?? false);
     setFormLatePaymentThreshold(billing.late_payment_threshold ?? 7);
     // Capture initial state after sync
     initialBillingRef.current = {
-      billing_mode: resolvedMode,
+      billing_mode: mode,
       currency: billing.currency ?? 'IDR',
       invoice_prefix: billing.invoice_prefix ?? 'INV',
       late_payment: billing.late_payment_auto_lock
