@@ -6,11 +6,15 @@ import {
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { EmailService } from '../email/email.service.js';
 import { CreateParentInviteDto, ParentRegisterDto } from './parent.dto.js';
 
 @Injectable()
 export class ParentInviteService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async createInvite(institutionId: string, dto: CreateParentInviteDto) {
     // Validate all student IDs belong to this institution
@@ -38,6 +42,24 @@ export class ParentInviteService {
         student_ids: dto.student_ids,
         expires_at: expiresAt,
       },
+    });
+
+    // Fetch institution name and student names for the email
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { name: true },
+    });
+
+    const students = await this.prisma.student.findMany({
+      where: { id: { in: dto.student_ids } },
+      select: { name: true },
+    });
+
+    await this.emailService.sendParentInvitation({
+      to: dto.email,
+      institutionName: institution?.name ?? 'Sinaloka',
+      inviteToken: token,
+      studentNames: students.map(s => s.name),
     });
 
     return invite;

@@ -8,6 +8,7 @@ export class EmailService {
   private readonly resend: Resend;
   private readonly from: string;
   private readonly tutorPortalUrl: string;
+  private readonly parentPortalUrl: string;
 
   constructor(private readonly configService: ConfigService) {
     this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY'));
@@ -17,6 +18,9 @@ export class EmailService {
     this.tutorPortalUrl =
       this.configService.get<string>('TUTOR_PORTAL_URL') ||
       'http://localhost:5173';
+    this.parentPortalUrl =
+      this.configService.get<string>('PARENT_PORTAL_URL') ||
+      'http://localhost:5174';
   }
 
   async sendTutorInvitation(params: {
@@ -42,6 +46,35 @@ export class EmailService {
     } catch (error) {
       this.logger.error(
         `Failed to send invitation email to ${params.to}`,
+        error,
+      );
+      return { success: false, error: 'Failed to send email' };
+    }
+  }
+
+  async sendParentInvitation(params: {
+    to: string;
+    institutionName: string;
+    inviteToken: string;
+    studentNames: string[];
+  }): Promise<{ success: boolean; error?: string }> {
+    const inviteUrl = `${this.parentPortalUrl}/register?token=${params.inviteToken}`;
+
+    try {
+      await this.resend.emails.send({
+        from: this.from,
+        to: params.to,
+        subject: `Undangan Portal Orang Tua - ${params.institutionName}`,
+        html: this.buildParentInvitationHtml({
+          institutionName: params.institutionName,
+          inviteUrl,
+          studentNames: params.studentNames,
+        }),
+      });
+      return { success: true };
+    } catch (error) {
+      this.logger.error(
+        `Failed to send parent invitation email to ${params.to}`,
         error,
       );
       return { success: false, error: 'Failed to send email' };
@@ -228,6 +261,56 @@ export class EmailService {
             </td>
           </tr>
 
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+  }
+
+  private buildParentInvitationHtml(params: {
+    institutionName: string;
+    inviteUrl: string;
+    studentNames: string[];
+  }): string {
+    const studentList = params.studentNames.map(n => `<li style="margin-bottom: 4px;">${n}</li>`).join('');
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
+          <tr>
+            <td style="background-color: #18181b; border-radius: 12px 12px 0 0; padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;">${params.institutionName}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #ffffff; padding: 40px;">
+              <p style="font-size: 17px; color: #18181b; line-height: 1.6; margin: 0 0 16px;">Halo,</p>
+              <p style="font-size: 15px; color: #3f3f46; line-height: 1.7; margin: 0 0 8px;">Anda diundang untuk bergabung di <strong>Portal Orang Tua ${params.institutionName}</strong> untuk memantau perkembangan anak Anda:</p>
+              <ul style="font-size: 15px; color: #3f3f46; line-height: 1.7; margin: 0 0 28px; padding-left: 20px;">${studentList}</ul>
+              <p style="font-size: 15px; color: #3f3f46; line-height: 1.7; margin: 0 0 28px;">Melalui portal ini, Anda dapat melihat jadwal, kehadiran, dan pembayaran anak Anda.</p>
+              <div style="text-align: center; margin-bottom: 28px;">
+                <a href="${params.inviteUrl}" style="display: inline-block; background-color: #18181b; color: #ffffff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Daftar Sekarang</a>
+              </div>
+              <p style="font-size: 13px; color: #a1a1aa; line-height: 1.6; text-align: center; margin: 0 0 8px;">Link ini akan kedaluwarsa dalam <strong style="color: #71717a;">72 jam</strong>.</p>
+              <p style="font-size: 13px; color: #a1a1aa; line-height: 1.6; text-align: center; margin: 0;">Jika Anda tidak merasa menerima undangan ini, abaikan email ini.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #fafafa; border-radius: 0 0 12px 12px; padding: 24px 40px; text-align: center; border-top: 1px solid #e4e4e7;">
+              <p style="margin: 0 0 4px; font-size: 13px; color: #71717a;">Dikirim oleh <strong>${params.institutionName}</strong> melalui Sinaloka</p>
+              <p style="margin: 0; font-size: 12px; color: #a1a1aa;">Anda menerima email ini karena diundang sebagai orang tua.</p>
+            </td>
+          </tr>
         </table>
       </td>
     </tr>
