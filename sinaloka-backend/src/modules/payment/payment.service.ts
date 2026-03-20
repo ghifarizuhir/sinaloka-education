@@ -59,13 +59,54 @@ export class PaymentService {
   }
 
   async update(institutionId: string, id: string, dto: UpdatePaymentDto) {
-    await this.findOne(institutionId, id);
-    return this.prisma.payment.update({ where: { id }, data: dto });
+    const payment = await this.findOne(institutionId, id);
+    const updated = await this.prisma.payment.update({ where: { id }, data: dto });
+
+    // Sync enrollment payment_status when payment status changes
+    if (dto.status && dto.status !== payment.status) {
+      await this.syncEnrollmentPaymentStatus(payment.enrollment_id);
+    }
+
+    return updated;
   }
 
   async delete(institutionId: string, id: string) {
     await this.findOne(institutionId, id);
     return this.prisma.payment.delete({ where: { id } });
+  }
+
+  /**
+   * Derive enrollment payment_status from its payments:
+   * - All PAID → PAID
+   * - Any OVERDUE → OVERDUE
+   * - Any PENDING → PENDING
+   * - No payments → NEW
+   */
+  private async syncEnrollmentPaymentStatus(enrollmentId: string) {
+    const payments = await this.prisma.payment.findMany({
+      where: { enrollment_id: enrollmentId },
+      select: { status: true },
+    });
+
+    if (payments.length === 0) return;
+
+    const statuses = payments.map(p => p.status);
+    let derivedStatus: string;
+
+    if (statuses.every(s => s === 'PAID')) {
+      derivedStatus = 'PAID';
+    } else if (statuses.some(s => s === 'OVERDUE')) {
+      derivedStatus = 'OVERDUE';
+    } else if (statuses.some(s => s === 'PENDING')) {
+      derivedStatus = 'PENDING';
+    } else {
+      derivedStatus = 'NEW';
+    }
+
+    await this.prisma.enrollment.update({
+      where: { id: enrollmentId },
+      data: { payment_status: derivedStatus as any },
+    });
   }
 
   async refreshOverdueStatus(institutionId: string): Promise<number> {
@@ -99,6 +140,13 @@ export class PaymentService {
       );
     }
 
+    // Get enrollment IDs before batch update
+    const payments = await this.prisma.payment.findMany({
+      where: { id: { in: dto.payment_ids }, institution_id: institutionId },
+      select: { enrollment_id: true },
+    });
+    const enrollmentIds = [...new Set(payments.map(p => p.enrollment_id))];
+
     const result = await this.prisma.payment.updateMany({
       where: {
         id: { in: dto.payment_ids },
@@ -110,6 +158,11 @@ export class PaymentService {
         method: dto.method,
       },
     });
+
+    // Sync enrollment payment_status for all affected enrollments
+    for (const enrollmentId of enrollmentIds) {
+      await this.syncEnrollmentPaymentStatus(enrollmentId);
+    }
 
     return { updated: result.count };
   }
