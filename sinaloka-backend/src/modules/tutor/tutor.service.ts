@@ -249,16 +249,19 @@ export class TutorService {
     if (institution?.plan_limit_reached_at) {
       const { PLAN_LIMITS } = await import('../../common/constants/plans.js');
       const planConfig = PLAN_LIMITS[institution.plan_type as any];
-      if (planConfig.maxTutors !== null) {
-        const count = await this.prisma.tutor.count({
-          where: { institution_id: institutionId },
+
+      // Check BOTH resources before clearing shared grace period
+      const tutorsBelowLimit = planConfig.maxTutors === null ||
+        (await this.prisma.tutor.count({ where: { institution_id: institutionId } })) < planConfig.maxTutors;
+
+      const studentsBelowLimit = planConfig.maxStudents === null ||
+        (await this.prisma.student.count({ where: { institution_id: institutionId, status: 'ACTIVE' } })) < planConfig.maxStudents;
+
+      if (tutorsBelowLimit && studentsBelowLimit) {
+        await this.prisma.institution.update({
+          where: { id: institutionId },
+          data: { plan_limit_reached_at: null },
         });
-        if (count < planConfig.maxTutors) {
-          await this.prisma.institution.update({
-            where: { id: institutionId },
-            data: { plan_limit_reached_at: null },
-          });
-        }
       }
     }
   }

@@ -113,16 +113,19 @@ export class StudentService {
     if (institution?.plan_limit_reached_at) {
       const { PLAN_LIMITS } = await import('../../common/constants/plans.js');
       const planConfig = PLAN_LIMITS[institution.plan_type as any];
-      if (planConfig.maxStudents !== null) {
-        const count = await this.prisma.student.count({
-          where: { institution_id: institutionId, status: 'ACTIVE' },
+
+      // Check BOTH resources before clearing shared grace period
+      const studentsBelowLimit = planConfig.maxStudents === null ||
+        (await this.prisma.student.count({ where: { institution_id: institutionId, status: 'ACTIVE' } })) < planConfig.maxStudents;
+
+      const tutorsBelowLimit = planConfig.maxTutors === null ||
+        (await this.prisma.tutor.count({ where: { institution_id: institutionId } })) < planConfig.maxTutors;
+
+      if (studentsBelowLimit && tutorsBelowLimit) {
+        await this.prisma.institution.update({
+          where: { id: institutionId },
+          data: { plan_limit_reached_at: null },
         });
-        if (count < planConfig.maxStudents) {
-          await this.prisma.institution.update({
-            where: { id: institutionId },
-            data: { plan_limit_reached_at: null },
-          });
-        }
       }
     }
 
