@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LogIn, Users, Settings, BarChart3, Plus } from 'lucide-react';
+import { LogIn, Users, Settings, BarChart3, Plus, CreditCard } from 'lucide-react';
 import {
   Card,
   Button,
@@ -23,8 +23,9 @@ import {
 import { useAuth } from '@/src/hooks/useAuth';
 import api from '@/src/lib/api';
 import InstitutionForm from './InstitutionForm';
+import BillingPaymentTab from './BillingPaymentTab';
 
-type Tab = 'general' | 'admins' | 'overview';
+type Tab = 'general' | 'billing' | 'admins' | 'overview';
 
 export default function InstitutionDetail() {
   const { t } = useTranslation();
@@ -65,6 +66,11 @@ export default function InstitutionDetail() {
       key: 'general',
       label: t('superAdmin.tabs.general'),
       icon: <Settings size={16} />,
+    },
+    {
+      key: 'billing',
+      label: 'Billing & Payment',
+      icon: <CreditCard size={16} />,
     },
     {
       key: 'admins',
@@ -114,6 +120,7 @@ export default function InstitutionDetail() {
       {activeTab === 'general' && (
         <InstitutionForm institution={institution} />
       )}
+      {activeTab === 'billing' && <BillingPaymentTab institutionId={id!} />}
       {activeTab === 'admins' && <AdminsTab institution={institution} />}
       {activeTab === 'overview' && <OverviewTab institutionId={institution.id} />}
     </div>
