@@ -10,8 +10,14 @@ import { cn } from "../lib/utils";
 interface InstitutionInfo {
   name: string;
   logo_url?: string;
+  slug: string;
   student_enabled: boolean;
   tutor_enabled: boolean;
+}
+
+interface ApiResponse {
+  institution: { name: string; logo_url: string | null; slug: string };
+  registration: { student_enabled: boolean; tutor_enabled: boolean };
 }
 
 type Role = "student" | "tutor";
@@ -171,9 +177,16 @@ export default function RegisterPage() {
     }
 
     api
-      .get<InstitutionInfo>(`/api/register/${slug}`)
+      .get<ApiResponse>(`/api/register/${slug}`)
       .then((res) => {
-        const data = res.data;
+        const { institution: inst, registration: reg } = res.data;
+        const data: InstitutionInfo = {
+          name: inst.name,
+          logo_url: inst.logo_url ?? undefined,
+          slug: inst.slug,
+          student_enabled: reg.student_enabled,
+          tutor_enabled: reg.tutor_enabled,
+        };
         setInstitution(data);
 
         if (!data.student_enabled && !data.tutor_enabled) {
