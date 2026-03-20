@@ -1,3 +1,4 @@
+import React from 'react';
 import { usePlan } from '../hooks/usePlan';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
