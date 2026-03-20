@@ -24,6 +24,7 @@ import {
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
+import { usePlan } from '../hooks/usePlan';
 import { cn } from '../lib/utils';
 import ImpersonationBanner from './ImpersonationBanner';
 
@@ -99,6 +100,59 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
     </div>
   </header>
 );
+
+function SidebarPlanWidget() {
+  const { t } = useTranslation();
+  const { data: plan } = usePlan();
+  const navigate = useNavigate();
+
+  if (!plan) return null;
+
+  const { usage, planConfig } = plan;
+  const studentPercent = planConfig.maxStudents
+    ? Math.round((usage.students.current / planConfig.maxStudents) * 100)
+    : 0;
+
+  const planColors: Record<string, string> = {
+    STARTER: 'text-zinc-500',
+    GROWTH: 'text-blue-500',
+    BUSINESS: 'text-amber-500',
+  };
+
+  return (
+    <div className="p-4 border-t border-border/50">
+      <div className="p-4 bg-muted/50 rounded-2xl">
+        <p className={cn('text-xs font-bold mb-1', planColors[plan.currentPlan])}>
+          {planConfig.label}
+        </p>
+        <p className="text-[10px] text-muted-foreground mb-3">
+          {planConfig.maxStudents
+            ? `${usage.students.current}/${planConfig.maxStudents} ${t('plan.maxStudents').toLowerCase()}`
+            : `${usage.students.current} ${t('plan.maxStudents').toLowerCase()} (${t('plan.unlimited').toLowerCase()})`}
+        </p>
+        {planConfig.maxStudents && (
+          <div className="w-full h-1 bg-muted rounded-full overflow-hidden mb-4">
+            <div
+              className={cn(
+                'h-full rounded-full transition-all',
+                studentPercent >= 100 ? 'bg-red-500' : studentPercent >= 80 ? 'bg-amber-500' : 'bg-primary',
+              )}
+              style={{ width: `${Math.min(studentPercent, 100)}%` }}
+            />
+          </div>
+        )}
+        {plan.currentPlan !== 'BUSINESS' && (
+          <button
+            onClick={() => navigate('/settings', { state: { tab: 'plans' } })}
+            className="text-[10px] font-bold text-foreground hover:underline"
+          >
+            {t('layout.upgradeNow')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export const Layout = () => {
   const location = useLocation();
@@ -222,18 +276,7 @@ export const Layout = () => {
           </div>
         </nav>
 
-        {!isSidebarMinimized && (
-          <div className="p-4 border-t border-border/50">
-            <div className="p-4 bg-muted/50 rounded-2xl">
-              <p className="text-xs font-bold text-foreground mb-1">{t('layout.proPlan')}</p>
-              <p className="text-[10px] text-muted-foreground mb-3">{t('layout.storageUsage')}</p>
-              <div className="w-full h-1 bg-muted rounded-full overflow-hidden mb-4">
-                <div className="w-4/5 h-full bg-primary"></div>
-              </div>
-              <button className="text-[10px] font-bold text-foreground hover:underline">{t('layout.upgradeNow')}</button>
-            </div>
-          </div>
-        )}
+        {!isSidebarMinimized && <SidebarPlanWidget />}
 
         <div className={cn("px-4 pb-4", isSidebarMinimized && "px-3")}>
           <button
