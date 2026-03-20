@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import axios from 'axios';
 import api, { setAccessToken, setRefreshToken, getRefreshToken, clearTokens } from '../api/client';
 import type { ParentProfile } from '../types';
 import { mapProfile } from '../mappers';
@@ -23,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(async () => {
     try {
-      const res = await api.get('/auth/me');
+      const res = await api.get('/api/auth/me');
       setProfile(mapProfile(res.data));
       setIsAuthenticated(true);
     } catch {
@@ -33,14 +32,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await api.post('/auth/login', { email, password });
+    const res = await api.post('/api/auth/login', { email, password });
     setAccessToken(res.data.access_token);
     setRefreshToken(res.data.refresh_token);
     await fetchProfile();
   }, [fetchProfile]);
 
   const register = useCallback(async (token: string, name: string, password: string) => {
-    const res = await api.post('/auth/register/parent', { token, name, password });
+    const res = await api.post('/api/auth/register/parent', { token, name, password });
     setAccessToken(res.data.access_token);
     setRefreshToken(res.data.refresh_token);
     await fetchProfile();
@@ -49,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     const refreshToken = getRefreshToken();
     try {
-      if (refreshToken) await api.post('/auth/logout', { refresh_token: refreshToken });
+      if (refreshToken) await api.post('/api/auth/logout', { refresh_token: refreshToken });
     } catch {
       // Always clear local tokens regardless
     } finally {
@@ -62,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const refreshToken = getRefreshToken();
     if (refreshToken) {
-      axios.post('/api/auth/refresh', { refresh_token: refreshToken })
+      api.post('/api/auth/refresh', { refresh_token: refreshToken })
         .then((res) => {
           setAccessToken(res.data.access_token);
           setRefreshToken(res.data.refresh_token);

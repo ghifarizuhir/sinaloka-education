@@ -23,7 +23,7 @@ export function useChildDetail(studentId: string | null) {
     if (!studentId) return;
     setIsLoading(true);
     try {
-      const res = await api.get(`/parent/children/${studentId}/attendance`, { params: { limit: 50 } });
+      const res = await api.get(`/api/parent/children/${studentId}/attendance`, { params: { limit: 50 } });
       setAttendance(res.data.data.map(mapAttendance));
       setAttendanceSummary(res.data.summary);
     } catch { /* silently fail */ }
@@ -34,7 +34,7 @@ export function useChildDetail(studentId: string | null) {
     if (!studentId) return;
     setIsLoading(true);
     try {
-      const res = await api.get(`/parent/children/${studentId}/sessions`, { params: { limit: 50 } });
+      const res = await api.get(`/api/parent/children/${studentId}/sessions`, { params: { limit: 50 } });
       setSessions(res.data.data.map(mapSession));
     } catch { /* silently fail */ }
     finally { setIsLoading(false); }
@@ -44,7 +44,7 @@ export function useChildDetail(studentId: string | null) {
     if (!studentId) return;
     setIsLoading(true);
     try {
-      const res = await api.get(`/parent/children/${studentId}/payments`, { params: { limit: 50 } });
+      const res = await api.get(`/api/parent/children/${studentId}/payments`, { params: { limit: 50 } });
       const gatewayConfigured = res.data.gateway_configured ?? false;
       setPayments(res.data.data.map((p: any) => ({ ...mapPayment(p), gateway_configured: gatewayConfigured })));
     } catch { /* silently fail */ }
@@ -55,7 +55,7 @@ export function useChildDetail(studentId: string | null) {
     if (!studentId) return;
     setIsLoading(true);
     try {
-      const res = await api.get(`/parent/children/${studentId}/enrollments`);
+      const res = await api.get(`/api/parent/children/${studentId}/enrollments`);
       setEnrollments(res.data.map(mapEnrollment));
     } catch { /* silently fail */ }
     finally { setIsLoading(false); }
