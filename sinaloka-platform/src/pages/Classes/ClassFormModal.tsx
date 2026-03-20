@@ -181,7 +181,7 @@ export const ClassFormModal = ({
               <button
                 key={day}
                 type="button"
-                onClick={() => toggleScheduleDay(day)}
+                onClick={() => { toggleScheduleDay(day); clearError('schedules'); }}
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-xs font-bold border transition-all',
                   formSchedules.some(s => s.day === day)

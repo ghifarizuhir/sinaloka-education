@@ -174,7 +174,7 @@ export function useClassesPage() {
       [!formTutorId, 'tutor_id', t('classes.validation.tutorRequired')],
       [formSchedules.length === 0, 'schedules', t('classes.validation.scheduleDayRequired')],
       [!formCapacity || Number(formCapacity) <= 0 || isNaN(Number(formCapacity)), 'capacity', t('classes.validation.capacityRequired')],
-      [isNaN(Number(formFee)) || Number(formFee) < 0, 'fee', t('classes.validation.feeRequired')],
+      [formFee === '' || isNaN(Number(formFee)) || Number(formFee) < 0, 'fee', t('classes.validation.feeRequired')],
       [formTutorFeeMode === 'FIXED_PER_SESSION' && (formTutorFee === '' || isNaN(Number(formTutorFee))), 'tutor_fee', t('classes.validation.tutorFeeRequired')],
       [formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' && (!formTutorFeePerStudent || Number(formTutorFeePerStudent) <= 0 || isNaN(Number(formTutorFeePerStudent))), 'tutor_fee_per_student', t('classes.validation.perStudentFeeRequired')],
     ]);
