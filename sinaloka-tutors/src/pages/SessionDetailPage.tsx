@@ -30,7 +30,7 @@ export function SessionDetailPage({ session, onClose }: SessionDetailPageProps) 
 
   useEffect(() => {
     setLoading(true);
-    api.get(`/tutor/schedule/${session.id}/students`)
+    api.get(`/api/tutor/schedule/${session.id}/students`)
       .then((res) => setStudents(res.data.students.map(mapStudent)))
       .catch(() => {})
       .finally(() => setLoading(false));

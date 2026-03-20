@@ -18,7 +18,7 @@ export function useSchedule(initialFilter?: ScheduleFilter) {
     try {
       const params: Record<string, string> = { limit: '100' };
       if (activeFilter) params.status = activeFilter;
-      const res = await api.get('/tutor/schedule', { params });
+      const res = await api.get('/api/tutor/schedule', { params });
       setData(res.data.data.map(mapSession));
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Gagal memuat jadwal');
@@ -37,7 +37,7 @@ export function useSchedule(initialFilter?: ScheduleFilter) {
       prev.map((s) => (s.id === id ? { ...s, status: 'cancelled' as const } : s)),
     );
     try {
-      await api.patch(`/tutor/schedule/${id}/cancel`);
+      await api.patch(`/api/tutor/schedule/${id}/cancel`);
     } catch (err: any) {
       // Revert
       await fetchSchedule();
@@ -49,7 +49,7 @@ export function useSchedule(initialFilter?: ScheduleFilter) {
     id: string,
     dto: { proposed_date: string; proposed_start_time: string; proposed_end_time: string; reschedule_reason: string },
   ) => {
-    await api.patch(`/tutor/schedule/${id}/request-reschedule`, dto);
+    await api.patch(`/api/tutor/schedule/${id}/request-reschedule`, dto);
     await fetchSchedule();
   }, [fetchSchedule]);
 

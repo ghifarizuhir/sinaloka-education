@@ -16,7 +16,7 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.get('/tutor/profile')
+    api.get('/api/tutor/profile')
       .then((res) => {
         setBankName(res.data.bank_name ?? '');
         setBankAccountNumber(res.data.bank_account_number ?? '');
@@ -36,7 +36,7 @@ export function ProfileEditPage({ onSaved, onClose }: ProfileEditPageProps) {
     }
 
     try {
-      await api.patch('/tutor/profile', {
+      await api.patch('/api/tutor/profile', {
         bank_name: bankName,
         bank_account_number: bankAccountNumber,
         bank_account_holder: bankAccountHolder,
