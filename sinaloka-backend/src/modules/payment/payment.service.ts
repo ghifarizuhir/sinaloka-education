@@ -69,11 +69,15 @@ export class PaymentService {
   }
 
   async refreshOverdueStatus(institutionId: string): Promise<number> {
+    // Compare against start of today (date-only) so payments due today are NOT overdue
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const result = await this.prisma.payment.updateMany({
       where: {
         institution_id: institutionId,
         status: 'PENDING',
-        due_date: { lt: new Date() },
+        due_date: { lt: today },
       },
       data: { status: 'OVERDUE' },
     });
