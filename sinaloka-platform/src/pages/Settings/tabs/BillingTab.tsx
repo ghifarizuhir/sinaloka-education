@@ -56,7 +56,7 @@ export const BillingTab = ({
               <Label className="text-zinc-400 uppercase tracking-widest text-[10px]">{t('settings.billing.billingMode')}</Label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { id: 'pay-as-you-go', label: t('settings.billing.payAsYouGo'), desc: t('settings.billing.payAsYouGoDesc') },
+                  { id: 'per_session', label: t('settings.billing.payAsYouGo'), desc: t('settings.billing.payAsYouGoDesc') },
                   { id: 'package', label: t('settings.billing.packagePrepaid'), desc: t('settings.billing.packagePrepaidDesc') },
                   { id: 'subscription', label: t('settings.billing.subscription'), desc: t('settings.billing.subscriptionDesc') },
                 ].map((mode) => (
