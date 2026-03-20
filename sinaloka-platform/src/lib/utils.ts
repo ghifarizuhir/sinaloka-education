@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import api from './api';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,19 +25,19 @@ export function formatCurrency(amount: number, lang: string = 'id'): string {
 }
 
 /**
- * Download a file from an authenticated API endpoint.
- * Fetches the file as a blob via the API client (with JWT) and triggers a browser download.
+ * Build a public URL for an uploaded file.
+ * File serve endpoint is public — no auth required.
  */
-export async function downloadFile(path: string, filename: string) {
-  const response = await api.get(`/api/uploads/${path}`, { responseType: 'blob' });
-  const url = URL.createObjectURL(response.data);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+export function getFileUrl(path: string): string {
+  const base = import.meta.env.VITE_API_URL ?? '';
+  return `${base}/api/uploads/${path}`;
+}
+
+/**
+ * Open a file URL in a new tab (for PDFs, images, etc).
+ */
+export function openFile(path: string) {
+  window.open(getFileUrl(path), '_blank');
 }
 
 export function formatCurrencyShort(amount: number, lang: string = 'id'): string {

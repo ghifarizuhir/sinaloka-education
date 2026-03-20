@@ -4,7 +4,6 @@ import {
   Post,
   Param,
   Res,
-  ForbiddenException,
   BadRequestException,
   UseInterceptors,
   UploadedFile,
@@ -13,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
+import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { UploadService } from './upload.service.js';
@@ -47,20 +47,14 @@ export class UploadController {
     return { url };
   }
 
+  @Public()
   @Get(':institutionId/:type/:filename')
   serveFile(
     @Param('institutionId') institutionId: string,
     @Param('type') type: string,
     @Param('filename') filename: string,
-    @CurrentUser() user: JwtPayload,
     @Res() res: Response,
   ) {
-    if (
-      user.role !== Role.SUPER_ADMIN &&
-      user.institutionId !== institutionId
-    ) {
-      throw new ForbiddenException('Access denied');
-    }
     const abs = this.uploadService.getFilePath(institutionId, type, filename);
     res.sendFile(abs);
   }
