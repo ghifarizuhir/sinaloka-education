@@ -16,6 +16,7 @@ export interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
+  mustChangePassword: boolean;
   impersonatedInstitution: { id: string; name: string } | null;
   enterInstitution: (id: string, name: string) => void;
   exitInstitution: () => void;
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isAuthenticated = !!user;
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   const [impersonatedInstitution, setImpersonatedInstitution] = useState<{
     id: string;
@@ -54,7 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem('access_token');
     if (!token) { setIsLoading(false); return; }
     authService.getMe()
-      .then((profile) => { setUser(profile); applyInstitutionLanguage(profile); })
+      .then((profile) => {
+        setUser(profile);
+        setMustChangePassword(profile.must_change_password);
+        applyInstitutionLanguage(profile);
+      })
       .catch(() => { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); })
       .finally(() => setIsLoading(false));
   }, []);
@@ -65,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('refresh_token', tokens.refresh_token);
     const profile = await authService.getMe();
     setUser(profile);
+    setMustChangePassword(profile.must_change_password);
     applyInstitutionLanguage(profile);
     return profile;
   }, []);
@@ -76,11 +83,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('refresh_token');
     sessionStorage.removeItem('impersonatedInstitution');
     setImpersonatedInstitution(null);
+    setMustChangePassword(false);
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout, impersonatedInstitution, enterInstitution, exitInstitution, isImpersonating }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout, mustChangePassword, impersonatedInstitution, enterInstitution, exitInstitution, isImpersonating }}>
       {children}
     </AuthContext.Provider>
   );
