@@ -1,5 +1,6 @@
 import { Reveal } from "./shared/Reveal";
 import { METRICS } from "../lib/constants";
+import { cn } from "../lib/utils";
 
 export function OutcomeMetrics() {
   return (
@@ -19,39 +20,28 @@ export function OutcomeMetrics() {
           {METRICS.map((m, i) => (
             <Reveal key={m.label} delay={i * 0.08}>
               <div
-                className={`rounded-xl p-6 h-full ${
-                  i === 0
-                    ? "bg-accent-600 text-white"
-                    : "bg-white border border-[#E5E5E5]"
-                }`}
+                className={cn(
+                  "rounded-xl p-6 h-full",
+                  i === 0 ? "bg-accent-600 text-white" : "bg-white border border-[#E5E5E5]"
+                )}
               >
                 <div
-                  className={`text-4xl font-extrabold leading-none ${
-                    i === 0 ? "text-white" : "text-[#111]"
-                  }`}
+                  className={cn("text-4xl font-extrabold leading-none", i === 0 ? "text-white" : "text-[#111]")}
                 >
                   {m.number}
                   {m.unit && (
-                    <span
-                      className={`text-lg font-normal ml-1 ${
-                        i === 0 ? "text-accent-200" : "text-[#999]"
-                      }`}
-                    >
+                    <span className={cn("text-lg font-normal ml-1", i === 0 ? "text-accent-200" : "text-[#999]")}>
                       {m.unit}
                     </span>
                   )}
                 </div>
                 <div
-                  className={`mt-3 text-sm font-medium ${
-                    i === 0 ? "text-accent-100" : "text-[#333]"
-                  }`}
+                  className={cn("mt-3 text-sm font-medium", i === 0 ? "text-accent-100" : "text-[#333]")}
                 >
                   {m.label}
                 </div>
                 <div
-                  className={`mt-2 text-xs ${
-                    i === 0 ? "text-accent-200/60" : "text-[#999]"
-                  }`}
+                  className={cn("mt-2 text-xs", i === 0 ? "text-accent-200/60" : "text-[#999]")}
                 >
                   {m.note}
                 </div>

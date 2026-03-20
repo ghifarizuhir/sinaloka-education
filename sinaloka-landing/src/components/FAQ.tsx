@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { Reveal } from "./shared/Reveal";
 import { FAQ_ITEMS } from "../lib/constants";
+import { cn } from "../lib/utils";
 
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
@@ -25,15 +26,13 @@ export function FAQ() {
         <div className="max-w-[720px] mx-auto space-y-0 divide-y divide-[#E5E5E5]">
           {FAQ_ITEMS.map((faq, i) => (
             <Reveal key={i} delay={i * 0.05}>
-              <div className={`transition-colors rounded-lg -mx-3 px-3 ${open === i ? "bg-accent-50/50" : "hover:bg-[#F8F8F8]"}`}>
+              <div className={cn("transition-colors rounded-lg -mx-3 px-3", open === i ? "bg-accent-50/50" : "hover:bg-[#F8F8F8]")}>
                 <button
                   onClick={() => setOpen(open === i ? null : i)}
                   className="w-full flex items-center justify-between py-5 text-left"
                 >
                   <span
-                    className={`font-semibold text-base pr-4 transition-colors ${
-                      open === i ? "text-accent-600" : "text-[#111]"
-                    }`}
+                    className={cn("font-semibold text-base pr-4 transition-colors", open === i ? "text-accent-600" : "text-[#111]")}
                   >
                     {faq.q}
                   </span>
@@ -41,7 +40,7 @@ export function FAQ() {
                     animate={{ rotate: open === i ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <ChevronDown size={18} className={`shrink-0 transition-colors ${open === i ? "text-accent-600" : "text-[#999]"}`} />
+                    <ChevronDown size={18} className={cn("shrink-0 transition-colors", open === i ? "text-accent-600" : "text-[#999]")} />
                   </motion.div>
                 </button>
                 <AnimatePresence>

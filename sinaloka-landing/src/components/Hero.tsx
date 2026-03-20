@@ -20,8 +20,7 @@ export function Hero() {
 
   return (
     <section className="py-24 lg:py-32 pt-32 lg:pt-40 relative overflow-hidden">
-      {/* Background ornaments */}
-      <div className="absolute inset-0 bg-grid opacity-40 pointer-events-none" />
+      {/* Background ornaments — no bg-grid here, global one in App.tsx covers it */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-accent-100/30 blur-[120px] pointer-events-none" />
       <div className="absolute top-40 -left-40 w-[400px] h-[400px] rounded-full bg-accent-200/20 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-20 -right-32 w-[350px] h-[350px] rounded-full bg-accent-100/25 blur-[80px] pointer-events-none" />

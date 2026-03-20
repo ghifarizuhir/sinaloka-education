@@ -2,6 +2,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Reveal } from "./shared/Reveal";
 import { WhatsAppIcon } from "./shared/WhatsAppIcon";
 import { WHATSAPP_URL, PRICING_TIERS } from "../lib/constants";
+import { cn } from "../lib/utils";
 
 export function Pricing() {
   return (
@@ -24,11 +25,12 @@ export function Pricing() {
           {PRICING_TIERS.map((plan, i) => (
             <Reveal key={plan.name} delay={i * 0.1}>
               <div
-                className={`rounded-xl p-8 flex flex-col transition-all ${
+                className={cn(
+                  "rounded-xl p-8 flex flex-col transition-all",
                   plan.highlighted
                     ? "border-2 border-accent-600 shadow-lg bg-white"
                     : "bg-white border border-[#E5E5E5]"
-                }`}
+                )}
               >
                 {plan.highlighted && (
                   <div className="inline-flex self-start bg-accent-50 text-accent-600 text-[10px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-full mb-4">

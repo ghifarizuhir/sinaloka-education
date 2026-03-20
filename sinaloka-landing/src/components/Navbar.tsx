@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { WhatsAppIcon } from "./shared/WhatsAppIcon";
 import { WHATSAPP_URL, NAV_LINKS } from "../lib/constants";
+import { cn } from "../lib/utils";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -16,11 +17,10 @@ export function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/85 backdrop-blur-md border-b border-[#E5E5E5]"
-          : "bg-transparent"
-      }`}
+      className={cn(
+        "fixed top-0 inset-x-0 z-50 transition-all duration-300",
+        scrolled ? "bg-white/85 backdrop-blur-md border-b border-[#E5E5E5]" : "bg-transparent"
+      )}
     >
       <div className="max-w-6xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <a href="#" className="text-xl font-bold text-[#111]">

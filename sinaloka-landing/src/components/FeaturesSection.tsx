@@ -1,5 +1,6 @@
 import { Reveal } from "./shared/Reveal";
 import { FEATURES } from "../lib/constants";
+import { cn } from "../lib/utils";
 
 export function FeaturesSection() {
   return (
@@ -23,18 +24,18 @@ export function FeaturesSection() {
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 0.06}>
               <div
-                className={`rounded-xl p-8 h-full transition-all duration-300 ${
+                className={cn(
+                  "rounded-xl p-8 h-full transition-all duration-300",
                   f.highlighted
                     ? "bg-accent-600 text-white"
                     : "bg-[#F8F8F8] border border-[#E5E5E5] hover:shadow-md hover:-translate-y-0.5"
-                }`}
+                )}
               >
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${
-                    f.highlighted
-                      ? "bg-white/15"
-                      : "bg-accent-50 border border-accent-100"
-                  }`}
+                  className={cn(
+                    "w-10 h-10 rounded-lg flex items-center justify-center mb-4",
+                    f.highlighted ? "bg-white/15" : "bg-accent-50 border border-accent-100"
+                  )}
                 >
                   <f.icon
                     size={20}
@@ -42,16 +43,12 @@ export function FeaturesSection() {
                   />
                 </div>
                 <h3
-                  className={`font-semibold text-lg mb-2 ${
-                    f.highlighted ? "text-white" : "text-[#111]"
-                  }`}
+                  className={cn("font-semibold text-lg mb-2", f.highlighted ? "text-white" : "text-[#111]")}
                 >
                   {f.title}
                 </h3>
                 <p
-                  className={`text-sm leading-relaxed ${
-                    f.highlighted ? "text-accent-100" : "text-[#666]"
-                  }`}
+                  className={cn("text-sm leading-relaxed", f.highlighted ? "text-accent-100" : "text-[#666]")}
                 >
                   {f.desc}
                 </p>
