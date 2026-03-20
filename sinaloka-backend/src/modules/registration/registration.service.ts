@@ -287,13 +287,9 @@ export class RegistrationService {
         );
       }
 
-      await this.invitationService.invite(institutionId, {
-        email: registration.email!,
-        name: registration.name,
-        subject_ids: [],
-        experience_years: registration.experience_years ?? 0,
-      });
-
+      // Mark as approved FIRST (in transaction), then send invite.
+      // If invite fails, the registration stays approved but no tutor is created — admin can re-trigger manually.
+      // This prevents the inverse problem: invite sent but registration stuck as PENDING.
       await this.prisma.registration.update({
         where: { id },
         data: {
@@ -301,6 +297,16 @@ export class RegistrationService {
           reviewed_at: new Date(),
           reviewed_by: userId,
         },
+      });
+
+      // subject_ids empty — admin maps subjects manually after tutor accepts invite.
+      // Type assertion needed: InviteTutorDto requires min(1) subjects via Zod (for normal invite flow),
+      // but registration approve intentionally skips subjects.
+      await this.invitationService.invite(institutionId, {
+        email: registration.email!,
+        name: registration.name,
+        subject_ids: [] as unknown as [string, ...string[]],
+        experience_years: registration.experience_years ?? 0,
       });
     }
 
