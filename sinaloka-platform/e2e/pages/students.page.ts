@@ -58,9 +58,11 @@ export class StudentsPage {
   }
 
   async deleteStudent(name: string) {
-    this.page.on('dialog', (dialog) => dialog.accept());
     await this.openRowMenu(name);
     await this.page.getByRole('button', { name: /delete/i }).click();
+    // Custom confirm modal: type "delete" then click confirm button
+    await this.page.locator('#delete-confirm').fill('delete');
+    await this.page.getByRole('button', { name: /delete student/i }).click();
   }
 
   async search(query: string) { await this.searchInput.fill(query); }

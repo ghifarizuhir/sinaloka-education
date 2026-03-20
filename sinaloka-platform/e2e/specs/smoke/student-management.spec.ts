@@ -11,7 +11,7 @@ test.describe('Student Management', () => {
     await studentsPage.createStudent({
       name: 'New Test Student',
       email: 'newstudent@example.com',
-      grade: '10th Grade',
+      grade: 'Kelas 10',
       parent_name: 'Test Parent',
       parent_phone: '+62812000000',
     });
