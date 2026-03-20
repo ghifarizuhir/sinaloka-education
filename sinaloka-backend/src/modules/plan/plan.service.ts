@@ -43,7 +43,12 @@ export class PlanService {
       }),
     ]);
 
-    let gracePeriod = null;
+    let gracePeriod: {
+      startedAt: string;
+      endsAt: string;
+      daysRemaining: number;
+      expired: boolean;
+    } | null = null;
     if (institution.plan_limit_reached_at) {
       const end = new Date(institution.plan_limit_reached_at);
       end.setDate(end.getDate() + planConfig.gracePeriodDays);

@@ -15,6 +15,7 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+import { PlanLimit } from '../../common/decorators/plan.decorator.js';
 import { TutorService } from './tutor.service.js';
 import {
   CreateTutorSchema,
@@ -38,6 +39,7 @@ export class TutorController {
     private readonly invitationService: InvitationService,
   ) {}
 
+  @PlanLimit('tutors')
   @Post()
   async create(
     @CurrentUser() user: JwtPayload,

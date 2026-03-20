@@ -21,6 +21,7 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+import { PlanLimit } from '../../common/decorators/plan.decorator.js';
 import { StudentService } from './student.service.js';
 import {
   CreateStudentSchema,
@@ -38,6 +39,7 @@ import type {
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
+  @PlanLimit('students')
   @Post()
   async create(
     @CurrentUser() user: JwtPayload,
@@ -54,6 +56,7 @@ export class StudentController {
     return this.studentService.findAll(user.institutionId!, query);
   }
 
+  @PlanLimit('students')
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
   async importCsv(
