@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { PLAN_LIMITS } from '../../common/constants/plans.js';
-import type { PlanType } from '../../../generated/prisma/client.js';
+import type {
+  PlanType,
+  UpgradeRequestStatus,
+} from '../../../generated/prisma/client.js';
 import type {
   UpgradeRequestDto,
   ReviewUpgradeRequestDto,
@@ -32,7 +35,7 @@ export class PlanService {
       throw new NotFoundException('Institution not found');
     }
 
-    const planConfig = PLAN_LIMITS[institution.plan_type as PlanType];
+    const planConfig = PLAN_LIMITS[institution.plan_type];
 
     const [studentCount, tutorCount] = await Promise.all([
       this.prisma.student.count({
@@ -87,7 +90,7 @@ export class PlanService {
       throw new NotFoundException('Institution not found');
     }
 
-    const currentOrder = PLAN_LIMITS[institution.plan_type as PlanType].order;
+    const currentOrder = PLAN_LIMITS[institution.plan_type].order;
     const requestedOrder = PLAN_LIMITS[dto.requested_plan as PlanType].order;
 
     if (requestedOrder <= currentOrder) {
@@ -104,9 +107,7 @@ export class PlanService {
     });
 
     if (existingPending) {
-      throw new ConflictException(
-        'You already have a pending upgrade request',
-      );
+      throw new ConflictException('You already have a pending upgrade request');
     }
 
     return this.prisma.upgradeRequest.create({
@@ -120,7 +121,9 @@ export class PlanService {
   }
 
   async getUpgradeRequests(query: UpgradeRequestQueryDto) {
-    const where = query.status ? { status: query.status as any } : {};
+    const where = query.status
+      ? { status: query.status as UpgradeRequestStatus }
+      : {};
     const skip = (query.page - 1) * query.limit;
 
     const [data, total] = await Promise.all([

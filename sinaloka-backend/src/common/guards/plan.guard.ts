@@ -6,11 +6,26 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { PLAN_FEATURE_KEY, PLAN_LIMIT_KEY } from '../decorators/plan.decorator.js';
+import {
+  PLAN_FEATURE_KEY,
+  PLAN_LIMIT_KEY,
+} from '../decorators/plan.decorator.js';
 import { PLAN_LIMITS } from '../constants/plans.js';
 import type { PlanFeatureKey, PlanLimitResource } from '../constants/plans.js';
 import type { JwtPayload } from '../decorators/current-user.decorator.js';
 import type { PlanType } from '../../../generated/prisma/client.js';
+
+interface PlanGuardRequest {
+  user: JwtPayload;
+  _planWarning?: {
+    type: string;
+    resource: string;
+    current: number;
+    limit: number;
+    gracePeriodEnds: string;
+    message: string;
+  };
+}
 
 @Injectable()
 export class PlanGuard implements CanActivate {
@@ -33,7 +48,7 @@ export class PlanGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<PlanGuardRequest>();
     const user: JwtPayload = request.user;
 
     if (!user?.institutionId) {
@@ -52,7 +67,7 @@ export class PlanGuard implements CanActivate {
       return true;
     }
 
-    const planConfig = PLAN_LIMITS[institution.plan_type as PlanType];
+    const planConfig = PLAN_LIMITS[institution.plan_type];
 
     if (featureKey) {
       if (!planConfig.features[featureKey]) {
@@ -65,7 +80,7 @@ export class PlanGuard implements CanActivate {
 
     if (limitResource) {
       await this.enforcePlanLimit(
-        institution.plan_type as PlanType,
+        institution.plan_type,
         institution.plan_limit_reached_at,
         user.institutionId,
         limitResource,
@@ -83,7 +98,7 @@ export class PlanGuard implements CanActivate {
     institutionId: string,
     resource: PlanLimitResource,
     planConfig: (typeof PLAN_LIMITS)[PlanType],
-    request: any,
+    request: PlanGuardRequest,
   ) {
     const maxLimit =
       resource === 'students' ? planConfig.maxStudents : planConfig.maxTutors;

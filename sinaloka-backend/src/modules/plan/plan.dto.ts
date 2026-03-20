@@ -12,13 +12,17 @@ export const ReviewUpgradeRequestSchema = z.object({
   review_notes: z.string().max(500).optional(),
 });
 
-export type ReviewUpgradeRequestDto = z.infer<typeof ReviewUpgradeRequestSchema>;
+export type ReviewUpgradeRequestDto = z.infer<
+  typeof ReviewUpgradeRequestSchema
+>;
 
 export const UpdateInstitutionPlanSchema = z.object({
   plan_type: z.enum(['STARTER', 'GROWTH', 'BUSINESS']),
 });
 
-export type UpdateInstitutionPlanDto = z.infer<typeof UpdateInstitutionPlanSchema>;
+export type UpdateInstitutionPlanDto = z.infer<
+  typeof UpdateInstitutionPlanSchema
+>;
 
 export const UpgradeRequestQuerySchema = z.object({
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED']).optional(),
