@@ -27,7 +27,9 @@ export function PlanWarningBanner() {
 
   if (!isApproaching && !isAtLimit) return null;
 
-  const resource = studentPercent >= tutorPercent ? 'murid' : 'tutor';
+  const resource = studentPercent >= tutorPercent
+    ? t('plan.maxStudents').toLowerCase()
+    : t('plan.maxTutors').toLowerCase();
   const percent = Math.round(Math.max(studentPercent, tutorPercent));
 
   let message: string;
