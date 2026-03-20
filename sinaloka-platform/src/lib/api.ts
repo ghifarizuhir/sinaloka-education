@@ -41,7 +41,16 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Plan warning interceptor
+    if (response.data?._warning) {
+      const warning = response.data._warning;
+      window.dispatchEvent(
+        new CustomEvent('plan-warning', { detail: warning }),
+      );
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
