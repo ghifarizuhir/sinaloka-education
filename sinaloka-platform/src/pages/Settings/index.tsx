@@ -77,16 +77,6 @@ export const SettingsPage = () => {
           t={state.t}
           isLoadingBilling={state.isLoadingBilling}
           updateBilling={state.updateBilling}
-          formBillingMode={state.formBillingMode}
-          setFormBillingMode={state.setFormBillingMode}
-          formCurrency={state.formCurrency}
-          setFormCurrency={state.setFormCurrency}
-          formInvoicePrefix={state.formInvoicePrefix}
-          setFormInvoicePrefix={state.setFormInvoicePrefix}
-          formLatePaymentAutoLock={state.formLatePaymentAutoLock}
-          setFormLatePaymentAutoLock={state.setFormLatePaymentAutoLock}
-          formLatePaymentThreshold={state.formLatePaymentThreshold}
-          setFormLatePaymentThreshold={state.setFormLatePaymentThreshold}
           formExpenseCategories={state.formExpenseCategories}
           newCategoryInput={state.newCategoryInput}
           setNewCategoryInput={state.setNewCategoryInput}
