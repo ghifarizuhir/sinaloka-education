@@ -112,7 +112,9 @@ function LoadingSkeleton() {
 
 // ─── Page header ──────────────────────────────────────────────────────────────
 
-function PageHeader({ institution }: { institution: InstitutionInfo }) {
+function PageHeader({ institution }: { institution: InstitutionInfo | null }) {
+  if (!institution) return null;
+
   return (
     <div className="flex flex-col items-center gap-3 text-center mb-8">
       {institution.logo_url ? (
@@ -413,7 +415,7 @@ export default function RegisterPage() {
           <PageHeader institution={institution} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {institution.student_enabled && (
+            {institution?.student_enabled && (
               <motion.button
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -437,7 +439,7 @@ export default function RegisterPage() {
               </motion.button>
             )}
 
-            {institution.tutor_enabled && (
+            {institution?.tutor_enabled && (
               <motion.button
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
