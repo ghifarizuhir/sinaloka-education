@@ -93,6 +93,17 @@ enum UpgradeRequestStatus {
   REJECTED
 }
 
+enum RegistrationType {
+  STUDENT
+  TUTOR
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Institution {
   id         String   @id @default(uuid())
   name       String
@@ -127,8 +138,36 @@ model Institution {
   whatsapp_messages   WhatsappMessage[]
   subjects          Subject[]
   upgrade_requests  UpgradeRequest[]
+  registrations     Registration[]
 
   @@map("institutions")
+}
+
+model Registration {
+  id               String             @id @default(uuid())
+  institution_id   String
+  institution      Institution        @relation(fields: [institution_id], references: [id])
+  type             RegistrationType
+  status           RegistrationStatus @default(PENDING)
+  name             String
+  email            String?
+  phone            String?
+  grade            String?
+  parent_name      String?
+  parent_phone     String?
+  parent_email     String?
+  subject_names    String[]
+  experience_years Int?
+  rejected_reason  String?
+  reviewed_at      DateTime?
+  reviewed_by      String?
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+
+  @@index([institution_id])
+  @@index([status])
+  @@index([type])
+  @@map("registrations")
 }
 
 model UpgradeRequest {

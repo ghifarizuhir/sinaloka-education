@@ -17,6 +17,7 @@ import {
   Receipt,
   Banknote,
   ClipboardCheck,
+  ClipboardList,
   TrendingDown,
   LogOut,
   MessageSquare
@@ -25,23 +26,32 @@ import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
 import { usePlan } from '../hooks/usePlan';
+import { usePendingRegistrationCount } from '../hooks/useRegistrations';
 import { cn } from '../lib/utils';
 import ImpersonationBanner from './ImpersonationBanner';
 import { PlanWarningBanner } from './PlanWarningBanner';
 
-const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any, label: string, href: string, active: boolean, minimized: boolean }) => (
+const SidebarItem = ({ icon: Icon, label, href, active, minimized, badge }: { icon: any, label: string, href: string, active: boolean, minimized: boolean, badge?: number }) => (
   <Link
     to={href}
     title={minimized ? label : undefined}
     className={cn(
-      "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
+      "relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
       active
         ? "bg-muted text-foreground font-medium"
         : "text-muted-foreground hover:text-foreground hover:bg-accent"
     )}
   >
     <Icon size={18} className={cn("transition-colors shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
-    {!minimized && <span className="text-sm truncate">{label}</span>}
+    {!minimized && <span className="text-sm truncate flex-1">{label}</span>}
+    {!minimized && badge != null && badge > 0 && (
+      <span className="ml-auto shrink-0 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+        {badge > 99 ? '99+' : badge}
+      </span>
+    )}
+    {minimized && badge != null && badge > 0 && (
+      <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-destructive" />
+    )}
   </Link>
 );
 
@@ -173,6 +183,8 @@ export const Layout = () => {
   const auth = useAuth();
   const { t, i18n } = useTranslation();
   const { data: plan } = usePlan();
+  const { data: pendingCountData } = usePendingRegistrationCount();
+  const pendingRegistrations = pendingCountData?.count ?? 0;
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -221,7 +233,8 @@ export const Layout = () => {
     '/finance/payouts': t('layout.pageTitle.tutorPayouts'),
     '/finance/expenses': t('layout.pageTitle.operatingExpenses'),
     '/settings': t('layout.pageTitle.settings'),
-    '/whatsapp': t('layout.pageTitle.whatsapp')
+    '/whatsapp': t('layout.pageTitle.whatsapp'),
+    '/registrations': t('registration.title'),
   }[location.pathname] || t('layout.pageTitle.dashboard');
 
   return (
@@ -261,6 +274,7 @@ export const Layout = () => {
               <SidebarItem icon={CalendarClock} label={t('nav.schedules')} href="/schedules" active={location.pathname === '/schedules'} minimized={isSidebarMinimized} />
               <SidebarItem icon={ClipboardCheck} label={t('nav.attendance')} href="/attendance" active={location.pathname === '/attendance'} minimized={isSidebarMinimized} />
               <SidebarItem icon={UserPlus} label={t('nav.enrollments')} href="/enrollments" active={location.pathname === '/enrollments'} minimized={isSidebarMinimized} />
+              <SidebarItem icon={ClipboardList} label={t('nav.registrations')} href="/registrations" active={location.pathname === '/registrations'} minimized={isSidebarMinimized} badge={pendingRegistrations} />
             </div>
           </div>
 

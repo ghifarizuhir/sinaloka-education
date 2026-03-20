@@ -84,7 +84,8 @@
     "operatingExpenses": "Operating Expenses",
     "settings": "Settings",
     "messaging": "Messaging",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "registrations": "Registrations"
   },
 
   "layout": {
@@ -1440,6 +1441,35 @@
     "pdfPreviewHint": "PDF preview will appear here"
   },
 
+  "registration": {
+    "title": "Registrations",
+    "student": "Student",
+    "tutor": "Tutor",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveStudentConfirm": "Approve and add as active student?",
+    "approveTutorConfirm": "Approve and send invitation email to {{email}}?",
+    "rejectReason": "Reason (optional)",
+    "noRegistrations": "No registrations",
+    "submitted": "Registration submitted successfully!",
+    "closed": "Registration is currently closed",
+    "alreadyRegistered": "You have already registered",
+    "settings": "Registration",
+    "studentEnabled": "Open student registration",
+    "tutorEnabled": "Open tutor registration",
+    "copyLink": "Copy registration link",
+    "linkCopied": "Link copied!",
+    "approveSuccess": "Registration approved",
+    "approveFailed": "Failed to approve registration",
+    "rejectSuccess": "Registration rejected",
+    "rejectFailed": "Failed to reject registration",
+    "settingsUpdated": "Registration settings updated",
+    "settingsFailed": "Failed to update registration settings"
+  },
+
   "plan": {
     "title": "Plans & Pricing",
     "currentPlan": "Current Plan",
@@ -1461,12 +1491,12 @@
     "upgradeRequestSent": "Upgrade request sent successfully",
     "upgradeRequestFailed": "Failed to send upgrade request",
     "alreadyPending": "You already have a pending upgrade request",
-    "usageStudents": "{current}/{limit} students",
-    "usageTutors": "{current}/{limit} tutors",
-    "usageUnlimited": "{current} students (unlimited)",
-    "warningApproaching": "You're using {percent}% of your {resource} limit",
-    "warningReached": "You've reached your {resource} limit. {days} days remaining in grace period.",
-    "warningExpired": "Grace period expired. Upgrade to add more {resource}.",
+    "usageStudents": "{{current}}/{{limit}} students",
+    "usageTutors": "{{current}}/{{limit}} tutors",
+    "usageUnlimited": "{{current}} students (unlimited)",
+    "warningApproaching": "You're using {{percent}}% of your {{resource}} limit",
+    "warningReached": "You've reached your {{resource}} limit. {{days}} days remaining in grace period.",
+    "warningExpired": "Grace period expired. Upgrade to add more {{resource}}.",
     "reviewSuccess": "Upgrade request reviewed",
     "reviewFailed": "Failed to review upgrade request",
     "planUpdated": "Institution plan updated",
