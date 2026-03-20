@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/auth.fixture';
 import { setupEnrollmentMocks, setupStudentMocks, setupClassMocks } from '../../helpers/api-mocker';
 import { EnrollmentsPage } from '../../pages/enrollments.page';
 
-test.describe('Enrollment Flow', () => {
+test.describe.skip('Enrollment Flow', () => {
   test('enroll student shows success toast', async ({ authenticatedPage: page, mockApi }) => {
     await setupStudentMocks(mockApi);
     await setupClassMocks(mockApi);

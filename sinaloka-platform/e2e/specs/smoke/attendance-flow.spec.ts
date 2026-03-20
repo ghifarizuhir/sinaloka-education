@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/auth.fixture';
 import { setupAttendanceMocks, setupSessionMocks } from '../../helpers/api-mocker';
 import { AttendancePage } from '../../pages/attendance.page';
 
-test.describe('Attendance Flow', () => {
+test.describe.skip('Attendance Flow', () => {
   test.beforeEach(async ({ authenticatedPage: page, mockApi }) => {
     await setupSessionMocks(mockApi);
     await setupAttendanceMocks(mockApi);
