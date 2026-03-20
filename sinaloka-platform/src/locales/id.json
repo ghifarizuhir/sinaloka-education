@@ -85,7 +85,7 @@
     "settings": "Pengaturan",
     "messaging": "Perpesanan",
     "whatsapp": "WhatsApp",
-    "registrations": "Pendaftaran"
+    "registrations": "Registrasi"
   },
 
   "layout": {
@@ -1442,7 +1442,7 @@
   },
 
   "registration": {
-    "title": "Pendaftaran",
+    "title": "Registrasi",
     "student": "Murid",
     "tutor": "Tutor",
     "pending": "Menunggu",
@@ -1453,21 +1453,21 @@
     "approveStudentConfirm": "Setujui dan tambahkan sebagai murid aktif?",
     "approveTutorConfirm": "Setujui dan kirim email undangan ke {email}?",
     "rejectReason": "Alasan (opsional)",
-    "noRegistrations": "Tidak ada pendaftaran",
-    "submitted": "Pendaftaran berhasil dikirim!",
-    "closed": "Pendaftaran sedang ditutup",
-    "alreadyRegistered": "Anda sudah mendaftar",
-    "settings": "Pendaftaran",
-    "studentEnabled": "Buka pendaftaran murid",
-    "tutorEnabled": "Buka pendaftaran tutor",
-    "copyLink": "Salin link pendaftaran",
+    "noRegistrations": "Tidak ada registrasi",
+    "submitted": "Registrasi berhasil dikirim!",
+    "closed": "Registrasi sedang ditutup",
+    "alreadyRegistered": "Anda sudah terdaftar",
+    "settings": "Registrasi",
+    "studentEnabled": "Buka registrasi murid",
+    "tutorEnabled": "Buka registrasi tutor",
+    "copyLink": "Salin link registrasi",
     "linkCopied": "Link disalin!",
-    "approveSuccess": "Pendaftaran disetujui",
-    "approveFailed": "Gagal menyetujui pendaftaran",
-    "rejectSuccess": "Pendaftaran ditolak",
-    "rejectFailed": "Gagal menolak pendaftaran",
-    "settingsUpdated": "Pengaturan pendaftaran diperbarui",
-    "settingsFailed": "Gagal memperbarui pengaturan pendaftaran"
+    "approveSuccess": "Registrasi disetujui",
+    "approveFailed": "Gagal menyetujui registrasi",
+    "rejectSuccess": "Registrasi ditolak",
+    "rejectFailed": "Gagal menolak registrasi",
+    "settingsUpdated": "Pengaturan registrasi diperbarui",
+    "settingsFailed": "Gagal memperbarui pengaturan registrasi"
   },
 
   "plan": {
