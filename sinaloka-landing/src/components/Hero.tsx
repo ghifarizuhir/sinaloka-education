@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "./shared/WhatsAppIcon";
 import { WHATSAPP_URL } from "../lib/constants";
+import { cn } from "../lib/utils";
 
 export function Hero() {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -194,9 +195,9 @@ export function Hero() {
                     { label: "Kehadiran", value: "94%", change: "+2%", color: "bg-amber-50 text-amber-600", dot: "bg-amber-400" },
                     { label: "Pendapatan", value: "Rp 48jt", change: "+18%", color: "bg-violet-50 text-violet-600", dot: "bg-violet-400" },
                   ].map((stat) => (
-                    <div key={stat.label} className={`rounded-lg p-2.5 sm:p-3 ${stat.color}`}>
+                    <div key={stat.label} className={cn("rounded-lg p-2.5 sm:p-3", stat.color)}>
                       <div className="flex items-center gap-1 mb-1">
-                        <div className={`w-1.5 h-1.5 rounded-full ${stat.dot}`} />
+                        <div className={cn("w-1.5 h-1.5 rounded-full", stat.dot)} />
                         <span className="text-[8px] sm:text-[9px] opacity-70">{stat.label}</span>
                       </div>
                       <div className="text-sm sm:text-base font-extrabold">{stat.value}</div>
@@ -218,7 +219,7 @@ export function Hero() {
                         { text: "Absensi Fisika tercatat", time: "2 jam", dot: "bg-amber-400" },
                       ].map((item) => (
                         <div key={item.text} className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.dot}`} />
+                          <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", item.dot)} />
                           <span className="text-[9px] text-[#444] flex-1 truncate">{item.text}</span>
                           <span className="text-[8px] text-[#BBB] shrink-0">{item.time}</span>
                         </div>

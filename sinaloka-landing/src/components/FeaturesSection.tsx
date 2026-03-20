@@ -38,7 +38,7 @@ export function FeaturesSection() {
                   )}
                 >
                   <f.icon
-                    size={20}
+                    size={24}
                     className={f.highlighted ? "text-white" : "text-accent-600"}
                   />
                 </div>

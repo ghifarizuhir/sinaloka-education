@@ -29,7 +29,7 @@ export function HowItWorks() {
                 <div className="w-8 h-8 rounded-full bg-accent-50 text-accent-600 font-bold text-sm flex items-center justify-center mb-4 relative z-10">
                   {step.num}
                 </div>
-                <step.icon size={20} className="text-accent-600 mb-3" />
+                <step.icon size={24} className="text-accent-600 mb-3" />
                 <h3 className="font-semibold text-[#111] text-base mb-2">
                   {step.title}
                 </h3>

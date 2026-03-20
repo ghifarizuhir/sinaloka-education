@@ -11,7 +11,7 @@ export function FinalCTA() {
           <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
             Siap ngurusin bimbel tanpa pusing?
           </h2>
-          <p className="mt-6 text-white/50 text-base md:text-lg">
+          <p className="mt-6 text-white/70 text-base md:text-lg">
             150+ bimbel sudah merasakan bedanya. Ceritakan kebutuhan Anda — kami
             bantu dari awal, gratis.
           </p>
