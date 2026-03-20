@@ -81,6 +81,18 @@ enum InvitationStatus {
   CANCELLED
 }
 
+enum PlanType {
+  STARTER
+  GROWTH
+  BUSINESS
+}
+
+enum UpgradeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Institution {
   id         String   @id @default(uuid())
   name       String
@@ -92,6 +104,9 @@ model Institution {
   settings         Json?
   timezone         String   @default("Asia/Jakarta")
   default_language String   @default("id")
+  plan_type              PlanType  @default(STARTER)
+  plan_limit_reached_at  DateTime?
+  plan_changed_at        DateTime?
   is_active        Boolean  @default(true)
   created_at       DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -111,8 +126,28 @@ model Institution {
   invitations         Invitation[]
   whatsapp_messages   WhatsappMessage[]
   subjects          Subject[]
+  upgrade_requests  UpgradeRequest[]
 
   @@map("institutions")
+}
+
+model UpgradeRequest {
+  id              String               @id @default(uuid())
+  institution_id  String
+  institution     Institution          @relation(fields: [institution_id], references: [id])
+  current_plan    PlanType
+  requested_plan  PlanType
+  status          UpgradeRequestStatus @default(PENDING)
+  message         String?
+  review_notes    String?
+  reviewed_by     String?
+  reviewed_at     DateTime?
+  created_at      DateTime             @default(now())
+  updated_at      DateTime             @updatedAt
+
+  @@index([status])
+  @@index([institution_id])
+  @@map("upgrade_requests")
 }
 
 model User {
