@@ -7,17 +7,19 @@ export class DashboardPage {
   readonly commandPaletteModal: Locator;
 
   constructor(private page: Page) {
-    this.statsGrid = page.locator('.grid').first();
-    this.activitySection = page.getByText('Recent Activity');
+    this.statsGrid = page.locator('.grid.grid-cols-2');
+    this.activitySection = page.getByText('Recent Activity').locator('..');
     this.commandPaletteInput = page.locator('input[placeholder*="Search for"]');
     this.commandPaletteModal = page.locator('.fixed.inset-0').filter({ has: this.commandPaletteInput });
   }
 
-  async goto() { await this.page.goto('/'); }
+  async goto() {
+    await this.page.goto('/');
+    await this.page.waitForLoadState('networkidle');
+  }
 
   getStatCard(label: string): Locator { return this.page.getByText(label).locator('..'); }
   getActivityItem(text: string): Locator { return this.page.getByText(text); }
-  getQuickLink(text: string): Locator { return this.page.getByRole('link', { name: text }); }
 
   async openCommandPalette() {
     await this.page.getByRole('button', { name: /quick actions/i }).click();
