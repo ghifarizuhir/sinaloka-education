@@ -10,7 +10,6 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import {
   LoginDto,
   RefreshTokenDto,
