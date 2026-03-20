@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -214,6 +214,14 @@ export const Layout = () => {
         .map((part) => part[0].toUpperCase())
         .join('')
     : 'AD';
+
+  const { mustChangePassword } = auth;
+
+  useEffect(() => {
+    if (mustChangePassword && !location.pathname.startsWith('/settings')) {
+      navigate('/settings?tab=security');
+    }
+  }, [mustChangePassword, location.pathname, navigate]);
 
   const handleLogout = async () => {
     await auth.logout();
