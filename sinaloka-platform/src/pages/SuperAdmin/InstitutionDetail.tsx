@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LogIn, Users, Settings, BarChart3, Plus, CreditCard } from 'lucide-react';
+import { LogIn, Users, Settings, BarChart3, Plus, CreditCard, Zap } from 'lucide-react';
 import {
   Card,
   Button,
@@ -24,8 +24,10 @@ import { useAuth } from '@/src/hooks/useAuth';
 import api from '@/src/lib/api';
 import InstitutionForm from './InstitutionForm';
 import BillingPaymentTab from './BillingPaymentTab';
+import { useUpdateInstitutionPlan } from '@/src/hooks/usePlan';
+import type { PlanType } from '@/src/types/plan';
 
-type Tab = 'general' | 'billing' | 'admins' | 'overview';
+type Tab = 'general' | 'billing' | 'admins' | 'overview' | 'plan';
 
 export default function InstitutionDetail() {
   const { t } = useTranslation();
@@ -82,6 +84,11 @@ export default function InstitutionDetail() {
       label: t('superAdmin.tabs.overview'),
       icon: <BarChart3 size={16} />,
     },
+    {
+      key: 'plan',
+      label: t('superAdmin.tabs.plan', 'Plan'),
+      icon: <Zap size={16} />,
+    },
   ];
 
   return (
@@ -123,6 +130,12 @@ export default function InstitutionDetail() {
       {activeTab === 'billing' && <BillingPaymentTab institutionId={id!} />}
       {activeTab === 'admins' && <AdminsTab institution={institution} />}
       {activeTab === 'overview' && <OverviewTab institutionId={institution.id} />}
+      {activeTab === 'plan' && (
+        <PlanManagementTab
+          institutionId={institution.id}
+          currentPlan={(institution.plan_type as PlanType) ?? 'STARTER'}
+        />
+      )}
     </div>
   );
 }
@@ -283,6 +296,153 @@ function AdminsTab({
           </div>
         </form>
       </Modal>
+    </div>
+  );
+}
+
+/* ─── Plan Management Tab ─── */
+const PLAN_LIMITS: Record<PlanType, { maxStudents: number | null; maxTutors: number | null }> = {
+  STARTER: { maxStudents: 30, maxTutors: 5 },
+  GROWTH: { maxStudents: 200, maxTutors: 20 },
+  BUSINESS: { maxStudents: null, maxTutors: null },
+};
+
+function PlanBadge({ plan }: { plan: PlanType }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold',
+        plan === 'STARTER' &&
+          'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
+        plan === 'GROWTH' &&
+          'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        plan === 'BUSINESS' &&
+          'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+      )}
+    >
+      {plan}
+    </span>
+  );
+}
+
+function PlanManagementTab({
+  institutionId,
+  currentPlan,
+}: {
+  institutionId: string;
+  currentPlan: PlanType;
+}) {
+  const { t } = useTranslation();
+  const { data: summary, isLoading: summaryLoading } = useInstitutionSummary(institutionId);
+  const updatePlan = useUpdateInstitutionPlan();
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>(currentPlan);
+
+  const planOptions: PlanType[] = ['STARTER', 'GROWTH', 'BUSINESS'];
+
+  const limits = PLAN_LIMITS[selectedPlan];
+  const studentCount = summary?.studentCount ?? 0;
+  const tutorCount = summary?.tutorCount ?? 0;
+
+  const wouldExceedStudents =
+    limits.maxStudents !== null && studentCount > limits.maxStudents;
+  const wouldExceedTutors =
+    limits.maxTutors !== null && tutorCount > limits.maxTutors;
+  const showDowngradeWarning =
+    selectedPlan !== currentPlan && (wouldExceedStudents || wouldExceedTutors);
+
+  const handleSave = () => {
+    if (selectedPlan === currentPlan) return;
+    updatePlan.mutate({ institutionId, plan_type: selectedPlan });
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-bold dark:text-zinc-100">
+        {t('superAdmin.tabs.plan', 'Plan')}
+      </h2>
+
+      <Card className="space-y-6">
+        {/* Current Plan */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            {t('plan.currentPlan', 'Current Plan')}:
+          </span>
+          <PlanBadge plan={currentPlan} />
+        </div>
+
+        {/* Usage Stats */}
+        {summaryLoading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-5 w-48" />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              {t('plan.students', 'Students')}:{' '}
+              <span className="font-semibold dark:text-zinc-100">
+                {studentCount}
+              </span>
+              {limits.maxStudents !== null && (
+                <span className="text-zinc-400"> / {limits.maxStudents}</span>
+              )}
+            </p>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              {t('plan.tutors', 'Tutors')}:{' '}
+              <span className="font-semibold dark:text-zinc-100">
+                {tutorCount}
+              </span>
+              {limits.maxTutors !== null && (
+                <span className="text-zinc-400"> / {limits.maxTutors}</span>
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Plan Selector */}
+        <div className="space-y-2">
+          <label
+            htmlFor="plan-select"
+            className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            {t('plan.changePlan', 'Change Plan')}
+          </label>
+          <select
+            id="plan-select"
+            value={selectedPlan}
+            onChange={(e) => setSelectedPlan(e.target.value as PlanType)}
+            className="block w-full max-w-xs rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+          >
+            {planOptions.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Downgrade Warning */}
+        {showDowngradeWarning && (
+          <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3">
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              {t(
+                'plan.downgradeWarning',
+                'Warning: the current usage exceeds the limits of the selected plan. Downgrading may restrict access.'
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Save */}
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSave}
+            disabled={selectedPlan === currentPlan || updatePlan.isPending}
+          >
+            {updatePlan.isPending ? t('common.saving') : t('common.save')}
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }

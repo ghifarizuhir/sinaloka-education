@@ -95,6 +95,9 @@ export default function Institutions() {
                     {t('superAdmin.table.admins')}
                   </th>
                   <th className="text-left text-xs font-bold uppercase tracking-wider text-zinc-500 p-4">
+                    {t('plan.plan', 'Plan')}
+                  </th>
+                  <th className="text-left text-xs font-bold uppercase tracking-wider text-zinc-500 p-4">
                     {t('common.status')}
                   </th>
                   <th className="text-left text-xs font-bold uppercase tracking-wider text-zinc-500 p-4">
@@ -136,6 +139,21 @@ export default function Institutions() {
                           <span className="text-sm text-zinc-400">—</span>
                         )}
                       </div>
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={cn(
+                          'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                          inst.plan_type === 'STARTER' &&
+                            'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400',
+                          inst.plan_type === 'GROWTH' &&
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                          inst.plan_type === 'BUSINESS' &&
+                            'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                        )}
+                      >
+                        {inst.plan_type ?? 'STARTER'}
+                      </span>
                     </td>
                     <td className="p-4">
                       <Badge variant={inst.is_active ? 'success' : 'default'}>

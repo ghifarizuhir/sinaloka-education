@@ -16,6 +16,7 @@ export interface Institution {
   timezone: string;
   default_language: string;
   is_active: boolean;
+  plan_type: 'STARTER' | 'GROWTH' | 'BUSINESS';
   created_at: string;
   updated_at: string;
   users?: InstitutionAdmin[];
