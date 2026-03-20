@@ -8,7 +8,7 @@ import {
   ArrowLeft, BadgeCheck, X, AlertTriangle
 } from 'lucide-react';
 import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog, PageHeader, Select } from '../../components/UI';
-import { cn, formatCurrency, formatDate } from '../../lib/utils';
+import { cn, formatCurrency, formatDate, downloadFile } from '../../lib/utils';
 import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout, useGenerateSalaries } from '@/src/hooks/usePayouts';
 import { useTutors } from '@/src/hooks/useTutors';
 import { toast } from 'sonner';
@@ -165,8 +165,7 @@ export const TutorPayouts = () => {
       const updated = await payoutsService.generateSlip(selectedPayout.id);
       setSelectedPayout(updated);
       if (updated.slip_url) {
-        const apiUrl = import.meta.env.VITE_API_URL ?? '';
-        window.open(`${apiUrl}/api/uploads/${updated.slip_url}`, '_blank');
+        downloadFile(updated.slip_url, updated.slip_url.split('/').pop() ?? 'payout-slip.pdf');
       }
       toast.success(t('payouts.toast.slipGenerated', { defaultValue: 'Payout slip generated' }));
     } catch {
@@ -178,8 +177,7 @@ export const TutorPayouts = () => {
 
   const handleDownloadSlip = () => {
     if (!selectedPayout?.slip_url) return;
-    const apiUrl = import.meta.env.VITE_API_URL ?? '';
-    window.open(`${apiUrl}/api/uploads/${selectedPayout.slip_url}`, '_blank');
+    downloadFile(selectedPayout.slip_url, selectedPayout.slip_url.split('/').pop() ?? 'payout-slip.pdf');
   };
 
   const handleExportAudit = async () => {
