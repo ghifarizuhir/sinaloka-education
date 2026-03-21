@@ -32,15 +32,18 @@ export function PaymentList({ data }: PaymentListProps) {
     const newWindow = window.open('', '_blank');
     try {
       const result = await checkoutPayment(payment.id);
-      if (newWindow) {
+      if (newWindow && !newWindow.closed) {
         newWindow.location.href = result.redirect_url;
       } else {
-        // Fallback if popup still blocked
+        // Fallback if popup blocked or user closed the blank tab
         window.location.href = result.redirect_url;
       }
-    } catch (err: any) {
-      newWindow?.close();
-      setError(err?.response?.data?.message || 'Gagal memproses pembayaran. Coba lagi.');
+    } catch (err: unknown) {
+      if (newWindow && !newWindow.closed) {
+        newWindow.close();
+      }
+      const message = (err as any)?.response?.data?.message || 'Gagal memproses pembayaran. Coba lagi.';
+      setError(message);
     } finally {
       setLoadingId(null);
     }
