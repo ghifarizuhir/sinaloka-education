@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const PaymentStatus = z.enum(['PAID', 'PENDING', 'OVERDUE']);
-const PaymentMethod = z.enum(['CASH', 'TRANSFER', 'OTHER']);
+const PaymentMethod = z.enum(['CASH', 'TRANSFER', 'OTHER', 'MIDTRANS']);
 
 export const CreatePaymentSchema = z.object({
   student_id: z.string().uuid(),
