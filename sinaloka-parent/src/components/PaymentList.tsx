@@ -24,14 +24,17 @@ interface PaymentListProps {
 export function PaymentList({ data, onOpenPaymentStatus }: PaymentListProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleBayar = async (payment: PaymentRecord) => {
     setLoadingId(payment.id);
+    setError(null);
     try {
       const result = await checkoutPayment(payment.id);
-      window.open(result.redirect_url, '_blank');
-      onOpenPaymentStatus?.(payment.id);
-    } catch {
-      // silently fail — user stays on the list
+      // Use location.href instead of window.open to avoid popup blocker
+      window.location.href = result.redirect_url;
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Gagal memproses pembayaran. Coba lagi.');
     } finally {
       setLoadingId(null);
     }
@@ -47,6 +50,11 @@ export function PaymentList({ data, onOpenPaymentStatus }: PaymentListProps) {
 
   return (
     <div className="space-y-3">
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
       {data.map((payment) => {
         const canPay =
           payment.status === 'PENDING' || payment.status === 'OVERDUE';

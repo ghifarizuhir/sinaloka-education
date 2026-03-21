@@ -100,6 +100,9 @@ export class PaymentGatewayController {
 
     const itemName = payment.enrollment?.class?.name ?? 'Tuition Fee';
 
+    // Unique order ID per checkout attempt — Midtrans rejects reused order_ids
+    const orderId = `${payment.id}-${Date.now()}`;
+
     const snapResult = await this.midtransService.createSnapTransaction(
       {
         midtrans_server_key: gatewayConfig.midtrans_server_key,
@@ -107,7 +110,7 @@ export class PaymentGatewayController {
         is_sandbox: gatewayConfig.is_sandbox,
       },
       {
-        orderId: payment.id,
+        orderId,
         grossAmount: Number(payment.amount),
         customerName: payment.student?.name,
         itemName,
@@ -119,7 +122,7 @@ export class PaymentGatewayController {
       data: {
         snap_token: snapResult.token,
         snap_redirect_url: snapResult.redirect_url,
-        midtrans_transaction_id: payment.id,
+        midtrans_transaction_id: orderId,
       },
     });
 
@@ -147,8 +150,11 @@ export class PaymentGatewayController {
       signature_key,
     } = body;
 
+    // Extract payment UUID from order_id format "{uuid}-{timestamp}"
+    const paymentId = order_id.length > 36 ? order_id.slice(0, 36) : order_id;
+
     const payment = await this.prisma.payment.findFirst({
-      where: { id: order_id },
+      where: { id: paymentId },
       select: {
         id: true,
         status: true,
@@ -203,44 +209,51 @@ export class PaymentGatewayController {
     const paymentType = (body.payment_type as string) ?? 'unknown';
 
     if (newStatus !== null) {
-      if (newStatus === 'PAID') {
-        const { midtransFee, transferAmount, platformCost } = calculateFee(
-          Number(payment.amount),
-          paymentType,
-          this.configService,
-        );
+      try {
+        if (newStatus === 'PAID') {
+          const { midtransFee, transferAmount, platformCost } = calculateFee(
+            Number(payment.amount),
+            paymentType,
+            this.configService,
+          );
 
-        await this.prisma.$transaction(async (tx) => {
-          await tx.payment.update({
+          await this.prisma.$transaction(async (tx) => {
+            await tx.payment.update({
+              where: { id: payment.id },
+              data: {
+                status: 'PAID',
+                paid_date: new Date(),
+                method: 'MIDTRANS',
+                midtrans_payment_type: paymentType,
+              },
+            });
+
+            await tx.settlement.create({
+              data: {
+                institution_id: payment.institution_id,
+                payment_id: payment.id,
+                gross_amount: Number(payment.amount),
+                midtrans_fee: midtransFee,
+                transfer_amount: transferAmount,
+                platform_cost: platformCost,
+                status: 'PENDING',
+              },
+            });
+          });
+        } else {
+          await this.prisma.payment.update({
             where: { id: payment.id },
             data: {
-              status: 'PAID',
-              paid_date: new Date(),
-              method: 'MIDTRANS',
+              status: newStatus,
               midtrans_payment_type: paymentType,
             },
           });
-
-          await tx.settlement.create({
-            data: {
-              institution_id: payment.institution_id,
-              payment_id: payment.id,
-              gross_amount: Number(payment.amount),
-              midtrans_fee: midtransFee,
-              transfer_amount: transferAmount,
-              platform_cost: platformCost,
-              status: 'PENDING',
-            },
-          });
-        });
-      } else {
-        await this.prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: newStatus,
-            midtrans_payment_type: paymentType,
-          },
-        });
+        }
+      } catch (err) {
+        this.logger.error(
+          `Webhook processing failed for order ${order_id}: ${err}`,
+        );
+        return { status: 'processing_error' };
       }
     }
 
