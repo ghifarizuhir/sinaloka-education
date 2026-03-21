@@ -163,6 +163,20 @@ export class SubscriptionService {
         const graceEndsAt = new Date(expiresAt);
         graceEndsAt.setDate(graceEndsAt.getDate() + GRACE_PERIOD_DAYS);
 
+        // Cancel any existing active subscriptions BEFORE creating the new one
+        // to avoid unique index violations
+        await tx.subscription.updateMany({
+          where: {
+            institution_id: institutionId,
+            status: { in: ['ACTIVE', 'GRACE_PERIOD'] },
+          },
+          data: {
+            status: 'CANCELLED',
+            cancelled_at: now,
+            cancelled_reason: 'Replaced by new subscription',
+          },
+        });
+
         const subscription = await tx.subscription.create({
           data: {
             institution_id: institutionId,
@@ -171,20 +185,6 @@ export class SubscriptionService {
             started_at: now,
             expires_at: expiresAt,
             grace_ends_at: graceEndsAt,
-          },
-        });
-
-        // Cancel any existing active subscriptions
-        await tx.subscription.updateMany({
-          where: {
-            institution_id: institutionId,
-            status: { in: ['ACTIVE', 'GRACE_PERIOD'] },
-            id: { not: subscription.id },
-          },
-          data: {
-            status: 'CANCELLED',
-            cancelled_at: now,
-            cancelled_reason: 'Replaced by new subscription',
           },
         });
 
@@ -227,6 +227,7 @@ export class SubscriptionService {
     }
     if (data.expires_at) {
       updateData['expires_at'] = data.expires_at;
+      updateData['grace_ends_at'] = null;
     }
     if (data.status) {
       updateData['status'] = data.status;

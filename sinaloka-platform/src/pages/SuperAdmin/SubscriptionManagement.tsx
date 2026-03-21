@@ -599,19 +599,19 @@ export default function SubscriptionManagement() {
           <>
             <StatCard
               label={`${t('plan.starter', 'Starter')} — ${t('subscription.institutions', 'Institutions')}`}
-              value={stats?.plan_counts?.STARTER ?? 0}
+              value={stats?.planCounts?.find(p => p.plan_type === 'STARTER')?.count ?? 0}
             />
             <StatCard
               label={`${t('plan.growth', 'Growth')} — ${t('subscription.institutions', 'Institutions')}`}
-              value={stats?.plan_counts?.GROWTH ?? 0}
+              value={stats?.planCounts?.find(p => p.plan_type === 'GROWTH')?.count ?? 0}
             />
             <StatCard
               label={`${t('plan.business', 'Business')} — ${t('subscription.institutions', 'Institutions')}`}
-              value={stats?.plan_counts?.BUSINESS ?? 0}
+              value={stats?.planCounts?.find(p => p.plan_type === 'BUSINESS')?.count ?? 0}
             />
             <StatCard
               label={t('subscription.expiringIn7Days', 'Expiring in 7 Days')}
-              value={stats?.expiring_soon ?? 0}
+              value={stats?.expiringSoon ?? 0}
             />
           </>
         )}
@@ -627,17 +627,17 @@ export default function SubscriptionManagement() {
           <>
             <StatCard
               label={t('subscription.pendingPayments', 'Pending Payments')}
-              value={stats?.pending_payments ?? 0}
+              value={stats?.pendingPayments ?? 0}
             />
             <StatCard
               label={t('subscription.revenueThisMonth', 'Revenue This Month')}
               value={
-                stats?.monthly_revenue != null
+                stats?.monthlyRevenue != null
                   ? new Intl.NumberFormat(i18n.language === 'id' ? 'id-ID' : 'en-US', {
                       style: 'currency',
                       currency: 'IDR',
                       minimumFractionDigits: 0,
-                    }).format(stats.monthly_revenue)
+                    }).format(stats.monthlyRevenue)
                   : 'Rp 0'
               }
             />

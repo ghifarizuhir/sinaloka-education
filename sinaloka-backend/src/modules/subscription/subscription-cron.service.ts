@@ -60,18 +60,25 @@ export class SubscriptionCronService {
 
       const admins = subscription.institution.users;
 
-      // Email first, then DB update
+      // Email first, then DB update only if email succeeded
+      let emailSent = admins.length === 0;
       for (const admin of admins) {
         try {
           await this.emailService.sendSubscriptionGracePeriodNotification(
             admin.email,
             graceEndsAt,
           );
+          emailSent = true;
         } catch (error: any) {
           this.logger.error(
             `Failed to send grace period email to ${admin.email} for subscription ${subscription.id}: ${error.message}`,
           );
         }
+      }
+
+      if (!emailSent) {
+        failed++;
+        continue;
       }
 
       // Update DB (idempotent via status condition)
@@ -133,17 +140,24 @@ export class SubscriptionCronService {
     for (const subscription of expiredGraceSubscriptions) {
       const admins = subscription.institution.users;
 
-      // Email first, then DB update
+      // Email first, then DB update only if email succeeded
+      let emailSent = admins.length === 0;
       for (const admin of admins) {
         try {
           await this.emailService.sendSubscriptionDowngradeNotification(
             admin.email,
           );
+          emailSent = true;
         } catch (error: any) {
           this.logger.error(
             `Failed to send downgrade email to ${admin.email} for subscription ${subscription.id}: ${error.message}`,
           );
         }
+      }
+
+      if (!emailSent) {
+        failed++;
+        continue;
       }
 
       // Update subscription + institution in transaction (idempotent via status condition)
@@ -221,8 +235,10 @@ export class SubscriptionCronService {
       const msRemaining = subscription.expires_at.getTime() - now.getTime();
       const daysRemaining = Math.ceil(msRemaining / (1000 * 60 * 60 * 24));
 
-      // Find the matching reminder tier (7, 3, or 1)
-      const tier = (REMINDER_TIERS as readonly number[]).find(
+      // Find the matching reminder tier (1, 3, or 7)
+      // Use ascending order so we find the tightest tier first:
+      // e.g. daysRemaining=1 → tier=1, daysRemaining=3 → tier=3, daysRemaining=5 → tier=7
+      const tier = ([1, 3, 7] as number[]).find(
         (t) => daysRemaining <= t,
       );
       if (tier === undefined) {

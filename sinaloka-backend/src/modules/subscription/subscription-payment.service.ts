@@ -169,12 +169,14 @@ export class SubscriptionPaymentService {
   async handleWebhook(body: Record<string, unknown>) {
     const {
       order_id,
+      transaction_id,
       transaction_status,
       status_code,
       gross_amount,
       signature_key,
     } = body as {
       order_id: string;
+      transaction_id: string;
       transaction_status: string;
       status_code: string;
       gross_amount: string;
@@ -238,10 +240,18 @@ export class SubscriptionPaymentService {
         data: {
           status: 'PAID',
           paid_at: now,
-          midtrans_transaction_id: order_id,
+          midtrans_transaction_id: transaction_id,
           subscription_id: subscriptionId,
         },
       });
+
+      // Get subscription dates for accurate invoice period
+      const activatedSubscription =
+        await this.subscriptionService.getActiveSubscription(
+          payment.institution_id,
+        );
+      const periodStart = activatedSubscription?.started_at ?? now;
+      const periodEnd = activatedSubscription?.expires_at ?? now;
 
       // Create invoice now that we have a subscription
       await this.createInvoiceForPayment(
@@ -250,6 +260,8 @@ export class SubscriptionPaymentService {
         subscriptionId,
         payment.amount,
         'PAID',
+        periodStart,
+        periodEnd,
       );
 
       // Email ADMINs confirmation
@@ -326,6 +338,14 @@ export class SubscriptionPaymentService {
         },
       });
 
+      // Get subscription dates for accurate invoice period
+      const activatedSubscription =
+        await this.subscriptionService.getActiveSubscription(
+          payment.institution_id,
+        );
+      const periodStart = activatedSubscription?.started_at ?? now;
+      const periodEnd = activatedSubscription?.expires_at ?? now;
+
       // Create invoice now that we have a subscription
       await this.createInvoiceForPayment(
         payment.id,
@@ -333,6 +353,8 @@ export class SubscriptionPaymentService {
         subscriptionId,
         payment.amount,
         'PAID',
+        periodStart,
+        periodEnd,
       );
 
       // Email ADMINs confirmation
@@ -410,11 +432,10 @@ export class SubscriptionPaymentService {
     subscriptionId: string,
     amount: number,
     status: 'DRAFT' | 'SENT' | 'PAID',
+    periodStart: Date,
+    periodEnd: Date,
   ) {
     const invoiceNumber = await this.generateInvoiceNumber();
-    const now = new Date();
-    const periodEnd = new Date(now);
-    periodEnd.setDate(periodEnd.getDate() + 30);
 
     await this.prisma.subscriptionInvoice.create({
       data: {
@@ -422,9 +443,9 @@ export class SubscriptionPaymentService {
         subscription_id: subscriptionId,
         invoice_number: invoiceNumber,
         amount,
-        period_start: now,
+        period_start: periodStart,
         period_end: periodEnd,
-        due_date: now,
+        due_date: periodStart,
         status,
         payment_id: paymentId,
       },
@@ -438,7 +459,7 @@ export class SubscriptionPaymentService {
     const admins = await this.prisma.user.findMany({
       where: {
         institution_id: institutionId,
-        role: { in: ['ADMIN', 'SUPER_ADMIN'] },
+        role: 'ADMIN',
         is_active: true,
       },
       select: { email: true },
@@ -468,7 +489,7 @@ export class SubscriptionPaymentService {
     const admins = await this.prisma.user.findMany({
       where: {
         institution_id: institutionId,
-        role: { in: ['ADMIN', 'SUPER_ADMIN'] },
+        role: 'ADMIN',
         is_active: true,
       },
       select: { email: true },

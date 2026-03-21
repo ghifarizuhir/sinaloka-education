@@ -78,10 +78,10 @@ export interface SubscriptionListItem {
 }
 
 export interface SubscriptionStats {
-  plan_counts: { STARTER: number; GROWTH: number; BUSINESS: number };
-  expiring_soon: number;
-  pending_payments: number;
-  monthly_revenue: number;
+  planCounts: { plan_type: string; count: number }[];
+  expiringSoon: number;
+  pendingPayments: number;
+  monthlyRevenue: number;
 }
 
 export interface PaginatedResponse<T> {
