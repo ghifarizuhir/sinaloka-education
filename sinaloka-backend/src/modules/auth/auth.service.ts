@@ -342,10 +342,21 @@ export class AuthService {
   ): Promise<TokenResponse> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: { institution: true },
     });
 
     if (!user || !user.password_hash) {
       throw new UnauthorizedException('User not found');
+    }
+
+    if (!user.is_active) {
+      throw new UnauthorizedException('User account is inactive');
+    }
+
+    if (user.institution && !user.institution.is_active) {
+      throw new ForbiddenException(
+        'Your institution has been deactivated. Contact support.',
+      );
     }
 
     const isCurrentValid = await bcrypt.compare(
