@@ -16,7 +16,9 @@ Implement a monthly subscription billing system for Sinaloka's institution plans
 | Expiry behavior | 7-day grace period then downgrade to STARTER | Consistent with existing grace period system; avoids abrupt disruption |
 | Billing cycle start | From payment confirmation date | Simplest — no prorate logic needed |
 | Subscription management | ADMIN self-service + SUPER_ADMIN override | Reduces SUPER_ADMIN workload; ADMIN can pay/renew independently |
-| Expiry checking | Lazy check (guard) + cron job | Lazy for immediate UX feedback; cron as safety net |
+| Expiry checking | Read-only guard + cron job for state transitions | Guard only reads and attaches warnings; cron handles all writes (state transitions, downgrade) |
+| UpgradeRequest model | Deprecated — replaced by subscription payment flow | Avoids two conflicting upgrade paths |
+| Midtrans credentials | Platform-level env vars for subscription payments | Sinaloka is the merchant (not institution); separate from per-institution SPP Midtrans keys |
 | Architecture | Separate SubscriptionModule | Follows existing module-per-domain pattern; keeps plan enforcement untouched |
 
 ## 1. Database Schema
@@ -59,16 +61,22 @@ enum InvoiceStatus {
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | String @id @default(cuid()) | PK |
-| `institution_id` | String | FK to Institution (unique for active) |
+| `institution_id` | String | FK to Institution |
 | `plan_type` | PlanType | GROWTH or BUSINESS |
 | `status` | SubscriptionStatus | ACTIVE, GRACE_PERIOD, EXPIRED, CANCELLED |
 | `started_at` | DateTime | Start of current billing period |
 | `expires_at` | DateTime | started_at + 30 days |
 | `grace_ends_at` | DateTime? | expires_at + 7 days (set when entering grace period) |
 | `auto_downgraded_at` | DateTime? | Timestamp when auto-downgrade occurred |
-| `last_reminder_sent` | DateTime? | Prevents duplicate reminder emails on same day |
+| `cancelled_at` | DateTime? | When subscription was cancelled |
+| `cancelled_reason` | String? | Why subscription was cancelled |
+| `last_reminder_tier` | Int? | Last reminder sent: 7, 3, or 1 (H-X). Prevents duplicate reminders. |
 | `created_at` | DateTime @default(now()) | |
 | `updated_at` | DateTime @updatedAt | |
+
+**Uniqueness constraint:** Partial unique index via raw SQL migration: `CREATE UNIQUE INDEX idx_subscription_active_per_institution ON subscription (institution_id) WHERE status IN ('ACTIVE', 'GRACE_PERIOD')`. This ensures only one active/grace-period subscription per institution while allowing historical EXPIRED/CANCELLED records.
+
+**Indexes:** `@@index([institution_id])`, `@@index([status])`, `@@index([expires_at])` (for cron job queries).
 
 **SubscriptionPayment** — Every payment for a subscription.
 
@@ -80,7 +88,7 @@ enum InvoiceStatus {
 | `amount` | Int | Amount in Rupiah |
 | `method` | SubscriptionPaymentMethod | MIDTRANS or MANUAL_TRANSFER |
 | `status` | SubscriptionPaymentStatus | PENDING, PAID, FAILED, EXPIRED |
-| `midtrans_order_id` | String? | For Midtrans payments |
+| `midtrans_order_id` | String? | For Midtrans payments (prefixed `SUB-` to distinguish from student payments) |
 | `midtrans_transaction_id` | String? | From Midtrans webhook |
 | `proof_url` | String? | Upload URL for manual transfer proof |
 | `confirmed_by` | String? | SUPER_ADMIN user ID who confirmed |
@@ -88,6 +96,8 @@ enum InvoiceStatus {
 | `notes` | String? | SUPER_ADMIN notes (approval/rejection reason) |
 | `paid_at` | DateTime? | When payment was completed |
 | `created_at` | DateTime @default(now()) | |
+
+**Indexes:** `@@index([institution_id])`, `@@index([status])`.
 
 **SubscriptionInvoice** — Generated per billing cycle.
 
@@ -110,8 +120,10 @@ enum InvoiceStatus {
 **Institution** — Add relation:
 
 ```prisma
-subscription Subscription?
+subscriptions Subscription[]
 ```
+
+Use one-to-many relation because Prisma's one-to-one requires `@unique` on the FK, which conflicts with the partial unique index (multiple EXPIRED/CANCELLED rows per institution). The active subscription is fetched via service-layer query: `prisma.subscription.findFirst({ where: { institution_id, status: { in: ['ACTIVE', 'GRACE_PERIOD'] } } })`.
 
 STARTER institutions have no Subscription record. No subscription = STARTER (default behavior unchanged).
 
@@ -143,8 +155,7 @@ src/modules/subscription/
 |--------|------|-------------|
 | GET | `/api/subscription` | Get own subscription status |
 | GET | `/api/subscription/invoices` | List own invoices |
-| POST | `/api/subscription/pay` | Initiate payment (Midtrans or manual upload) |
-| POST | `/api/subscription/renew` | Renew subscription (generates payment) |
+| POST | `/api/subscription/pay` | Initiate payment or renewal (Midtrans or manual upload). Accepts optional `type: 'new' | 'renewal'` — if renewal, extends from old `expires_at`. |
 
 **SUPER_ADMIN Endpoints:**
 
@@ -159,25 +170,39 @@ src/modules/subscription/
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/subscription/midtrans-webhook` | Midtrans payment notification (public) |
+| POST | `/api/payments/midtrans-webhook` | Shared Midtrans webhook (existing endpoint, extended) |
 
-### Subscription Guard (Lazy Check)
+**Midtrans webhook routing:** The existing `POST /api/payments/midtrans-webhook` endpoint is extended. **The `order_id` prefix check (`SUB-` prefix) must be the first operation in the webhook handler, before any payment table lookup.** If `order_id` starts with `SUB-`, immediately delegate to `SubscriptionPaymentService.handleWebhook()` and return. Otherwise, proceed with the existing student payment flow. This ordering is critical because the existing handler attempts a `payment.findFirst()` lookup that would return null for subscription orders, causing a premature `payment_not_found` response.
 
-Applied globally after auth. Runs on every request:
+**Midtrans credentials:** Subscription payments use platform-level env vars (`SUBSCRIPTION_MIDTRANS_SERVER_KEY`, `SUBSCRIPTION_MIDTRANS_CLIENT_KEY`) since Sinaloka is the merchant. These are separate from per-institution Midtrans keys used for student SPP payments.
+
+**SUPER_ADMIN Stats Endpoint:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/admin/subscriptions/stats` | Aggregated stats: counts per plan, expiring soon, pending payments, monthly revenue |
+
+### Subscription Guard (Read-Only Lazy Check)
+
+Applied globally after auth. **Read-only** — no database writes. Attaches warnings to the response for the frontend to display.
 
 ```
 if no subscription → skip (STARTER, no action)
 if status == ACTIVE && now > expires_at:
-  → set status = GRACE_PERIOD
-  → set grace_ends_at = expires_at + 7 days
-  → attach warning to response
-if status == GRACE_PERIOD && now > grace_ends_at:
-  → set status = EXPIRED
-  → set institution.plan_type = STARTER
-  → set auto_downgraded_at = now
-if ACTIVE && (expires_at - now) <= 7 days:
-  → attach warning to response (approaching expiry)
+  → attach warning: { type: 'EXPIRED', grace_ends_at: expires_at + 7 days }
+  (actual status transition happens in cron job)
+else if status == GRACE_PERIOD && now > grace_ends_at:
+  → attach warning: { type: 'DOWNGRADE_PENDING' }
+  (actual downgrade happens in cron job)
+else if status == GRACE_PERIOD:
+  → attach warning: { type: 'GRACE_PERIOD', days_remaining: grace_ends_at - now }
+else if status == ACTIVE && now <= expires_at && (expires_at - now) <= 7 days:
+  → attach warning: { type: 'EXPIRING_SOON', days_remaining: N }
 ```
+
+Conditions are mutually exclusive via `else if`. The EXPIRING_SOON check explicitly requires `now <= expires_at` to prevent negative days.
+
+The guard only reads subscription state and attaches `_subscriptionWarning` to the request. All state transitions (ACTIVE → GRACE_PERIOD → EXPIRED, downgrade) happen exclusively in the cron job to avoid race conditions from concurrent requests performing writes.
 
 ### Cron Jobs
 
@@ -185,14 +210,29 @@ Uses `@nestjs/schedule`:
 
 | Schedule | Job | Description |
 |----------|-----|-------------|
-| Daily 00:00 | Expiry scanner | Find subscriptions expiring within 7 days, send reminder emails (H-7, H-3, H-1). Check `last_reminder_sent` to avoid duplicates. |
-| Daily 01:00 | Auto-downgrade | Find GRACE_PERIOD subscriptions past `grace_ends_at`, downgrade to STARTER, send notification email. |
+| Daily 00:00 | Subscription lifecycle | Single cron job, sequential steps: **Step 1:** Find ACTIVE subscriptions past `expires_at` → transition to GRACE_PERIOD (using `updateMany WHERE status = 'ACTIVE'` for idempotency) + send grace period entry emails. **Step 2:** Find GRACE_PERIOD past `grace_ends_at` → transition to EXPIRED + downgrade `institution.plan_type` to STARTER + send downgrade notification emails. **Step 3:** Send reminder emails (H-7, H-3, H-1) for still-ACTIVE subscriptions — check `last_reminder_tier` to skip already-sent tiers. |
+
+**Email error handling:** For each subscription, send email first, then update DB state (`last_reminder_tier`, `status`) only on email success. On email failure, log the error and skip to the next subscription — the next cron run will retry since the state was not updated. This ensures no silent email loss.
 
 ### Integration with Existing PlanGuard
 
 - `PlanGuard` continues to enforce limits based on `institution.plan_type` — **no changes needed**
 - Subscription module updates `institution.plan_type` on upgrade/downgrade
 - `PlanGuard` is unaware of subscriptions — clean separation
+
+### Deprecation of UpgradeRequest
+
+The existing `UpgradeRequest` model is deprecated. Currently, ADMINs submit upgrade requests that SUPER_ADMIN manually approves/rejects. With the subscription payment flow, upgrades are handled via payment (Midtrans or manual transfer + SUPER_ADMIN confirmation). The `UpgradeRequest` table and related endpoints will be removed as part of this implementation. Existing pending requests should be resolved before deployment.
+
+### Tenant Scoping
+
+- ADMIN endpoints: scoped by `request.tenantId` from JWT (standard behavior via `TenantInterceptor`)
+- SUPER_ADMIN endpoints: query across all institutions, optionally filterable by `?institution_id=`
+- This follows the existing pattern used by other SUPER_ADMIN endpoints
+
+### In-Flight Payment During Grace Period
+
+If an ADMIN initiates a Midtrans payment before expiry but completes it during grace period (or even after auto-downgrade), the webhook handler should still process the payment and restore the subscription to ACTIVE with `plan_type` updated accordingly. The payment's `subscription_id` links it to the correct subscription regardless of current status.
 
 ## 3. Payment Flows
 
@@ -345,8 +385,18 @@ Using existing `EmailService` (Resend).
 
 ### Deduplication
 
-- `last_reminder_sent` field on Subscription prevents duplicate reminder emails on the same day
-- Cron job checks this field before sending
+- `last_reminder_tier` field on Subscription stores which reminder was last sent (7, 3, or 1)
+- Cron job only sends a reminder if the current H-X tier is different from `last_reminder_tier`
+- Example: on H-7 day, cron sets `last_reminder_tier = 7`. On H-6, H-5, H-4 no email sent. On H-3, `last_reminder_tier` is 7 ≠ 3, so H-3 email is sent and tier updated to 3.
+
+### Email Recipients
+
+- ADMIN emails: sent to all users with ADMIN role for the institution
+- SUPER_ADMIN emails: sent to all users with SUPER_ADMIN role
+
+### Invoice Number Sequence
+
+Invoice numbers use format `INV-{YYYYMM}-{seq}` where `{seq}` is a zero-padded 5-digit global counter (e.g., `INV-202603-00042`). Uses a single Postgres sequence `subscription_invoice_seq` created once in a migration (`CREATE SEQUENCE subscription_invoice_seq`). The sequence increments monotonically across all months — no per-month sequences needed. Fetch next value via `SELECT nextval('subscription_invoice_seq')` in a Prisma raw query.
 
 ## Out of Scope (Future)
 
