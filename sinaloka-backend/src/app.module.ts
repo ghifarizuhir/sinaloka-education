@@ -30,6 +30,9 @@ import { SettingsModule } from './modules/settings/settings.module.js';
 import { SubjectModule } from './modules/subject/subject.module.js';
 import { PlanModule } from './modules/plan/plan.module.js';
 import { RegistrationModule } from './modules/registration/registration.module.js';
+import { SubscriptionModule } from './modules/subscription/subscription.module.js';
+import { SubscriptionGuard } from './modules/subscription/subscription.guard.js';
+import { SubscriptionWarningInterceptor } from './modules/subscription/subscription-warning.interceptor.js';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
 import { HealthController } from './health.controller.js';
@@ -61,6 +64,7 @@ import { HealthController } from './health.controller.js';
     SubjectModule,
     PlanModule,
     RegistrationModule,
+    SubscriptionModule,
     ScheduleModule.forRoot(),
     WhatsappModule,
   ],
@@ -82,12 +86,20 @@ import { HealthController } from './health.controller.js';
       useClass: PlanGuard,
     },
     {
+      provide: APP_GUARD,
+      useClass: SubscriptionGuard,
+    },
+    {
       provide: APP_INTERCEPTOR,
       useClass: TenantInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
       useClass: PlanWarningInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SubscriptionWarningInterceptor,
     },
   ],
 })
