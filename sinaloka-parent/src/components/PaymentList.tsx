@@ -28,11 +28,18 @@ export function PaymentList({ data }: PaymentListProps) {
   const handleBayar = async (payment: PaymentRecord) => {
     setLoadingId(payment.id);
     setError(null);
+    // Open window synchronously (direct user gesture) to avoid popup blocker
+    const newWindow = window.open('', '_blank');
     try {
       const result = await checkoutPayment(payment.id);
-      // Use location.href instead of window.open to avoid popup blocker
-      window.location.href = result.redirect_url;
+      if (newWindow) {
+        newWindow.location.href = result.redirect_url;
+      } else {
+        // Fallback if popup still blocked
+        window.location.href = result.redirect_url;
+      }
     } catch (err: any) {
+      newWindow?.close();
       setError(err?.response?.data?.message || 'Gagal memproses pembayaran. Coba lagi.');
     } finally {
       setLoadingId(null);
