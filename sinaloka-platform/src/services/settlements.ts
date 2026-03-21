@@ -3,43 +3,77 @@ import api from '../lib/api';
 export interface Settlement {
   id: string;
   institution_id: string;
-  institution?: { id: string; name: string };
-  student_id: string;
-  student?: { id: string; name: string };
   payment_id: string;
-  gross_amount: number;
-  platform_fee: number;
-  net_amount: number;
+  gross_amount: string;
+  midtrans_fee: string;
+  transfer_amount: string;
+  platform_cost: string;
   status: 'PENDING' | 'TRANSFERRED';
   transferred_at?: string | null;
+  transferred_by?: string | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;
+  institution: { id: string; name: string };
+  payment: {
+    id: string;
+    amount: string;
+    student: { id: string; name: string } | null;
+    midtrans_payment_type: string | null;
+  };
+}
+
+export interface SettlementSummaryInstitution {
+  institution_id: string;
+  institution_name: string;
+  pending_count: number;
+  pending_amount: number;
+  transferred_count: number;
+  transferred_amount: number;
+  total_platform_cost: number;
 }
 
 export interface SettlementSummary {
-  total_pending: number;
-  total_transferred: number;
-  total_platform_fee: number;
-  pending_count: number;
-  transferred_count: number;
+  institutions: SettlementSummaryInstitution[];
+  totals: {
+    total_pending: number;
+    total_transferred: number;
+    total_platform_cost: number;
+  };
+}
+
+export interface SettlementReportTransaction {
+  date: string;
+  student_name: string;
+  payment_type: string | null;
+  gross_amount: number;
+  midtrans_fee: number;
+  transfer_amount: number;
+  platform_cost: number;
+  status: 'PENDING' | 'TRANSFERRED';
+  transferred_at: string | null;
 }
 
 export interface SettlementReport {
-  institution_id: string;
-  institution?: { id: string; name: string };
+  institution_name: string;
   period: string;
-  total_gross: number;
-  total_fee: number;
-  total_net: number;
-  count: number;
+  transactions: SettlementReportTransaction[];
+  summary: {
+    total_gross: number;
+    total_fee: number;
+    total_net: number;
+    total_platform_cost: number;
+  };
 }
 
 export interface PaginatedSettlements {
-  items: Settlement[];
-  total: number;
-  page: number;
-  limit: number;
+  data: Settlement[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface GetSettlementsParams {
@@ -78,7 +112,7 @@ export const settlementsService = {
 
   getSettlementReport: (params: GetSettlementReportParams) =>
     api
-      .get<SettlementReport[]>('/api/admin/settlements/report', { params })
+      .get<SettlementReport>('/api/admin/settlements/report', { params })
       .then((r) => r.data),
 
   markTransferred: (id: string, data: MarkTransferredData) =>

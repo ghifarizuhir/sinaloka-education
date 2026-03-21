@@ -94,7 +94,7 @@ function TransferModal({ settlement, onClose }: TransferModalProps) {
                 Jumlah Transfer
               </p>
               <p className="text-sm font-medium dark:text-zinc-100">
-                Rp {settlement.net_amount.toLocaleString('id-ID')}
+                Rp {Number(settlement.transfer_amount).toLocaleString('id-ID')}
               </p>
             </div>
           </div>
@@ -274,9 +274,9 @@ export default function Settlements() {
       }),
   });
 
-  const items: Settlement[] = settlementsData?.items ?? [];
-  const total = settlementsData?.total ?? 0;
-  const totalPages = Math.ceil(total / PAGE_LIMIT);
+  const items: Settlement[] = settlementsData?.data ?? [];
+  const total = settlementsData?.meta?.total ?? 0;
+  const totalPages = settlementsData?.meta?.totalPages ?? 1;
 
   const pendingItems = items.filter((i) => i.status === 'PENDING');
   const allPendingSelected =
@@ -323,15 +323,15 @@ export default function Settlements() {
           <>
             <StatCard
               label="Total Pending"
-              value={`Rp ${(summary?.total_pending ?? 0).toLocaleString('id-ID')}`}
+              value={`Rp ${(summary?.totals?.total_pending ?? 0).toLocaleString('id-ID')}`}
             />
             <StatCard
               label="Total Transferred"
-              value={`Rp ${(summary?.total_transferred ?? 0).toLocaleString('id-ID')}`}
+              value={`Rp ${(summary?.totals?.total_transferred ?? 0).toLocaleString('id-ID')}`}
             />
             <StatCard
               label="Total Platform Fee"
-              value={`Rp ${(summary?.total_platform_fee ?? 0).toLocaleString('id-ID')}`}
+              value={`Rp ${(summary?.totals?.total_platform_cost ?? 0).toLocaleString('id-ID')}`}
             />
           </>
         )}
@@ -445,16 +445,16 @@ export default function Settlements() {
                       </span>
                     </td>
                     <td className="p-4 text-sm text-zinc-500">
-                      {item.student?.name ?? item.student_id}
+                      {item.payment?.student?.name ?? '—'}
                     </td>
                     <td className="p-4 text-sm text-right dark:text-zinc-100">
-                      Rp {item.gross_amount.toLocaleString('id-ID')}
+                      Rp {Number(item.gross_amount).toLocaleString('id-ID')}
                     </td>
                     <td className="p-4 text-sm text-right text-zinc-500">
-                      Rp {item.platform_fee.toLocaleString('id-ID')}
+                      Rp {Number(item.platform_cost).toLocaleString('id-ID')}
                     </td>
                     <td className="p-4 text-sm text-right font-medium dark:text-zinc-100">
-                      Rp {item.net_amount.toLocaleString('id-ID')}
+                      Rp {Number(item.transfer_amount).toLocaleString('id-ID')}
                     </td>
                     <td className="p-4">
                       <StatusBadge status={item.status} />

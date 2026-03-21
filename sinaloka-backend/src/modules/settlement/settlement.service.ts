@@ -187,7 +187,7 @@ export class SettlementService {
     }
 
     const result = await this.prisma.settlement.updateMany({
-      where: { id: { in: dto.settlement_ids } },
+      where: { id: { in: dto.settlement_ids }, status: 'PENDING' },
       data: {
         status: 'TRANSFERRED',
         transferred_at: dto.transferred_at,
