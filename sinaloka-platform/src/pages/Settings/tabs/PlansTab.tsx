@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, Zap } from 'lucide-react';
-import { Card, Button, Badge, Modal } from '../../../components/UI';
+import { Card, Button, Badge } from '../../../components/UI';
 import { cn } from '../../../lib/utils';
-import { usePlan, useRequestUpgrade } from '../../../hooks/usePlan';
+import { usePlan } from '../../../hooks/usePlan';
+import { useSubscriptionStatus } from '../../../hooks/useSubscription';
 import type { PlanType, PlanConfig } from '../../../types/plan';
+import { SubscriptionStatusCard } from './PlansTab/SubscriptionStatusCard';
+import { PaymentModal } from './PlansTab/PaymentModal';
+import { InvoiceTable } from './PlansTab/InvoiceTable';
 
 const PLAN_ORDER: PlanType[] = ['STARTER', 'GROWTH', 'BUSINESS'];
 
@@ -115,92 +119,85 @@ function PricingCard({
   );
 }
 
+interface PaymentModalState {
+  open: boolean;
+  planType: 'GROWTH' | 'BUSINESS';
+  type: 'new' | 'renewal';
+}
+
 export const PlansTab = () => {
   const { t } = useTranslation();
   const { data: planInfo, isLoading } = usePlan();
-  const requestUpgrade = useRequestUpgrade();
+  const { data: subscriptionStatus } = useSubscriptionStatus();
 
-  const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
-  const [upgradeMessage, setUpgradeMessage] = useState('');
+  const [paymentModal, setPaymentModal] = useState<PaymentModalState | null>(null);
 
   const handleRequestUpgrade = (plan: PlanType) => {
-    setSelectedPlan(plan);
-    setUpgradeMessage('');
+    if (plan === 'STARTER') return;
+    setPaymentModal({ open: true, planType: plan as 'GROWTH' | 'BUSINESS', type: 'new' });
   };
 
-  const handleSubmitUpgrade = () => {
-    if (!selectedPlan) return;
-    requestUpgrade.mutate(
-      { requested_plan: selectedPlan, message: upgradeMessage || undefined },
-      {
-        onSuccess: () => {
-          setSelectedPlan(null);
-          setUpgradeMessage('');
-        },
-      },
-    );
+  const handleRenew = () => {
+    if (!planInfo) return;
+    const currentPlan = planInfo.currentPlan;
+    if (currentPlan === 'STARTER') return;
+    setPaymentModal({ open: true, planType: currentPlan as 'GROWTH' | 'BUSINESS', type: 'renewal' });
   };
+
+  const closePaymentModal = () => setPaymentModal(null);
+
+  const paymentPrice =
+    paymentModal && planInfo
+      ? (planInfo.allPlans[paymentModal.planType]?.price ?? 0)
+      : 0;
 
   if (isLoading || !planInfo) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-80 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
-        ))}
+      <div className="space-y-6">
+        <div className="h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-80 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {PLAN_ORDER.map((planType) => (
-          <PricingCard
-            key={planType}
-            planType={planType}
-            planConfig={planInfo.allPlans[planType]}
-            currentPlan={planInfo.currentPlan}
-            onRequestUpgrade={handleRequestUpgrade}
-          />
-        ))}
+      <div className="space-y-8">
+        {subscriptionStatus && (
+          <SubscriptionStatusCard data={subscriptionStatus} onRenew={handleRenew} />
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {PLAN_ORDER.map((planType) => (
+            <PricingCard
+              key={planType}
+              planType={planType}
+              planConfig={planInfo.allPlans[planType]}
+              currentPlan={planInfo.currentPlan}
+              onRequestUpgrade={handleRequestUpgrade}
+            />
+          ))}
+        </div>
+
+        <div>
+          <h3 className="text-base font-semibold text-zinc-800 dark:text-zinc-100 mb-4">Invoice</h3>
+          <InvoiceTable />
+        </div>
       </div>
 
-      <Modal
-        isOpen={selectedPlan !== null}
-        onClose={() => setSelectedPlan(null)}
-        title={t('plan.requestUpgrade')}
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {selectedPlan && planInfo.allPlans[selectedPlan]?.label}
-          </p>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium dark:text-zinc-100">
-              {t('plan.upgradeMessage')}
-            </label>
-            <textarea
-              value={upgradeMessage}
-              onChange={(e) => setUpgradeMessage(e.target.value)}
-              placeholder={t('plan.upgradeMessagePlaceholder')}
-              rows={4}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-            />
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setSelectedPlan(null)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              onClick={handleSubmitUpgrade}
-              disabled={requestUpgrade.isPending}
-              className="gap-2"
-            >
-              <Zap size={15} />
-              {requestUpgrade.isPending ? t('common.saving') : t('plan.requestUpgrade')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      {paymentModal && (
+        <PaymentModal
+          isOpen={paymentModal.open}
+          onClose={closePaymentModal}
+          planType={paymentModal.planType}
+          type={paymentModal.type}
+          price={paymentPrice}
+        />
+      )}
     </>
   );
 };
