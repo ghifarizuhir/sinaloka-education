@@ -95,6 +95,10 @@ export class WhatsappService {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`Fonnte API returned HTTP ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (!data.status) {

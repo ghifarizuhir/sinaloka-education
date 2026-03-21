@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 jest.mock('../../common/prisma/prisma.service', () => {
@@ -145,6 +142,7 @@ describe('WhatsappService', () => {
       };
 
       global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
@@ -176,6 +174,7 @@ describe('WhatsappService', () => {
 
     it('should store structured templateParams in DB record', async () => {
       global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
         json: () => Promise.resolve({ status: true, id: ['123'] }),
       });
       prisma.whatsappMessage.update.mockResolvedValue({
@@ -208,6 +207,7 @@ describe('WhatsappService', () => {
       };
 
       global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
