@@ -18,10 +18,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 interface PaymentListProps {
   data: PaymentRecord[];
-  onOpenPaymentStatus?: (paymentId: string) => void;
 }
 
-export function PaymentList({ data, onOpenPaymentStatus }: PaymentListProps) {
+export function PaymentList({ data }: PaymentListProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);

@@ -151,7 +151,14 @@ export class PaymentGatewayController {
     } = body;
 
     // Extract payment UUID from order_id format "{uuid}-{timestamp}"
-    const paymentId = order_id.length > 36 ? order_id.slice(0, 36) : order_id;
+    const UUID_RE =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidPart = order_id.slice(0, 36);
+    const suffix = order_id.slice(36);
+    const paymentId =
+      UUID_RE.test(uuidPart) && (!suffix || /^-\d{13}$/.test(suffix))
+        ? uuidPart
+        : order_id; // fallback: treat full string as ID (legacy format)
 
     const payment = await this.prisma.payment.findFirst({
       where: { id: paymentId },
@@ -253,7 +260,7 @@ export class PaymentGatewayController {
         this.logger.error(
           `Webhook processing failed for order ${order_id}: ${err}`,
         );
-        return { status: 'processing_error' };
+        throw err; // Re-throw so Midtrans gets 500 and retries
       }
     }
 
