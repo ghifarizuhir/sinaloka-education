@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
   NotFoundException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -179,7 +178,10 @@ describe('WhatsappService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         json: () => Promise.resolve({ status: true, id: ['123'] }),
       });
-      prisma.whatsappMessage.update.mockResolvedValue({ id: 'msg-1', status: 'SENT' });
+      prisma.whatsappMessage.update.mockResolvedValue({
+        id: 'msg-1',
+        status: 'SENT',
+      });
 
       await service.sendMessage({
         institutionId: 'inst-1',
