@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -28,9 +31,7 @@ describe('WhatsappService', () => {
   };
 
   const configValues: Record<string, string> = {
-    WHATSAPP_ACCESS_TOKEN: 'test-token',
-    WHATSAPP_PHONE_NUMBER_ID: 'test-phone-id',
-    WHATSAPP_APP_SECRET: 'test-secret',
+    FONNTE_TOKEN: 'test-fonnte-token',
   };
 
   beforeEach(async () => {
@@ -62,7 +63,7 @@ describe('WhatsappService', () => {
   });
 
   describe('isConfigured()', () => {
-    it('should return true when WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID are set', () => {
+    it('should return true when FONNTE_TOKEN is set', () => {
       expect(service.isConfigured()).toBe(true);
     });
   });
@@ -87,7 +88,7 @@ describe('WhatsappService', () => {
       unconfiguredService = module.get<WhatsappService>(WhatsappService);
     });
 
-    it('should return false when WHATSAPP_ACCESS_TOKEN is missing', () => {
+    it('should return false when FONNTE_TOKEN is missing', () => {
       expect(unconfiguredService.isConfigured()).toBe(false);
     });
   });
@@ -128,30 +129,169 @@ describe('WhatsappService', () => {
     });
   });
 
-  describe('verifyWebhookSignature()', () => {
-    it('should return true for valid HMAC SHA-256 signature', () => {
-      const payload = '{"test":"data"}';
-      const expected =
-        'sha256=' +
-        crypto
-          .createHmac('sha256', 'test-secret')
-          .update(payload)
-          .digest('hex');
-
-      expect(service.verifyWebhookSignature(payload, expected)).toBe(true);
+  describe('sendMessage()', () => {
+    beforeEach(() => {
+      prisma.whatsappMessage.create.mockResolvedValue({
+        id: 'msg-1',
+        status: 'PENDING',
+        retry_count: 0,
+      });
     });
 
-    it('should return false for invalid signature', () => {
-      const payload = '{"test":"data"}';
-      // Must be same byte length as a real sha256 hex digest (64 hex chars)
-      const fakeSignature = 'sha256=' + 'a'.repeat(64);
-      expect(service.verifyWebhookSignature(payload, fakeSignature)).toBe(
-        false,
+    it('should send message via Fonnte and update status to SENT', async () => {
+      const mockResponse = {
+        status: true,
+        id: ['80367170'],
+        process: 'pending',
+      };
+
+      global.fetch = jest.fn().mockResolvedValue({
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      prisma.whatsappMessage.update.mockResolvedValue({
+        id: 'msg-1',
+        status: 'SENT',
+        wa_message_id: '80367170',
+      });
+
+      const result = await service.sendMessage({
+        institutionId: 'inst-1',
+        phone: '081234567890',
+        message: 'Test message',
+        relatedType: 'payment',
+        relatedId: 'pay-1',
+      });
+
+      expect(result?.status).toBe('SENT');
+
+      // Verify the target was sent without + prefix
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.target).toBe('6281234567890');
+      expect(body.target).not.toContain('+');
+
+      // Verify Authorization header has no Bearer prefix
+      expect(fetchCall[1].headers.Authorization).toBe('test-fonnte-token');
+    });
+
+    it('should store structured templateParams in DB record', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        json: () => Promise.resolve({ status: true, id: ['123'] }),
+      });
+      prisma.whatsappMessage.update.mockResolvedValue({ id: 'msg-1', status: 'SENT' });
+
+      await service.sendMessage({
+        institutionId: 'inst-1',
+        phone: '081234567890',
+        message: 'Test',
+        templateName: 'payment_reminder',
+        templateParams: { studentName: 'Alice', amount: '500.000' },
+      });
+
+      expect(prisma.whatsappMessage.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            template_name: 'payment_reminder',
+            template_params: { studentName: 'Alice', amount: '500.000' },
+          }),
+        }),
       );
     });
 
-    it('should return false when no signature provided', () => {
-      expect(service.verifyWebhookSignature('payload', '')).toBe(false);
+    it('should mark message FAILED when Fonnte returns status false', async () => {
+      const mockResponse = {
+        status: false,
+        reason: 'token invalid',
+      };
+
+      global.fetch = jest.fn().mockResolvedValue({
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      prisma.whatsappMessage.update.mockResolvedValue({
+        id: 'msg-1',
+        status: 'FAILED',
+        error: 'token invalid',
+      });
+      prisma.whatsappMessage.findUnique.mockResolvedValue({
+        id: 'msg-1',
+        status: 'FAILED',
+      });
+
+      const result = await service.sendMessage({
+        institutionId: 'inst-1',
+        phone: '081234567890',
+        message: 'Test message',
+      });
+
+      expect(result?.status).toBe('FAILED');
+    });
+
+    it('should mark message FAILED on network error', async () => {
+      global.fetch = jest.fn().mockRejectedValue(new Error('Network timeout'));
+
+      prisma.whatsappMessage.update.mockResolvedValue({
+        id: 'msg-1',
+        status: 'FAILED',
+        error: 'Network timeout',
+      });
+      prisma.whatsappMessage.findUnique.mockResolvedValue({
+        id: 'msg-1',
+        status: 'FAILED',
+      });
+
+      const result = await service.sendMessage({
+        institutionId: 'inst-1',
+        phone: '081234567890',
+        message: 'Test message',
+      });
+
+      expect(result?.status).toBe('FAILED');
+    });
+  });
+
+  describe('handleStatusUpdate()', () => {
+    it('should map Fonnte "Sent" to DELIVERED', async () => {
+      await service.handleStatusUpdate('wa-123', 'Sent');
+      expect(prisma.whatsappMessage.updateMany).toHaveBeenCalledWith({
+        where: { wa_message_id: 'wa-123' },
+        data: { status: 'DELIVERED' },
+      });
+    });
+
+    it('should map Fonnte "Read" to READ', async () => {
+      await service.handleStatusUpdate('wa-123', 'Read');
+      expect(prisma.whatsappMessage.updateMany).toHaveBeenCalledWith({
+        where: { wa_message_id: 'wa-123' },
+        data: { status: 'READ' },
+      });
+    });
+
+    it('should map Fonnte "Failed" to FAILED', async () => {
+      await service.handleStatusUpdate('wa-123', 'Failed');
+      expect(prisma.whatsappMessage.updateMany).toHaveBeenCalledWith({
+        where: { wa_message_id: 'wa-123' },
+        data: { status: 'FAILED' },
+      });
+    });
+
+    it('should be case-insensitive', async () => {
+      await service.handleStatusUpdate('wa-123', 'SENT');
+      expect(prisma.whatsappMessage.updateMany).toHaveBeenCalledWith({
+        where: { wa_message_id: 'wa-123' },
+        data: { status: 'DELIVERED' },
+      });
+    });
+
+    it('should ignore unknown status', async () => {
+      await service.handleStatusUpdate('wa-123', 'unknown');
+      expect(prisma.whatsappMessage.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('should no-op when waMessageId is empty', async () => {
+      await service.handleStatusUpdate('', 'Sent');
+      expect(prisma.whatsappMessage.updateMany).not.toHaveBeenCalled();
     });
   });
 
