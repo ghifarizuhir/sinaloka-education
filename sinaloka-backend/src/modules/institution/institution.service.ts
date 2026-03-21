@@ -95,6 +95,7 @@ export class InstitutionService {
             password_hash: hashedPassword,
             role: 'ADMIN',
             institution_id: institution.id,
+            must_change_password: true,
           },
         });
         const created = await tx.institution.findUnique({

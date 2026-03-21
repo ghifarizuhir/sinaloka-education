@@ -16,6 +16,7 @@ import {
   ParentRegisterSchema,
   ForgotPasswordSchema,
   ResetPasswordSchema,
+  ChangePasswordSchema,
 } from './auth.dto.js';
 import type {
   LoginDto,
@@ -24,6 +25,7 @@ import type {
   ParentRegisterDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  ChangePasswordDto,
 } from './auth.dto.js';
 import { ParentInviteService } from '../parent/parent-invite.service.js';
 import { Public } from '../../common/decorators/public.decorator.js';
@@ -99,5 +101,14 @@ export class AuthController {
   @Get('me')
   async me(@CurrentUser() user: JwtPayload) {
     return this.authService.getProfile(user.userId);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(ChangePasswordSchema)) dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user.userId, dto);
   }
 }

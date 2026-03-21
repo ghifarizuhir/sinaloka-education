@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { Building2, ClipboardList, CreditCard, GraduationCap, Zap } from 'lucide-react';
+import { Building2, ClipboardList, CreditCard, GraduationCap, Shield, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSettingsPage } from './useSettingsPage';
 import { GeneralTab } from './tabs/GeneralTab';
@@ -9,6 +9,8 @@ import { BillingTab } from './tabs/BillingTab';
 import { AcademicTab } from './tabs/AcademicTab';
 import { PlansTab } from './tabs/PlansTab';
 import { RegistrationTab } from './tabs/RegistrationTab';
+import { SecurityTab } from './tabs/SecurityTab';
+import { useAuth } from '../../hooks/useAuth';
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
@@ -16,6 +18,7 @@ export const SettingsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const activeTab = searchParams.get('tab') || 'general';
+  const { mustChangePassword } = useAuth();
 
   useEffect(() => {
     if ((location.state as { tab?: string } | null)?.tab === 'plans') {
@@ -23,12 +26,19 @@ export const SettingsPage = () => {
     }
   }, [location.state]);
 
+  useEffect(() => {
+    if (mustChangePassword && activeTab !== 'security') {
+      setSearchParams({ tab: 'security' });
+    }
+  }, [mustChangePassword, activeTab, setSearchParams]);
+
   const tabs = [
     { id: 'general', label: t('settings.tabs.general'), icon: Building2 },
     { id: 'billing', label: t('settings.tabs.billing'), icon: CreditCard },
     { id: 'academic', label: t('settings.tabs.academic'), icon: GraduationCap },
     { id: 'registration', label: t('registration.settings'), icon: ClipboardList },
     { id: 'plans', label: t('settings.tabs.plans'), icon: Zap },
+    { id: 'security', label: t('settings.tabs.security'), icon: Shield },
   ];
 
   return (
@@ -44,21 +54,25 @@ export const SettingsPage = () => {
 
       <div className="sticky top-16 z-10 bg-white dark:bg-zinc-950 -mx-1 px-1">
         <nav className="flex gap-2 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto pb-px">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSearchParams({ tab: tab.id })}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap",
-                activeTab === tab.id
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-            >
-              <tab.icon size={16} />
-              {tab.label}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const isDisabled = mustChangePassword && tab.id !== 'security';
+            return (
+              <button
+                key={tab.id}
+                onClick={() => !isDisabled && setSearchParams({ tab: tab.id })}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                  isDisabled && "opacity-40 cursor-not-allowed pointer-events-none",
+                  activeTab === tab.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <tab.icon size={16} />
+                {tab.label}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
@@ -114,6 +128,10 @@ export const SettingsPage = () => {
 
       {activeTab === 'plans' && (
         <PlansTab />
+      )}
+
+      {activeTab === 'security' && (
+        <SecurityTab />
       )}
 
       {activeTab === 'academic' && (

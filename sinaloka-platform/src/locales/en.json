@@ -1293,14 +1293,24 @@
       "addGrade": "Add Grade Level"
     },
     "security": {
-      "securityTitle": "Security & Access Control",
-      "twoFactorAuth": "Two-Factor Authentication (2FA)",
-      "twoFactorAuthDesc": "Require a code from your phone to login",
-      "passwordPolicy": "Password Policy",
-      "minChars": "Minimum 8 characters",
-      "includeNumbers": "Must include numbers",
-      "includeSpecialChars": "Must include special characters",
-      "requirePasswordChange": "Require password change every 90 days"
+      "title": "Change Password",
+      "subtitle": "Make sure your new password is at least 8 characters with an uppercase letter and a number.",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "updateButton": "Update Password",
+      "forceChangeAlert": "You must change your default password before continuing.",
+      "successMessage": "Password changed successfully",
+      "successWelcome": "Password changed successfully. Welcome!",
+      "errorCurrentWrong": "Current password is incorrect",
+      "errorSamePassword": "New password must be different from current password",
+      "errorMismatch": "Passwords do not match",
+      "validationTitle": "Password requirements:",
+      "validation": {
+        "minLength": "At least 8 characters",
+        "uppercase": "Contains an uppercase letter",
+        "digit": "Contains a number"
+      }
     },
     "integrations": {
       "connectedServices": "Connected Services",

@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ForbiddenException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -9,13 +10,13 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import {
   LoginDto,
   RefreshTokenDto,
   LogoutDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  ChangePasswordDto,
 } from './auth.dto.js';
 import { EmailService } from '../email/email.service.js';
 
@@ -24,6 +25,7 @@ export interface TokenResponse {
   refresh_token: string;
   token_type: string;
   expires_in: number;
+  must_change_password: boolean;
 }
 
 @Injectable()
@@ -108,6 +110,7 @@ export class AuthService {
       refresh_token: refreshTokenValue,
       token_type: 'Bearer',
       expires_in: this.expiryToSeconds(jwtExpiry),
+      must_change_password: user.must_change_password,
     };
   }
 
@@ -179,6 +182,7 @@ export class AuthService {
       refresh_token: newRefreshTokenValue,
       token_type: 'Bearer',
       expires_in: this.expiryToSeconds(jwtExpiry),
+      must_change_password: refreshToken.user.must_change_password,
     };
   }
 
@@ -208,6 +212,7 @@ export class AuthService {
         avatar_url: true,
         is_active: true,
         last_login_at: true,
+        must_change_password: true,
         created_at: true,
         institution: {
           select: {
@@ -329,6 +334,93 @@ export class AuthService {
     ]);
 
     return { message: 'Password berhasil direset.' };
+  }
+
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+  ): Promise<TokenResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { institution: true },
+    });
+
+    if (!user || !user.password_hash) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (!user.is_active) {
+      throw new UnauthorizedException('User account is inactive');
+    }
+
+    if (user.institution && !user.institution.is_active) {
+      throw new ForbiddenException(
+        'Your institution has been deactivated. Contact support.',
+      );
+    }
+
+    const isCurrentValid = await bcrypt.compare(
+      dto.current_password,
+      user.password_hash,
+    );
+    if (!isCurrentValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    if (dto.current_password === dto.new_password) {
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
+    }
+
+    const newHash = await bcrypt.hash(dto.new_password, 10);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          password_hash: newHash,
+          must_change_password: false,
+        },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { user_id: userId, revoked: false },
+        data: { revoked: true },
+      }),
+    ]);
+
+    // Issue new tokens
+    const payload = {
+      sub: user.id,
+      institutionId: user.institution_id,
+      role: user.role,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshTokenValue = crypto.randomBytes(64).toString('hex');
+    const refreshExpiry = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRY',
+      '7d',
+    );
+    const expiresAt = this.calculateExpiry(refreshExpiry);
+
+    await this.prisma.refreshToken.create({
+      data: {
+        user_id: userId,
+        token: refreshTokenValue,
+        expires_at: expiresAt,
+      },
+    });
+
+    const jwtExpiry = this.configService.get<string>('JWT_EXPIRY', '15m');
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshTokenValue,
+      token_type: 'Bearer',
+      expires_in: this.expiryToSeconds(jwtExpiry),
+      must_change_password: false,
+    };
   }
 
   private calculateExpiry(expiry: string): Date {

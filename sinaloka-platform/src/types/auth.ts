@@ -8,6 +8,7 @@ export interface TokenResponse {
   refresh_token: string;
   token_type: string;
   expires_in: number;
+  must_change_password: boolean;
 }
 
 export interface User {
@@ -19,6 +20,7 @@ export interface User {
   is_active: boolean;
   last_login_at: string | null;
   created_at: string;
+  must_change_password: boolean;
   institution: {
     id: string;
     name: string;
