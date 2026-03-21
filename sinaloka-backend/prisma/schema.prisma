@@ -93,6 +93,33 @@ enum UpgradeRequestStatus {
   REJECTED
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  GRACE_PERIOD
+  EXPIRED
+  CANCELLED
+}
+
+enum SubscriptionPaymentMethod {
+  MIDTRANS
+  MANUAL_TRANSFER
+}
+
+enum SubscriptionPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
 enum RegistrationType {
   STUDENT
   TUTOR
@@ -139,6 +166,9 @@ model Institution {
   subjects          Subject[]
   upgrade_requests  UpgradeRequest[]
   registrations     Registration[]
+  subscriptions          Subscription[]
+  subscription_payments  SubscriptionPayment[]
+  subscription_invoices  SubscriptionInvoice[]
 
   @@map("institutions")
 }
@@ -187,6 +217,79 @@ model UpgradeRequest {
   @@index([status])
   @@index([institution_id])
   @@map("upgrade_requests")
+}
+
+model Subscription {
+  id                  String             @id @default(cuid())
+  institution_id      String
+  plan_type           PlanType
+  status              SubscriptionStatus @default(ACTIVE)
+  started_at          DateTime
+  expires_at          DateTime
+  grace_ends_at       DateTime?
+  auto_downgraded_at  DateTime?
+  cancelled_at        DateTime?
+  cancelled_reason    String?
+  last_reminder_tier  Int?
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+
+  institution  Institution           @relation(fields: [institution_id], references: [id])
+  payments     SubscriptionPayment[]
+  invoices     SubscriptionInvoice[]
+
+  @@index([institution_id])
+  @@index([status])
+  @@index([expires_at])
+  @@map("subscription")
+}
+
+model SubscriptionPayment {
+  id                      String                    @id @default(cuid())
+  subscription_id         String?
+  institution_id          String
+  plan_type               PlanType
+  payment_type            String                    @default("new")
+  amount                  Int
+  method                  SubscriptionPaymentMethod
+  status                  SubscriptionPaymentStatus @default(PENDING)
+  midtrans_order_id       String?
+  midtrans_transaction_id String?
+  proof_url               String?
+  confirmed_by            String?
+  confirmed_at            DateTime?
+  notes                   String?
+  paid_at                 DateTime?
+  created_at              DateTime                  @default(now())
+
+  subscription  Subscription?      @relation(fields: [subscription_id], references: [id])
+  institution   Institution        @relation(fields: [institution_id], references: [id])
+  invoice       SubscriptionInvoice?
+
+  @@index([institution_id])
+  @@index([status])
+  @@map("subscription_payment")
+}
+
+model SubscriptionInvoice {
+  id              String        @id @default(cuid())
+  institution_id  String
+  subscription_id String
+  invoice_number  String        @unique
+  amount          Int
+  period_start    DateTime
+  period_end      DateTime
+  due_date        DateTime
+  status          InvoiceStatus @default(DRAFT)
+  payment_id      String?       @unique
+  created_at      DateTime      @default(now())
+
+  institution   Institution          @relation(fields: [institution_id], references: [id])
+  subscription  Subscription         @relation(fields: [subscription_id], references: [id])
+  payment       SubscriptionPayment? @relation(fields: [payment_id], references: [id])
+
+  @@index([institution_id])
+  @@map("subscription_invoice")
 }
 
 model User {
