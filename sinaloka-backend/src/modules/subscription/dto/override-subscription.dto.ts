@@ -7,4 +7,6 @@ export const OverrideSubscriptionSchema = z.object({
   notes: z.string().min(1).max(500),
 });
 
-export type OverrideSubscriptionDto = z.infer<typeof OverrideSubscriptionSchema>;
+export type OverrideSubscriptionDto = z.infer<
+  typeof OverrideSubscriptionSchema
+>;

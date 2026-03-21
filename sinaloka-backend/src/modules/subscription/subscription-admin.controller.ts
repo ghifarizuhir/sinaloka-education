@@ -29,7 +29,8 @@ export class SubscriptionAdminController {
   @Patch(':id')
   async overrideSubscription(
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(OverrideSubscriptionSchema)) body: OverrideSubscriptionDto,
+    @Body(new ZodValidationPipe(OverrideSubscriptionSchema))
+    body: OverrideSubscriptionDto,
   ) {
     return this.subscriptionService.overrideSubscription(id, body);
   }

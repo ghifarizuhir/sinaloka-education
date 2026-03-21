@@ -5,4 +5,6 @@ export const ConfirmSubscriptionPaymentSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-export type ConfirmSubscriptionPaymentDto = z.infer<typeof ConfirmSubscriptionPaymentSchema>;
+export type ConfirmSubscriptionPaymentDto = z.infer<
+  typeof ConfirmSubscriptionPaymentSchema
+>;

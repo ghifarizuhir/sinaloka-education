@@ -1,8 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { PLAN_LIMITS } from '../../common/constants/plans.js';
-import { SUBSCRIPTION_DURATION_DAYS, GRACE_PERIOD_DAYS } from './subscription.constants.js';
-import type { PlanType, SubscriptionStatus } from '../../../generated/prisma/client.js';
+import {
+  SUBSCRIPTION_DURATION_DAYS,
+  GRACE_PERIOD_DAYS,
+} from './subscription.constants.js';
+import type {
+  PlanType,
+  SubscriptionStatus,
+} from '../../../generated/prisma/client.js';
 import type { SubscriptionQueryDto } from './dto/subscription-query.dto.js';
 
 @Injectable()
@@ -61,7 +67,9 @@ export class SubscriptionService {
       const expiresAt = new Date(subscription.expires_at);
       const daysRemaining = Math.max(
         0,
-        Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
+        Math.ceil(
+          (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+        ),
       );
 
       subscriptionDetails = {
@@ -292,7 +300,15 @@ export class SubscriptionService {
     sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
 
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    const endOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
 
     const [planCounts, expiringSoon, pendingPaymentsCount, monthlyRevenue] =
       await Promise.all([

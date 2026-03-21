@@ -32,6 +32,10 @@ export class SubscriptionPaymentAdminController {
     body: ConfirmSubscriptionPaymentDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.subscriptionPaymentService.confirmPayment(id, body, user.userId);
+    return this.subscriptionPaymentService.confirmPayment(
+      id,
+      body,
+      user.userId,
+    );
   }
 }

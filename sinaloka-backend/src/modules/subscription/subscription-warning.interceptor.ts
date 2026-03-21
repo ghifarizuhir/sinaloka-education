@@ -33,7 +33,7 @@ export class SubscriptionWarningInterceptor implements NestInterceptor {
           !Array.isArray(data)
         ) {
           return {
-            ...(data as object),
+            ...data,
             _subscriptionWarning: request._subscriptionWarning,
           };
         }

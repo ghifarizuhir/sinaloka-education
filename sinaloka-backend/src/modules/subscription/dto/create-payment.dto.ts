@@ -7,4 +7,6 @@ export const CreateSubscriptionPaymentSchema = z.object({
   proof_url: z.string().url().optional(),
 });
 
-export type CreateSubscriptionPaymentDto = z.infer<typeof CreateSubscriptionPaymentSchema>;
+export type CreateSubscriptionPaymentDto = z.infer<
+  typeof CreateSubscriptionPaymentSchema
+>;
