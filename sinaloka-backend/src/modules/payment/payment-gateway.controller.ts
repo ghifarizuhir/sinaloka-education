@@ -10,7 +10,10 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
+import { SubscriptionPaymentService } from '../subscription/subscription-payment.service.js';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
@@ -28,6 +31,8 @@ export class PaymentGatewayController {
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
     private readonly midtransService: MidtransService,
+    @Inject(forwardRef(() => SubscriptionPaymentService))
+    private readonly subscriptionPaymentService: SubscriptionPaymentService,
   ) {}
 
   @Post(':id/checkout')
@@ -120,6 +125,12 @@ export class PaymentGatewayController {
   @Public()
   @HttpCode(HttpStatus.OK)
   async midtransWebhook(@Body() body: Record<string, any>) {
+    // Route subscription payments to SubscriptionPaymentService
+    const orderId = body.order_id;
+    if (orderId && orderId.startsWith('SUB-')) {
+      return this.subscriptionPaymentService.handleWebhook(body);
+    }
+
     const {
       order_id,
       transaction_status,

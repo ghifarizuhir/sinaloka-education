@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -37,11 +38,11 @@ export class PlanController {
   }
 
   @Post('upgrade-request')
-  async requestUpgrade(
-    @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(UpgradeRequestSchema)) dto: UpgradeRequestDto,
-  ) {
-    return this.planService.requestUpgrade(user.institutionId!, dto);
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  async requestUpgrade() {
+    throw new BadRequestException(
+      'Upgrade requests are deprecated. Please use the subscription payment flow at /api/subscription/pay.',
+    );
   }
 
   @Get('upgrade-requests')
