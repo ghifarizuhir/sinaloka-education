@@ -11,7 +11,17 @@ import { MidtransService } from './midtrans.service.js';
 @Module({
   imports: [SettingsModule, forwardRef(() => SubscriptionModule)],
   controllers: [PaymentController, PaymentGatewayController],
-  providers: [PaymentService, InvoiceGeneratorService, InvoiceService, MidtransService],
-  exports: [PaymentService, InvoiceGeneratorService, InvoiceService, MidtransService],
+  providers: [
+    PaymentService,
+    InvoiceGeneratorService,
+    InvoiceService,
+    MidtransService,
+  ],
+  exports: [
+    PaymentService,
+    InvoiceGeneratorService,
+    InvoiceService,
+    MidtransService,
+  ],
 })
 export class PaymentModule {}

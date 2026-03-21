@@ -20,9 +20,11 @@ import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { MidtransService } from './midtrans.service.js';
+import { calculateFee } from '../settlement/fee-rates.js';
 
 @Controller('payments')
 export class PaymentGatewayController {
@@ -32,6 +34,7 @@ export class PaymentGatewayController {
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
     private readonly midtransService: MidtransService,
+    private readonly configService: ConfigService,
     @Inject(forwardRef(() => SubscriptionPaymentService))
     private readonly subscriptionPaymentService: SubscriptionPaymentService,
   ) {}
@@ -197,17 +200,48 @@ export class PaymentGatewayController {
     const newStatus =
       this.midtransService.mapTransactionStatus(transaction_status);
 
+    const paymentType = (body.payment_type as string) ?? 'unknown';
+
     if (newStatus !== null) {
-      await this.prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: newStatus,
-          ...(newStatus === 'PAID' && {
-            paid_date: new Date(),
-            method: 'MIDTRANS',
-          }),
-        },
-      });
+      if (newStatus === 'PAID') {
+        const { midtransFee, transferAmount, platformCost } = calculateFee(
+          Number(payment.amount),
+          paymentType,
+          this.configService,
+        );
+
+        await this.prisma.$transaction(async (tx) => {
+          await tx.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: 'PAID',
+              paid_date: new Date(),
+              method: 'MIDTRANS',
+              midtrans_payment_type: paymentType,
+            },
+          });
+
+          await tx.settlement.create({
+            data: {
+              institution_id: payment.institution_id,
+              payment_id: payment.id,
+              gross_amount: Number(payment.amount),
+              midtrans_fee: midtransFee,
+              transfer_amount: transferAmount,
+              platform_cost: platformCost,
+              status: 'PENDING',
+            },
+          });
+        });
+      } else {
+        await this.prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: newStatus,
+            midtrans_payment_type: paymentType,
+          },
+        });
+      }
     }
 
     return { status: 'ok' };

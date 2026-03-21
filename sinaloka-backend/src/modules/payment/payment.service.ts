@@ -60,7 +60,10 @@ export class PaymentService {
 
   async update(institutionId: string, id: string, dto: UpdatePaymentDto) {
     const payment = await this.findOne(institutionId, id);
-    const updated = await this.prisma.payment.update({ where: { id }, data: dto });
+    const updated = await this.prisma.payment.update({
+      where: { id },
+      data: dto,
+    });
 
     // Sync enrollment payment_status when payment status changes
     if (dto.status && dto.status !== payment.status) {
@@ -90,14 +93,14 @@ export class PaymentService {
 
     if (payments.length === 0) return;
 
-    const statuses = payments.map(p => p.status);
+    const statuses = payments.map((p) => p.status);
     let derivedStatus: string;
 
-    if (statuses.every(s => s === 'PAID')) {
+    if (statuses.every((s) => s === 'PAID')) {
       derivedStatus = 'PAID';
-    } else if (statuses.some(s => s === 'OVERDUE')) {
+    } else if (statuses.some((s) => s === 'OVERDUE')) {
       derivedStatus = 'OVERDUE';
-    } else if (statuses.some(s => s === 'PENDING')) {
+    } else if (statuses.some((s) => s === 'PENDING')) {
       derivedStatus = 'PENDING';
     } else {
       derivedStatus = 'NEW';
@@ -145,7 +148,7 @@ export class PaymentService {
       where: { id: { in: dto.payment_ids }, institution_id: institutionId },
       select: { enrollment_id: true },
     });
-    const enrollmentIds = [...new Set(payments.map(p => p.enrollment_id))];
+    const enrollmentIds = [...new Set(payments.map((p) => p.enrollment_id))];
 
     const result = await this.prisma.payment.updateMany({
       where: {
