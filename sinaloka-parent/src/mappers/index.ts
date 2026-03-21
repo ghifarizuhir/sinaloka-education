@@ -53,11 +53,22 @@ export function mapSession(raw: any): SessionRecord {
     status: raw.status,
     topic_covered: raw.topic_covered ?? null,
     session_summary: raw.session_summary ?? null,
-    class: raw.class,
+    class: {
+      ...raw.class,
+      subject: typeof raw.class?.subject === 'object' ? raw.class.subject.name : raw.class?.subject,
+    },
   };
 }
 
 export function mapPayment(raw: any): PaymentRecord {
+  const enrollment = raw.enrollment ? {
+    ...raw.enrollment,
+    class: raw.enrollment.class ? {
+      ...raw.enrollment.class,
+      subject: typeof raw.enrollment.class.subject === 'object' ? raw.enrollment.class.subject.name : raw.enrollment.class.subject,
+    } : raw.enrollment.class,
+  } : raw.enrollment;
+
   return {
     id: raw.id,
     amount: Number(raw.amount),
@@ -66,7 +77,7 @@ export function mapPayment(raw: any): PaymentRecord {
     status: raw.status,
     method: raw.method ?? null,
     gateway_configured: raw.gateway_configured ?? false,
-    enrollment: raw.enrollment,
+    enrollment,
   };
 }
 
@@ -76,7 +87,7 @@ export function mapEnrollment(raw: any): EnrollmentRecord {
     status: raw.status,
     class: {
       name: raw.class.name,
-      subject: raw.class.subject,
+      subject: typeof raw.class.subject === 'object' ? raw.class.subject.name : raw.class.subject,
       schedules: raw.class.schedules ?? [],
       fee: Number(raw.class.fee),
       tutor: { user: { name: raw.class.tutor?.user?.name ?? '' } },

@@ -45,7 +45,7 @@ export class ParentService {
                   where: { status: 'ACTIVE' },
                   include: {
                     class: {
-                      select: { id: true, name: true, subject: true },
+                      select: { id: true, name: true, subject: { select: { name: true } } },
                     },
                   },
                 },
@@ -84,7 +84,7 @@ export class ParentService {
             },
             orderBy: { date: 'asc' },
             include: {
-              class: { select: { id: true, name: true, subject: true } },
+              class: { select: { id: true, name: true, subject: { select: { name: true } } } },
             },
           })
         : [];
@@ -127,13 +127,13 @@ export class ParentService {
           ? {
               date: nextSession.date,
               start_time: nextSession.start_time,
-              subject: nextSession.class.subject,
+              subject: nextSession.class.subject?.name ?? '',
               class_name: nextSession.class.name,
             }
           : null,
         enrollments: s.enrollments.map((e: any) => ({
           class_name: e.class.name,
-          subject: e.class.subject,
+          subject: e.class.subject?.name ?? '',
         })),
       };
     });
@@ -204,7 +204,7 @@ export class ParentService {
               date: true,
               start_time: true,
               end_time: true,
-              class: { select: { name: true, subject: true } },
+              class: { select: { name: true, subject: { select: { name: true } } } },
             },
           },
         },
@@ -284,7 +284,7 @@ export class ParentService {
         take: limit,
         orderBy: { date: 'desc' },
         include: {
-          class: { select: { name: true, subject: true } },
+          class: { select: { name: true, subject: { select: { name: true } } } },
         },
       }),
       this.prisma.session.count({ where }),
