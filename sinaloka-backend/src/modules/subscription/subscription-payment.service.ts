@@ -31,14 +31,11 @@ export class SubscriptionPaymentService {
   private getMidtransConfig() {
     return {
       midtrans_server_key:
-        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_SERVER_KEY') ??
-        '',
+        this.configService.get<string>('MIDTRANS_SERVER_KEY') ?? '',
       midtrans_client_key:
-        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_CLIENT_KEY') ??
-        '',
+        this.configService.get<string>('MIDTRANS_CLIENT_KEY') ?? '',
       is_sandbox:
-        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_SANDBOX') !==
-        'false',
+        this.configService.get<string>('MIDTRANS_IS_SANDBOX') !== 'false',
     };
   }
 

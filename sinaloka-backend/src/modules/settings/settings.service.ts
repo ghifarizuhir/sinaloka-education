@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  GoneException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import type {
   UpdateGeneralSettingsDto,
@@ -11,13 +16,6 @@ import type {
 const REGISTRATION_DEFAULTS = {
   student_enabled: false,
   tutor_enabled: false,
-};
-
-const PAYMENT_GATEWAY_DEFAULTS = {
-  provider: 'midtrans' as const,
-  midtrans_server_key: '',
-  midtrans_client_key: '',
-  is_sandbox: true,
 };
 
 const BILLING_DEFAULTS = {
@@ -62,7 +60,10 @@ const GENERAL_SELECT = {
 
 @Injectable()
 export class SettingsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async getGeneral(institutionId: string) {
     const institution = await this.prisma.institution.findUnique({
@@ -169,57 +170,33 @@ export class SettingsService {
     return { ...ACADEMIC_DEFAULTS, ...updatedAcademic };
   }
 
-  async getPaymentGateway(institutionId: string) {
-    const institution = await this.prisma.institution.findUnique({
-      where: { id: institutionId },
-      select: { settings: true },
-    });
+  async getPaymentGateway(_institutionId?: string) {
+    const serverKey =
+      this.configService.get<string>('MIDTRANS_SERVER_KEY') ?? '';
+    const clientKey =
+      this.configService.get<string>('MIDTRANS_CLIENT_KEY') ?? '';
 
-    if (!institution) {
-      throw new NotFoundException('Institution not found');
-    }
-
-    const stored = (institution.settings as any)?.payment_gateway ?? {};
-    const config = { ...PAYMENT_GATEWAY_DEFAULTS, ...stored };
-
-    const maskedServerKey = config.midtrans_server_key
-      ? `${config.midtrans_server_key.slice(0, 4)}${'*'.repeat(Math.max(0, config.midtrans_server_key.length - 4))}`
+    const maskedServerKey = serverKey
+      ? `${serverKey.slice(0, 4)}${'*'.repeat(Math.max(0, serverKey.length - 4))}`
       : '';
 
     return {
-      provider: config.provider,
+      provider: 'midtrans' as const,
       midtrans_server_key: maskedServerKey,
-      midtrans_client_key: config.midtrans_client_key,
-      is_sandbox: config.is_sandbox,
-      is_configured: !!config.midtrans_server_key && !!config.midtrans_client_key,
+      midtrans_client_key: clientKey,
+      is_sandbox:
+        this.configService.get<string>('MIDTRANS_IS_SANDBOX') !== 'false',
+      is_configured: !!serverKey && !!clientKey,
     };
   }
 
   async updatePaymentGateway(
-    institutionId: string,
-    dto: UpdatePaymentGatewayDto,
+    _institutionId: string,
+    _dto: UpdatePaymentGatewayDto,
   ) {
-    const institution = await this.prisma.institution.findUnique({
-      where: { id: institutionId },
-      select: { settings: true },
-    });
-
-    if (!institution) {
-      throw new NotFoundException('Institution not found');
-    }
-
-    const currentSettings = (institution.settings as any) ?? {};
-    const currentGateway = currentSettings.payment_gateway ?? {};
-    const updatedGateway = { ...currentGateway, ...dto };
-
-    await this.prisma.institution.update({
-      where: { id: institutionId },
-      data: {
-        settings: { ...currentSettings, payment_gateway: updatedGateway },
-      },
-    });
-
-    return this.getPaymentGateway(institutionId);
+    throw new GoneException(
+      'Payment gateway configuration is now managed at platform level. Contact Super Admin.',
+    );
   }
 
   async getRegistration(institutionId: string) {
@@ -263,17 +240,15 @@ export class SettingsService {
     return { ...REGISTRATION_DEFAULTS, ...updatedRegistration };
   }
 
-  async getPaymentGatewayConfig(institutionId: string) {
-    const institution = await this.prisma.institution.findUnique({
-      where: { id: institutionId },
-      select: { settings: true },
-    });
-
-    if (!institution) {
-      throw new NotFoundException('Institution not found');
-    }
-
-    const stored = (institution.settings as any)?.payment_gateway ?? {};
-    return { ...PAYMENT_GATEWAY_DEFAULTS, ...stored };
+  async getPaymentGatewayConfig(_institutionId?: string) {
+    return {
+      provider: 'midtrans' as const,
+      midtrans_server_key:
+        this.configService.get<string>('MIDTRANS_SERVER_KEY') ?? '',
+      midtrans_client_key:
+        this.configService.get<string>('MIDTRANS_CLIENT_KEY') ?? '',
+      is_sandbox:
+        this.configService.get<string>('MIDTRANS_IS_SANDBOX') !== 'false',
+    };
   }
 }
