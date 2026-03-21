@@ -12,6 +12,7 @@ import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { PlanService } from './plan.service.js';
 import {
@@ -33,8 +34,8 @@ export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
   @Get()
-  async getPlanInfo(@CurrentUser() user: JwtPayload) {
-    return this.planService.getPlanInfo(user.institutionId!);
+  async getPlanInfo(@InstitutionId() institutionId: string) {
+    return this.planService.getPlanInfo(institutionId);
   }
 
   @Post('upgrade-request')
