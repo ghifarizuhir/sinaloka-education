@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { MidtransService } from '../payment/midtrans.service.js';
@@ -26,11 +31,14 @@ export class SubscriptionPaymentService {
   private getMidtransConfig() {
     return {
       midtrans_server_key:
-        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_SERVER_KEY') ?? '',
+        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_SERVER_KEY') ??
+        '',
       midtrans_client_key:
-        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_CLIENT_KEY') ?? '',
+        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_CLIENT_KEY') ??
+        '',
       is_sandbox:
-        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_SANDBOX') !== 'false',
+        this.configService.get<string>('SUBSCRIPTION_MIDTRANS_SANDBOX') !==
+        'false',
     };
   }
 
@@ -44,7 +52,10 @@ export class SubscriptionPaymentService {
     return `INV-${yearMonth}-${String(seq).padStart(5, '0')}`;
   }
 
-  async createPayment(institutionId: string, dto: CreateSubscriptionPaymentDto) {
+  async createPayment(
+    institutionId: string,
+    dto: CreateSubscriptionPaymentDto,
+  ) {
     const planConfig = PLAN_LIMITS[dto.plan_type as PlanType];
     if (!planConfig || planConfig.price === null) {
       throw new BadRequestException('This plan does not require payment');
@@ -70,14 +81,19 @@ export class SubscriptionPaymentService {
       const config = this.getMidtransConfig();
 
       if (!config.midtrans_server_key || !config.midtrans_client_key) {
-        throw new BadRequestException('Subscription payment gateway is not configured');
+        throw new BadRequestException(
+          'Subscription payment gateway is not configured',
+        );
       }
 
-      const snapResult = await this.midtransService.createSnapTransaction(config, {
-        orderId,
-        grossAmount: amount,
-        itemName: `Sinaloka ${planConfig.label} Plan - ${dto.type === 'renewal' ? 'Renewal' : 'New'}`,
-      });
+      const snapResult = await this.midtransService.createSnapTransaction(
+        config,
+        {
+          orderId,
+          grossAmount: amount,
+          itemName: `Sinaloka ${planConfig.label} Plan - ${dto.type === 'renewal' ? 'Renewal' : 'New'}`,
+        },
+      );
 
       const payment = await this.prisma.subscriptionPayment.create({
         data: {
@@ -100,7 +116,9 @@ export class SubscriptionPaymentService {
     } else {
       // MANUAL_TRANSFER
       if (!dto.proof_url) {
-        throw new BadRequestException('proof_url is required for manual transfer payments');
+        throw new BadRequestException(
+          'proof_url is required for manual transfer payments',
+        );
       }
 
       const payment = await this.prisma.subscriptionPayment.create({
@@ -128,22 +146,17 @@ export class SubscriptionPaymentService {
       });
 
       for (const admin of superAdmins) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const emailServiceAny = this.emailService as any;
-        if (typeof emailServiceAny.sendSubscriptionPaymentPendingReview === 'function') {
-          emailServiceAny
-            .sendSubscriptionPaymentPendingReview({
-              to: admin.email,
-              adminName: admin.name,
-              institutionName: institution?.name ?? institutionId,
-              planType: dto.plan_type,
-              amount,
-              paymentId: payment.id,
-            })
-            .catch((err: unknown) => {
-              this.logger.warn(`Failed to send pending review email to ${admin.email}`, err);
-            });
-        }
+        this.emailService
+          .sendSubscriptionPendingPaymentNotification(
+            admin.email,
+            institution?.name ?? institutionId,
+          )
+          .catch((err: unknown) => {
+            this.logger.warn(
+              `Failed to send pending review email to ${admin.email}`,
+              err,
+            );
+          });
       }
 
       return {
@@ -199,19 +212,23 @@ export class SubscriptionPaymentService {
     });
 
     if (!signatureValid) {
-      this.logger.warn(`Invalid signature for subscription webhook order ${order_id}`);
+      this.logger.warn(
+        `Invalid signature for subscription webhook order ${order_id}`,
+      );
       return { status: 'invalid_signature' };
     }
 
-    const newStatus = this.midtransService.mapTransactionStatus(transaction_status);
+    const newStatus =
+      this.midtransService.mapTransactionStatus(transaction_status);
 
     if (newStatus === 'PAID') {
       // Activate subscription
-      const subscriptionId = await this.subscriptionService.activateSubscription(
-        payment.institution_id,
-        payment.plan_type as PlanType,
-        payment.payment_type as 'new' | 'renewal',
-      );
+      const subscriptionId =
+        await this.subscriptionService.activateSubscription(
+          payment.institution_id,
+          payment.plan_type,
+          payment.payment_type as 'new' | 'renewal',
+        );
 
       const now = new Date();
 
@@ -227,10 +244,19 @@ export class SubscriptionPaymentService {
       });
 
       // Create invoice now that we have a subscription
-      await this.createInvoiceForPayment(payment.id, payment.institution_id, subscriptionId, payment.amount, 'PAID');
+      await this.createInvoiceForPayment(
+        payment.id,
+        payment.institution_id,
+        subscriptionId,
+        payment.amount,
+        'PAID',
+      );
 
       // Email ADMINs confirmation
-      await this.sendActivationEmails(payment.institution_id, payment.plan_type as PlanType);
+      await this.sendActivationEmails(
+        payment.institution_id,
+        payment.plan_type,
+      );
     } else if (newStatus === 'PENDING') {
       // Expired or other non-terminal state — do not change payment status
       // (Midtrans expire → leave as PENDING, or mark EXPIRED)
@@ -272,18 +298,21 @@ export class SubscriptionPaymentService {
     }
 
     if (payment.method !== 'MANUAL_TRANSFER') {
-      throw new BadRequestException('Only MANUAL_TRANSFER payments can be confirmed manually');
+      throw new BadRequestException(
+        'Only MANUAL_TRANSFER payments can be confirmed manually',
+      );
     }
 
     const now = new Date();
 
     if (dto.action === 'approve') {
       // Activate subscription
-      const subscriptionId = await this.subscriptionService.activateSubscription(
-        payment.institution_id,
-        payment.plan_type as PlanType,
-        payment.payment_type as 'new' | 'renewal',
-      );
+      const subscriptionId =
+        await this.subscriptionService.activateSubscription(
+          payment.institution_id,
+          payment.plan_type,
+          payment.payment_type as 'new' | 'renewal',
+        );
 
       // Update payment: PAID + link to subscription
       await this.prisma.subscriptionPayment.update({
@@ -298,10 +327,19 @@ export class SubscriptionPaymentService {
       });
 
       // Create invoice now that we have a subscription
-      await this.createInvoiceForPayment(payment.id, payment.institution_id, subscriptionId, payment.amount, 'PAID');
+      await this.createInvoiceForPayment(
+        payment.id,
+        payment.institution_id,
+        subscriptionId,
+        payment.amount,
+        'PAID',
+      );
 
       // Email ADMINs confirmation
-      await this.sendActivationEmails(payment.institution_id, payment.plan_type as PlanType);
+      await this.sendActivationEmails(
+        payment.institution_id,
+        payment.plan_type,
+      );
 
       return { status: 'approved' };
     } else {
@@ -317,7 +355,11 @@ export class SubscriptionPaymentService {
       });
 
       // Email ADMINs rejection with reason
-      await this.sendRejectionEmails(payment.institution_id, payment.plan_type as PlanType, dto.notes);
+      await this.sendRejectionEmails(
+        payment.institution_id,
+        payment.plan_type,
+        dto.notes,
+      );
 
       return { status: 'rejected' };
     }
@@ -339,7 +381,12 @@ export class SubscriptionPaymentService {
             select: { id: true, name: true },
           },
           subscription: {
-            select: { id: true, plan_type: true, status: true, expires_at: true },
+            select: {
+              id: true,
+              plan_type: true,
+              status: true,
+              expires_at: true,
+            },
           },
         },
         orderBy: { created_at: 'desc' },
@@ -384,40 +431,38 @@ export class SubscriptionPaymentService {
     });
   }
 
-  private async sendActivationEmails(institutionId: string, planType: PlanType) {
+  private async sendActivationEmails(
+    institutionId: string,
+    planType: PlanType,
+  ) {
     const admins = await this.prisma.user.findMany({
       where: {
         institution_id: institutionId,
         role: { in: ['ADMIN', 'SUPER_ADMIN'] },
         is_active: true,
       },
-      select: { email: true, name: true },
+      select: { email: true },
     });
 
-    const subscription = await this.subscriptionService.getActiveSubscription(institutionId);
+    const subscription =
+      await this.subscriptionService.getActiveSubscription(institutionId);
     const expiresAt = subscription?.expires_at ?? new Date();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const emailServiceAny = this.emailService as any;
     for (const admin of admins) {
-      if (typeof emailServiceAny.sendSubscriptionPaymentConfirmed === 'function') {
-        emailServiceAny
-          .sendSubscriptionPaymentConfirmed({
-            to: admin.email,
-            adminName: admin.name,
-            planType,
-            expiresAt,
-          })
-          .catch((err: unknown) => {
-            this.logger.warn(`Failed to send activation email to ${admin.email}`, err);
-          });
-      }
+      this.emailService
+        .sendSubscriptionPaymentConfirmed(admin.email, planType, expiresAt)
+        .catch((err: unknown) => {
+          this.logger.warn(
+            `Failed to send activation email to ${admin.email}`,
+            err,
+          );
+        });
     }
   }
 
   private async sendRejectionEmails(
     institutionId: string,
-    planType: PlanType,
+    _planType: PlanType,
     reason?: string,
   ) {
     const admins = await this.prisma.user.findMany({
@@ -426,24 +471,18 @@ export class SubscriptionPaymentService {
         role: { in: ['ADMIN', 'SUPER_ADMIN'] },
         is_active: true,
       },
-      select: { email: true, name: true },
+      select: { email: true },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const emailServiceAny = this.emailService as any;
     for (const admin of admins) {
-      if (typeof emailServiceAny.sendSubscriptionPaymentRejected === 'function') {
-        emailServiceAny
-          .sendSubscriptionPaymentRejected({
-            to: admin.email,
-            adminName: admin.name,
-            planType,
-            reason,
-          })
-          .catch((err: unknown) => {
-            this.logger.warn(`Failed to send rejection email to ${admin.email}`, err);
-          });
-      }
+      this.emailService
+        .sendSubscriptionPaymentRejected(admin.email, reason ?? '')
+        .catch((err: unknown) => {
+          this.logger.warn(
+            `Failed to send rejection email to ${admin.email}`,
+            err,
+          );
+        });
     }
   }
 }
