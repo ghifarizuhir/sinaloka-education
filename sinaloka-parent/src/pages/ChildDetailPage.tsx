@@ -5,7 +5,6 @@ import { AttendanceList } from '../components/AttendanceList';
 import { SessionList } from '../components/SessionList';
 import { PaymentList } from '../components/PaymentList';
 import { EnrollmentList } from '../components/EnrollmentList';
-import { PaymentStatusView } from '../components/PaymentStatusView';
 import type { ChildSummary } from '../types';
 import { cn } from '../lib/utils';
 
@@ -28,7 +27,6 @@ export function ChildDetailPage({ child, onBack }: ChildDetailPageProps) {
     fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments,
   } = useChildDetail(child.id);
 
-  const [paymentStatusId, setPaymentStatusId] = useState<string | null>(null);
 
   useEffect(() => {
     switch (activeTab) {
@@ -39,14 +37,6 @@ export function ChildDetailPage({ child, onBack }: ChildDetailPageProps) {
     }
   }, [activeTab, fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments]);
 
-  if (paymentStatusId) {
-    return (
-      <PaymentStatusView
-        paymentId={paymentStatusId}
-        onBack={() => setPaymentStatusId(null)}
-      />
-    );
-  }
 
   return (
     <div className="pb-24">
@@ -79,12 +69,7 @@ export function ChildDetailPage({ child, onBack }: ChildDetailPageProps) {
         <>
           {activeTab === 'attendance' && <AttendanceList data={attendance} summary={attendanceSummary} />}
           {activeTab === 'sessions' && <SessionList data={sessions} />}
-          {activeTab === 'payments' && (
-            <PaymentList
-              data={payments}
-              onOpenPaymentStatus={setPaymentStatusId}
-            />
-          )}
+          {activeTab === 'payments' && <PaymentList data={payments} />}
           {activeTab === 'enrollments' && <EnrollmentList data={enrollments} />}
         </>
       )}
