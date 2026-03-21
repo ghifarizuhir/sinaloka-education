@@ -49,8 +49,7 @@ export function PaymentList({ data, onOpenPaymentStatus }: PaymentListProps) {
     <div className="space-y-3">
       {data.map((payment) => {
         const canPay =
-          (payment.status === 'PENDING' || payment.status === 'OVERDUE') &&
-          payment.gateway_configured;
+          payment.status === 'PENDING' || payment.status === 'OVERDUE';
 
         return (
           <div key={payment.id} className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center gap-3">

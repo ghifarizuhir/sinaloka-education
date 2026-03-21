@@ -67,7 +67,10 @@ export class MidtransService {
     const hash = crypto
       .createHash('sha512')
       .update(
-        params.orderId + params.statusCode + params.grossAmount + params.serverKey,
+        params.orderId +
+          params.statusCode +
+          params.grossAmount +
+          params.serverKey,
       )
       .digest('hex');
     return hash === params.signatureKey;

@@ -32,6 +32,7 @@ import { PlanModule } from './modules/plan/plan.module.js';
 import { RegistrationModule } from './modules/registration/registration.module.js';
 import { SubscriptionModule } from './modules/subscription/subscription.module.js';
 import { SubscriptionGuard } from './modules/subscription/subscription.guard.js';
+import { SettlementModule } from './modules/settlement/settlement.module.js';
 import { SubscriptionWarningInterceptor } from './modules/subscription/subscription-warning.interceptor.js';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
@@ -65,6 +66,7 @@ import { HealthController } from './health.controller.js';
     PlanModule,
     RegistrationModule,
     SubscriptionModule,
+    SettlementModule,
     ScheduleModule.forRoot(),
     WhatsappModule,
   ],
