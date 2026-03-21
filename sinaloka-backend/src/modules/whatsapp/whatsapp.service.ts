@@ -6,39 +6,34 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import type {
   WhatsappMessagesQueryDto,
   UpdateWhatsappSettingsDto,
 } from './whatsapp.dto.js';
 
-const GRAPH_API_URL = 'https://graph.facebook.com/v21.0';
+const FONNTE_API_URL = 'https://api.fonnte.com/send';
 
 @Injectable()
 export class WhatsappService {
   private readonly logger = new Logger(WhatsappService.name);
-  private readonly accessToken: string | undefined;
-  private readonly phoneNumberId: string | undefined;
-  private readonly appSecret: string | undefined;
+  private readonly fonnteToken: string | undefined;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {
-    this.accessToken = this.config.get<string>('WHATSAPP_ACCESS_TOKEN');
-    this.phoneNumberId = this.config.get<string>('WHATSAPP_PHONE_NUMBER_ID');
-    this.appSecret = this.config.get<string>('WHATSAPP_APP_SECRET');
+    this.fonnteToken = this.config.get<string>('FONNTE_TOKEN');
 
-    if (this.accessToken) {
-      this.logger.log('WhatsApp Cloud API configured');
+    if (this.fonnteToken) {
+      this.logger.log('WhatsApp (Fonnte) configured');
     } else {
-      this.logger.warn('WhatsApp Cloud API not configured — module is no-op');
+      this.logger.warn('WhatsApp (Fonnte) not configured — module is no-op');
     }
   }
 
   isConfigured(): boolean {
-    return !!this.accessToken && !!this.phoneNumberId;
+    return !!this.fonnteToken;
   }
 
   normalizePhone(raw: string): string {
@@ -56,23 +51,12 @@ export class WhatsappService {
     return phone;
   }
 
-  verifyWebhookSignature(payload: string, signature: string): boolean {
-    if (!this.appSecret || !signature) return false;
-    const expected =
-      'sha256=' +
-      crypto.createHmac('sha256', this.appSecret).update(payload).digest('hex');
-    return crypto.timingSafeEqual(
-      Buffer.from(expected),
-      Buffer.from(signature),
-    );
-  }
-
-  async sendTemplate(params: {
+  async sendMessage(params: {
     institutionId: string;
     phone: string;
-    templateName: string;
-    templateLanguage: string;
-    templateParams: string[];
+    message: string;
+    templateName?: string;
+    templateParams?: Record<string, string>;
     relatedType?: string;
     relatedId?: string;
   }) {
@@ -81,14 +65,16 @@ export class WhatsappService {
     }
 
     const normalizedPhone = this.normalizePhone(params.phone);
+    // Fonnte requires digits only — strip the + prefix
+    const target = normalizedPhone.replace(/^\+/, '');
 
     // Create pending record
-    const message = await this.prisma.whatsappMessage.create({
+    const record = await this.prisma.whatsappMessage.create({
       data: {
         institution_id: params.institutionId,
         phone: normalizedPhone,
-        template_name: params.templateName,
-        template_params: params.templateParams,
+        template_name: params.templateName ?? params.relatedType ?? 'general',
+        template_params: params.templateParams ?? {},
         related_type: params.relatedType ?? null,
         related_id: params.relatedId ?? null,
         status: 'PENDING',
@@ -96,70 +82,52 @@ export class WhatsappService {
     });
 
     try {
-      const response = await fetch(
-        `${GRAPH_API_URL}/${this.phoneNumberId}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messaging_product: 'whatsapp',
-            to: normalizedPhone.replace('+', ''),
-            type: 'template',
-            template: {
-              name: params.templateName,
-              language: { code: params.templateLanguage },
-              components: [
-                {
-                  type: 'body',
-                  parameters: params.templateParams.map((value) => ({
-                    type: 'text',
-                    text: value,
-                  })),
-                },
-              ],
-            },
-          }),
+      const response = await fetch(FONNTE_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: this.fonnteToken!,
         },
-      );
+        body: JSON.stringify({
+          target,
+          message: params.message,
+          countryCode: '62',
+        }),
+      });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        const errorMsg = data?.error?.message || `HTTP ${response.status}`;
-        const isTransient = response.status >= 500 || response.status === 429;
+      if (!data.status) {
+        const errorMsg = data.reason || 'Unknown Fonnte error';
 
         await this.prisma.whatsappMessage.update({
-          where: { id: message.id },
+          where: { id: record.id },
           data: {
             status: 'FAILED',
             error: errorMsg,
-            retry_count: isTransient ? { increment: 1 } : message.retry_count,
+            retry_count: { increment: 1 },
           },
         });
 
         this.logger.error(`WhatsApp send failed: ${errorMsg}`, {
-          messageId: message.id,
+          messageId: record.id,
         });
         return this.prisma.whatsappMessage.findUnique({
-          where: { id: message.id },
+          where: { id: record.id },
         });
       }
 
-      const waMessageId = data?.messages?.[0]?.id;
+      const waMessageId = Array.isArray(data.id) ? data.id[0] : data.id;
       return this.prisma.whatsappMessage.update({
-        where: { id: message.id },
+        where: { id: record.id },
         data: {
           status: 'SENT',
-          wa_message_id: waMessageId ?? null,
+          wa_message_id: waMessageId?.toString() ?? null,
         },
       });
     } catch (error: any) {
-      // Network error — transient, retryable
       await this.prisma.whatsappMessage.update({
-        where: { id: message.id },
+        where: { id: record.id },
         data: {
           status: 'FAILED',
           error: error.message || 'Network error',
@@ -168,10 +136,10 @@ export class WhatsappService {
       });
 
       this.logger.error(`WhatsApp send error: ${error.message}`, {
-        messageId: message.id,
+        messageId: record.id,
       });
       return this.prisma.whatsappMessage.findUnique({
-        where: { id: message.id },
+        where: { id: record.id },
       });
     }
   }
@@ -179,14 +147,18 @@ export class WhatsappService {
   async handleStatusUpdate(waMessageId: string, status: string): Promise<void> {
     if (!waMessageId) return;
 
+    // Fonnte statuses (case-insensitive)
     const statusMap: Record<string, string> = {
-      sent: 'SENT',
-      delivered: 'DELIVERED',
+      sent: 'DELIVERED',
       read: 'READ',
+      processing: 'SENT',
+      pending: 'SENT',
       failed: 'FAILED',
+      invalid: 'FAILED',
+      expired: 'FAILED',
     };
 
-    const mappedStatus = statusMap[status];
+    const mappedStatus = statusMap[status.toLowerCase()];
     if (!mappedStatus) return;
 
     await this.prisma.whatsappMessage.updateMany({
@@ -359,18 +331,26 @@ export class WhatsappService {
           ? 'Menunggu'
           : 'Pending';
 
-    return this.sendTemplate({
+    const message =
+      `Assalamu'alaikum, Bapak/Ibu wali dari *${payment.student.name}*.\n\n` +
+      `Ini adalah pengingat pembayaran dari *${payment.institution.name}*:\n` +
+      `💰 Jumlah: Rp ${amount}\n` +
+      `📅 Jatuh tempo: ${dueDate}\n` +
+      `📋 Status: ${statusLabel}\n\n` +
+      `Mohon segera melakukan pembayaran. Terima kasih.`;
+
+    return this.sendMessage({
       institutionId,
       phone: parentPhone,
+      message,
       templateName: 'payment_reminder',
-      templateLanguage: lang,
-      templateParams: [
-        payment.student.name,
-        payment.institution.name,
+      templateParams: {
+        studentName: payment.student.name,
+        institutionName: payment.institution.name,
         amount,
         dueDate,
         statusLabel,
-      ],
+      },
       relatedType: 'payment',
       relatedId: paymentId,
     });
