@@ -12,6 +12,69 @@
 
 ---
 
+## ⚠ Mandatory Implementation Notes (from plan review)
+
+These rules apply across ALL tasks. The code examples in the tasks below may not reflect all of these — treat this section as authoritative.
+
+### N1: Backend `.js` extensions on all relative imports
+Every relative import in backend files MUST end with `.js` (ESM convention used throughout this codebase). Example:
+```ts
+// ✅ Correct
+import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { Roles } from '../../common/decorators/roles.decorator.js';
+
+// ❌ Wrong
+import { PrismaService } from '../../common/prisma/prisma.service';
+```
+
+### N2: Use `Role` enum, not string literals for `@Roles()`
+```ts
+// ✅ Correct
+import { Role } from '../../../generated/prisma/client.js';
+@Roles(Role.ADMIN)
+
+// ❌ Wrong
+@Roles('ADMIN')
+```
+
+### N3: Use local `ZodValidationPipe`, not `nestjs-zod`
+```ts
+// ✅ Correct
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+
+// ❌ Wrong
+import { ZodValidationPipe } from 'nestjs-zod';
+```
+
+### N4: `EmailService` uses `this.from`, not `this.emailFrom`
+All new email methods in Task 5 must use `this.from` (the field name in the existing `EmailService`).
+
+### N5: ADMIN controller endpoints — `@Roles(Role.ADMIN)` only
+The `SubscriptionController` (ADMIN self-service) must NOT include `SUPER_ADMIN` in `@Roles()`. `TenantInterceptor` sets `tenantId = null` for SUPER_ADMIN when no `?institution_id=` query param is provided, which would cause null reference errors. SUPER_ADMIN manages subscriptions through the `SubscriptionAdminController` instead.
+
+### N6: Separate route paths for payment endpoints
+To avoid route conflicts with `:id` param, the SUPER_ADMIN payment endpoints must use a separate base path:
+- `GET /api/admin/subscription-payments` (not nested under `/subscriptions`)
+- `PATCH /api/admin/subscription-payments/:id/confirm`
+
+This means `subscription-admin.controller.ts` should be split into two controllers, or the payment endpoints should be prefixed differently. Recommended: create a separate `@Controller('admin/subscription-payments')` section within `subscription-admin.controller.ts` using a second controller class.
+
+### N7: Track `payment_type` on `SubscriptionPayment` model
+Add a `payment_type` field (`'new' | 'renewal'`) to the `SubscriptionPayment` Prisma model and the `create-payment.dto.ts`. This is needed because at webhook time, the subscription status may have changed (ACTIVE → GRACE_PERIOD → EXPIRED), so we can't infer the original intent from the subscription's current status. Record `payment_type` at creation time, read it back in the webhook handler:
+```ts
+// At webhook time:
+await this.subscriptionService.activateSubscription(
+  payment.institution_id,
+  payment.subscription.plan_type,
+  payment.payment_type, // 'new' or 'renewal' — from the payment record
+);
+```
+
+### N8: Don't create placeholder `EXPIRED` subscriptions
+Instead of creating a `Subscription` record with status `EXPIRED` as a placeholder before payment (which creates orphaned records if payment is abandoned), create the subscription only upon payment confirmation in `activateSubscription()`. The `SubscriptionPayment` record should store `institution_id` and `plan_type` directly — it doesn't need a `subscription_id` FK at creation time. Set `subscription_id` after activation. Alternatively, make `subscription_id` nullable on `SubscriptionPayment` and populate it on activation.
+
+---
+
 ## File Map
 
 ### Backend — New Files
@@ -137,8 +200,10 @@ model Subscription {
 ```prisma
 model SubscriptionPayment {
   id                       String                    @id @default(cuid())
-  subscription_id          String
+  subscription_id          String?
   institution_id           String
+  plan_type                PlanType
+  payment_type             String                    @default("new") // 'new' or 'renewal'
   amount                   Int
   method                   SubscriptionPaymentMethod
   status                   SubscriptionPaymentStatus @default(PENDING)
@@ -151,8 +216,8 @@ model SubscriptionPayment {
   paid_at                  DateTime?
   created_at               DateTime                  @default(now())
 
-  subscription Subscription @relation(fields: [subscription_id], references: [id])
-  institution  Institution  @relation(fields: [institution_id], references: [id])
+  subscription Subscription? @relation(fields: [subscription_id], references: [id])
+  institution  Institution   @relation(fields: [institution_id], references: [id])
   invoice      SubscriptionInvoice?
 
   @@index([institution_id])
@@ -2116,11 +2181,11 @@ export const subscriptionService = {
 
   listPayments: (params?: Record<string, any>) =>
     api
-      .get<PaginatedResponse<SubscriptionPayment>>('/api/admin/subscriptions/payments', { params })
+      .get<PaginatedResponse<SubscriptionPayment>>('/api/admin/subscription-payments', { params })
       .then((r) => r.data),
 
   confirmPayment: (id: string, data: { action: 'approve' | 'reject'; notes?: string }) =>
-    api.patch(`/api/admin/subscriptions/payments/${id}/confirm`, data).then((r) => r.data),
+    api.patch(`/api/admin/subscription-payments/${id}/confirm`, data).then((r) => r.data),
 };
 ```
 
