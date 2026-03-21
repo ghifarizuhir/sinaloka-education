@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionService } from '../services/subscription.service';
 import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import type { CreatePaymentRequest } from '../types/subscription';
 
 export function useSubscriptionStatus() {
@@ -21,17 +20,16 @@ export function useSubscriptionInvoices() {
 
 export function useCreatePayment() {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (data: CreatePaymentRequest) => subscriptionService.createPayment(data),
     onSuccess: () => {
-      toast.success(t('subscription.paymentCreated'));
+      toast.success('Pembayaran berhasil dibuat');
       queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
       queryClient.invalidateQueries({ queryKey: ['subscription-invoices'] });
     },
     onError: () => {
-      toast.error(t('subscription.paymentFailed'));
+      toast.error('Gagal membuat pembayaran');
     },
   });
 }
@@ -52,18 +50,17 @@ export function useSubscriptionStats() {
 
 export function useOverrideSubscription() {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Record<string, unknown>) =>
       subscriptionService.overrideSubscription(id, data),
     onSuccess: () => {
-      toast.success(t('subscription.overrideSuccess'));
+      toast.success('Subscription berhasil diubah');
       queryClient.invalidateQueries({ queryKey: ['admin-subscriptions'] });
       queryClient.invalidateQueries({ queryKey: ['admin-subscription-stats'] });
     },
     onError: () => {
-      toast.error(t('subscription.overrideFailed'));
+      toast.error('Gagal mengubah subscription');
     },
   });
 }
@@ -77,7 +74,6 @@ export function useSubscriptionPayments(params?: Record<string, unknown>) {
 
 export function useConfirmPayment() {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({
@@ -89,12 +85,12 @@ export function useConfirmPayment() {
       notes?: string;
     }) => subscriptionService.confirmPayment(id, data),
     onSuccess: () => {
-      toast.success(t('subscription.paymentConfirmed'));
+      toast.success('Pembayaran berhasil dikonfirmasi');
       queryClient.invalidateQueries({ queryKey: ['admin-subscription-payments'] });
       queryClient.invalidateQueries({ queryKey: ['admin-subscriptions'] });
     },
     onError: () => {
-      toast.error(t('subscription.paymentConfirmFailed'));
+      toast.error('Gagal mengkonfirmasi pembayaran');
     },
   });
 }

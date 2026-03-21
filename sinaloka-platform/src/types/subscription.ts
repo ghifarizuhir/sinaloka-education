@@ -22,6 +22,7 @@ export interface SubscriptionPayment {
   id: string;
   subscription_id: string | null;
   institution_id: string;
+  institution?: { id: string; name: string };
   amount: number;
   method: 'MIDTRANS' | 'MANUAL_TRANSFER';
   status: 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED';

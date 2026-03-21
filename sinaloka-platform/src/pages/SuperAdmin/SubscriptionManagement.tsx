@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink } from 'lucide-react';
 import {
@@ -80,18 +80,13 @@ function OverrideModal({ subscription, onClose }: OverrideModalProps) {
   const [notes, setNotes] = useState('');
   const overrideMutation = useOverrideSubscription();
 
-  const handleOpen = (sub: SubscriptionListItem) => {
-    setPlanType((sub.plan_type as PlanType) ?? 'STARTER');
-    setStatus((sub.status as SubscriptionStatus) ?? 'ACTIVE');
-    // Pre-fill expires_at with existing value formatted as YYYY-MM-DD for date input
-    setExpiresAt(sub.expires_at ? sub.expires_at.slice(0, 10) : '');
+  useEffect(() => {
+    if (!subscription) return;
+    setPlanType((subscription.plan_type as PlanType) ?? 'STARTER');
+    setStatus((subscription.status as SubscriptionStatus) ?? 'ACTIVE');
+    setExpiresAt(subscription.expires_at ? subscription.expires_at.slice(0, 10) : '');
     setNotes('');
-  };
-
-  // When subscription changes, reset form
-  if (subscription && planType === 'STARTER' && expiresAt === '' && subscription.plan_type !== 'STARTER') {
-    handleOpen(subscription);
-  }
+  }, [subscription]);
 
   const handleSubmit = () => {
     if (!subscription || !notes.trim()) return;
@@ -504,7 +499,7 @@ function PaymentsTable({
             >
               <td className="p-4">
                 <span className="font-medium dark:text-zinc-100">
-                  {payment.institution_id}
+                  {payment.institution?.name ?? payment.institution_id}
                 </span>
               </td>
               <td className="p-4 text-sm dark:text-zinc-100">
