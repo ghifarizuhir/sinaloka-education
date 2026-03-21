@@ -256,9 +256,9 @@ export class PaymentGatewayController {
             },
           });
         }
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error(
-          `Webhook processing failed for order ${order_id}: ${err}`,
+          `Webhook processing failed for order ${order_id}: [${err?.code}] ${err?.message}`,
         );
         throw err; // Re-throw so Midtrans gets 500 and retries
       }
