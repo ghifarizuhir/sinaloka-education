@@ -39,7 +39,10 @@ export function mapAttendance(raw: any): AttendanceRecord {
       date: new Date(raw.session.date).toISOString(),
       start_time: raw.session.start_time,
       end_time: raw.session.end_time,
-      class: raw.session.class,
+      class: {
+        ...raw.session.class,
+        subject: typeof raw.session.class?.subject === 'object' ? raw.session.class.subject.name : raw.session.class?.subject,
+      },
     },
   };
 }
