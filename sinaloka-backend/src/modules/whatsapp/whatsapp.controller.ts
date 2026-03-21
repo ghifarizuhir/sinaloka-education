@@ -1,17 +1,16 @@
 import {
   Controller,
-  Get,
   Post,
+  Get,
   Patch,
   Param,
   Query,
   Body,
-  Headers,
-  Req,
   ForbiddenException,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
@@ -21,67 +20,44 @@ import type { JwtPayload } from '../../common/decorators/current-user.decorator.
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { WhatsappService } from './whatsapp.service.js';
 import {
+  FonnteWebhookSchema,
+  type FonnteWebhookDto,
   WhatsappMessagesQuerySchema,
   type WhatsappMessagesQueryDto,
   UpdateWhatsappSettingsSchema,
   type UpdateWhatsappSettingsDto,
 } from './whatsapp.dto.js';
-import type { Request } from 'express';
 
 @Controller()
 @PlanFeature('whatsappNotification')
 export class WhatsappController {
-  constructor(private readonly whatsappService: WhatsappService) {}
+  private readonly fonnteDeviceNumber: string | undefined;
 
-  // --- Webhook endpoints (public, no auth) ---
-
-  @Public()
-  @Get('whatsapp/webhook')
-  verifyWebhook(
-    @Query('hub.mode') mode: string,
-    @Query('hub.verify_token') verifyToken: string,
-    @Query('hub.challenge') challenge: string,
+  constructor(
+    private readonly whatsappService: WhatsappService,
+    private readonly config: ConfigService,
   ) {
-    const expected = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
-    if (mode === 'subscribe' && verifyToken === expected) {
-      return challenge;
-    }
-    throw new ForbiddenException('Webhook verification failed');
+    this.fonnteDeviceNumber = this.config.get<string>('FONNTE_DEVICE_NUMBER');
   }
+
+  // --- Webhook endpoint (public, no JWT auth) ---
 
   @Public()
   @Post('whatsapp/webhook')
   @HttpCode(HttpStatus.OK)
   async handleWebhook(
-    @Body() body: any,
-    @Headers('x-hub-signature-256') signature: string,
-    @Req() req: Request,
+    @Body(new ZodValidationPipe(FonnteWebhookSchema)) body: FonnteWebhookDto,
   ) {
-    // Verify signature
-    const rawBody = (req as any).rawBody?.toString() || JSON.stringify(body);
-    if (!this.whatsappService.verifyWebhookSignature(rawBody, signature)) {
-      throw new ForbiddenException('Invalid webhook signature');
+    // Authenticate: Fonnte sends the device phone number in body.device
+    if (!this.fonnteDeviceNumber || body.device !== this.fonnteDeviceNumber) {
+      throw new ForbiddenException('Invalid webhook source');
     }
 
-    // Process status updates
-    const entries = body?.entry ?? [];
-    for (const entry of entries) {
-      const changes = entry?.changes ?? [];
-      for (const change of changes) {
-        const statuses = change?.value?.statuses ?? [];
-        for (const status of statuses) {
-          await this.whatsappService.handleStatusUpdate(
-            status.id,
-            status.status,
-          );
-        }
-      }
-    }
-
+    await this.whatsappService.handleStatusUpdate(body.id, body.status);
     return 'OK';
   }
 
-  // --- Admin endpoint ---
+  // --- Admin endpoints ---
 
   @Post('admin/whatsapp/payment-reminder/:paymentId')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)

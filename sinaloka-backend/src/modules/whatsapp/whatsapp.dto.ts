@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
-export const WebhookVerifySchema = z.object({
-  'hub.mode': z.literal('subscribe'),
-  'hub.verify_token': z.string(),
-  'hub.challenge': z.string(),
+export const FonnteWebhookSchema = z.object({
+  device: z.string(),
+  id: z.string(),
+  status: z.string(),
 });
-
-export type WebhookVerifyDto = z.infer<typeof WebhookVerifySchema>;
+export type FonnteWebhookDto = z.infer<typeof FonnteWebhookSchema>;
 
 export const WhatsappMessagesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
