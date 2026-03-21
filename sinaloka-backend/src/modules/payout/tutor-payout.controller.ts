@@ -3,6 +3,7 @@ import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { PayoutService } from './payout.service.js';
@@ -20,16 +21,17 @@ export class TutorPayoutController {
   @Get()
   async findOwn(
     @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(PayoutQuerySchema)) query: PayoutQueryDto,
   ) {
     const tutor = await this.prisma.tutor.findFirst({
-      where: { user_id: user.userId, institution_id: user.institutionId! },
+      where: { user_id: user.userId, institution_id: institutionId },
     });
 
     if (!tutor) {
       throw new NotFoundException('Tutor profile not found');
     }
 
-    return this.payoutService.findByTutor(user.institutionId!, tutor.id, query);
+    return this.payoutService.findByTutor(institutionId, tutor.id, query);
   }
 }

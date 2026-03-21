@@ -19,6 +19,7 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { MidtransService } from './midtrans.service.js';
@@ -39,10 +40,11 @@ export class PaymentGatewayController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.PARENT)
   async checkout(
     @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     const payment = await this.prisma.payment.findFirst({
-      where: { id, institution_id: user.institutionId! },
+      where: { id, institution_id: institutionId },
       include: {
         student: true,
         enrollment: { include: { class: true } },
@@ -83,10 +85,13 @@ export class PaymentGatewayController {
     }
 
     const gatewayConfig = await this.settingsService.getPaymentGatewayConfig(
-      user.institutionId!,
+      institutionId,
     );
 
-    if (!gatewayConfig.midtrans_server_key || !gatewayConfig.midtrans_client_key) {
+    if (
+      !gatewayConfig.midtrans_server_key ||
+      !gatewayConfig.midtrans_client_key
+    ) {
       throw new BadRequestException('Payment gateway is not configured');
     }
 
@@ -162,8 +167,12 @@ export class PaymentGatewayController {
     );
 
     if (!gatewayConfig.midtrans_server_key) {
-      this.logger.warn(`Webhook for payment ${order_id} but gateway not configured`);
-      throw new BadRequestException('Payment gateway not configured for this institution');
+      this.logger.warn(
+        `Webhook for payment ${order_id} but gateway not configured`,
+      );
+      throw new BadRequestException(
+        'Payment gateway not configured for this institution',
+      );
     }
 
     const signatureValid = this.midtransService.verifySignature({
@@ -185,7 +194,8 @@ export class PaymentGatewayController {
       return { status: 'amount_mismatch' };
     }
 
-    const newStatus = this.midtransService.mapTransactionStatus(transaction_status);
+    const newStatus =
+      this.midtransService.mapTransactionStatus(transaction_status);
 
     if (newStatus !== null) {
       await this.prisma.payment.update({
@@ -207,10 +217,11 @@ export class PaymentGatewayController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.PARENT)
   async getStatus(
     @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     const payment = await this.prisma.payment.findFirst({
-      where: { id, institution_id: user.institutionId! },
+      where: { id, institution_id: institutionId },
       select: {
         id: true,
         status: true,
