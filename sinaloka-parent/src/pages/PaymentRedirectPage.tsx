@@ -1,3 +1,4 @@
+import React from 'react';
 import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 type PaymentRedirectStatus = 'finish' | 'unfinish' | 'error';
