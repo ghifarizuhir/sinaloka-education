@@ -3,6 +3,7 @@ import {
   Building2,
   Users,
   TrendingUp,
+  CreditCard,
   PanelLeftClose,
   PanelLeftOpen,
   Sun,
@@ -104,6 +105,7 @@ export default function SuperAdminLayout() {
           <SidebarItem icon={Building2} label={t('superAdmin.institutions')} href="/super/institutions" active={location.pathname.startsWith('/super/institutions')} minimized={isSidebarMinimized} />
           <SidebarItem icon={Users} label={t('superAdmin.users')} href="/super/users" active={location.pathname === '/super/users'} minimized={isSidebarMinimized} />
           <SidebarItem icon={TrendingUp} label={t('plan.upgradeRequests')} href="/super/upgrade-requests" active={location.pathname === '/super/upgrade-requests'} minimized={isSidebarMinimized} />
+          <SidebarItem icon={CreditCard} label={t('subscription.management', 'Subscriptions')} href="/super/subscriptions" active={location.pathname === '/super/subscriptions'} minimized={isSidebarMinimized} />
         </nav>
 
         <div className={cn("px-4 pb-4", isSidebarMinimized && "px-3")}>
