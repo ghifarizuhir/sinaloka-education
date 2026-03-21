@@ -19,7 +19,7 @@ Replace Meta Cloud API with Fonnte (`api.fonnte.com`) for all outbound WhatsApp 
 | Remove | Add | Description |
 |---|---|---|
 | `WHATSAPP_ACCESS_TOKEN` | `FONNTE_TOKEN` | Device token from Fonnte dashboard |
-| `WHATSAPP_PHONE_NUMBER_ID` | — | Not needed |
+| `WHATSAPP_PHONE_NUMBER_ID` | `FONNTE_DEVICE_NUMBER` | WhatsApp phone number of the Fonnte device (for webhook auth) |
 | `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | — | Fonnte has no verify handshake |
 | `WHATSAPP_APP_SECRET` | — | No HMAC signature |
 | `WHATSAPP_BUSINESS_ACCOUNT_ID` | — | Not needed |
@@ -95,7 +95,7 @@ Note: Fonnte may or may not send `Read` status — if it does, map to READ. If n
 **`POST /api/whatsapp/webhook`** — Simplify:
 - Remove HMAC signature verification (delete the `verifyWebhookSignature()` call)
 - Parse Fonnte's flat JSON body: `{ device, id, status }`
-- **Authenticate the webhook:** Validate `body.device === FONNTE_TOKEN` (or the device phone number — whichever Fonnte sends). This replaces HMAC as a basic authenticity check. Reject with 401 if mismatch.
+- **Authenticate the webhook:** Validate `body.device === FONNTE_DEVICE_NUMBER`. Fonnte sends the device's WhatsApp phone number (e.g. `628123456789`) in the `device` field — NOT the API token. Use a separate `FONNTE_DEVICE_NUMBER` env var for this comparison. Reject with 403 if mismatch.
 - Call `handleStatusUpdate()` with the message ID and new status
 - Keep `@Public()` decorator
 
@@ -137,6 +137,7 @@ Remove the old five `WHATSAPP_*` variables and their comment block. Replace with
 ```env
 # WhatsApp (Fonnte) - optional, no-op if not set
 FONNTE_TOKEN=your_fonnte_device_token
+FONNTE_DEVICE_NUMBER=your_whatsapp_phone_number
 ```
 
 ### Unit Tests (`whatsapp.service.spec.ts`)
@@ -168,8 +169,9 @@ Specific changes needed:
 1. **Register Fonnte account** at https://md.fonnte.com/new/register.php
 2. **Add device** and get device token from dashboard
 3. **Set `FONNTE_TOKEN`** environment variable in Railway
-4. **Configure webhook URL** in Fonnte device dashboard → set to `https://api.sinaloka.com/api/whatsapp/webhook` so delivery status updates are received
-5. **Remove old `WHATSAPP_*` env vars** from Railway
+4. **Set `FONNTE_DEVICE_NUMBER`** environment variable in Railway (the WhatsApp phone number registered in Fonnte, e.g. `628123456789`)
+5. **Configure webhook URL** in Fonnte device dashboard → set to `https://api.sinaloka.com/api/whatsapp/webhook` so delivery status updates are received
+6. **Remove old `WHATSAPP_*` env vars** from Railway
 
 ## Testing
 
