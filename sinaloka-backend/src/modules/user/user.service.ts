@@ -135,6 +135,7 @@ export class UserService {
         password_hash: passwordHash,
         role: dto.role,
         institution_id: dto.institution_id ?? null,
+        must_change_password: true,
       },
       select: {
         id: true,

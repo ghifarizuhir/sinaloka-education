@@ -105,10 +105,9 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(new ZodValidationPipe(ChangePasswordSchema))
   async changePassword(
     @CurrentUser() user: JwtPayload,
-    @Body() dto: ChangePasswordDto,
+    @Body(new ZodValidationPipe(ChangePasswordSchema)) dto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(user.userId, dto);
   }
