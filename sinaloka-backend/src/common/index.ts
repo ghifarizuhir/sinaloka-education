@@ -13,6 +13,7 @@ export { CurrentUser } from './decorators/current-user.decorator.js';
 export type { JwtPayload } from './decorators/current-user.decorator.js';
 export { Roles, ROLES_KEY } from './decorators/roles.decorator.js';
 export { Public, IS_PUBLIC_KEY } from './decorators/public.decorator.js';
+export { InstitutionId } from './decorators/institution-id.decorator.js';
 
 // Guards
 export { RolesGuard } from './guards/roles.guard.js';

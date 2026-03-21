@@ -11,8 +11,7 @@ import {
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { ExpenseService } from './expense.service.js';
 import {
@@ -33,47 +32,47 @@ export class ExpenseController {
 
   @Post()
   create(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CreateExpenseSchema)) dto: CreateExpenseDto,
   ) {
-    return this.expenseService.create(user.institutionId!, dto);
+    return this.expenseService.create(institutionId, dto);
   }
 
   @Get()
   findAll(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(ExpenseQuerySchema)) query: ExpenseQueryDto,
   ) {
-    return this.expenseService.findAll(user.institutionId!, query);
+    return this.expenseService.findAll(institutionId, query);
   }
 
   @Post('process-recurring')
-  processRecurring(@CurrentUser() user: JwtPayload) {
-    return this.expenseService.processRecurringExpenses(user.institutionId!);
+  processRecurring(@InstitutionId() institutionId: string) {
+    return this.expenseService.processRecurringExpenses(institutionId);
   }
 
   @Get(':id')
   findOne(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.expenseService.findOne(user.institutionId!, id);
+    return this.expenseService.findOne(institutionId, id);
   }
 
   @Patch(':id')
   update(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body(new ZodValidationPipe(UpdateExpenseSchema)) dto: UpdateExpenseDto,
   ) {
-    return this.expenseService.update(user.institutionId!, id, dto);
+    return this.expenseService.update(institutionId, id, dto);
   }
 
   @Delete(':id')
   delete(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.expenseService.delete(user.institutionId!, id);
+    return this.expenseService.delete(institutionId, id);
   }
 }

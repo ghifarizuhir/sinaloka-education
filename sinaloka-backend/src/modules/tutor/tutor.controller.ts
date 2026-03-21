@@ -12,8 +12,7 @@ import {
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { PlanLimit } from '../../common/decorators/plan.decorator.js';
 import { TutorService } from './tutor.service.js';
@@ -42,56 +41,68 @@ export class TutorController {
   @PlanLimit('tutors')
   @Post()
   async create(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CreateTutorSchema)) dto: CreateTutorDto,
   ) {
-    return this.tutorService.create(user.institutionId!, dto);
+    return this.tutorService.create(institutionId, dto);
   }
 
   @Get()
   async findAll(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(TutorQuerySchema)) query: TutorQueryDto,
   ) {
-    return this.tutorService.findAll(user.institutionId!, query);
+    return this.tutorService.findAll(institutionId, query);
   }
 
   @PlanLimit('tutors')
   @Post('invite')
   async invite(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(InviteTutorSchema)) dto: InviteTutorDto,
   ) {
-    return this.invitationService.invite(user.institutionId!, dto);
+    return this.invitationService.invite(institutionId, dto);
   }
 
   @Post(':id/resend-invite')
-  async resendInvite(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    return this.invitationService.resendInvite(user.institutionId!, id);
+  async resendInvite(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    return this.invitationService.resendInvite(institutionId, id);
   }
 
   @Post(':id/cancel-invite')
-  async cancelInvite(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    return this.invitationService.cancelInvite(user.institutionId!, id);
+  async cancelInvite(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    return this.invitationService.cancelInvite(institutionId, id);
   }
 
   @Get(':id')
-  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    return this.tutorService.findOne(user.institutionId!, id);
+  async findOne(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    return this.tutorService.findOne(institutionId, id);
   }
 
   @Patch(':id')
   async update(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateTutorSchema)) dto: UpdateTutorDto,
   ) {
-    return this.tutorService.update(user.institutionId!, id, dto);
+    return this.tutorService.update(institutionId, id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    await this.tutorService.delete(user.institutionId!, id);
+  async remove(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    await this.tutorService.delete(institutionId, id);
   }
 }

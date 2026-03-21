@@ -2,8 +2,7 @@ import { Controller, Get, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { ReportService } from './report.service.js';
 import {
@@ -28,13 +27,13 @@ export class ReportController {
 
   @Get('attendance')
   async attendance(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(AttendanceReportQuerySchema))
     q: AttendanceReportQueryDto,
     @Res() res: Response,
   ) {
     const buf = await this.reportService.generateAttendanceReport(
-      user.institutionId!,
+      institutionId,
       q,
     );
     res.set({
@@ -46,15 +45,12 @@ export class ReportController {
 
   @Get('finance')
   async finance(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(FinanceReportQuerySchema))
     q: FinanceReportQueryDto,
     @Res() res: Response,
   ) {
-    const buf = await this.reportService.generateFinanceReport(
-      user.institutionId!,
-      q,
-    );
+    const buf = await this.reportService.generateFinanceReport(institutionId, q);
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'inline; filename="finance-report.pdf"',
@@ -64,13 +60,13 @@ export class ReportController {
 
   @Get('student-progress')
   async studentProgress(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(StudentProgressQuerySchema))
     q: StudentProgressQueryDto,
     @Res() res: Response,
   ) {
     const buf = await this.reportService.generateStudentProgressReport(
-      user.institutionId!,
+      institutionId,
       q.student_id,
       q.date_from,
       q.date_to,
@@ -84,11 +80,11 @@ export class ReportController {
 
   @Get('financial-summary')
   async financialSummary(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
   ) {
     return this.reportService.getFinancialSummary(
-      user.institutionId!,
+      institutionId,
       q.period_start,
       q.period_end,
     );
@@ -96,11 +92,11 @@ export class ReportController {
 
   @Get('revenue-breakdown')
   async revenueBreakdown(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
   ) {
     return this.reportService.getRevenueBreakdown(
-      user.institutionId!,
+      institutionId,
       q.period_start,
       q.period_end,
     );
@@ -108,11 +104,11 @@ export class ReportController {
 
   @Get('expense-breakdown')
   async expenseBreakdown(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(ReportPeriodSchema)) q: ReportPeriodDto,
   ) {
     return this.reportService.getExpenseBreakdown(
-      user.institutionId!,
+      institutionId,
       q.period_start,
       q.period_end,
     );
@@ -120,12 +116,12 @@ export class ReportController {
 
   @Get('export-csv')
   async exportCsv(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(ExportCsvSchema)) q: ExportCsvDto,
     @Res() res: Response,
   ) {
     const csv = await this.reportService.exportCsv(
-      user.institutionId!,
+      institutionId,
       q.type,
       q.period_start,
       q.period_end,

@@ -12,8 +12,7 @@ import {
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { ClassService } from './class.service.js';
 import {
@@ -34,37 +33,43 @@ export class ClassController {
 
   @Post()
   async create(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CreateClassSchema)) dto: CreateClassDto,
   ) {
-    return this.classService.create(user.institutionId!, dto);
+    return this.classService.create(institutionId, dto);
   }
 
   @Get()
   async findAll(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(ClassQuerySchema)) query: ClassQueryDto,
   ) {
-    return this.classService.findAll(user.institutionId!, query);
+    return this.classService.findAll(institutionId, query);
   }
 
   @Get(':id')
-  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    return this.classService.findOne(user.institutionId!, id);
+  async findOne(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    return this.classService.findOne(institutionId, id);
   }
 
   @Patch(':id')
   async update(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateClassSchema)) dto: UpdateClassDto,
   ) {
-    return this.classService.update(user.institutionId!, id, dto);
+    return this.classService.update(institutionId, id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    await this.classService.delete(user.institutionId!, id);
+  async remove(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    await this.classService.delete(institutionId, id);
   }
 }

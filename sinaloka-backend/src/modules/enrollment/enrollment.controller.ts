@@ -18,8 +18,7 @@ import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { EnrollmentService } from './enrollment.service.js';
 import {
@@ -46,40 +45,37 @@ export class EnrollmentController {
 
   @Post('check-conflict')
   async checkConflict(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CheckConflictSchema)) dto: CheckConflictDto,
   ) {
-    return this.enrollmentService.checkConflict(user.institutionId!, dto);
+    return this.enrollmentService.checkConflict(institutionId, dto);
   }
 
   @Post()
   async create(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CreateEnrollmentSchema))
     dto: CreateEnrollmentDto,
   ) {
-    return this.enrollmentService.create(user.institutionId!, dto);
+    return this.enrollmentService.create(institutionId, dto);
   }
 
   @Get()
   async findAll(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(EnrollmentQuerySchema))
     query: EnrollmentQueryDto,
   ) {
-    return this.enrollmentService.findAll(user.institutionId!, query);
+    return this.enrollmentService.findAll(institutionId, query);
   }
 
   @Get('export')
   async exportCsv(
     @Query() query: any,
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Res() res: Response,
   ) {
-    const csv = await this.enrollmentService.exportToCsv(
-      query,
-      user.institutionId!,
-    );
+    const csv = await this.enrollmentService.exportToCsv(query, institutionId);
     res.set({
       'Content-Type': 'text/csv',
       'Content-Disposition': `attachment; filename=enrollments_${new Date().toISOString().split('T')[0]}.csv`,
@@ -91,54 +87,57 @@ export class EnrollmentController {
   @UseInterceptors(FileInterceptor('file'))
   async importCsv(
     @UploadedFile() file: Express.Multer.File,
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
   ) {
     if (!file) throw new BadRequestException('CSV file required');
     if (file.mimetype !== 'text/csv' && !file.originalname.endsWith('.csv')) {
       throw new BadRequestException('File must be a CSV');
     }
-    return this.enrollmentService.importFromCsv(
-      file.buffer,
-      user.institutionId!,
-    );
+    return this.enrollmentService.importFromCsv(file.buffer, institutionId);
   }
 
   @Patch('bulk')
   async bulkUpdate(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(BulkUpdateEnrollmentSchema))
     dto: BulkUpdateEnrollmentDto,
   ) {
-    return this.enrollmentService.bulkUpdate(user.institutionId!, dto);
+    return this.enrollmentService.bulkUpdate(institutionId, dto);
   }
 
   @Delete('bulk')
   async bulkDelete(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(BulkDeleteEnrollmentSchema))
     dto: BulkDeleteEnrollmentDto,
   ) {
-    return this.enrollmentService.bulkDelete(user.institutionId!, dto.ids);
+    return this.enrollmentService.bulkDelete(institutionId, dto.ids);
   }
 
   @Get(':id')
-  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    return this.enrollmentService.findOne(user.institutionId!, id);
+  async findOne(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    return this.enrollmentService.findOne(institutionId, id);
   }
 
   @Patch(':id')
   async update(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateEnrollmentSchema))
     dto: UpdateEnrollmentDto,
   ) {
-    return this.enrollmentService.update(user.institutionId!, id, dto);
+    return this.enrollmentService.update(institutionId, id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    await this.enrollmentService.delete(user.institutionId!, id);
+  async remove(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
+    await this.enrollmentService.delete(institutionId, id);
   }
 }

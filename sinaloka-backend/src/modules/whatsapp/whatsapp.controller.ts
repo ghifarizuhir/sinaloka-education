@@ -15,8 +15,7 @@ import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { PlanFeature } from '../../common/decorators/plan.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { WhatsappService } from './whatsapp.service.js';
 import {
@@ -62,11 +61,11 @@ export class WhatsappController {
   @Post('admin/whatsapp/payment-reminder/:paymentId')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   async sendPaymentReminder(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('paymentId') paymentId: string,
   ) {
     const message = await this.whatsappService.sendPaymentReminder(
-      user.institutionId!,
+      institutionId,
       paymentId,
     );
     return { success: true, message_id: message?.id ?? null };
@@ -75,36 +74,36 @@ export class WhatsappController {
   @Get('admin/whatsapp/messages')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   async getMessages(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(WhatsappMessagesQuerySchema))
     query: WhatsappMessagesQueryDto,
   ) {
-    return this.whatsappService.getMessages(user.institutionId!, query);
+    return this.whatsappService.getMessages(institutionId, query);
   }
 
   @Get('admin/whatsapp/stats')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   async getStats(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query('date_from') dateFrom?: string,
     @Query('date_to') dateTo?: string,
   ) {
-    return this.whatsappService.getStats(user.institutionId!, dateFrom, dateTo);
+    return this.whatsappService.getStats(institutionId, dateFrom, dateTo);
   }
 
   @Get('admin/whatsapp/settings')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  async getSettings(@CurrentUser() user: JwtPayload) {
-    return this.whatsappService.getSettings(user.institutionId!);
+  async getSettings(@InstitutionId() institutionId: string) {
+    return this.whatsappService.getSettings(institutionId);
   }
 
   @Patch('admin/whatsapp/settings')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   async updateSettings(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(UpdateWhatsappSettingsSchema))
     dto: UpdateWhatsappSettingsDto,
   ) {
-    return this.whatsappService.updateSettings(user.institutionId!, dto);
+    return this.whatsappService.updateSettings(institutionId, dto);
   }
 }

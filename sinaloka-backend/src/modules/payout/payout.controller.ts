@@ -15,8 +15,7 @@ import {
 import type { Response } from 'express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { PayoutService } from './payout.service.js';
 import { PayoutSlipService } from './payout-slip.service.js';
@@ -43,45 +42,45 @@ export class PayoutController {
 
   @Post()
   create(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CreatePayoutSchema)) dto: CreatePayoutDto,
   ) {
-    return this.payoutService.create(user.institutionId!, dto);
+    return this.payoutService.create(institutionId, dto);
   }
 
   @Get()
   findAll(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(PayoutQuerySchema)) query: PayoutQueryDto,
   ) {
-    return this.payoutService.findAll(user.institutionId!, query);
+    return this.payoutService.findAll(institutionId, query);
   }
 
   @Get('calculate')
   calculate(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(CalculatePayoutSchema))
     query: CalculatePayoutDto,
   ) {
-    return this.payoutService.calculatePayout(user.institutionId!, query);
+    return this.payoutService.calculatePayout(institutionId, query);
   }
 
   @Post(':id/generate-slip')
   @HttpCode(HttpStatus.OK)
   generateSlip(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.payoutSlipService.generateSlip(user.institutionId!, id);
+    return this.payoutSlipService.generateSlip(institutionId, id);
   }
 
   @Get(':id/export-audit')
   async exportAudit(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ) {
-    const csv = await this.payoutService.exportAudit(user.institutionId!, id);
+    const csv = await this.payoutService.exportAudit(institutionId, id);
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader(
       'Content-Disposition',
@@ -92,32 +91,32 @@ export class PayoutController {
 
   @Post('generate-salaries')
   @HttpCode(HttpStatus.OK)
-  generateSalaries(@CurrentUser() user: JwtPayload) {
-    return this.payoutService.generateMonthlySalaries(user.institutionId!);
+  generateSalaries(@InstitutionId() institutionId: string) {
+    return this.payoutService.generateMonthlySalaries(institutionId);
   }
 
   @Get(':id')
   findOne(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.payoutService.findOne(user.institutionId!, id);
+    return this.payoutService.findOne(institutionId, id);
   }
 
   @Patch(':id')
   update(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body(new ZodValidationPipe(UpdatePayoutSchema)) dto: UpdatePayoutDto,
   ) {
-    return this.payoutService.update(user.institutionId!, id, dto);
+    return this.payoutService.update(institutionId, id, dto);
   }
 
   @Delete(':id')
   delete(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.payoutService.delete(user.institutionId!, id);
+    return this.payoutService.delete(institutionId, id);
   }
 }

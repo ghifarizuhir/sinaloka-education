@@ -11,8 +11,7 @@ import {
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { PaymentService } from './payment.service.js';
 import { InvoiceService } from './invoice.service.js';
@@ -41,79 +40,79 @@ export class PaymentController {
 
   @Post()
   create(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CreatePaymentSchema)) dto: CreatePaymentDto,
   ) {
-    return this.paymentService.create(user.institutionId!, dto);
+    return this.paymentService.create(institutionId, dto);
   }
 
   @Get()
   findAll(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(PaymentQuerySchema)) query: PaymentQueryDto,
   ) {
-    return this.paymentService.findAll(user.institutionId!, query);
+    return this.paymentService.findAll(institutionId, query);
   }
 
   @Post('batch-record')
   batchRecord(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(BatchRecordPaymentSchema))
     dto: BatchRecordPaymentDto,
   ) {
-    return this.paymentService.batchRecord(user.institutionId!, dto);
+    return this.paymentService.batchRecord(institutionId, dto);
   }
 
   @Post('generate-subscriptions')
-  generateSubscriptions(@CurrentUser() user: JwtPayload) {
+  generateSubscriptions(@InstitutionId() institutionId: string) {
     return this.invoiceGeneratorService.generateSubscriptionPayments({
-      institutionId: user.institutionId!,
+      institutionId,
     });
   }
 
   @Get('overdue-summary')
-  getOverdueSummary(@CurrentUser() user: JwtPayload) {
-    return this.paymentService.getOverdueSummary(user.institutionId!);
+  getOverdueSummary(@InstitutionId() institutionId: string) {
+    return this.paymentService.getOverdueSummary(institutionId);
   }
 
   @Get(':id')
   findOne(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.paymentService.findOne(user.institutionId!, id);
+    return this.paymentService.findOne(institutionId, id);
   }
 
   @Patch(':id')
   update(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body(new ZodValidationPipe(UpdatePaymentSchema)) dto: UpdatePaymentDto,
   ) {
-    return this.paymentService.update(user.institutionId!, id, dto);
+    return this.paymentService.update(institutionId, id, dto);
   }
 
   @Delete(':id')
   delete(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.paymentService.delete(user.institutionId!, id);
+    return this.paymentService.delete(institutionId, id);
   }
 
   @Post(':id/generate-invoice')
   generateInvoice(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.invoiceService.generateInvoice(user.institutionId!, id);
+    return this.invoiceService.generateInvoice(institutionId, id);
   }
 
   @Post(':id/remind')
   remind(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.paymentService.remind(user.institutionId!, id);
+    return this.paymentService.remind(institutionId, id);
   }
 }
