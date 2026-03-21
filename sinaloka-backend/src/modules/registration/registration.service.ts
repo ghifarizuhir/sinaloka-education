@@ -211,7 +211,9 @@ export class RegistrationService {
     }
 
     if (registration.status !== 'PENDING') {
-      throw new ForbiddenException('Only pending registrations can be approved');
+      throw new ForbiddenException(
+        'Only pending registrations can be approved',
+      );
     }
 
     const institution = await this.prisma.institution.findUnique({
@@ -328,7 +330,9 @@ export class RegistrationService {
     }
 
     if (registration.status !== 'PENDING') {
-      throw new ForbiddenException('Only pending registrations can be rejected');
+      throw new ForbiddenException(
+        'Only pending registrations can be rejected',
+      );
     }
 
     await this.prisma.registration.update({

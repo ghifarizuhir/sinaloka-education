@@ -9,9 +9,9 @@ export interface PlanFeatures {
 export interface PlanConfig {
   label: string;
   maxStudents: number | null; // null = unlimited
-  maxTutors: number | null;   // null = unlimited
+  maxTutors: number | null; // null = unlimited
   features: PlanFeatures;
-  price: number | null;       // null = free
+  price: number | null; // null = free
   priceDisplay: string;
   gracePeriodDays: number;
   order: number;

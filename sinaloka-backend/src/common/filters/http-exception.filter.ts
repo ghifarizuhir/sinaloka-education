@@ -56,7 +56,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       );
     }
 
-    const body: Record<string, unknown> = { statusCode, error, message, requestId };
+    const body: Record<string, unknown> = {
+      statusCode,
+      error,
+      message,
+      requestId,
+    };
     if (errors) {
       body.errors = errors;
     }

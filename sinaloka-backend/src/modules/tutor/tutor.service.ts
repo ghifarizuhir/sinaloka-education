@@ -251,11 +251,17 @@ export class TutorService {
       const planConfig = PLAN_LIMITS[institution.plan_type as any];
 
       // Check BOTH resources before clearing shared grace period
-      const tutorsBelowLimit = planConfig.maxTutors === null ||
-        (await this.prisma.tutor.count({ where: { institution_id: institutionId } })) < planConfig.maxTutors;
+      const tutorsBelowLimit =
+        planConfig.maxTutors === null ||
+        (await this.prisma.tutor.count({
+          where: { institution_id: institutionId },
+        })) < planConfig.maxTutors;
 
-      const studentsBelowLimit = planConfig.maxStudents === null ||
-        (await this.prisma.student.count({ where: { institution_id: institutionId, status: 'ACTIVE' } })) < planConfig.maxStudents;
+      const studentsBelowLimit =
+        planConfig.maxStudents === null ||
+        (await this.prisma.student.count({
+          where: { institution_id: institutionId, status: 'ACTIVE' },
+        })) < planConfig.maxStudents;
 
       if (tutorsBelowLimit && studentsBelowLimit) {
         await this.prisma.institution.update({

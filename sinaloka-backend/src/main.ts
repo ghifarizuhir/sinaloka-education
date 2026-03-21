@@ -14,7 +14,7 @@ async function bootstrap() {
   expressApp.set('trust proxy', 1);
 
   app.enableCors({
-    origin: corsOrigins ? corsOrigins.split(',').map(o => o.trim()) : true,
+    origin: corsOrigins ? corsOrigins.split(',').map((o) => o.trim()) : true,
     credentials: true,
   });
   app.setGlobalPrefix('api');

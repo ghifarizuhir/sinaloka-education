@@ -59,7 +59,7 @@ export class ParentInviteService {
       to: dto.email,
       institutionName: institution?.name ?? 'Sinaloka',
       inviteToken: token,
-      studentNames: students.map(s => s.name),
+      studentNames: students.map((s) => s.name),
     });
 
     return invite;

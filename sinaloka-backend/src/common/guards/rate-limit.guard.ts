@@ -21,22 +21,25 @@ interface RateLimitEntry {
 const ipMap = new Map<string, RateLimitEntry>();
 
 // Cleanup stale entries every 10 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of ipMap) {
-    if (entry.resetAt <= now) ipMap.delete(key);
-  }
-}, 10 * 60 * 1000);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, entry] of ipMap) {
+      if (entry.resetAt <= now) ipMap.delete(key);
+    }
+  },
+  10 * 60 * 1000,
+);
 
 @Injectable()
 export class RateLimitGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const config = this.reflector.get<{ maxRequests: number; windowMs: number }>(
-      RATE_LIMIT_KEY,
-      context.getHandler(),
-    );
+    const config = this.reflector.get<{
+      maxRequests: number;
+      windowMs: number;
+    }>(RATE_LIMIT_KEY, context.getHandler());
 
     if (!config) return true;
 

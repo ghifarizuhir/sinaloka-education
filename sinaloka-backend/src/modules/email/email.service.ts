@@ -274,7 +274,9 @@ export class EmailService {
     inviteUrl: string;
     studentNames: string[];
   }): string {
-    const studentList = params.studentNames.map(n => `<li style="margin-bottom: 4px;">${n}</li>`).join('');
+    const studentList = params.studentNames
+      .map((n) => `<li style="margin-bottom: 4px;">${n}</li>`)
+      .join('');
     return `
 <!DOCTYPE html>
 <html>
@@ -339,7 +341,11 @@ export class EmailService {
         from: this.from,
         to,
         subject,
-        html: this.buildSubscriptionReminderHtml({ planType, expiresAt, daysRemaining }),
+        html: this.buildSubscriptionReminderHtml({
+          planType,
+          expiresAt,
+          daysRemaining,
+        }),
       });
       return { success: true };
     } catch (error) {
@@ -402,7 +408,10 @@ export class EmailService {
         from: this.from,
         to,
         subject: `Pembayaran subscription ${planType} dikonfirmasi`,
-        html: this.buildSubscriptionPaymentConfirmedHtml({ planType, expiresAt }),
+        html: this.buildSubscriptionPaymentConfirmedHtml({
+          planType,
+          expiresAt,
+        }),
       });
       return { success: true };
     } catch (error) {
@@ -466,7 +475,12 @@ export class EmailService {
       month: 'long',
       year: 'numeric',
     });
-    const urgencyColor = params.daysRemaining === 1 ? '#dc2626' : params.daysRemaining === 3 ? '#ea580c' : '#ca8a04';
+    const urgencyColor =
+      params.daysRemaining === 1
+        ? '#dc2626'
+        : params.daysRemaining === 3
+          ? '#ea580c'
+          : '#ca8a04';
     const urgencyMessage =
       params.daysRemaining === 1
         ? 'Subscription Anda berakhir <strong>besok</strong>. Segera perpanjang agar layanan tidak terganggu.'
@@ -520,7 +534,9 @@ export class EmailService {
 </html>`;
   }
 
-  private buildSubscriptionGracePeriodHtml(params: { graceEndsAt: Date }): string {
+  private buildSubscriptionGracePeriodHtml(params: {
+    graceEndsAt: Date;
+  }): string {
     const formattedDate = params.graceEndsAt.toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
@@ -673,7 +689,9 @@ export class EmailService {
 </html>`;
   }
 
-  private buildSubscriptionPaymentRejectedHtml(params: { reason: string }): string {
+  private buildSubscriptionPaymentRejectedHtml(params: {
+    reason: string;
+  }): string {
     return `
 <!DOCTYPE html>
 <html>
@@ -719,7 +737,9 @@ export class EmailService {
 </html>`;
   }
 
-  private buildSubscriptionPendingPaymentHtml(params: { institutionId: string }): string {
+  private buildSubscriptionPendingPaymentHtml(params: {
+    institutionId: string;
+  }): string {
     return `
 <!DOCTYPE html>
 <html>
