@@ -7,6 +7,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ChildDetailPage } from './pages/ChildDetailPage';
+import { PaymentRedirectPage } from './pages/PaymentRedirectPage';
 import { useAuth } from './hooks/useAuth';
 import { useChildren } from './hooks/useChildren';
 import { LogOut } from 'lucide-react';
@@ -23,6 +24,21 @@ export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const inviteToken = urlParams.get('token');
   const resetToken = urlParams.get('reset_token');
+
+  // Midtrans payment redirect pages
+  const path = window.location.pathname;
+  if (path === '/payment/finish' || path === '/payment/unfinish' || path === '/payment/error') {
+    const status = path.split('/').pop() as 'finish' | 'unfinish' | 'error';
+    return (
+      <PaymentRedirectPage
+        status={status}
+        onBack={() => {
+          window.history.replaceState({}, '', '/');
+          window.location.reload();
+        }}
+      />
+    );
+  }
 
   if (authLoading) {
     return (
