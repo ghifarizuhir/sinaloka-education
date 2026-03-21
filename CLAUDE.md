@@ -87,6 +87,58 @@ npm run lint               # TypeScript type-check
 
 Tests in `sinaloka-platform/e2e/`. Uses API mocking (`e2e/helpers/api-mocker.ts`) with mock data in `e2e/mocks/*.json`. Page objects in `e2e/pages/`. Auth fixtures in `e2e/fixtures/`. Config supports light-mode and dark-mode projects.
 
+## Development Flow
+
+Every task follows this flow. Step 1 (Scope Check) determines which steps to run.
+
+### Step 1: Scope Check (ALWAYS)
+
+Evaluate scope BEFORE doing anything:
+
+| Criteria | Kecil | Medium | Besar |
+|---|---|---|---|
+| Files affected | 1-2 | 3-5 | 5+ |
+| Modules crossed | 1 | 1-2 | 2+ |
+| Needs design/architecture? | No | Maybe | Yes |
+| Risk of breaking change? | No | Low | Yes |
+| Example | Typo fix, 1-file bug | Multi-file refactor, bug fix | New feature, new module |
+
+### Step 2-9: Based on Scope
+
+| Step | Kecil | Medium | Besar |
+|---|---|---|---|
+| **2. GitHub Issue** | Skip | Create | Create |
+| **3. Brainstorm** (`/superpowers:brainstorming`) | Skip | Skip | Run — explore requirements, write spec |
+| **4. Plan** (`/superpowers:writing-plans`) | Skip | Run | Run — write implementation plan |
+| **5. Branch** | Skip (push to master) | Create (`fix/`, `feat/`) | Create (`feat/`, `refactor/`) |
+| **6. Implement** | Direct edit | `/superpowers:executing-plans` | `/superpowers:subagent-driven-development` |
+| **7. Test** | `npm run build` | Build + unit tests | Build + tests + MCP Playwright (visual/E2E) |
+| **8. Review** (`/superpowers:requesting-code-review`) | Skip | Run | Run |
+| **9. Deliver** | Direct push | PR → merge → close issue | PR → merge → close issue |
+
+### Skill Reference
+
+| Situasi | Skill / Tool |
+|---|---|
+| Fitur baru / perubahan besar | `/superpowers:brainstorming` → `/superpowers:writing-plans` |
+| Bug fixing | `/superpowers:systematic-debugging` |
+| Frontend UI baru / redesign | `/frontend-design:frontend-design` |
+| Implementasi dari plan (parallel agents) | `/superpowers:subagent-driven-development` |
+| Implementasi dari plan (inline) | `/superpowers:executing-plans` |
+| Test visual / E2E browser | MCP Playwright (`mcp__plugin_playwright_playwright__*`) |
+| Sebelum buat PR | `/superpowers:requesting-code-review` |
+| Sebelum claim selesai | `/superpowers:verification-before-completion` |
+| Selesai di branch, siap merge | `/superpowers:finishing-a-development-branch` |
+| Ganti topik / task baru | Evaluasi: lanjut session atau sarankan session baru |
+
+### GitHub Flow
+
+- **Issues** — tracking bug & feature requests. Buat untuk scope medium/besar.
+- **Pull Requests** — code review & CI. Referensi issue dengan `Fixes #XX` di body PR.
+- **Projects** — optional board untuk tracking progress (Todo → In Progress → Done).
+
+Alur: `Issue → Branch → PR (Fixes #XX) → CI pass → Merge → Issue auto-closed`
+
 ## CI/CD & Git Workflow
 
 ### Prefer `gh` CLI over raw `git` for GitHub operations
@@ -219,7 +271,8 @@ Cloudflare Pages caches aggressively. After a frontend deploy, remind the user t
 | `EMAIL_FROM` | Yes | Email sender address |
 | `TUTOR_PORTAL_URL` | Yes | Tutor app URL for email links |
 | `PARENT_PORTAL_URL` | Yes | Parent app URL for email links |
-| `WHATSAPP_*` | No | WhatsApp Cloud API vars (no-op if not set) |
+| `FONNTE_TOKEN` | No | Fonnte WhatsApp device token (no-op if not set) |
+| `FONNTE_DEVICE_NUMBER` | No | WhatsApp phone number for webhook auth |
 
 **Frontends (GitHub Actions → Cloudflare Pages):**
 
