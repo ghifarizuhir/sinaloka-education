@@ -1,8 +1,16 @@
-import { Controller, Get, Patch, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Body,
+  Req,
+  BadRequestException,
+} from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import type { TenantRequest } from '../../common/interceptors/tenant.interceptor.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { SettingsService } from './settings.service.js';
 import {
@@ -25,73 +33,120 @@ import type {
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
+  private getInstitutionId(req: TenantRequest, user: JwtPayload): string {
+    const id = req.tenantId ?? user.institutionId;
+    if (!id) {
+      throw new BadRequestException('Institution ID is required');
+    }
+    return id;
+  }
+
   @Get('general')
-  async getGeneral(@CurrentUser() user: JwtPayload) {
-    return this.settingsService.getGeneral(user.institutionId!);
+  async getGeneral(
+    @Req() req: TenantRequest,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.settingsService.getGeneral(this.getInstitutionId(req, user));
   }
 
   @Patch('general')
   async updateGeneral(
+    @Req() req: TenantRequest,
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(UpdateGeneralSettingsSchema))
     dto: UpdateGeneralSettingsDto,
   ) {
-    return this.settingsService.updateGeneral(user.institutionId!, dto);
+    return this.settingsService.updateGeneral(
+      this.getInstitutionId(req, user),
+      dto,
+    );
   }
 
   @Get('billing')
-  async getBilling(@CurrentUser() user: JwtPayload) {
-    return this.settingsService.getBilling(user.institutionId!);
+  async getBilling(
+    @Req() req: TenantRequest,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.settingsService.getBilling(this.getInstitutionId(req, user));
   }
 
   @Patch('billing')
   async updateBilling(
+    @Req() req: TenantRequest,
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(UpdateBillingSettingsSchema))
     dto: UpdateBillingSettingsDto,
   ) {
-    return this.settingsService.updateBilling(user.institutionId!, dto);
+    return this.settingsService.updateBilling(
+      this.getInstitutionId(req, user),
+      dto,
+    );
   }
 
   @Get('academic')
-  async getAcademic(@CurrentUser() user: JwtPayload) {
-    return this.settingsService.getAcademic(user.institutionId!);
+  async getAcademic(
+    @Req() req: TenantRequest,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.settingsService.getAcademic(this.getInstitutionId(req, user));
   }
 
   @Patch('academic')
   async updateAcademic(
+    @Req() req: TenantRequest,
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(UpdateAcademicSettingsSchema))
     dto: UpdateAcademicSettingsDto,
   ) {
-    return this.settingsService.updateAcademic(user.institutionId!, dto);
+    return this.settingsService.updateAcademic(
+      this.getInstitutionId(req, user),
+      dto,
+    );
   }
 
   @Get('payment-gateway')
-  async getPaymentGateway(@CurrentUser() user: JwtPayload) {
-    return this.settingsService.getPaymentGateway(user.institutionId!);
+  async getPaymentGateway(
+    @Req() req: TenantRequest,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.settingsService.getPaymentGateway(
+      this.getInstitutionId(req, user),
+    );
   }
 
   @Patch('payment-gateway')
   async updatePaymentGateway(
+    @Req() req: TenantRequest,
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(UpdatePaymentGatewaySchema))
     dto: UpdatePaymentGatewayDto,
   ) {
-    return this.settingsService.updatePaymentGateway(user.institutionId!, dto);
+    return this.settingsService.updatePaymentGateway(
+      this.getInstitutionId(req, user),
+      dto,
+    );
   }
 
   @Get('registration')
-  async getRegistration(@CurrentUser() user: JwtPayload) {
-    return this.settingsService.getRegistration(user.institutionId!);
+  async getRegistration(
+    @Req() req: TenantRequest,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.settingsService.getRegistration(
+      this.getInstitutionId(req, user),
+    );
   }
 
   @Patch('registration')
   async updateRegistration(
+    @Req() req: TenantRequest,
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(UpdateRegistrationSettingsSchema))
     dto: UpdateRegistrationSettingsDto,
   ) {
-    return this.settingsService.updateRegistration(user.institutionId!, dto);
+    return this.settingsService.updateRegistration(
+      this.getInstitutionId(req, user),
+      dto,
+    );
   }
 }
