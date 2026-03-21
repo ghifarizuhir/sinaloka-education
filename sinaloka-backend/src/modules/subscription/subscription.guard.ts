@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Logger,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator.js';
@@ -101,7 +106,9 @@ export class SubscriptionGuard implements CanActivate {
       }
     } catch (error) {
       // Gracefully skip if subscription table doesn't exist yet (migration not applied)
-      this.logger.warn('Subscription guard skipped: ' + (error as Error).message);
+      this.logger.warn(
+        'Subscription guard skipped: ' + (error as Error).message,
+      );
     }
 
     return true;

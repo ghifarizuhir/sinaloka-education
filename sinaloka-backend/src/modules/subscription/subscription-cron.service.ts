@@ -5,6 +5,9 @@ import { EmailService } from '../email/email.service.js';
 import { GRACE_PERIOD_DAYS, REMINDER_TIERS } from './subscription.constants.js';
 import { Role } from '../../../generated/prisma/client.js';
 
+// Ascending order so we find the tightest tier first
+const SORTED_REMINDER_TIERS = [...REMINDER_TIERS].sort((a, b) => a - b);
+
 @Injectable()
 export class SubscriptionCronService {
   private readonly logger = new Logger(SubscriptionCronService.name);
@@ -69,9 +72,9 @@ export class SubscriptionCronService {
             graceEndsAt,
           );
           emailSent = true;
-        } catch (error: any) {
+        } catch (error: unknown) {
           this.logger.error(
-            `Failed to send grace period email to ${admin.email} for subscription ${subscription.id}: ${error.message}`,
+            `Failed to send grace period email to ${admin.email} for subscription ${subscription.id}: ${(error as Error).message}`,
           );
         }
       }
@@ -96,10 +99,10 @@ export class SubscriptionCronService {
             `Subscription ${subscription.id} transitioned ACTIVE → GRACE_PERIOD`,
           );
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         failed++;
         this.logger.error(
-          `Failed to update subscription ${subscription.id} to GRACE_PERIOD: ${error.message}`,
+          `Failed to update subscription ${subscription.id} to GRACE_PERIOD: ${(error as Error).message}`,
         );
       }
     }
@@ -148,9 +151,9 @@ export class SubscriptionCronService {
             admin.email,
           );
           emailSent = true;
-        } catch (error: any) {
+        } catch (error: unknown) {
           this.logger.error(
-            `Failed to send downgrade email to ${admin.email} for subscription ${subscription.id}: ${error.message}`,
+            `Failed to send downgrade email to ${admin.email} for subscription ${subscription.id}: ${(error as Error).message}`,
           );
         }
       }
@@ -186,10 +189,10 @@ export class SubscriptionCronService {
             `Subscription ${subscription.id} transitioned GRACE_PERIOD → EXPIRED, institution ${subscription.institution_id} downgraded to STARTER`,
           );
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         failed++;
         this.logger.error(
-          `Failed to expire/downgrade subscription ${subscription.id}: ${error.message}`,
+          `Failed to expire/downgrade subscription ${subscription.id}: ${(error as Error).message}`,
         );
       }
     }
@@ -236,11 +239,8 @@ export class SubscriptionCronService {
       const daysRemaining = Math.ceil(msRemaining / (1000 * 60 * 60 * 24));
 
       // Find the matching reminder tier (1, 3, or 7)
-      // Use ascending order so we find the tightest tier first:
       // e.g. daysRemaining=1 → tier=1, daysRemaining=3 → tier=3, daysRemaining=5 → tier=7
-      const tier = ([1, 3, 7] as number[]).find(
-        (t) => daysRemaining <= t,
-      );
+      const tier = SORTED_REMINDER_TIERS.find((t) => daysRemaining <= t);
       if (tier === undefined) {
         skipped++;
         continue;
@@ -270,9 +270,9 @@ export class SubscriptionCronService {
             daysRemaining,
           );
           emailSent = true;
-        } catch (error: any) {
+        } catch (error: unknown) {
           this.logger.error(
-            `Failed to send reminder email to ${admin.email} for subscription ${subscription.id}: ${error.message}`,
+            `Failed to send reminder email to ${admin.email} for subscription ${subscription.id}: ${(error as Error).message}`,
           );
         }
       }
@@ -287,10 +287,10 @@ export class SubscriptionCronService {
           this.logger.log(
             `Reminder sent for subscription ${subscription.id} at tier ${tier} (${daysRemaining} days remaining)`,
           );
-        } catch (error: any) {
+        } catch (error: unknown) {
           failed++;
           this.logger.error(
-            `Failed to update last_reminder_tier for subscription ${subscription.id}: ${error.message}`,
+            `Failed to update last_reminder_tier for subscription ${subscription.id}: ${(error as Error).message}`,
           );
         }
       } else {
