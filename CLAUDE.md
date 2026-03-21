@@ -238,6 +238,10 @@ Cloudflare Pages caches aggressively. After a frontend deploy, remind the user t
 5. **No secrets in code** — use GitHub Secrets/Environment variables
 6. **Database migrations**: Include in the PR if Prisma schema changed; CI runs `prisma migrate deploy` against a test database
 7. **New environment variables**: Document in `.env.example` of the affected app and note in the PR description
+8. **Pre-merge deployment checklist** — before merging any PR, verify:
+   - **Migration files**: If Prisma schema changed, ensure `prisma/migrations/` contains the migration SQL file. Use `npx prisma migrate dev --name <name>` to generate it. If shadow DB errors block `migrate dev`, create the migration directory and `migration.sql` manually. **Do not rely on `db push` alone** — production uses `prisma migrate deploy` which requires migration files.
+   - **Data migrations**: If existing data needs transformation (e.g., backfilling a new required column, updating enum values), include a one-off script or SQL in the PR description with instructions.
+   - **Deployment-time queries**: If the change requires manual DB queries on production (e.g., setting flags for existing users), document them in the PR description under a "Post-deploy steps" section.
 
 **PR decision guide:**
 
