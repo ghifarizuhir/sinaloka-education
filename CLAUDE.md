@@ -95,6 +95,25 @@ Every task follows this flow. Step 1 (Scope Check) determines which steps to run
 
 Evaluate scope BEFORE doing anything:
 
+Scope ditentukan oleh **impact domain** DAN **effort**. Domain dengan impact tinggi otomatis menaikkan minimum scope, berapapun jumlah file yang berubah.
+
+**Impact Domain (override effort-based scope):**
+
+| Domain | Contoh | Minimum Scope |
+|---|---|---|
+| **Financial** | Payment, checkout, webhook, settlement, fee, invoice | **Besar** — selalu PR + review + test |
+| **Auth/Security** | Login, JWT, roles, guards, tenant isolation | **Besar** — selalu PR + review |
+| **Data integrity** | Migration, Prisma schema, data transformation | **Medium** — selalu PR |
+| **User-facing UX** | UI component, routing, navigation | **Medium** — PR kalau runtime change |
+| **Internal/tooling** | Docs, config, non-runtime | **Kecil** — direct push OK |
+
+Worst case per domain:
+- **Financial**: payment stuck, uang hilang, settlement tidak tercatat, institusi dirugikan
+- **Auth/Security**: tenant isolation bocor, role bypass, account takeover
+- **Data integrity**: data hilang permanent, cascade delete
+
+**Effort-based scope (untuk domain yang tidak ada di tabel di atas):**
+
 | Criteria | Kecil | Medium | Besar |
 |---|---|---|---|
 | Files affected | 1-2 | 3-5 | 5+ |
@@ -102,6 +121,8 @@ Evaluate scope BEFORE doing anything:
 | Needs design/architecture? | No | Maybe | Yes |
 | Risk of breaking change? | No | Low | Yes |
 | Example | Typo fix, 1-file bug | Multi-file refactor, bug fix | New feature, new module |
+
+**Aturan: ambil scope yang lebih tinggi antara impact domain dan effort.** Misal: 1 baris fix di webhook (effort: kecil) tapi domain financial (impact: besar) → scope = **Besar**.
 
 ### Step 2-9: Based on Scope
 
