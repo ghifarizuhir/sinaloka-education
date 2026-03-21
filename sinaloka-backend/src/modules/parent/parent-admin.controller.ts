@@ -11,8 +11,7 @@ import {
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { ParentService } from './parent.service.js';
 import { ParentInviteService } from './parent-invite.service.js';
@@ -37,50 +36,50 @@ export class ParentAdminController {
 
   @Post('invite')
   async createInvite(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(CreateParentInviteSchema))
     dto: CreateParentInviteDto,
   ) {
-    return this.parentInviteService.createInvite(user.institutionId!, dto);
+    return this.parentInviteService.createInvite(institutionId, dto);
   }
 
   @Get()
   async findAll(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(ParentQuerySchema)) query: ParentQueryDto,
   ) {
-    return this.parentService.findAll(user.institutionId!, query);
+    return this.parentService.findAll(institutionId, query);
   }
 
   @Get(':id')
-  async findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    return this.parentService.findOne(user.institutionId!, id);
+  async findOne(@InstitutionId() institutionId: string, @Param('id') id: string) {
+    return this.parentService.findOne(institutionId, id);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
-    await this.parentService.deleteParent(user.institutionId!, id);
+  async remove(@InstitutionId() institutionId: string, @Param('id') id: string) {
+    await this.parentService.deleteParent(institutionId, id);
   }
 
   @Post(':id/link')
   async linkStudents(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(LinkStudentsSchema)) dto: LinkStudentsDto,
   ) {
-    return this.parentService.linkStudents(user.institutionId!, id, dto);
+    return this.parentService.linkStudents(institutionId, id, dto);
   }
 
   @Delete(':parentId/children/:studentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async unlinkStudent(
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @Param('parentId') parentId: string,
     @Param('studentId') studentId: string,
   ) {
     await this.parentService.unlinkStudent(
-      user.institutionId!,
+      institutionId,
       parentId,
       studentId,
     );

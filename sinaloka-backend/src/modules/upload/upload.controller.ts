@@ -13,8 +13,7 @@ import type { Response } from 'express';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
-import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { UploadService } from './upload.service.js';
 
 const ALLOWED_UPLOAD_TYPES = ['receipts', 'proofs', 'logos'];
@@ -28,7 +27,7 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @Param('type') type: string,
-    @CurrentUser() user: JwtPayload,
+    @InstitutionId() institutionId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!ALLOWED_UPLOAD_TYPES.includes(type)) {
@@ -41,7 +40,7 @@ export class UploadController {
     }
     const url = await this.uploadService.saveFile(
       file,
-      user.institutionId!,
+      institutionId,
       type,
     );
     return { url };
