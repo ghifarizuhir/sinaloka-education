@@ -42,15 +42,13 @@
 
 **Total: 1 item besar, 1 PR, merged.**
 
----
+### Session 4 (2026-03-22) — Sprint 8
 
-## Upcoming
-
-### Session 4 — Sprint 8: Audit Log (1 item besar)
-
-| # | Item | Effort | Detail |
+| Sprint | PR | Items | Status |
 |---|---|---|---|
-| 1 | **Audit log** | Besar | Siapa melakukan apa, kapan. Perlu: audit_log table, interceptor/decorator untuk auto-log, audit log viewer di SuperAdmin + Admin (institusi sendiri), filter by user/action/date. Penting untuk akuntabilitas institusi. |
+| **Sprint 8: Audit Log** | #65 | Centralized audit logging — global interceptor auto-captures all mutations with full before/after diff, `audit_logs` table, event-driven async persistence (`@nestjs/event-emitter`), `@NoAuditLog()` decorator, sensitive field redaction, filterable viewer with expandable diff rows, dual-route (SuperAdmin `/super/audit-logs` + Admin `/audit-logs`), tenant-scoped, 10 unit tests | Merged |
+
+**Total: 1 item besar, 1 PR, merged.**
 
 ---
 
