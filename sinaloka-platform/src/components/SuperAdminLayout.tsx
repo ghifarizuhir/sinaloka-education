@@ -25,11 +25,11 @@ const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any
     className={cn(
       "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
       active
-        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium"
-        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+        ? "bg-sidebar-accent/80 text-foreground font-medium nav-item-glow"
+        : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40"
     )}
   >
-    <Icon size={18} className={cn("transition-colors shrink-0", active ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100")} />
+    <Icon size={18} className={cn("transition-colors shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
     {!minimized && <span className="text-sm truncate">{label}</span>}
   </Link>
 );
@@ -85,15 +85,16 @@ export default function SuperAdminLayout() {
   })();
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <div className="flex min-h-screen bg-background transition-colors duration-300">
       {/* Sidebar */}
       <aside className={cn(
-        "border-r border-zinc-100 dark:border-zinc-800 flex flex-col fixed h-full bg-white dark:bg-zinc-950 z-20 transition-all duration-300",
+        "sidebar-glass flex flex-col fixed h-full z-20 transition-all duration-300",
         isSidebarMinimized ? "w-20" : "w-64"
       )}>
+        <div className="sidebar-gradient-line h-[2px] w-full shrink-0" />
         <div className={cn("p-8 flex items-center gap-3", isSidebarMinimized && "px-6")}>
-          <div className="w-8 h-8 bg-zinc-900 dark:bg-zinc-100 rounded-lg flex items-center justify-center shrink-0">
-            <div className="w-4 h-4 bg-white dark:bg-zinc-900 rounded-sm rotate-45"></div>
+          <div className="w-9 h-9 bg-gradient-to-br from-zinc-800 to-zinc-600 dark:from-zinc-200 dark:to-zinc-400 rounded-xl flex items-center justify-center shrink-0 shadow-lg">
+            <div className="w-4 h-4 bg-white dark:bg-zinc-900 rounded-sm rotate-45" />
           </div>
           {!isSidebarMinimized && (
             <div className="flex flex-col">
@@ -123,7 +124,7 @@ export default function SuperAdminLayout() {
             onClick={handleLogout}
             title={t('layout.logOut')}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-all duration-200 text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20",
+              "flex items-center gap-3 px-3 py-2 w-full rounded-xl transition-all duration-200 text-muted-foreground hover:text-destructive hover:bg-destructive/10",
               isSidebarMinimized && "justify-center"
             )}
           >
@@ -138,11 +139,11 @@ export default function SuperAdminLayout() {
         "flex-1 min-h-screen flex flex-col transition-all duration-300",
         isSidebarMinimized ? "ml-20" : "ml-64"
       )}>
-        <header className="h-16 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between px-8 sticky top-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md z-10 transition-colors">
+        <header className="h-16 header-glass flex items-center justify-between px-6 sticky top-0 z-10 transition-colors">
           <div className="flex items-center gap-4">
             <button
               onClick={toggleSidebar}
-              className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors"
+              className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded-xl transition-all"
             >
               {isSidebarMinimized ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
             </button>
@@ -151,24 +152,25 @@ export default function SuperAdminLayout() {
           <div className="flex items-center gap-4">
             <button
               onClick={toggleDarkMode}
-              className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-full transition-colors"
+              className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded-xl transition-all"
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
             <button
               onClick={toggleLanguage}
-              className="px-2 py-1 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-full transition-colors border border-zinc-200 dark:border-zinc-800"
+              className="px-2.5 py-1 text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded-lg transition-all border border-border/30"
               title={i18n.language === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
             >
               {i18n.language === 'id' ? 'ID' : 'EN'}
             </button>
 
-            <div className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 text-xs font-bold">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-500 dark:from-zinc-300 dark:to-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 text-xs font-bold shadow-lg">
               {userInitials}
             </div>
           </div>
         </header>
+        <div className="header-gradient-border h-[1px] w-full" />
         <div className="p-8 max-w-7xl mx-auto w-full">
           <Outlet />
         </div>
