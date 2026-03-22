@@ -39,7 +39,7 @@ export class ExpenseService {
       where.description = { contains: search, mode: 'insensitive' };
     }
 
-    const [data, total] = await Promise.all([
+    const [data, total, aggregate] = await Promise.all([
       this.prisma.expense.findMany({
         where,
         skip: (page - 1) * limit,
@@ -47,9 +47,19 @@ export class ExpenseService {
         orderBy: { [sort_by]: sort_order },
       }),
       this.prisma.expense.count({ where }),
+      this.prisma.expense.aggregate({
+        where,
+        _sum: { amount: true },
+      }),
     ]);
 
-    return { data, meta: buildPaginationMeta(total, page, limit) };
+    return {
+      data,
+      meta: {
+        ...buildPaginationMeta(total, page, limit),
+        total_amount: Number(aggregate._sum.amount ?? 0),
+      },
+    };
   }
 
   async findOne(institutionId: string, id: string) {
