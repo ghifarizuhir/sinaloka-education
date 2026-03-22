@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   Plus,
   MoreHorizontal,
@@ -48,6 +49,10 @@ import {
   useInviteTutor,
   useResendInvite,
   useCancelInvite,
+  useBulkVerifyTutor,
+  useBulkDeleteTutor,
+  useBulkResendInvite,
+  useBulkCancelInvite,
 } from '@/src/hooks/useTutors';
 import { useSubjects } from '@/src/hooks/useSubjects';
 import type { Tutor } from '@/src/types/tutor';
@@ -190,6 +195,9 @@ export const Tutors = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingTutor, setEditingTutor] = useState<Tutor | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ type: 'cancel' | 'delete'; tutorId: string } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [bulkCancelConfirm, setBulkCancelConfirm] = useState(false);
 
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -200,6 +208,8 @@ export const Tutors = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  useEffect(() => { setSelectedIds([]); }, [searchQuery, filterSubject, sortBy]);
 
   const { data: allSubjects = [] } = useSubjects();
 
@@ -220,6 +230,26 @@ export const Tutors = () => {
 
   const tutors = data?.data ?? [];
   const meta = data?.meta;
+
+  const bulkVerify = useBulkVerifyTutor();
+  const bulkDelete = useBulkDeleteTutor();
+  const bulkResendInvite = useBulkResendInvite();
+  const bulkCancelInvite = useBulkCancelInvite();
+
+  // Get the current tutor list from query data
+  const tutorList: Tutor[] = tutors;
+
+  // Selection helpers
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]);
+  const toggleSelectAll = () =>
+    setSelectedIds((prev) => prev.length === tutorList.length ? [] : tutorList.map((t) => t.id));
+
+  // Compute which actions are available for the selection
+  const selectedTutors = tutorList.filter((t) => selectedIds.includes(t.id));
+  const hasPending = selectedTutors.some((t) => (t as any).user && !(t as any).user.is_active);
+  const verifiedCount = selectedTutors.filter((t) => t.is_verified).length;
+  const shouldVerify = verifiedCount <= selectedTutors.length / 2;
 
   const handleFilterSubject = (value: string) => {
     setFilterSubject(value);
@@ -330,6 +360,15 @@ export const Tutors = () => {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
         />
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+            <input
+              type="checkbox"
+              className="w-4 h-4 accent-primary cursor-pointer"
+              checked={selectedIds.length === tutorList.length && tutorList.length > 0}
+              onChange={toggleSelectAll}
+            />
+            {t('common.selectAll', 'Select all')}
+          </label>
           <Select
             value={filterSubject}
             onChange={handleFilterSubject}
@@ -400,6 +439,12 @@ export const Tutors = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tutors.map((tutor) => (
               <Card key={tutor.id} className="hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group relative overflow-hidden">
+                <input
+                  type="checkbox"
+                  className="absolute top-3 left-3 w-4 h-4 accent-primary cursor-pointer z-10"
+                  checked={selectedIds.includes(tutor.id)}
+                  onChange={() => toggleSelect(tutor.id)}
+                />
                 <div className="absolute top-0 right-0 p-4">
                   <DropdownMenu
                     trigger={<MoreHorizontal size={18} />}
@@ -464,6 +509,11 @@ export const Tutors = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
+                  <th className="w-10 px-3 py-3">
+                    <input type="checkbox" className="w-4 h-4 accent-primary cursor-pointer"
+                      checked={selectedIds.length === tutorList.length && tutorList.length > 0}
+                      onChange={toggleSelectAll} />
+                  </th>
                   <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.tutor')}</th>
                   <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.subjects')}</th>
                   <th className="px-6 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('tutors.table.experience')}</th>
@@ -475,6 +525,11 @@ export const Tutors = () => {
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {tutors.map((tutor) => (
                   <tr key={tutor.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors group">
+                    <td className="w-10 px-3 py-4">
+                      <input type="checkbox" className="w-4 h-4 accent-primary cursor-pointer"
+                        checked={selectedIds.includes(tutor.id)}
+                        onChange={() => toggleSelect(tutor.id)} />
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <Avatar name={tutor.name} size="md" />
@@ -599,6 +654,104 @@ export const Tutors = () => {
         cancelLabel={t('common.cancel')}
         isLoading={cancelInvite.isPending || deleteTutor.isPending}
       />
+
+      {/* Floating Bulk Action Bar */}
+      <AnimatePresence>
+        {selectedIds.length > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40"
+          >
+            <div className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4 border border-white/10 dark:border-black/10">
+              <div className="flex items-center gap-2 border-r border-white/20 dark:border-black/20 pr-4">
+                <span className="text-sm font-bold">{selectedIds.length}</span>
+                <span className="text-xs text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider">{t('common.selected')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  className="h-8 px-3 rounded-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 text-xs font-medium hover:bg-white/20 dark:hover:bg-black/20 transition-colors disabled:opacity-40"
+                  disabled={bulkVerify.isPending}
+                  onClick={() => bulkVerify.mutateAsync({ ids: selectedIds, is_verified: shouldVerify }).then(() => { setSelectedIds([]); toast.success(t('tutors.bulk.verifySuccess', 'Tutors updated')); })}
+                >
+                  {shouldVerify ? t('tutors.bulk.verify', 'Verify') : t('tutors.bulk.unverify', 'Unverify')}
+                </button>
+                <button
+                  className="h-8 px-3 rounded-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 text-xs font-medium hover:bg-white/20 dark:hover:bg-black/20 transition-colors disabled:opacity-40"
+                  disabled={!hasPending || bulkResendInvite.isPending}
+                  onClick={() => bulkResendInvite.mutateAsync(selectedIds).then(() => { setSelectedIds([]); toast.success(t('tutors.bulk.resendSuccess', 'Invites resent')); })}
+                >
+                  {t('tutors.bulk.resendInvite', 'Resend Invite')}
+                </button>
+                <button
+                  className="h-8 px-3 rounded-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 text-xs font-medium hover:bg-white/20 dark:hover:bg-black/20 transition-colors disabled:opacity-40"
+                  disabled={!hasPending || bulkCancelInvite.isPending}
+                  onClick={() => setBulkCancelConfirm(true)}
+                >
+                  {t('tutors.bulk.cancelInvite', 'Cancel Invite')}
+                </button>
+                <button
+                  className="h-8 px-3 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-medium hover:bg-red-500/30 transition-colors"
+                  onClick={() => setBulkDeleteConfirm(true)}
+                >
+                  {t('common.delete', 'Delete')}
+                </button>
+              </div>
+              <button
+                onClick={() => setSelectedIds([])}
+                className="p-1 hover:bg-white/10 dark:hover:bg-black/5 rounded-full transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bulk Delete Confirmation */}
+      {bulkDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-2">{t('tutors.bulk.deleteTitle', 'Delete Tutors')}</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('tutors.bulk.deleteWarning', 'Are you sure you want to delete {{count}} tutor(s)? This action cannot be undone.', { count: selectedIds.length })}
+            </p>
+            <div className="flex justify-end gap-2">
+              <button className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-muted" onClick={() => setBulkDeleteConfirm(false)}>{t('common.cancel', 'Cancel')}</button>
+              <button
+                className="px-4 py-2 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                disabled={bulkDelete.isPending}
+                onClick={() => bulkDelete.mutateAsync(selectedIds).then(() => { setSelectedIds([]); setBulkDeleteConfirm(false); toast.success(t('tutors.bulk.deleteSuccess', 'Tutors deleted')); })}
+              >
+                {bulkDelete.isPending ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Cancel Invite Confirmation */}
+      {bulkCancelConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-2">{t('tutors.bulk.cancelInviteTitle', 'Cancel Invitations')}</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('tutors.bulk.cancelInviteWarning', 'Cancelling invitations will permanently delete the selected pending tutors and all their associated data (classes, sessions, enrollments). This cannot be undone.')}
+            </p>
+            <div className="flex justify-end gap-2">
+              <button className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-muted" onClick={() => setBulkCancelConfirm(false)}>{t('common.cancel', 'Cancel')}</button>
+              <button
+                className="px-4 py-2 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                disabled={bulkCancelInvite.isPending}
+                onClick={() => bulkCancelInvite.mutateAsync(selectedIds).then(() => { setSelectedIds([]); setBulkCancelConfirm(false); toast.success(t('tutors.bulk.cancelInviteSuccess', 'Invitations cancelled')); })}
+              >
+                {bulkCancelInvite.isPending ? t('common.processing', 'Processing...') : t('tutors.bulk.confirmCancel', 'Cancel Invitations')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
