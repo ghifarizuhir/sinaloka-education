@@ -720,14 +720,14 @@ export const Tutors = () => {
                 <button
                   className="h-8 px-3 rounded-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 text-xs font-medium hover:bg-white/20 dark:hover:bg-black/20 transition-colors disabled:opacity-40"
                   disabled={bulkVerify.isPending}
-                  onClick={() => bulkVerify.mutateAsync({ ids: selectedIds, is_verified: shouldVerify }).then(() => { setSelectedIds([]); toast.success(t('tutors.bulk.verifySuccess', 'Tutors updated')); })}
+                  onClick={() => bulkVerify.mutateAsync({ ids: selectedIds, is_verified: shouldVerify }).then(() => { setSelectedIds([]); toast.success(t('tutors.bulk.verifySuccess', 'Tutors updated')); }).catch(() => toast.error(t('common.error', 'Something went wrong')))}
                 >
                   {shouldVerify ? t('tutors.bulk.verify', 'Verify') : t('tutors.bulk.unverify', 'Unverify')}
                 </button>
                 <button
                   className="h-8 px-3 rounded-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20 text-xs font-medium hover:bg-white/20 dark:hover:bg-black/20 transition-colors disabled:opacity-40"
                   disabled={!hasPending || bulkResendInvite.isPending}
-                  onClick={() => bulkResendInvite.mutateAsync(selectedIds).then(() => { setSelectedIds([]); toast.success(t('tutors.bulk.resendSuccess', 'Invites resent')); })}
+                  onClick={() => bulkResendInvite.mutateAsync(selectedIds).then(() => { setSelectedIds([]); toast.success(t('tutors.bulk.resendSuccess', 'Invites resent')); }).catch(() => toast.error(t('common.error', 'Something went wrong')))}
                 >
                   {t('tutors.bulk.resendInvite', 'Resend Invite')}
                 </button>
@@ -769,7 +769,7 @@ export const Tutors = () => {
               <button
                 className="px-4 py-2 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                 disabled={bulkDelete.isPending}
-                onClick={() => bulkDelete.mutateAsync(selectedIds).then(() => { setSelectedIds([]); setBulkDeleteConfirm(false); toast.success(t('tutors.bulk.deleteSuccess', 'Tutors deleted')); })}
+                onClick={() => bulkDelete.mutateAsync(selectedIds).then(() => { setSelectedIds([]); setBulkDeleteConfirm(false); toast.success(t('tutors.bulk.deleteSuccess', 'Tutors deleted')); }).catch(() => toast.error(t('common.error', 'Something went wrong')))}
               >
                 {bulkDelete.isPending ? t('common.deleting', 'Deleting...') : t('common.delete', 'Delete')}
               </button>
@@ -791,7 +791,7 @@ export const Tutors = () => {
               <button
                 className="px-4 py-2 text-sm rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                 disabled={bulkCancelInvite.isPending}
-                onClick={() => bulkCancelInvite.mutateAsync(selectedIds).then(() => { setSelectedIds([]); setBulkCancelConfirm(false); toast.success(t('tutors.bulk.cancelInviteSuccess', 'Invitations cancelled')); })}
+                onClick={() => bulkCancelInvite.mutateAsync(selectedIds).then(() => { setSelectedIds([]); setBulkCancelConfirm(false); toast.success(t('tutors.bulk.cancelInviteSuccess', 'Invitations cancelled')); }).catch(() => toast.error(t('common.error', 'Something went wrong')))}
               >
                 {bulkCancelInvite.isPending ? t('common.processing', 'Processing...') : t('tutors.bulk.confirmCancel', 'Cancel Invitations')}
               </button>
