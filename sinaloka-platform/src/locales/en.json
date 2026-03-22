@@ -172,6 +172,12 @@
       "hours": "{{count}} hours ago",
       "days": "{{count}} days ago"
     },
+    "revenueVsExpenses": "Revenue vs Expenses",
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "attendanceTrend": "Attendance Rate",
+    "studentGrowth": "Student Growth",
+    "noData": "No data yet",
     "commandPalette": {
       "searchPlaceholder": "Search for students, tutors, or actions...",
       "quickActions": "Quick Actions",

@@ -172,6 +172,12 @@
       "hours": "{{count}} jam yang lalu",
       "days": "{{count}} hari yang lalu"
     },
+    "revenueVsExpenses": "Pendapatan vs Pengeluaran",
+    "revenue": "Pendapatan",
+    "expenses": "Pengeluaran",
+    "attendanceTrend": "Tingkat Kehadiran",
+    "studentGrowth": "Pertumbuhan Siswa",
+    "noData": "Belum ada data",
     "commandPalette": {
       "searchPlaceholder": "Cari siswa, tutor, atau aksi...",
       "quickActions": "Aksi Cepat",
