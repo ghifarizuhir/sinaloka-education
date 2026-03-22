@@ -3,6 +3,8 @@ import {
   Post,
   Get,
   Patch,
+  Put,
+  Delete,
   Param,
   Query,
   Body,
@@ -25,6 +27,8 @@ import {
   type WhatsappMessagesQueryDto,
   UpdateWhatsappSettingsSchema,
   type UpdateWhatsappSettingsDto,
+  UpdateTemplateSchema,
+  type UpdateTemplateDto,
 } from './whatsapp.dto.js';
 
 @Controller()
@@ -105,5 +109,41 @@ export class WhatsappController {
     dto: UpdateWhatsappSettingsDto,
   ) {
     return this.whatsappService.updateSettings(institutionId, dto);
+  }
+
+  // --- Template endpoints ---
+
+  @Get('admin/whatsapp/templates')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async getTemplates(@InstitutionId() institutionId: string) {
+    return this.whatsappService.getTemplates(institutionId);
+  }
+
+  @Get('admin/whatsapp/templates/:name')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async getTemplate(
+    @InstitutionId() institutionId: string,
+    @Param('name') name: string,
+  ) {
+    return this.whatsappService.getTemplate(institutionId, name);
+  }
+
+  @Put('admin/whatsapp/templates/:name')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async updateTemplate(
+    @InstitutionId() institutionId: string,
+    @Param('name') name: string,
+    @Body(new ZodValidationPipe(UpdateTemplateSchema)) dto: UpdateTemplateDto,
+  ) {
+    return this.whatsappService.updateTemplate(institutionId, name, dto);
+  }
+
+  @Delete('admin/whatsapp/templates/:name')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  async deleteTemplate(
+    @InstitutionId() institutionId: string,
+    @Param('name') name: string,
+  ) {
+    return this.whatsappService.deleteTemplate(institutionId, name);
   }
 }

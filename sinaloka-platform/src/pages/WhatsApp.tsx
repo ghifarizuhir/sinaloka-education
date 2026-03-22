@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useWhatsappMessages, useWhatsappStats, useWhatsappSettings, useUpdateWhatsappSettings, useSendPaymentReminder } from '@/src/hooks/useWhatsapp';
 import { usePayments } from '@/src/hooks/usePayments';
 import { FeatureLock } from '../components/FeatureLock';
+import { TemplatesTab } from './WhatsApp/TemplatesTab';
 
 const STATUS_BADGE: Record<string, { variant: 'default' | 'success' | 'warning' | 'error' | 'outline'; className?: string }> = {
   SENT: { variant: 'outline', className: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
@@ -19,7 +20,7 @@ const STATUS_BADGE: Record<string, { variant: 'default' | 'success' | 'warning' 
 export const WhatsApp = () => {
   const { t, i18n } = useTranslation();
 
-  const [activeTab, setActiveTab] = useState<'messages' | 'paymentReminders' | 'settings'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'paymentReminders' | 'settings' | 'templates'>('messages');
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState('');
   const [filterDateFrom, setFilterDateFrom] = useState('');
@@ -126,6 +127,7 @@ export const WhatsApp = () => {
           { value: 'messages', label: t('whatsapp.tabs.messages') },
           { value: 'paymentReminders', label: t('whatsapp.tabs.paymentReminders'), disabled: stats.data?.configured === false },
           { value: 'settings', label: t('whatsapp.tabs.settings'), disabled: stats.data?.configured === false },
+          { value: 'templates', label: t('whatsapp.tabs.templates') },
         ]}
       />
 
@@ -476,6 +478,8 @@ export const WhatsApp = () => {
           </div>
         </Card>
       )}
+      {/* Templates Tab */}
+      {activeTab === 'templates' && <TemplatesTab />}
       </FeatureLock>
     </div>
   );

@@ -8,9 +8,16 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { PaymentGatewayService } from '../payment/payment-gateway.service.js';
+import {
+  TEMPLATE_VARIABLES,
+  DEFAULT_TEMPLATES,
+  SAMPLE_DATA,
+  interpolateTemplate,
+} from './whatsapp.constants.js';
 import type {
   WhatsappMessagesQueryDto,
   UpdateWhatsappSettingsDto,
+  UpdateTemplateDto,
 } from './whatsapp.dto.js';
 
 const FONNTE_API_URL = 'https://api.fonnte.com/send';
@@ -281,6 +288,85 @@ export class WhatsappService {
     };
   }
 
+  // --- Template CRUD ---
+
+  async getTemplates(institutionId: string) {
+    const customs = await this.prisma.whatsappTemplate.findMany({
+      where: { institution_id: institutionId },
+    });
+    const customMap = new Map(customs.map((c) => [c.name, c]));
+
+    return {
+      templates: Object.entries(DEFAULT_TEMPLATES).map(([name, defaultBody]) => {
+        const custom = customMap.get(name);
+        return {
+          name,
+          body: custom?.body ?? defaultBody,
+          is_default: !custom,
+          variables: TEMPLATE_VARIABLES[name] ?? [],
+        };
+      }),
+    };
+  }
+
+  async getTemplate(institutionId: string, name: string) {
+    if (!DEFAULT_TEMPLATES[name]) {
+      throw new NotFoundException(`Template "${name}" not found`);
+    }
+
+    const custom = await this.prisma.whatsappTemplate.findUnique({
+      where: { institution_id_name: { institution_id: institutionId, name } },
+    });
+
+    return {
+      name,
+      body: custom?.body ?? DEFAULT_TEMPLATES[name],
+      is_default: !custom,
+      variables: TEMPLATE_VARIABLES[name] ?? [],
+      sample_data: SAMPLE_DATA[name] ?? {},
+    };
+  }
+
+  async updateTemplate(institutionId: string, name: string, dto: UpdateTemplateDto) {
+    if (!DEFAULT_TEMPLATES[name]) {
+      throw new NotFoundException(`Template "${name}" not found`);
+    }
+
+    // Validate variables in body
+    const usedVars = [...dto.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]);
+    const allowed = TEMPLATE_VARIABLES[name] ?? [];
+    const unknown = usedVars.filter((v) => !allowed.includes(v));
+    if (unknown.length > 0) {
+      throw new BadRequestException(
+        `Unknown variables: ${unknown.join(', ')}. Allowed: ${allowed.join(', ')}`,
+      );
+    }
+
+    const template = await this.prisma.whatsappTemplate.upsert({
+      where: { institution_id_name: { institution_id: institutionId, name } },
+      create: { institution_id: institutionId, name, body: dto.body },
+      update: { body: dto.body },
+    });
+
+    return {
+      name: template.name,
+      body: template.body,
+      is_default: false,
+    };
+  }
+
+  async deleteTemplate(institutionId: string, name: string) {
+    if (!DEFAULT_TEMPLATES[name]) {
+      throw new NotFoundException(`Template "${name}" not found`);
+    }
+
+    await this.prisma.whatsappTemplate.deleteMany({
+      where: { institution_id: institutionId, name },
+    });
+
+    return { message: 'Reset to default' };
+  }
+
   async sendPaymentReminder(institutionId: string, paymentId: string) {
     const payment = await this.prisma.payment.findFirst({
       where: { id: paymentId, institution_id: institutionId },
@@ -337,25 +423,27 @@ export class WhatsappService {
           ? 'Menunggu'
           : 'Pending';
 
-    const message =
-      `Assalamu'alaikum, Bapak/Ibu wali dari *${payment.student.name}*.\n\n` +
-      `Ini adalah pengingat pembayaran dari *${payment.institution.name}*:\n` +
-      `💰 Jumlah: Rp ${amount}\n` +
-      `📅 Jatuh tempo: ${dueDate}\n` +
-      `📋 Status: ${statusLabel}\n\n` +
-      `Mohon segera melakukan pembayaran. Terima kasih.`;
+    // Resolve template: custom from DB, or fallback to default
+    const customTemplate = await this.prisma.whatsappTemplate.findUnique({
+      where: {
+        institution_id_name: {
+          institution_id: institutionId,
+          name: 'payment_reminder',
+        },
+      },
+    });
+    const templateBody =
+      customTemplate?.body ?? DEFAULT_TEMPLATES['payment_reminder'];
 
-    // Generate payment link if Midtrans is configured
-    let paymentLink = '';
+    // Generate checkout URL if Midtrans is configured
+    let checkoutUrl = '';
     try {
-      const checkoutUrl =
+      const url =
         await this.paymentGatewayService.getOrCreateCheckoutUrl(
           paymentId,
           institutionId,
         );
-      if (checkoutUrl) {
-        paymentLink = `\n\n📱 Bayar langsung: ${checkoutUrl}`;
-      }
+      if (url) checkoutUrl = url;
     } catch (error) {
       this.logger.warn(
         `Failed to generate checkout URL for payment ${paymentId}`,
@@ -363,7 +451,17 @@ export class WhatsappService {
       );
     }
 
-    const fullMessage = message + paymentLink;
+    // Build variables map
+    const variables: Record<string, string> = {
+      student_name: payment.student.name,
+      institution_name: payment.institution.name,
+      amount,
+      due_date: dueDate,
+      status: statusLabel,
+      checkout_url: checkoutUrl ? `📱 Bayar langsung: ${checkoutUrl}` : '',
+    };
+
+    const fullMessage = interpolateTemplate(templateBody, variables);
 
     return this.sendMessage({
       institutionId,

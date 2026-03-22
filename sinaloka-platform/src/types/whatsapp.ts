@@ -37,3 +37,11 @@ export interface WhatsappMessageQueryParams extends PaginationParams {
   date_to?: string;
   related_type?: string;
 }
+
+export interface WhatsappTemplate {
+  name: string;
+  body: string;
+  is_default: boolean;
+  variables: string[];
+  sample_data?: Record<string, string>;
+}
