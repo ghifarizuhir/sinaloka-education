@@ -1,6 +1,7 @@
 import { Navbar } from "../components/Navbar";
 import { Hero } from "../components/Hero";
 import { ProblemSection } from "../components/ProblemSection";
+import InteractiveDemo from "../components/InteractiveDemo";
 import { FeaturesSection } from "../components/FeaturesSection";
 import { HowItWorks } from "../components/HowItWorks";
 import { Pricing } from "../components/Pricing";
@@ -15,7 +16,7 @@ export default function LandingPage() {
       <Navbar />
       <Hero />
       <ProblemSection />
-      {/* InteractiveDemo will be added in Task 4 */}
+      <InteractiveDemo />
       <FeaturesSection />
       <HowItWorks />
       <Pricing />
