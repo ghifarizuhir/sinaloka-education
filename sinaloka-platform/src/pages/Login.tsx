@@ -22,7 +22,7 @@ export function Login() {
     }
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
-    const target = redirect && redirect.startsWith('/') ? redirect : '/';
+    const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/';
     return <Navigate to={target} replace />;
   }
 
@@ -37,7 +37,7 @@ export function Login() {
       } else {
         const params = new URLSearchParams(window.location.search);
         const redirect = params.get('redirect');
-        const target = redirect && redirect.startsWith('/') ? redirect : '/';
+        const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/';
         navigate(target, { replace: true });
       }
     } catch (err: unknown) {
