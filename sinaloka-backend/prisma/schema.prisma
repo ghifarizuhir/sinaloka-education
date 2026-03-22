@@ -597,6 +597,7 @@ model Payment {
   student_id      String
   enrollment_id   String
   amount          Decimal
+  discount_amount Decimal   @default(0)
   due_date        DateTime      @db.Date
   paid_date       DateTime?     @db.Date
   status          PaymentStatus @default(PENDING)
@@ -672,6 +673,7 @@ model Expense {
   is_recurring          Boolean         @default(false)
   recurrence_frequency  String?
   recurrence_end_date   DateTime?       @db.Date
+  last_generated_at     DateTime?
   created_at            DateTime        @default(now())
   updated_at            DateTime        @updatedAt
 
