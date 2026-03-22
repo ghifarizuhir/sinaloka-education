@@ -1,9 +1,10 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Skeleton } from '@/src/components/UI';
 
 export function ProtectedRoute() {
   const { user, isAuthenticated, isLoading, isImpersonating } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -17,7 +18,10 @@ export function ProtectedRoute() {
     );
   }
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    const currentPath = location.pathname + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(currentPath)}`} replace />;
+  }
 
   if (user?.role === 'SUPER_ADMIN' && !isImpersonating) {
     return <Navigate to="/super/institutions" replace />;

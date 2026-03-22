@@ -76,6 +76,16 @@ export const Attendance = () => {
   // Selected session object
   const selectedSession = useMemo(() => sessions.find(s => s.id === selectedSessionId), [sessions, selectedSessionId]);
 
+  // Monthly attendance summary for the selected session's class
+  const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1).toISOString().split('T')[0];
+  const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).toISOString().split('T')[0];
+  const selectedSessionClassId = selectedSession?.class_id ?? null;
+  const { data: attendanceSummary } = useAttendanceSummary({
+    class_id: selectedSessionClassId ?? '',
+    date_from: monthStart,
+    date_to: monthEnd,
+  });
+
   // Determine if editing is locked (completed or past date)
   const isSessionLocked = useMemo(() => {
     if (!selectedSession) return false;
@@ -331,6 +341,29 @@ export const Attendance = () => {
                       </div>
                     </div>
                   </div>
+                  {attendanceSummary && (
+                    <div className="space-y-1.5 mt-3">
+                      <p className="text-xs text-muted-foreground">{t('attendance.classSummary', { defaultValue: 'Class Summary (This Month)' })}</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="rounded-lg bg-emerald-50 dark:bg-emerald-900/20 p-2 text-center">
+                          <p className="text-lg font-bold text-emerald-600">{attendanceSummary.attendance_rate}%</p>
+                          <p className="text-[10px] text-emerald-600/70">{t('attendance.rate', { defaultValue: 'Rate' })}</p>
+                        </div>
+                        <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-2 text-center">
+                          <p className="text-lg font-bold text-blue-600">{attendanceSummary.present}</p>
+                          <p className="text-[10px] text-blue-600/70">{t('attendance.presentLabel', { defaultValue: 'Present' })}</p>
+                        </div>
+                        <div className="rounded-lg bg-rose-50 dark:bg-rose-900/20 p-2 text-center">
+                          <p className="text-lg font-bold text-rose-600">{attendanceSummary.absent}</p>
+                          <p className="text-[10px] text-rose-600/70">{t('attendance.absentLabel', { defaultValue: 'Absent' })}</p>
+                        </div>
+                        <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 p-2 text-center">
+                          <p className="text-lg font-bold text-amber-600">{attendanceSummary.late}</p>
+                          <p className="text-[10px] text-amber-600/70">{t('attendance.lateLabel', { defaultValue: 'Late' })}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Attendance Table */}
