@@ -20,7 +20,10 @@ export function Login() {
     if (user?.role === 'SUPER_ADMIN') {
       return <Navigate to="/super/institutions" replace />;
     }
-    return <Navigate to="/" replace />;
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    const target = redirect && redirect.startsWith('/') ? redirect : '/';
+    return <Navigate to={target} replace />;
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -32,7 +35,10 @@ export function Login() {
       if (profile.role === 'SUPER_ADMIN') {
         navigate('/super/institutions', { replace: true });
       } else {
-        navigate('/', { replace: true });
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect');
+        const target = redirect && redirect.startsWith('/') ? redirect : '/';
+        navigate(target, { replace: true });
       }
     } catch (err: unknown) {
       const message =
