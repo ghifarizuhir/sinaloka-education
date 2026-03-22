@@ -15,6 +15,7 @@ import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { UserService } from './user.service.js';
 import {
@@ -44,8 +45,11 @@ export class UserController {
 
   @Post()
   @UsePipes(new ZodValidationPipe(CreateUserSchema))
-  async create(@Body() dto: CreateUserDto) {
-    return this.userService.create(dto);
+  async create(
+    @InstitutionId() institutionId: string,
+    @Body() dto: CreateUserDto,
+  ) {
+    return this.userService.create(institutionId, dto);
   }
 
   @Patch(':id')
