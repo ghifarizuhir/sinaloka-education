@@ -15,7 +15,9 @@ const DEFAULT_FEE_RATES: Record<string, FeeRate> = {
   shopeepay: { type: 'percentage', value: 0.02 },
 };
 
-export function getFeeRates(configService?: ConfigService): Record<string, FeeRate> {
+export function getFeeRates(
+  configService?: ConfigService,
+): Record<string, FeeRate> {
   const overrideJson = configService?.get<string>('MIDTRANS_FEE_RATES');
   if (overrideJson) {
     try {

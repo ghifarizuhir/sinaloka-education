@@ -44,10 +44,7 @@ export class StudentService {
     return student;
   }
 
-  async findAll(
-    institutionId: string,
-    query: StudentQueryDto,
-  ) {
+  async findAll(institutionId: string, query: StudentQueryDto) {
     const { page, limit, search, grade, status, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 

@@ -8,4 +8,6 @@ const listNotificationsSchema = z.object({
   unread: z.coerce.boolean().optional(),
 });
 
-export class ListNotificationsDto extends createZodDto(listNotificationsSchema) {}
+export class ListNotificationsDto extends createZodDto(
+  listNotificationsSchema,
+) {}

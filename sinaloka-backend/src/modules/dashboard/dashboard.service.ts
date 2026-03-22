@@ -175,10 +175,12 @@ export class DashboardService {
     }
 
     return {
-      data: Array.from(byMonth.entries()).map(([month, { present, total }]) => ({
-        month,
-        rate: total > 0 ? Math.round((present / total) * 10000) / 100 : 0,
-      })),
+      data: Array.from(byMonth.entries()).map(
+        ([month, { present, total }]) => ({
+          month,
+          rate: total > 0 ? Math.round((present / total) * 10000) / 100 : 0,
+        }),
+      ),
     };
   }
 
@@ -208,13 +210,16 @@ export class DashboardService {
     for (let i = 0; i < 6; i++) {
       const d = new Date();
       d.setMonth(d.getMonth() - (5 - i));
-      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+      months.push(
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      );
     }
 
     const countByMonth = new Map(months.map((m) => [m, 0]));
     for (const s of newStudents) {
       const key = `${s.created_at.getFullYear()}-${String(s.created_at.getMonth() + 1).padStart(2, '0')}`;
-      if (countByMonth.has(key)) countByMonth.set(key, countByMonth.get(key)! + 1);
+      if (countByMonth.has(key))
+        countByMonth.set(key, countByMonth.get(key)! + 1);
     }
 
     let cumulative = baseCount;
@@ -254,7 +259,9 @@ export class DashboardService {
     for (let i = 0; i < 6; i++) {
       const d = new Date();
       d.setMonth(d.getMonth() - (5 - i));
-      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+      months.push(
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      );
     }
 
     const revenueByMonth = new Map(months.map((m) => [m, 0]));
@@ -263,12 +270,14 @@ export class DashboardService {
     for (const p of payments) {
       if (!p.paid_date) continue;
       const key = `${p.paid_date.getFullYear()}-${String(p.paid_date.getMonth() + 1).padStart(2, '0')}`;
-      if (revenueByMonth.has(key)) revenueByMonth.set(key, revenueByMonth.get(key)! + Number(p.amount));
+      if (revenueByMonth.has(key))
+        revenueByMonth.set(key, revenueByMonth.get(key)! + Number(p.amount));
     }
 
     for (const e of expenses) {
       const key = `${e.date.getFullYear()}-${String(e.date.getMonth() + 1).padStart(2, '0')}`;
-      if (expensesByMonth.has(key)) expensesByMonth.set(key, expensesByMonth.get(key)! + Number(e.amount));
+      if (expensesByMonth.has(key))
+        expensesByMonth.set(key, expensesByMonth.get(key)! + Number(e.amount));
     }
 
     return {

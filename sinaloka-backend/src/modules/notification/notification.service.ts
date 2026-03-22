@@ -72,9 +72,13 @@ export class NotificationService {
     });
   }
 
-  async markAsRead(id: string, institutionId: string) {
+  async markAsRead(id: string, institutionId: string, userId: string) {
     return this.prisma.notification.update({
-      where: { id, institution_id: institutionId },
+      where: {
+        id,
+        institution_id: institutionId,
+        OR: [{ user_id: null }, { user_id: userId }],
+      },
       data: { read_at: new Date() },
     });
   }

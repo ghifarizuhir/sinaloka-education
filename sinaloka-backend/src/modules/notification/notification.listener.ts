@@ -32,7 +32,10 @@ export class NotificationListener {
       data: { paymentId: event.paymentId },
     });
     if (notification) {
-      this.notificationGateway.pushToInstitution(event.institutionId, notification as Record<string, unknown>);
+      this.notificationGateway.pushToInstitution(
+        event.institutionId,
+        notification as Record<string, unknown>,
+      );
     }
   }
 
@@ -46,7 +49,10 @@ export class NotificationListener {
       data: { studentId: event.studentId },
     });
     if (notification) {
-      this.notificationGateway.pushToInstitution(event.institutionId, notification as Record<string, unknown>);
+      this.notificationGateway.pushToInstitution(
+        event.institutionId,
+        notification as Record<string, unknown>,
+      );
     }
   }
 
@@ -60,7 +66,10 @@ export class NotificationListener {
       data: { parentId: event.parentId, studentNames: event.studentNames },
     });
     if (notification) {
-      this.notificationGateway.pushToInstitution(event.institutionId, notification as Record<string, unknown>);
+      this.notificationGateway.pushToInstitution(
+        event.institutionId,
+        notification as Record<string, unknown>,
+      );
     }
   }
 
@@ -74,7 +83,10 @@ export class NotificationListener {
       data: { sessionId: event.sessionId },
     });
     if (notification) {
-      this.notificationGateway.pushToInstitution(event.institutionId, notification as Record<string, unknown>);
+      this.notificationGateway.pushToInstitution(
+        event.institutionId,
+        notification as Record<string, unknown>,
+      );
     }
   }
 
@@ -88,7 +100,10 @@ export class NotificationListener {
       data: { sessionId: event.sessionId },
     });
     if (notification) {
-      this.notificationGateway.pushToInstitution(event.institutionId, notification as Record<string, unknown>);
+      this.notificationGateway.pushToInstitution(
+        event.institutionId,
+        notification as Record<string, unknown>,
+      );
     }
   }
 
@@ -102,7 +117,10 @@ export class NotificationListener {
       data: { sessionId: event.sessionId },
     });
     if (notification) {
-      this.notificationGateway.pushToInstitution(event.institutionId, notification as Record<string, unknown>);
+      this.notificationGateway.pushToInstitution(
+        event.institutionId,
+        notification as Record<string, unknown>,
+      );
     }
   }
 
@@ -116,7 +134,10 @@ export class NotificationListener {
       data: { tutorId: event.tutorId },
     });
     if (notification) {
-      this.notificationGateway.pushToInstitution(event.institutionId, notification as Record<string, unknown>);
+      this.notificationGateway.pushToInstitution(
+        event.institutionId,
+        notification as Record<string, unknown>,
+      );
     }
   }
 }

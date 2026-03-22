@@ -50,7 +50,10 @@ export class ReportController {
     q: FinanceReportQueryDto,
     @Res() res: Response,
   ) {
-    const buf = await this.reportService.generateFinanceReport(institutionId, q);
+    const buf = await this.reportService.generateFinanceReport(
+      institutionId,
+      q,
+    );
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'inline; filename="finance-report.pdf"',

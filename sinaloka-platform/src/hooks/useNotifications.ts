@@ -25,6 +25,7 @@ export function useNotificationSSE() {
   const queryClient = useQueryClient();
   const eventSourceRef = useRef<EventSource | null>(null);
   const retryDelayRef = useRef(1000);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const connect = useCallback(() => {
     const token = localStorage.getItem('access_token');
@@ -47,7 +48,7 @@ export function useNotificationSSE() {
     es.onerror = () => {
       es.close();
       eventSourceRef.current = null;
-      setTimeout(connect, retryDelayRef.current);
+      timeoutRef.current = setTimeout(connect, retryDelayRef.current);
       retryDelayRef.current = Math.min(retryDelayRef.current * 2, 60000);
     };
     eventSourceRef.current = es;
@@ -56,6 +57,7 @@ export function useNotificationSSE() {
   useEffect(() => {
     connect();
     return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
     };

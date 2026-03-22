@@ -75,6 +75,10 @@ export class NotificationController {
       throw new UnauthorizedException('Institution context required');
     }
 
+    if (payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN') {
+      throw new UnauthorizedException('Insufficient role');
+    }
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -98,12 +102,6 @@ export class NotificationController {
     });
   }
 
-  @Patch(':id/read')
-  @Roles('ADMIN', 'SUPER_ADMIN')
-  markAsRead(@Param('id') id: string, @InstitutionId() institutionId: string) {
-    return this.notificationService.markAsRead(id, institutionId);
-  }
-
   @Patch('read-all')
   @Roles('ADMIN', 'SUPER_ADMIN')
   markAllAsRead(
@@ -111,5 +109,15 @@ export class NotificationController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.notificationService.markAllAsRead(institutionId, user.userId);
+  }
+
+  @Patch(':id/read')
+  @Roles('ADMIN', 'SUPER_ADMIN')
+  markAsRead(
+    @Param('id') id: string,
+    @InstitutionId() institutionId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.notificationService.markAsRead(id, institutionId, user.userId);
   }
 }

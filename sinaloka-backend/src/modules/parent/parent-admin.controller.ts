@@ -52,13 +52,19 @@ export class ParentAdminController {
   }
 
   @Get(':id')
-  async findOne(@InstitutionId() institutionId: string, @Param('id') id: string) {
+  async findOne(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
     return this.parentService.findOne(institutionId, id);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@InstitutionId() institutionId: string, @Param('id') id: string) {
+  async remove(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+  ) {
     await this.parentService.deleteParent(institutionId, id);
   }
 
@@ -78,10 +84,6 @@ export class ParentAdminController {
     @Param('parentId') parentId: string,
     @Param('studentId') studentId: string,
   ) {
-    await this.parentService.unlinkStudent(
-      institutionId,
-      parentId,
-      studentId,
-    );
+    await this.parentService.unlinkStudent(institutionId, parentId, studentId);
   }
 }

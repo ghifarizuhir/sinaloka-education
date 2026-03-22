@@ -246,10 +246,7 @@ export class SettlementService {
       summary: {
         total_gross: transactions.reduce((s, t) => s + t.gross_amount, 0),
         total_fee: transactions.reduce((s, t) => s + t.midtrans_fee, 0),
-        total_net: transactions.reduce(
-          (s, t) => s + t.transfer_amount,
-          0,
-        ),
+        total_net: transactions.reduce((s, t) => s + t.transfer_amount, 0),
         total_platform_cost: transactions.reduce(
           (s, t) => s + t.platform_cost,
           0,

@@ -31,7 +31,10 @@ export class NotificationGateway {
     });
   }
 
-  pushToInstitution(institutionId: string, notification: Record<string, unknown>) {
+  pushToInstitution(
+    institutionId: string,
+    notification: Record<string, unknown>,
+  ) {
     const clients = this.connections.get(institutionId);
     if (!clients || clients.size === 0) return;
 

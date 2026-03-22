@@ -93,7 +93,11 @@ export class SessionController {
     @Body(new ZodValidationPipe(GenerateSessionsSchema))
     dto: GenerateSessionsDto,
   ) {
-    return this.sessionService.generateSessions(institutionId, user.userId, dto);
+    return this.sessionService.generateSessions(
+      institutionId,
+      user.userId,
+      dto,
+    );
   }
 
   @Patch(':id/approve')
