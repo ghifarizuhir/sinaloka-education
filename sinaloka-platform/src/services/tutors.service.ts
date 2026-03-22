@@ -41,4 +41,9 @@ export const tutorsService = {
     api.post<{ sent: number }>('/api/admin/tutors/bulk/resend-invite', { ids }).then((r) => r.data),
   bulkCancelInvite: (ids: string[]) =>
     api.post<{ cancelled: number }>('/api/admin/tutors/bulk/cancel-invite', { ids }).then((r) => r.data),
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<{ url: string }>('/api/uploads/avatars', formData).then((r) => r.data.url);
+  },
 };

@@ -409,7 +409,9 @@
       "deleteTitle": "Hapus Tutor",
       "deleteWarning": "Apakah Anda yakin ingin menghapus {{count}} tutor? Tindakan ini tidak bisa dibatalkan.",
       "deleteSuccess": "Tutor dihapus"
-    }
+    },
+    "avatarUpdated": "Foto diperbarui",
+    "changePhoto": "Ganti foto"
   },
 
   "classes": {

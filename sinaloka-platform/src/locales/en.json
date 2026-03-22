@@ -409,7 +409,9 @@
       "deleteTitle": "Delete Tutors",
       "deleteWarning": "Are you sure you want to delete {{count}} tutor(s)? This action cannot be undone.",
       "deleteSuccess": "Tutors deleted"
-    }
+    },
+    "avatarUpdated": "Photo updated",
+    "changePhoto": "Change photo"
   },
 
   "classes": {

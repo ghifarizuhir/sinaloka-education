@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -56,15 +56,21 @@ import {
 } from '@/src/hooks/useTutors';
 import { useSubjects } from '@/src/hooks/useSubjects';
 import type { Tutor } from '@/src/types/tutor';
+import { useQueryClient } from '@tanstack/react-query';
+import { tutorsService } from '@/src/services/tutors.service';
+import { CropModal } from '@/src/components/CropModal';
 
-const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
+const TutorForm = ({ initialData, onSubmit, onCancel, isEditing, queryClient }: {
   initialData?: Tutor | null;
   onSubmit: (data: any) => void;
   onCancel: () => void;
   isEditing: boolean;
+  queryClient: ReturnType<typeof useQueryClient>;
 }) => {
   const { t } = useTranslation();
   const { data: subjectsList } = useSubjects();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: initialData?.name ?? '',
     email: initialData?.email ?? '',
@@ -100,6 +106,45 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/jpeg,image/png"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = () => setCropSrc(reader.result as string);
+            reader.readAsDataURL(file);
+          }
+          e.target.value = '';
+        }}
+      />
+      {cropSrc && (
+        <CropModal
+          imageSrc={cropSrc}
+          onClose={() => setCropSrc(null)}
+          onCrop={async (blob) => {
+            setCropSrc(null);
+            const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+            const url = await tutorsService.uploadAvatar(file);
+            if (initialData) {
+              await tutorsService.update({ id: initialData.id, data: { avatar_url: url } });
+              queryClient.invalidateQueries({ queryKey: ['tutors'] });
+              toast.success(t('tutors.avatarUpdated', 'Photo updated'));
+            }
+          }}
+        />
+      )}
+      {isEditing && (
+        <div className="flex flex-col items-center gap-1 mb-2">
+          <div className="cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
+            <Avatar name={initialData?.name ?? ''} src={initialData?.avatar_url ?? undefined} size="lg" />
+            <p className="text-xs text-muted-foreground mt-1 text-center">{t('tutors.changePhoto', 'Change photo')}</p>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">{t('tutors.form.fullName')}</Label>
@@ -186,6 +231,7 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing }: {
 
 export const Tutors = () => {
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -463,7 +509,7 @@ export const Tutors = () => {
                 </div>
 
                 <div className="flex items-start gap-4 mb-6">
-                  <Avatar name={tutor.name} size="lg" />
+                  <Avatar name={tutor.name} size="lg" src={tutor.avatar_url ?? undefined} />
                   <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-lg dark:text-zinc-100">{tutor.name}</h4>
@@ -532,7 +578,7 @@ export const Tutors = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <Avatar name={tutor.name} size="md" />
+                        <Avatar name={tutor.name} size="md" src={tutor.avatar_url ?? undefined} />
                         <div>
                           <p className="text-sm font-bold dark:text-zinc-200">{tutor.name}</p>
                           <p className="text-xs text-zinc-500">{tutor.email}</p>
@@ -640,6 +686,7 @@ export const Tutors = () => {
           isEditing={!!editingTutor}
           onSubmit={editingTutor ? handleEditTutor : handleAddTutor}
           onCancel={() => { setShowForm(false); setEditingTutor(null); }}
+          queryClient={queryClient}
         />
       </Modal>
 
