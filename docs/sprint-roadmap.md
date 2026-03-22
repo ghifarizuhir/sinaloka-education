@@ -18,17 +18,17 @@
 
 **Total: 20 items, 4 PRs, semua merged.**
 
+### Session 2 (2026-03-22) — Sprint 5
+
+| Sprint | PR | Items | Status |
+|---|---|---|---|
+| **Sprint 5: Medium Items** | #62 | Dashboard charts (revenue vs expenses, attendance trend, student growth), bulk tutor operations (verify, delete, resend/cancel invite), tutor profile photos (crop + upload, platform + tutors app) | Merged |
+
+**Total: 3 items, 1 PR, merged. Payment gateway settings UI di-skip (sudah centralized ke platform-level). Profile photos menggantikan slot ke-3.**
+
 ---
 
 ## Upcoming
-
-### Session 2 — Sprint 5: Medium Items (3 items)
-
-| # | Item | Effort | Detail |
-|---|---|---|---|
-| 1 | **Dashboard charts** | Medium | Recharts sudah imported tapi Dashboard tidak punya grafik. Finance Overview sudah punya charts — Dashboard belum. Tambah revenue trend, attendance rate trend, atau student growth chart. |
-| 2 | **Bulk operations pada Tutors** | Medium | Students dan Enrollments sudah punya bulk select + bulk delete/update. Tutors belum. Tambah checkbox selection + bulk actions (delete, verify, etc). |
-| 3 | **Payment gateway settings UI** | Medium | Backend endpoint `GET/PATCH /api/settings/payment-gateway` sudah ada. Settings page belum punya tab UI untuk konfigurasi Midtrans keys (server key, client key, sandbox mode). |
 
 ### Session 3 — Sprint 6: Custom WhatsApp Templates (1 item besar)
 
@@ -49,8 +49,7 @@
 
 | # | Item | Effort | Detail |
 |---|---|---|---|
-| 1 | Student/Tutor profile photos | Medium | Saat ini hanya initials avatar. Perlu: upload foto, crop/resize, storage, display di semua tempat yang tampilkan avatar. |
-| 2 | Multi-branch support | Besar | Tercantum di pricing card (BUSINESS plan) tapi belum implemented. Perlu: branch model, branch-scoped data, branch selector UI. |
+| 1 | Multi-branch support | Besar | Tercantum di pricing card (BUSINESS plan) tapi belum implemented. Perlu: branch model, branch-scoped data, branch selector UI. |
 | 3 | Advanced Reporting | Besar | Tercantum di pricing card. Report saat ini masih basic (3 PDF reports). Perlu: custom report builder, scheduled reports, email delivery. |
 
 ---
