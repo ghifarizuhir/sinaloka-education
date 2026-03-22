@@ -152,13 +152,12 @@ export class PaymentsPage {
     // Delete button has Trash2 icon — last action button in the row
     await row.locator('button').last().click();
 
-    await Promise.all([
-      this.page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/api/admin/payments') && resp.request().method() === 'DELETE',
-      ),
-      confirmDialog(this.page),
-    ]);
+    const responsePromise = this.page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/admin/payments') && resp.request().method() === 'DELETE',
+    );
+    await confirmDialog(this.page);
+    await responsePromise;
   }
 
   /* ── Generate Invoice ── */

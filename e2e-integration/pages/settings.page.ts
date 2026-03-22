@@ -122,13 +122,12 @@ export class SettingsPage {
     }
     await this.saveChangesButton.click();
 
-    await Promise.all([
-      this.page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/api/admin/settings') && resp.request().method() === 'PATCH',
-      ),
-      confirmChangesModal(this.page),
-    ]);
+    const responsePromise = this.page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/admin/settings') && resp.request().method() === 'PATCH',
+    );
+    await confirmChangesModal(this.page);
+    await responsePromise;
   }
 
   /* ── Security tab ── */
@@ -210,15 +209,14 @@ export class SettingsPage {
     const saveBillingButton = this.page.getByRole('button', { name: /save changes/i });
     await saveBillingButton.click();
 
-    await Promise.all([
-      this.page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/api/admin/settings') &&
-          resp.url().includes('billing') &&
-          resp.request().method() === 'PATCH',
-      ),
-      confirmChangesModal(this.page),
-    ]);
+    const responsePromise = this.page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/admin/settings') &&
+        resp.url().includes('billing') &&
+        resp.request().method() === 'PATCH',
+    );
+    await confirmChangesModal(this.page);
+    await responsePromise;
   }
 
   /* ── Academic tab ── */
@@ -305,15 +303,14 @@ export class SettingsPage {
     const row = this.page.locator('tr').filter({ hasText: name });
     await row.locator('button[aria-label*="Delete"]').click();
 
-    await Promise.all([
-      this.page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/api/admin/settings') &&
-          resp.url().includes('academic') &&
-          resp.request().method() === 'PATCH',
-      ),
-      confirmDialog(this.page),
-    ]);
+    const responsePromise = this.page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/admin/settings') &&
+        resp.url().includes('academic') &&
+        resp.request().method() === 'PATCH',
+    );
+    await confirmDialog(this.page);
+    await responsePromise;
   }
 
   async toggleWorkingDay(day: string) {

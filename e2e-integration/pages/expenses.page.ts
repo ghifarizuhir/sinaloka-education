@@ -164,13 +164,12 @@ export class ExpensesPage {
     // Delete button is the last <button> in the row (Trash2 icon)
     await row.locator('button').last().click();
 
-    await Promise.all([
-      this.page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/api/admin/expenses') && resp.request().method() === 'DELETE',
-      ),
-      confirmDialog(this.page),
-    ]);
+    const responsePromise = this.page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/admin/expenses') && resp.request().method() === 'DELETE',
+    );
+    await confirmDialog(this.page);
+    await responsePromise;
   }
 
   async search(query: string) {

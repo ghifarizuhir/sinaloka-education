@@ -184,12 +184,11 @@ export class EnrollmentsPage {
     // ConfirmDialog uses role="alertdialog" — click the confirm button
     const confirmDialog = this.page.locator('[role="alertdialog"]');
     const confirmButton = confirmDialog.getByRole('button', { name: /delete/i });
-    await Promise.all([
-      this.page.waitForResponse(resp =>
-        resp.url().includes('/api/admin/enrollments') && resp.request().method() === 'DELETE'
-      ),
-      confirmButton.click(),
-    ]);
+    const responsePromise = this.page.waitForResponse(resp =>
+      resp.url().includes('/api/admin/enrollments') && resp.request().method() === 'DELETE'
+    );
+    await confirmButton.click();
+    await responsePromise;
   }
 
   /**
@@ -211,12 +210,11 @@ export class EnrollmentsPage {
 
     // BulkDeleteModal or ConfirmDialog appears — confirm the deletion
     const confirmButton = this.page.getByRole('button', { name: /confirm|delete/i }).last();
-    await Promise.all([
-      this.page.waitForResponse(resp =>
-        resp.url().includes('/api/admin/enrollments') && resp.request().method() === 'DELETE'
-      ),
-      confirmButton.click(),
-    ]);
+    const responsePromise = this.page.waitForResponse(resp =>
+      resp.url().includes('/api/admin/enrollments') && resp.request().method() === 'DELETE'
+    );
+    await confirmButton.click();
+    await responsePromise;
   }
 
   /**

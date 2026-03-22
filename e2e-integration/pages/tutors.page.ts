@@ -135,12 +135,11 @@ export class TutorsPage {
     const dialog = this.page.getByRole('alertdialog');
     await expect(dialog).toBeVisible();
     const confirmBtn = dialog.getByRole('button').filter({ hasNotText: /cancel|batal/i }).last();
-    await Promise.all([
-      this.page.waitForResponse(resp =>
-        resp.url().includes('/api/admin/tutors') && resp.request().method() === 'DELETE'
-      ),
-      confirmBtn.click(),
-    ]);
+    const responsePromise = this.page.waitForResponse(resp =>
+      resp.url().includes('/api/admin/tutors') && resp.request().method() === 'DELETE'
+    );
+    await confirmBtn.click();
+    await responsePromise;
   }
 
   async search(query: string) {
@@ -178,12 +177,11 @@ export class TutorsPage {
     const dialog = this.page.getByRole('alertdialog');
     await expect(dialog).toBeVisible();
     const confirmBtn = dialog.getByRole('button').filter({ hasNotText: /cancel|batal/i }).last();
-    await Promise.all([
-      this.page.waitForResponse(resp =>
-        resp.url().includes('/api/admin/tutors') && resp.request().method() === 'DELETE'
-      ),
-      confirmBtn.click(),
-    ]);
+    const responsePromise = this.page.waitForResponse(resp =>
+      resp.url().includes('/api/admin/tutors') && resp.request().method() === 'DELETE'
+    );
+    await confirmBtn.click();
+    await responsePromise;
   }
 
   /**
@@ -225,12 +223,11 @@ export class TutorsPage {
    * Click the Verify/Unverify button in the floating bulk action bar.
    */
   async bulkVerify() {
-    await Promise.all([
-      this.page.waitForResponse(resp =>
-        resp.url().includes('/api/admin/tutors') && resp.request().method() === 'PATCH'
-      ),
-      this.bulkActionBar.getByRole('button', { name: /verify|unverify/i }).click(),
-    ]);
+    const responsePromise = this.page.waitForResponse(resp =>
+      resp.url().includes('/api/admin/tutors') && resp.request().method() === 'PATCH'
+    );
+    await this.bulkActionBar.getByRole('button', { name: /verify|unverify/i }).click();
+    await responsePromise;
   }
 
   /**
@@ -241,12 +238,11 @@ export class TutorsPage {
 
     // Bulk delete uses a custom modal (not ConfirmDialog), with a "Delete" confirm button
     const confirmBtn = this.page.locator('.fixed.inset-0').locator('button').filter({ hasText: /^delete$/i });
-    await Promise.all([
-      this.page.waitForResponse(resp =>
-        resp.url().includes('/api/admin/tutors') && resp.request().method() === 'DELETE'
-      ),
-      confirmBtn.click(),
-    ]);
+    const responsePromise = this.page.waitForResponse(resp =>
+      resp.url().includes('/api/admin/tutors') && resp.request().method() === 'DELETE'
+    );
+    await confirmBtn.click();
+    await responsePromise;
   }
 
   /**

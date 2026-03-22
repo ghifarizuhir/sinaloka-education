@@ -242,12 +242,11 @@ export class PayoutsPage {
     // Delete button is the X icon — last button in row actions
     await row.locator('button').last().click();
 
-    await Promise.all([
-      this.page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/api/admin/payouts') && resp.request().method() === 'DELETE',
-      ),
-      confirmDialog(this.page),
-    ]);
+    const responsePromise = this.page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/admin/payouts') && resp.request().method() === 'DELETE',
+    );
+    await confirmDialog(this.page);
+    await responsePromise;
   }
 }
