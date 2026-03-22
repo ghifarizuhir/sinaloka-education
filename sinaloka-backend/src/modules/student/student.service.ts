@@ -60,7 +60,7 @@ export class StudentService {
       ];
     }
 
-    const [data, total] = await Promise.all([
+    const [data, total, activeCount, inactiveCount] = await Promise.all([
       this.prisma.student.findMany({
         where,
         skip,
@@ -68,11 +68,21 @@ export class StudentService {
         orderBy: { [sort_by]: sort_order },
       }),
       this.prisma.student.count({ where }),
+      this.prisma.student.count({
+        where: { institution_id: institutionId, status: 'ACTIVE' },
+      }),
+      this.prisma.student.count({
+        where: { institution_id: institutionId, status: 'INACTIVE' },
+      }),
     ]);
 
     return {
       data,
-      meta: buildPaginationMeta(total, page, limit),
+      meta: {
+        ...buildPaginationMeta(total, page, limit),
+        active_count: activeCount,
+        inactive_count: inactiveCount,
+      },
     };
   }
 
