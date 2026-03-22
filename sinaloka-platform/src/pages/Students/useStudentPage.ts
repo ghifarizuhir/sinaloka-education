@@ -13,6 +13,7 @@ import { useInviteParent } from '@/src/hooks/useParents';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
 import { ALL_GRADES } from '../../lib/constants';
 import type { Student } from '@/src/types/student';
+import type { StudentPaginationMeta } from '@/src/types/common';
 
 export function useStudentPage() {
   const { t, i18n } = useTranslation();
@@ -277,8 +278,8 @@ export function useStudentPage() {
   };
 
   const statsTotal = meta?.total ?? 0;
-  const statsActive = (meta as any)?.active_count ?? 0;
-  const statsInactive = (meta as any)?.inactive_count ?? 0;
+  const statsActive = (meta as StudentPaginationMeta)?.active_count ?? 0;
+  const statsInactive = (meta as StudentPaginationMeta)?.inactive_count ?? 0;
 
   return {
     t,

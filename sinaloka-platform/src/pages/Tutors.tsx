@@ -539,7 +539,7 @@ export const Tutors = () => {
       {meta && meta.totalPages > 1 && (
         <div className="flex items-center justify-between mt-6">
           <p className="text-sm text-muted-foreground">
-            Page {page} of {meta.totalPages} - {meta.total} total tutors
+            {t('common.pageInfo', { page, totalPages: meta.totalPages, total: meta.total, defaultValue: `Page ${page} of ${meta.totalPages} - ${meta.total} total tutors` })}
           </p>
           <div className="flex items-center gap-1">
             <Button

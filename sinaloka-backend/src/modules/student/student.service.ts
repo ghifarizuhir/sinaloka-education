@@ -2,10 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import {
-  buildPaginationMeta,
-  PaginatedResponse,
-} from '../../common/dto/pagination.dto.js';
+import { buildPaginationMeta } from '../../common/dto/pagination.dto.js';
 import { CreateStudentSchema } from './student.dto.js';
 import type {
   CreateStudentDto,
@@ -37,7 +34,7 @@ export class StudentService {
   async findAll(
     institutionId: string,
     query: StudentQueryDto,
-  ): Promise<PaginatedResponse<any>> {
+  ) {
     const { page, limit, search, grade, status, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 

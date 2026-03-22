@@ -19,7 +19,6 @@ export interface PaginatedResponse<T> {
     totalPages: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
-    [key: string]: unknown;
   };
 }
 

@@ -409,7 +409,7 @@ export const Dashboard = () => {
                 ))}
                 {filteredActions.length === 0 && (
                   <div className="px-3 py-8 text-center text-sm text-muted-foreground">
-                    No results found
+                    {t('common.noResults', { defaultValue: 'No results found' })}
                   </div>
                 )}
               </div>
