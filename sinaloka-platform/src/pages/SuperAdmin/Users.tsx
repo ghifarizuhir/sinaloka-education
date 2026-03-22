@@ -56,6 +56,15 @@ export default function SuperAdminUsers() {
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editActive, setEditActive] = useState(true);
+  const [resetPassword, setResetPassword] = useState('');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const passwordChecks = {
+    minLength: resetPassword.length >= 8,
+    uppercase: /[A-Z]/.test(resetPassword),
+    digit: /[0-9]/.test(resetPassword),
+  };
+  const isPasswordValid = passwordChecks.minLength && passwordChecks.uppercase && passwordChecks.digit;
 
   const { data, isLoading } = useUsers({
     page,
@@ -106,6 +115,8 @@ export default function SuperAdminUsers() {
     setEditName(user.name);
     setEditEmail(user.email);
     setEditActive(user.is_active);
+    setResetPassword('');
+    setShowResetConfirm(false);
     setShowEditModal(true);
   };
 
@@ -126,6 +137,21 @@ export default function SuperAdminUsers() {
       setEditUser(null);
     } catch {
       toast.error(t('superAdmin.toast.userUpdateError'));
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!editUser || !isPasswordValid) return;
+    try {
+      await updateUser.mutateAsync({
+        id: editUser.id,
+        data: { password: resetPassword },
+      });
+      toast.success(t('superAdmin.toast.passwordReset', { defaultValue: 'Password reset successfully. Admin must change password on next login.' }));
+      setResetPassword('');
+      setShowResetConfirm(false);
+    } catch {
+      toast.error(t('superAdmin.toast.passwordResetError', { defaultValue: 'Failed to reset password' }));
     }
   };
 
@@ -401,7 +427,7 @@ export default function SuperAdminUsers() {
       {/* Edit Admin Modal */}
       <Modal
         isOpen={showEditModal}
-        onClose={() => { setShowEditModal(false); setEditUser(null); }}
+        onClose={() => { setShowEditModal(false); setEditUser(null); setResetPassword(''); setShowResetConfirm(false); }}
         title={t('superAdmin.editUserModal.title')}
       >
         <form onSubmit={handleEdit} className="space-y-4">
@@ -424,11 +450,64 @@ export default function SuperAdminUsers() {
             <Label>{t('superAdmin.editUserModal.active')}</Label>
             <Switch checked={editActive} onChange={setEditActive} />
           </div>
+
+          {/* Reset Password Section */}
+          <div className="border-t border-border pt-4 mt-4 space-y-3">
+            <p className="text-sm font-medium text-foreground">{t('superAdmin.editUserModal.resetPassword', { defaultValue: 'Reset Password' })}</p>
+            <div className="space-y-1.5">
+              <PasswordInput
+                placeholder={t('superAdmin.editUserModal.newPasswordPlaceholder', { defaultValue: 'New password' })}
+                value={resetPassword}
+                onChange={(e) => setResetPassword(e.target.value)}
+              />
+            </div>
+
+            {resetPassword && (
+              <div className="space-y-1 text-xs">
+                <p className={passwordChecks.minLength ? 'text-emerald-600' : 'text-muted-foreground'}>
+                  {passwordChecks.minLength ? '✓' : '○'} {t('settings.security.minLength', { defaultValue: 'Minimum 8 characters' })}
+                </p>
+                <p className={passwordChecks.uppercase ? 'text-emerald-600' : 'text-muted-foreground'}>
+                  {passwordChecks.uppercase ? '✓' : '○'} {t('settings.security.uppercase', { defaultValue: 'At least 1 uppercase letter' })}
+                </p>
+                <p className={passwordChecks.digit ? 'text-emerald-600' : 'text-muted-foreground'}>
+                  {passwordChecks.digit ? '✓' : '○'} {t('settings.security.digit', { defaultValue: 'At least 1 digit' })}
+                </p>
+              </div>
+            )}
+
+            {!showResetConfirm ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowResetConfirm(true)}
+                disabled={!isPasswordValid || updateUser.isPending}
+              >
+                {t('superAdmin.editUserModal.resetPasswordBtn', { defaultValue: 'Reset Password' })}
+              </Button>
+            ) : (
+              <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 space-y-2">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  {t('superAdmin.editUserModal.resetPasswordConfirm', { defaultValue: 'Password will be reset. Admin must change it on next login.' })}
+                </p>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setShowResetConfirm(false)}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button type="button" size="sm" onClick={handleResetPassword} disabled={updateUser.isPending}>
+                    {t('common.confirm', { defaultValue: 'Confirm' })}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              onClick={() => { setShowEditModal(false); setEditUser(null); }}
+              onClick={() => { setShowEditModal(false); setEditUser(null); setResetPassword(''); setShowResetConfirm(false); }}
             >
               {t('common.cancel')}
             </Button>
