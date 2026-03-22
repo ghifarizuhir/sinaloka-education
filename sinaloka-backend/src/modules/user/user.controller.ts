@@ -54,7 +54,7 @@ export class UserController {
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateUserSchema)) dto: UpdateUserDto,
   ) {
-    return this.userService.update(id, dto, user.institutionId);
+    return this.userService.update(id, dto, user.institutionId, user.role);
   }
 
   @Delete(':id')
