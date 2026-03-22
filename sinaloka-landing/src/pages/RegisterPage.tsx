@@ -325,10 +325,8 @@ export default function RegisterPage() {
       errors.parent_name = "Nama orang tua wajib diisi";
     if (!studentForm.parent_phone.trim())
       errors.parent_phone = "No. HP orang tua wajib diisi";
-    if (
-      studentForm.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentForm.email)
-    )
+    if (!studentForm.email.trim()) errors.email = "Email siswa wajib diisi";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentForm.email))
       errors.email = "Format email tidak valid";
     if (
       studentForm.parent_email &&
@@ -376,9 +374,7 @@ export default function RegisterPage() {
           grade: studentForm.grade.trim(),
           parent_name: studentForm.parent_name.trim(),
           parent_phone: studentForm.parent_phone.trim(),
-          ...(studentForm.email.trim() && {
-            email: studentForm.email.trim(),
-          }),
+          email: studentForm.email.trim(),
           ...(studentForm.phone.trim() && {
             phone: studentForm.phone.trim(),
           }),
@@ -799,6 +795,7 @@ export default function RegisterPage() {
                               <InputField
                                 id="email"
                                 label="Email Siswa"
+                                required
                                 type="email"
                                 placeholder="email@contoh.com"
                                 value={studentForm.email}
