@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton, ConfirmDialog, PageHeader, Select } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
-import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/src/hooks/useExpenses';
+import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense, useExportExpenses } from '@/src/hooks/useExpenses';
 import { useBillingSettings } from '@/src/hooks/useSettings';
 import { expensesService } from '@/src/services/expenses.service';
 import { toast } from 'sonner';
@@ -68,6 +68,7 @@ export const OperatingExpenses = () => {
   const createExpense = useCreateExpense();
   const updateExpense = useUpdateExpense();
   const deleteExpense = useDeleteExpense();
+  const exportExpenses = useExportExpenses();
 
   const expenses = expensesData?.data ?? [];
   const total = expensesData?.meta?.total ?? 0;
@@ -216,9 +217,35 @@ export const OperatingExpenses = () => {
         title={t('expenses.title')}
         subtitle={t('expenses.subtitle')}
         actions={<>
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => {
+              exportExpenses.mutate(
+                {
+                  ...(filterCategory !== 'all' ? { category: filterCategory } : {}),
+                  ...(searchQuery ? { search: searchQuery } : {}),
+                },
+                {
+                  onSuccess: (blob: Blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `expenses_export_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    toast.success(t('common.exportSuccess', { defaultValue: 'Export successful' }));
+                  },
+                  onError: () => toast.error(t('common.exportError', { defaultValue: 'Export failed' })),
+                }
+              );
+            }}
+            disabled={exportExpenses.isPending}
+          >
             <Download size={16} />
-            {t('common.export')}
+            {exportExpenses.isPending ? t('common.exporting', { defaultValue: 'Exporting...' }) : t('common.export')}
           </Button>
           <Button onClick={handleAddExpense} className="gap-2">
             <Plus size={16} />

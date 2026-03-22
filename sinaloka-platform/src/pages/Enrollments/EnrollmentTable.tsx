@@ -3,7 +3,6 @@ import {
   MoreHorizontal,
   Search,
   Download,
-  CreditCard,
   ArrowUpRight,
   Edit,
   CheckCircle2,
@@ -209,11 +208,6 @@ export const EnrollmentTable = ({
                         <span className={cn("text-xs font-bold px-2 py-0.5 rounded-full", getPaymentBadge(enroll.payment_status))}>
                           {PAYMENT_LABEL[enroll.payment_status] ?? enroll.payment_status}
                         </span>
-                        {enroll.payment_status === 'OVERDUE' && (
-                          <button className="p-1 text-zinc-400 hover:text-indigo-600 transition-colors" title={t('enrollments.menu.sendReminder')}>
-                            <CreditCard size={14} />
-                          </button>
-                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { PaymentGatewayService } from '../payment/payment-gateway.service.js';
 import type {
   WhatsappMessagesQueryDto,
   UpdateWhatsappSettingsDto,
@@ -22,6 +23,7 @@ export class WhatsappService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly paymentGatewayService: PaymentGatewayService,
   ) {
     this.fonnteToken = this.config.get<string>('FONNTE_TOKEN');
 
@@ -343,10 +345,30 @@ export class WhatsappService {
       `📋 Status: ${statusLabel}\n\n` +
       `Mohon segera melakukan pembayaran. Terima kasih.`;
 
+    // Generate payment link if Midtrans is configured
+    let paymentLink = '';
+    try {
+      const checkoutUrl =
+        await this.paymentGatewayService.getOrCreateCheckoutUrl(
+          paymentId,
+          institutionId,
+        );
+      if (checkoutUrl) {
+        paymentLink = `\n\n📱 Bayar langsung: ${checkoutUrl}`;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to generate checkout URL for payment ${paymentId}`,
+        error,
+      );
+    }
+
+    const fullMessage = message + paymentLink;
+
     return this.sendMessage({
       institutionId,
       phone: parentPhone,
-      message,
+      message: fullMessage,
       templateName: 'payment_reminder',
       templateParams: {
         studentName: payment.student.name,

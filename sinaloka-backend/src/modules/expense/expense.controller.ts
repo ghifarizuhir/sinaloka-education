@@ -8,6 +8,7 @@ import {
   Body,
   Query,
   ParseUUIDPipe,
+  StreamableFile,
 } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -49,6 +50,19 @@ export class ExpenseController {
   @Post('process-recurring')
   processRecurring(@InstitutionId() institutionId: string) {
     return this.expenseService.processRecurringExpenses(institutionId);
+  }
+
+  @Get('export')
+  async exportCsv(
+    @InstitutionId() institutionId: string,
+    @Query(new ZodValidationPipe(ExpenseQuerySchema)) query: ExpenseQueryDto,
+  ) {
+    const csv = await this.expenseService.exportCsv(institutionId, query);
+    const date = new Date().toISOString().split('T')[0];
+    return new StreamableFile(Buffer.from(csv, 'utf-8'), {
+      type: 'text/csv',
+      disposition: `attachment; filename="expenses_export_${date}.csv"`,
+    });
   }
 
   @Get(':id')
