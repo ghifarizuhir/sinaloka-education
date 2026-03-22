@@ -3,18 +3,17 @@ import { FOOTER_LINKS, SOCIAL_LINKS } from "../lib/constants";
 export function Footer() {
   const columns = [
     { title: "Produk", links: FOOTER_LINKS.produk },
-    { title: "Perusahaan", links: FOOTER_LINKS.perusahaan },
-    { title: "Legal", links: FOOTER_LINKS.legal },
+    { title: "Kontak", links: FOOTER_LINKS.kontak },
   ];
 
   return (
     <footer className="bg-[#FAFAFA] border-t border-[#E5E5E5] py-16">
       <div className="max-w-6xl mx-auto px-6 lg:px-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-8">
           <div className="col-span-2 md:col-span-1">
             <span className="text-xl font-bold text-[#111]">Sinaloka</span>
             <p className="mt-3 text-sm text-[#999] leading-relaxed max-w-xs">
-              Platform manajemen bimbingan belajar #1 di Indonesia.
+              Platform manajemen bimbingan belajar.
             </p>
           </div>
 

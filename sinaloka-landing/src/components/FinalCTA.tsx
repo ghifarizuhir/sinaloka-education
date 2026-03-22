@@ -39,8 +39,7 @@ export function FinalCTA() {
             <span className="text-accent-400">tanpa pusing?</span>
           </h2>
           <p className="mt-6 text-accent-200/70 text-base md:text-lg">
-            150+ bimbel sudah merasakan bedanya. Ceritakan kebutuhan Anda — kami
-            bantu dari awal, gratis.
+            Coba sendiri — gratis 2 bulan, tanpa kartu kredit.
           </p>
 
           <div className="mt-10">
@@ -61,7 +60,7 @@ export function FinalCTA() {
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-accent-300/70">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 size={12} /> Gratis untuk bimbel kecil
+              <CheckCircle2 size={12} /> Gratis 2 bulan pertama
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 size={12} /> Setup dibantu tim kami
