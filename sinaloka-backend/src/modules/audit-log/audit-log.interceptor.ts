@@ -13,7 +13,11 @@ import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { AUDIT_EVENTS, AuditLogEvent } from './audit-log.events.js';
 import { NO_AUDIT_LOG_KEY } from './decorators/no-audit-log.decorator.js';
 import { buildSummary } from './audit-log.summary.js';
-import { computeDiff, buildCreateChanges, buildDeleteChanges } from './audit-log.utils.js';
+import {
+  computeDiff,
+  buildCreateChanges,
+  buildDeleteChanges,
+} from './audit-log.utils.js';
 
 const MUTATION_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
@@ -47,19 +51,16 @@ const RESOURCE_TO_MODEL: Record<string, string> = {
 };
 
 function resolveResourceType(endpoint: string): string {
-  const segments = endpoint.replace(/^\/api\/(admin|super-admin|tutor|parent)\//, '').split('/');
+  const segments = endpoint
+    .replace(/^\/api\/(admin|super-admin|tutor|parent)\//, '')
+    .split('/');
   let resource = segments[0] ?? 'unknown';
   if (resource === 'finance' && segments[1]) resource = segments[1];
-  return resource
-    .replace(/-/g, '_')
-    .replace(/ies$/, 'y')
-    .replace(/s$/, '');
+  return resource.replace(/-/g, '_').replace(/ies$/, 'y').replace(/s$/, '');
 }
 
 function resolveResourceIdFromUrl(endpoint: string): string | null {
-  const idMatch = endpoint.match(
-    /\/([a-f0-9-]{36}|c[a-z0-9]{24,})(?:\/|$)/i,
-  );
+  const idMatch = endpoint.match(/\/([a-f0-9-]{36}|c[a-z0-9]{24,})(?:\/|$)/i);
   return idMatch ? idMatch[1] : null;
 }
 
@@ -86,10 +87,10 @@ export class AuditLogInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const noAudit = this.reflector.getAllAndOverride<boolean>(NO_AUDIT_LOG_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const noAudit = this.reflector.getAllAndOverride<boolean>(
+      NO_AUDIT_LOG_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (noAudit) {
       return next.handle();
     }
@@ -105,9 +106,10 @@ export class AuditLogInterceptor implements NestInterceptor {
     const resourceType = resolveResourceType(endpoint);
     const resourceIdFromUrl = resolveResourceIdFromUrl(endpoint);
 
-    const needsBeforeState = (action === 'UPDATE' || action === 'DELETE') && resourceIdFromUrl;
+    const needsBeforeState =
+      (action === 'UPDATE' || action === 'DELETE') && resourceIdFromUrl;
     const beforeStatePromise = needsBeforeState
-      ? this.fetchBeforeState(resourceType, resourceIdFromUrl!)
+      ? this.fetchBeforeState(resourceType, resourceIdFromUrl)
       : Promise.resolve(null);
 
     return from(beforeStatePromise).pipe(
@@ -120,21 +122,47 @@ export class AuditLogInterceptor implements NestInterceptor {
 
               if (statusCode < 200 || statusCode >= 300) return;
 
-              const resourceId = resourceIdFromUrl ??
-                (responseBody && typeof responseBody === 'object' && 'id' in responseBody
-                  ? (responseBody as Record<string, unknown>).id as string
+              const resourceId =
+                resourceIdFromUrl ??
+                (responseBody &&
+                typeof responseBody === 'object' &&
+                'id' in responseBody
+                  ? ((responseBody as Record<string, unknown>).id as string)
                   : null);
 
-              let changes: Record<string, { before: unknown; after: unknown }> | null = null;
-              if (action === 'UPDATE' && beforeState && responseBody && typeof responseBody === 'object') {
-                changes = computeDiff(beforeState, responseBody as Record<string, unknown>);
-              } else if (action === 'CREATE' && responseBody && typeof responseBody === 'object') {
-                changes = buildCreateChanges(responseBody as Record<string, unknown>);
+              let changes: Record<
+                string,
+                { before: unknown; after: unknown }
+              > | null = null;
+              if (
+                action === 'UPDATE' &&
+                beforeState &&
+                responseBody &&
+                typeof responseBody === 'object'
+              ) {
+                changes = computeDiff(
+                  beforeState,
+                  responseBody as Record<string, unknown>,
+                );
+              } else if (
+                action === 'CREATE' &&
+                responseBody &&
+                typeof responseBody === 'object'
+              ) {
+                changes = buildCreateChanges(
+                  responseBody as Record<string, unknown>,
+                );
               } else if (action === 'DELETE' && beforeState) {
                 changes = buildDeleteChanges(beforeState);
               }
 
-              const summary = buildSummary(action, resourceType, beforeState, requestBody, resourceId);
+              const summary = buildSummary(
+                action,
+                resourceType,
+                beforeState,
+                requestBody,
+                resourceId,
+              );
 
               const event: AuditLogEvent = {
                 institutionId: request.tenantId ?? user.institutionId ?? null,
@@ -148,7 +176,12 @@ export class AuditLogInterceptor implements NestInterceptor {
                 httpMethod: method,
                 endpoint,
                 statusCode,
-                ipAddress: (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ?? request.ip ?? null,
+                ipAddress:
+                  (request.headers['x-forwarded-for'] as string)
+                    ?.split(',')[0]
+                    ?.trim() ??
+                  request.ip ??
+                  null,
                 userAgent: request.headers['user-agent'] ?? null,
               };
 
@@ -168,12 +201,18 @@ export class AuditLogInterceptor implements NestInterceptor {
       const modelName = RESOURCE_TO_MODEL[resourceType];
       if (!modelName) return null;
 
-      const delegate = (this.prisma as any)[modelName];
+      const delegate = (this.prisma as unknown as Record<string, unknown>)[
+        modelName
+      ] as {
+        findUnique?: (args: unknown) => Promise<Record<string, unknown> | null>;
+      };
       if (!delegate?.findUnique) return null;
 
       return await delegate.findUnique({ where: { id: resourceId } });
     } catch {
-      this.logger.warn(`Failed to fetch before-state for ${resourceType}:${resourceId}`);
+      this.logger.warn(
+        `Failed to fetch before-state for ${resourceType}:${resourceId}`,
+      );
       return null;
     }
   }
