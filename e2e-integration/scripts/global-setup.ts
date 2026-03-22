@@ -2,10 +2,10 @@ import { execSync } from 'child_process';
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import pg from 'pg';
+import { DB_URL } from '../helpers/constants.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const BACKEND = resolve(ROOT, '../sinaloka-backend');
-const DB_URL = 'postgresql://postgres:postgres@localhost:5435/sinaloka_test';
 
 async function waitForPostgres(maxRetries = 30): Promise<void> {
   for (let i = 0; i < maxRetries; i++) {

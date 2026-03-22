@@ -1,9 +1,10 @@
 import axios, { type AxiosInstance } from 'axios';
+import { API_BASE_URL } from './constants.js';
 
 export class ApiClient {
   private client: AxiosInstance;
 
-  constructor(baseURL = 'http://localhost:5555/api') {
+  constructor(baseURL = API_BASE_URL) {
     this.client = axios.create({ baseURL });
   }
 

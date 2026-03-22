@@ -1,12 +1,9 @@
 import { test, expect } from '../fixtures/auth.fixture.js';
-import { resetDatabase } from '../helpers/db-reset.js';
+import { resetDatabase, runSql } from '../helpers/db-reset.js';
 import { ACCOUNTS } from '../helpers/test-accounts.js';
 import { ApiClient } from '../helpers/api-client.js';
 import { LoginPage } from '../pages/login.page.js';
 import { SettingsPage } from '../pages/settings.page.js';
-import pg from 'pg';
-
-const DB_URL = 'postgresql://postgres:postgres@localhost:5435/sinaloka_test';
 
 // ─────────────────────────────────────────────────────────
 // Auth Integration Tests (33 tests)
@@ -117,10 +114,7 @@ test.describe('Auth — Forced Password Change', () => {
     await resetDatabase();
 
     // Set must_change_password = true for admin@cerdas.id
-    const client = new pg.Client({ connectionString: DB_URL });
-    await client.connect();
-    await client.query("UPDATE users SET must_change_password = true WHERE email = 'admin@cerdas.id'");
-    await client.end();
+    await runSql("UPDATE users SET must_change_password = true WHERE email = 'admin@cerdas.id'");
   });
 
   // 9. Forced password change flow
@@ -542,10 +536,7 @@ test.describe('Auth — Edge Cases', () => {
   // 32. Settings tab locking during forced change
   test('settings tabs are locked during forced password change', async ({ page }) => {
     // Set must_change_password = true
-    const client = new pg.Client({ connectionString: DB_URL });
-    await client.connect();
-    await client.query("UPDATE users SET must_change_password = true WHERE email = 'admin@cerdas.id'");
-    await client.end();
+    await runSql("UPDATE users SET must_change_password = true WHERE email = 'admin@cerdas.id'");
 
     const loginPage = new LoginPage(page);
     await loginPage.goto();
