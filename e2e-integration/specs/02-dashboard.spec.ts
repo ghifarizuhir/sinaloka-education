@@ -88,10 +88,6 @@ test.describe('Dashboard — Smoke', () => {
 });
 
 test.describe('Dashboard — Data Verification', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 6. Total Students = 5
   test('total students shows 5', async ({ authedPage }) => {
     const dashboard = new DashboardPage(authedPage);
@@ -211,10 +207,6 @@ test.describe('Dashboard — Data Verification', () => {
 });
 
 test.describe('Dashboard — Edge Cases', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 14. Tenant isolation — inst2 data should NOT appear
   test('tenant isolation prevents inst2 data from appearing', async ({ authedPage }) => {
     const dashboard = new DashboardPage(authedPage);

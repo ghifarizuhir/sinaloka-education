@@ -65,7 +65,6 @@ test.describe('Settings - Smoke', () => {
 test.describe('Settings - General', () => {
   // 3. Edit name and save
   test('edit name and save with confirm modal', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -76,7 +75,6 @@ test.describe('Settings - General', () => {
 
   // 4. Edit multiple fields
   test('edit multiple fields and save', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -91,7 +89,6 @@ test.describe('Settings - General', () => {
 
   // 5. Change timezone and language
   test('change timezone and language', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -122,7 +119,6 @@ test.describe('Settings - General', () => {
 
   // 6. No changes → info toast
   test('no changes shows info toast', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -140,7 +136,6 @@ test.describe('Settings - General', () => {
 
   // 7. Cancel ConfirmChangesModal
   test('cancel confirm modal does not save', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -174,7 +169,6 @@ test.describe('Settings - General', () => {
 test.describe('Settings - Billing', () => {
   // 9. Add expense category
   test('add expense category chip', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Billing');
@@ -189,7 +183,6 @@ test.describe('Settings - Billing', () => {
 
   // 10. Remove expense category
   test('remove expense category chip', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Billing');
@@ -209,7 +202,6 @@ test.describe('Settings - Billing', () => {
 
   // 11. Add bank account
   test('add bank account', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Billing');
@@ -227,7 +219,6 @@ test.describe('Settings - Billing', () => {
 
   // 12. Save billing with ConfirmChangesModal
   test('save billing with confirm modal shows array diff', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -242,7 +233,6 @@ test.describe('Settings - Billing', () => {
 test.describe('Settings - Academic', () => {
   // 13. Rooms table displays
   test('rooms table displays', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Academic');
@@ -252,7 +242,6 @@ test.describe('Settings - Academic', () => {
 
   // 14. Add room via modal
   test('add room via modal', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -272,7 +261,6 @@ test.describe('Settings - Academic', () => {
 
   // 15. Edit room
   test('edit room name', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -295,7 +283,6 @@ test.describe('Settings - Academic', () => {
 
   // 16. Delete room with ConfirmDialog
   test('delete room with confirm dialog', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -318,7 +305,6 @@ test.describe('Settings - Academic', () => {
 
   // 17. Toggle working days and save
   test('toggle working day and save with confirm modal', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Academic');
@@ -345,7 +331,6 @@ test.describe('Settings - Academic', () => {
 
   // 18. Add and remove grade level
   test('add and remove grade level', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -364,10 +349,6 @@ test.describe('Settings - Academic', () => {
 // ─── Registration (3) ───────────────────────────────────
 
 test.describe('Settings - Registration', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 19. Toggle student registration
   test('toggle student registration', async ({ authedPage }) => {
     const settings = new SettingsPage(authedPage);
@@ -408,7 +389,6 @@ test.describe('Settings - Registration', () => {
 test.describe('Settings - Security', () => {
   // 22. Change password successfully
   test('change password successfully', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -423,7 +403,6 @@ test.describe('Settings - Security', () => {
 
   // 23. Password validation indicators
   test('password validation indicators update on input', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Security');
@@ -454,7 +433,6 @@ test.describe('Settings - Security', () => {
 
   // 24. Wrong current password → error
   test('wrong current password shows error', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Security');
@@ -510,7 +488,6 @@ test.describe('Settings - Security', () => {
 test.describe('Settings - Confirm Modal', () => {
   // 25. Modal shows scalar diff
   test('modal shows scalar diff for institution name change', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
 
@@ -538,7 +515,6 @@ test.describe('Settings - Confirm Modal', () => {
 
   // 26. Modal shows array diff
   test('modal shows array diff for billing category addition', async ({ authedPage }) => {
-    await resetDatabase();
     const settings = new SettingsPage(authedPage);
     await settings.goto();
     await settings.switchTab('Billing');

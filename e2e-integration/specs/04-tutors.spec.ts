@@ -56,10 +56,6 @@ test.describe('Tutors - Smoke', () => {
 // ─── Invite (5) ──────────────────────────────────────────
 
 test.describe('Tutors - Invite', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 4. Invite tutor with required fields
   test('invite tutor with required fields', async ({ authedPage }) => {
     const tutors = new TutorsPage(authedPage);
@@ -154,10 +150,6 @@ test.describe('Tutors - Invite', () => {
 // ─── Update (5) ──────────────────────────────────────────
 
 test.describe('Tutors - Update', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 9. Edit tutor name
   test('edit tutor name', async ({ authedPage }) => {
     const tutors = new TutorsPage(authedPage);
@@ -262,10 +254,6 @@ test.describe('Tutors - Update', () => {
 // ─── Subjects & Sort (2) ────────────────────────────────
 
 test.describe('Tutors - Subjects & Sort', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 14. Filter by subject
   test('filter by subject', async ({ authedPage }) => {
     const tutors = new TutorsPage(authedPage);
@@ -319,10 +307,6 @@ test.describe('Tutors - Subjects & Sort', () => {
 // ─── Invite Lifecycle (4) ───────────────────────────────
 
 test.describe('Tutors - Invite Lifecycle', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 16. Pending tutor shows invite menu
   test('pending tutor shows invite menu', async ({ authedPage }) => {
     const tutors = new TutorsPage(authedPage);
@@ -403,10 +387,6 @@ test.describe('Tutors - Invite Lifecycle', () => {
 // ─── Delete & Bulk (6) ──────────────────────────────────
 
 test.describe('Tutors - Delete & Bulk', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 20. Delete via confirm dialog
   test('delete via confirm dialog', async ({ authedPage }) => {
     const tutors = new TutorsPage(authedPage);
@@ -552,10 +532,6 @@ test.describe('Tutors - Delete & Bulk', () => {
 // ─── View & Pagination (2) ──────────────────────────────
 
 test.describe('Tutors - View & Pagination', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 26. Toggle grid/list view
   test('toggle grid/list view', async ({ authedPage }) => {
     const tutors = new TutorsPage(authedPage);

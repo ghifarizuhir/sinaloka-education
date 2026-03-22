@@ -171,7 +171,6 @@ test.describe('Payments - Smoke + Filter', () => {
 test.describe('Payments - Record Payment', () => {
   // 11. Record as CASH
   test('record payment as CASH', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -190,7 +189,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 12. Record as TRANSFER
   test('record payment as TRANSFER', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -207,7 +205,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 13. Record as OTHER (E-Wallet)
   test('record payment as OTHER', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -224,7 +221,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 14. Record OVERDUE payment
   test('record overdue payment', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -250,7 +246,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 15. Record with discount
   test('record payment with discount', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -266,7 +261,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 16. Payment date sent correctly
   test('payment date sent correctly', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -288,7 +282,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 17. "Record Payment" button disappears after recording
   test('record payment button disappears after recording', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -315,7 +308,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 19. Button not visible on PAID rows
   test('record payment button not visible on PAID rows', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -327,7 +319,6 @@ test.describe('Payments - Record Payment', () => {
 
   // 20. Close modal → no API call
   test('close modal without confirming does not trigger API call', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -359,10 +350,6 @@ test.describe('Payments - Record Payment', () => {
 // ─── Batch (4) ──────────────────────────────────────────
 
 test.describe('Payments - Batch', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 21. Select 2+ → "Record Batch" button appears
   test('select 2 payments shows batch record button', async ({ authedPage }) => {
     const payments = new PaymentsPage(authedPage);
@@ -382,7 +369,6 @@ test.describe('Payments - Batch', () => {
 
   // 22. Batch record success
   test('batch record success', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -403,7 +389,6 @@ test.describe('Payments - Batch', () => {
 
   // 23. Deselect → button disappears
   test('deselect payments hides batch record button', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -421,7 +406,6 @@ test.describe('Payments - Batch', () => {
 
   // 24. Select all via header checkbox
   test('select all via header checkbox', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -438,7 +422,6 @@ test.describe('Payments - Batch', () => {
 test.describe('Payments - Overdue + Invoice + Reminder', () => {
   // 25. PENDING with past due_date → auto-detected as OVERDUE
   test('pending payment with past due_date is detected as overdue', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -459,8 +442,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 
   // 26. Summary count updates after recording
   test('overdue summary updates after recording payment', async ({ authedPage }) => {
-    await resetDatabase();
-
     // First create an overdue payment via API
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -496,7 +477,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 
   // 27. Enrollment payment_status syncs — verify via API after recording
   test('enrollment payment_status syncs after recording', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -526,7 +506,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 
   // 28. Generate invoice → success toast
   test('generate invoice shows success toast', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -539,7 +518,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 
   // 29. Duplicate invoice → error toast (409)
   test('duplicate invoice returns error', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -562,8 +540,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 
   // 30. Download invoice — verify download link
   test('download invoice link available after generation', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Generate invoice via API first
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -593,7 +569,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 
   // 31. Send reminder on PENDING → success toast
   test('send reminder on PENDING payment shows success toast', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -606,7 +581,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 
   // 32. Send reminder on OVERDUE → success toast
   test('send reminder on OVERDUE payment shows success toast', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -630,7 +604,6 @@ test.describe('Payments - Overdue + Invoice + Reminder', () => {
 test.describe('Payments - Delete', () => {
   // 33. Delete with confirm → toast, row removed
   test('delete payment with confirm removes row', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();
@@ -645,7 +618,6 @@ test.describe('Payments - Delete', () => {
 
   // 34. Cancel delete → row stays
   test('cancel delete keeps row', async ({ authedPage }) => {
-    await resetDatabase();
     const payments = new PaymentsPage(authedPage);
     await payments.goto();
     await expect(payments.table).toBeVisible();

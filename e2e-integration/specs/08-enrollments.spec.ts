@@ -59,10 +59,6 @@ test.describe('Enrollments - Smoke', () => {
 // ─── Create (6) ─────────────────────────────────────────
 
 test.describe('Enrollments - Create', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 3. Enroll single student — select unenrolled student (Lina), select class, type ACTIVE
   test('enroll single student as ACTIVE', async ({ authedPage }) => {
     const enrollments = new EnrollmentsPage(authedPage);
@@ -185,10 +181,6 @@ test.describe('Enrollments - Create', () => {
 // ─── Status Change (3) ──────────────────────────────────
 
 test.describe('Enrollments - Status Change', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 9. Change status via edit modal — open row menu > Edit, change to DROPPED
   test('change status via edit modal', async ({ authedPage }) => {
     const enrollments = new EnrollmentsPage(authedPage);
@@ -245,10 +237,6 @@ test.describe('Enrollments - Status Change', () => {
 // ─── Delete (2) ─────────────────────────────────────────
 
 test.describe('Enrollments - Delete', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 12. Delete single enrollment — create one first, then delete
   test('delete single enrollment', async ({ authedPage }) => {
     const enrollments = new EnrollmentsPage(authedPage);
@@ -294,10 +282,6 @@ test.describe('Enrollments - Delete', () => {
 // ─── Bulk (2) ───────────────────────────────────────────
 
 test.describe('Enrollments - Bulk', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 14. Bulk status change — select 2+, use bulk bar dropdown
   test('bulk status change to DROPPED', async ({ authedPage }) => {
     const enrollments = new EnrollmentsPage(authedPage);
@@ -372,10 +356,6 @@ test.describe('Enrollments - Bulk', () => {
 // ─── Filter (1) ─────────────────────────────────────────
 
 test.describe('Enrollments - Filter', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 16. Filter by status — select ACTIVE from filter
   test('filter by status ACTIVE', async ({ authedPage }) => {
     const enrollments = new EnrollmentsPage(authedPage);

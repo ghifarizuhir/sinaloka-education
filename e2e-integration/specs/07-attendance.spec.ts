@@ -78,10 +78,6 @@ test.describe('Attendance - Smoke', () => {
 // ─── Mark Attendance Happy (6) ───────────────────────────
 
 test.describe('Attendance - Mark Attendance Happy', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 5. Mark student Present
   test('mark student Present and save', async ({ authedPage }) => {
     const attendance = new AttendancePage(authedPage);
@@ -188,10 +184,6 @@ test.describe('Attendance - Mark Attendance Happy', () => {
 // ─── Negative (5) ────────────────────────────────────────
 
 test.describe('Attendance - Negative', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 11. Completed session — controls disabled
   test('completed session has disabled controls', async ({ authedPage }) => {
     const attendance = new AttendancePage(authedPage);
@@ -299,10 +291,6 @@ test.describe('Attendance - Negative', () => {
 // ─── Homework (3) ────────────────────────────────────────
 
 test.describe('Attendance - Homework', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 16. Toggle homework on
   test('toggle homework on and save', async ({ authedPage }) => {
     const attendance = new AttendancePage(authedPage);
@@ -376,10 +364,6 @@ test.describe('Attendance - Homework', () => {
 // ─── Notes (4) ───────────────────────────────────────────
 
 test.describe('Attendance - Notes', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 19. Add note and save
   test('add note and save', async ({ authedPage }) => {
     const attendance = new AttendancePage(authedPage);
@@ -478,10 +462,6 @@ test.describe('Attendance - Notes', () => {
 // ─── Edge Cases (9) ──────────────────────────────────────
 
 test.describe('Attendance - Edge Cases', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 23. Date navigation prev/next/today
   test('date navigation prev/next/today', async ({ authedPage }) => {
     const attendance = new AttendancePage(authedPage);

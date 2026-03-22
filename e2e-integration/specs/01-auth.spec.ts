@@ -41,10 +41,6 @@ test.describe('Auth — Smoke', () => {
 });
 
 test.describe('Auth — Happy Path', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 4. SUPER_ADMIN login → /super/institutions
   test('SUPER_ADMIN login redirects to /super/institutions', async ({ loginAs }) => {
     const page = await loginAs('SUPER_ADMIN');
@@ -159,10 +155,6 @@ test.describe('Auth — Forced Password Change', () => {
 });
 
 test.describe('Auth — Negative: Login', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 10. Wrong password
   test('wrong password shows error message', async ({ page }) => {
     const loginPage = new LoginPage(page);
@@ -241,10 +233,6 @@ test.describe('Auth — Negative: Login', () => {
 });
 
 test.describe('Auth — Negative: Change Password', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // Helper: navigate to settings > security tab
   async function goToSecurityTab(page: import('@playwright/test').Page) {
     await page.goto('/settings');
@@ -414,10 +402,6 @@ test.describe('Auth — Negative: Change Password', () => {
 });
 
 test.describe('Auth — Edge Cases', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 26. Open redirect prevention
   test('open redirect prevention blocks external redirect', async ({ page }) => {
     await page.goto('/login?redirect=//evil.com');
@@ -555,8 +539,6 @@ test.describe('Auth — Edge Cases', () => {
     const securityTab = page.getByRole('button', { name: /security/i });
     await expect(securityTab).not.toHaveClass(/opacity-40/);
 
-    // Reset DB for next tests
-    await resetDatabase();
   });
 
   // 33. Multiple rapid login attempts — no errors

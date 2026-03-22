@@ -94,10 +94,6 @@ test.describe('Finance Overview - Smoke', () => {
 // ─── Data Accuracy (8) ──────────────────────────────────
 
 test.describe('Finance Overview - Data Accuracy', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 6. Net profit formula correct (revenue - payouts - expenses)
   test('net profit formula is correct', async ({ authedPage }) => {
     const api = new ApiClient();
@@ -238,10 +234,6 @@ test.describe('Finance Overview - Data Accuracy', () => {
 // ─── Filters (5) ────────────────────────────────────────
 
 test.describe('Finance Overview - Filters', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 14. Switch to This Quarter
   test('switch to This Quarter', async ({ authedPage }) => {
     const finance = new FinanceOverviewPage(authedPage);
@@ -332,10 +324,6 @@ test.describe('Finance Overview - Filters', () => {
 // ─── Export + Reports (8) ───────────────────────────────
 
 test.describe('Finance Overview - Export + Reports', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 19. Export payments CSV
   test('export payments CSV triggers download', async ({ authedPage }) => {
     const finance = new FinanceOverviewPage(authedPage);

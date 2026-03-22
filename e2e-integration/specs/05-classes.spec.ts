@@ -63,10 +63,6 @@ test.describe('Classes - Smoke', () => {
 // ─── Create Happy (3) ───────────────────────────────────
 
 test.describe('Classes - Create Happy', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 4. Create with minimum fields
   test('create with minimum fields', async ({ authedPage }) => {
     const classes = new ClassesPage(authedPage);
@@ -137,10 +133,6 @@ test.describe('Classes - Create Happy', () => {
 // ─── Create Negative (11) ───────────────────────────────
 
 test.describe('Classes - Create Negative', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 7. Empty name
   test('empty name shows validation error', async ({ authedPage }) => {
     const classes = new ClassesPage(authedPage);
@@ -450,10 +442,6 @@ test.describe('Classes - Create Negative', () => {
 // ─── Schedule Management (6) ────────────────────────────
 
 test.describe('Classes - Schedule Management', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 18. Toggle day on/off
   test('toggle day on and off', async ({ authedPage }) => {
     const classes = new ClassesPage(authedPage);
@@ -620,10 +608,6 @@ test.describe('Classes - Schedule Management', () => {
 // ─── Update (6) ─────────────────────────────────────────
 
 test.describe('Classes - Update', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 24. Update name
   test('update class name', async ({ authedPage }) => {
     const classes = new ClassesPage(authedPage);
@@ -728,10 +712,6 @@ test.describe('Classes - Update', () => {
 // ─── Delete (5) ─────────────────────────────────────────
 
 test.describe('Classes - Delete', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 30. Delete class with no enrollments
   test('delete class with no enrollments', async ({ authedPage }) => {
     const classes = new ClassesPage(authedPage);

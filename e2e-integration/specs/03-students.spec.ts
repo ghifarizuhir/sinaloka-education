@@ -48,10 +48,6 @@ test.describe('Students - Smoke', () => {
 });
 
 test.describe('Students - Search & Filter', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 4. Search by name
   test('search by name', async ({ authedPage }) => {
     const students = new StudentsPage(authedPage);
@@ -132,10 +128,6 @@ test.describe('Students - Search & Filter', () => {
 });
 
 test.describe('Students - Create Happy', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 9. Create with required fields
   test('create with required fields', async ({ authedPage }) => {
     const students = new StudentsPage(authedPage);
@@ -175,10 +167,6 @@ test.describe('Students - Create Happy', () => {
 });
 
 test.describe('Students - Create Negative', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 11. Empty name
   test('empty name shows validation error', async ({ authedPage }) => {
     const students = new StudentsPage(authedPage);
@@ -311,10 +299,6 @@ test.describe('Students - Create Negative', () => {
 });
 
 test.describe('Students - Update', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 17. Edit student name
   test('edit student name', async ({ authedPage }) => {
     const students = new StudentsPage(authedPage);
@@ -387,10 +371,6 @@ test.describe('Students - Update', () => {
 });
 
 test.describe('Students - Delete', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 21. Delete with confirmation
   test('delete with confirmation', async ({ authedPage }) => {
     const students = new StudentsPage(authedPage);

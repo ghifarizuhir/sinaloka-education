@@ -85,10 +85,6 @@ test.describe('Schedules - Smoke', () => {
 // ─── View/Filter (6) ────────────────────────────────────
 
 test.describe('Schedules - View/Filter', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 4. Filter by date range
   test('filter by date range', async ({ authedPage }) => {
     const schedules = new SchedulesPage(authedPage);
@@ -204,10 +200,6 @@ test.describe('Schedules - View/Filter', () => {
 // ─── Create Session (4) ─────────────────────────────────
 
 test.describe('Schedules - Create Session', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 10. Create session successfully
   test('create session successfully', async ({ authedPage }) => {
     const schedules = new SchedulesPage(authedPage);
@@ -282,10 +274,6 @@ test.describe('Schedules - Create Session', () => {
 // ─── Edit/Reschedule (5) ────────────────────────────────
 
 test.describe('Schedules - Edit/Reschedule', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 14. Edit session date/time
   test('edit session date and time', async ({ authedPage }) => {
     const schedules = new SchedulesPage(authedPage);
@@ -365,10 +353,6 @@ test.describe('Schedules - Edit/Reschedule', () => {
 // ─── Cancel (3) ─────────────────────────────────────────
 
 test.describe('Schedules - Cancel', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 19. Cancel from list dropdown
   test('cancel from list dropdown', async ({ authedPage }) => {
     const schedules = new SchedulesPage(authedPage);
@@ -459,10 +443,6 @@ test.describe('Schedules - Cancel', () => {
 // ─── Complete + Drawer (6) ──────────────────────────────
 
 test.describe('Schedules - Complete + Drawer', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 22. Admin marks session as COMPLETED via edit modal
   test('admin marks session as COMPLETED', async ({ authedPage }) => {
     const schedules = new SchedulesPage(authedPage);

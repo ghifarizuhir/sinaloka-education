@@ -56,7 +56,6 @@ test.describe('Expenses - Smoke', () => {
 test.describe('Expenses - Create Happy', () => {
   // 4. Create basic expense
   test('create basic expense', async ({ authedPage }) => {
-    await resetDatabase();
     const expenses = new ExpensesPage(authedPage);
     await expenses.goto();
     await expect(expenses.table).toBeVisible();
@@ -74,7 +73,6 @@ test.describe('Expenses - Create Happy', () => {
 
   // 5. Create with minimum fields — amount, date, category only (no description)
   test('create with minimum fields', async ({ authedPage }) => {
-    await resetDatabase();
     const expenses = new ExpensesPage(authedPage);
     await expenses.goto();
     await expect(expenses.table).toBeVisible();
@@ -90,7 +88,6 @@ test.describe('Expenses - Create Happy', () => {
 
   // 6. Create recurring monthly
   test('create recurring monthly expense', async ({ authedPage }) => {
-    await resetDatabase();
     const expenses = new ExpensesPage(authedPage);
     await expenses.goto();
     await expect(expenses.table).toBeVisible();
@@ -110,7 +107,6 @@ test.describe('Expenses - Create Happy', () => {
 
   // 7. Create recurring weekly with end date
   test('create recurring weekly expense with end date', async ({ authedPage }) => {
-    await resetDatabase();
     const expenses = new ExpensesPage(authedPage);
     await expenses.goto();
     await expect(expenses.table).toBeVisible();
@@ -135,7 +131,6 @@ test.describe('Expenses - Create Happy', () => {
 
   // 8. Create with MARKETING category — verify badge
   test('create with MARKETING category shows correct badge', async ({ authedPage }) => {
-    await resetDatabase();
     const expenses = new ExpensesPage(authedPage);
     await expenses.goto();
     await expect(expenses.table).toBeVisible();
@@ -158,10 +153,6 @@ test.describe('Expenses - Create Happy', () => {
 // ─── Create Negative (5) ─────────────────────────────────
 
 test.describe('Expenses - Create Negative', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 9. Amount = 0 → toast error, drawer stays open
   test('amount zero shows error toast', async ({ authedPage }) => {
     const expenses = new ExpensesPage(authedPage);
@@ -274,8 +265,6 @@ test.describe('Expenses - Update', () => {
 
   // 14. Edit amount
   test('edit amount', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create an expense to edit via API
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -297,8 +286,6 @@ test.describe('Expenses - Update', () => {
 
   // 15. Edit category
   test('edit category', async ({ authedPage }) => {
-    await resetDatabase();
-
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
     await api.post('/admin/expenses', {
@@ -323,8 +310,6 @@ test.describe('Expenses - Update', () => {
 
   // 16. Edit description
   test('edit description', async ({ authedPage }) => {
-    await resetDatabase();
-
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
     await api.post('/admin/expenses', {
@@ -347,8 +332,6 @@ test.describe('Expenses - Update', () => {
 
   // 17. Drawer pre-fills existing values
   test('drawer pre-fills existing values on edit', async ({ authedPage }) => {
-    await resetDatabase();
-
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
     await api.post('/admin/expenses', {
@@ -385,8 +368,6 @@ test.describe('Expenses - Update', () => {
 
   // 18. Toggle recurring ON on non-recurring expense
   test('toggle recurring ON on non-recurring expense', async ({ authedPage }) => {
-    await resetDatabase();
-
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
     await api.post('/admin/expenses', {
@@ -410,8 +391,6 @@ test.describe('Expenses - Update', () => {
 
   // 19. Toggle recurring OFF on recurring expense
   test('toggle recurring OFF on recurring expense', async ({ authedPage }) => {
-    await resetDatabase();
-
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
     await api.post('/admin/expenses', {
@@ -442,8 +421,6 @@ test.describe('Expenses - Delete', () => {
 
   // 20. Delete with confirm
   test('delete expense with confirm removes row', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create an expense to delete
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -467,8 +444,6 @@ test.describe('Expenses - Delete', () => {
 
   // 21. Cancel delete — row stays
   test('cancel delete keeps row', async ({ authedPage }) => {
-    await resetDatabase();
-
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
     await api.post('/admin/expenses', {
@@ -502,10 +477,6 @@ test.describe('Expenses - Delete', () => {
 // ─── Search + Filter (4) ─────────────────────────────────
 
 test.describe('Expenses - Search + Filter', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 22. Search by description
   test('search by description filters results', async ({ authedPage }) => {
     // Create an expense with a unique description for search
@@ -587,10 +558,6 @@ test.describe('Expenses - Search + Filter', () => {
 // ─── Export (1) ──────────────────────────────────────────
 
 test.describe('Expenses - Export', () => {
-  test.beforeAll(async () => {
-    await resetDatabase();
-  });
-
   // 26. Export CSV — click export, verify no error toast
   test('export CSV triggers download without error', async ({ authedPage }) => {
     const expenses = new ExpensesPage(authedPage);

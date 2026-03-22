@@ -65,7 +65,6 @@ test.describe('Payouts - Smoke + Create', () => {
 
   // 4. Create with description
   test('create payout with description', async ({ authedPage }) => {
-    await resetDatabase();
     const payouts = new PayoutsPage(authedPage);
     await payouts.goto();
     await expect(payouts.table).toBeVisible();
@@ -83,7 +82,6 @@ test.describe('Payouts - Smoke + Create', () => {
 
   // 5. Create with period + calculate — fill period dates, click calculate
   test('create payout with period and calculate', async ({ authedPage }) => {
-    await resetDatabase();
     const payouts = new PayoutsPage(authedPage);
     await payouts.goto();
     await expect(payouts.table).toBeVisible();
@@ -136,7 +134,6 @@ test.describe('Payouts - Smoke + Create', () => {
 
   // 6. Overlap warning — create payout with overlapping period for same tutor
   test('overlap warning shown for overlapping period', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -170,7 +167,6 @@ test.describe('Payouts - Smoke + Create', () => {
 test.describe('Payouts - Create Negative', () => {
   // 7. No tutor → error
   test('create without tutor fails', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -187,7 +183,6 @@ test.describe('Payouts - Create Negative', () => {
 
   // 8. Amount = 0 → error
   test('create with amount zero fails', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -208,7 +203,6 @@ test.describe('Payouts - Create Negative', () => {
 
   // 9. Amount negative → backend 400
   test('create with negative amount fails', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -229,7 +223,6 @@ test.describe('Payouts - Create Negative', () => {
 
   // 10. Description > 500 chars → backend 400
   test('create with description exceeding 500 chars fails', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -255,8 +248,6 @@ test.describe('Payouts - Create Negative', () => {
 test.describe('Payouts - Reconciliation + Proof + Slip', () => {
   // 11. Reconcile PENDING to PAID
   test('reconcile pending payout to PAID', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create a PENDING payout via API first
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -283,8 +274,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
 
   // 12. Reconcile with bonus + deduction
   test('reconcile with bonus and deduction', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create PENDING payout
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -315,7 +304,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
 
   // 13. PAID payout — reconcile button not present or inputs disabled
   test('PAID payout has no reconcile action or inputs disabled', async ({ authedPage }) => {
-    await resetDatabase();
     const payouts = new PayoutsPage(authedPage);
     await payouts.goto();
     await expect(payouts.table).toBeVisible();
@@ -346,8 +334,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
 
   // 14. Upload proof
   test('upload proof in reconciliation view', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create PENDING payout for Siti
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -408,7 +394,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
 
   // 15. Proof persists after navigation
   test('proof persists after navigation', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -437,7 +422,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
 
   // 16. Generate slip for PAID payout
   test('generate slip for PAID payout', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -453,7 +437,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
 
   // 17. Duplicate slip → 409
   test('duplicate slip generation returns 409', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -479,8 +462,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
 test.describe('Payouts - Delete + Filter + Generate', () => {
   // 18. Delete successfully
   test('delete payout removes row', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create a PENDING payout for Siti to delete
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -521,8 +502,6 @@ test.describe('Payouts - Delete + Filter + Generate', () => {
 
   // 20. Filter by status
   test('filter by PENDING shows only pending payouts', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create a PENDING payout so we have both statuses
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -552,8 +531,6 @@ test.describe('Payouts - Delete + Filter + Generate', () => {
 
   // 21. Search by tutor name
   test('search by tutor name filters results', async ({ authedPage }) => {
-    await resetDatabase();
-
     // Create a payout for Siti so both tutors have payouts
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
@@ -584,7 +561,6 @@ test.describe('Payouts - Delete + Filter + Generate', () => {
 
   // 22. Pagination
   test('pagination renders when enough payouts exist', async ({ authedPage }) => {
-    await resetDatabase();
     const payouts = new PayoutsPage(authedPage);
     await payouts.goto();
     await expect(payouts.table).toBeVisible();
@@ -597,7 +573,6 @@ test.describe('Payouts - Delete + Filter + Generate', () => {
 
   // 23. Generate monthly salaries
   test('generate monthly salaries returns count', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -609,7 +584,6 @@ test.describe('Payouts - Delete + Filter + Generate', () => {
 
   // 24. Idempotent generate — click again, expect 0 created
   test('generate salaries is idempotent', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
@@ -624,7 +598,6 @@ test.describe('Payouts - Delete + Filter + Generate', () => {
 
   // 25. Export audit CSV
   test('export audit CSV for a payout', async () => {
-    await resetDatabase();
     const api = new ApiClient();
     await api.loginAs(ACCOUNTS.ADMIN_CERDAS);
 
