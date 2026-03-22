@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Info } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Card, Button, Input, Label, PasswordInput } from '@/src/components/UI';
 
@@ -13,6 +14,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForgotInfo, setShowForgotInfo] = useState(false);
 
   if (!authLoading && isAuthenticated) {
     if (user?.role === 'SUPER_ADMIN') {
@@ -93,6 +95,25 @@ export function Login() {
                 disabled={isSubmitting}
               />
             </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowForgotInfo(prev => !prev)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t('login.forgotPassword')}
+              </button>
+            </div>
+
+            {showForgotInfo && (
+              <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 px-4 py-3 flex items-start gap-2">
+                <Info size={14} className="text-muted-foreground mt-0.5 shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  {t('login.forgotPasswordInfo')}
+                </p>
+              </div>
+            )}
 
             {error && (
               <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3">

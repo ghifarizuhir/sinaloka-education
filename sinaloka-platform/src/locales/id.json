@@ -120,6 +120,8 @@
     "signIn": "Masuk",
     "signingIn": "Sedang masuk...",
     "defaultError": "Email atau kata sandi salah. Silakan coba lagi.",
+    "forgotPassword": "Lupa kata sandi?",
+    "forgotPasswordInfo": "Hubungi administrator sistem Anda untuk mereset kata sandi.",
     "copyright": "© {{year}} Sinaloka. Hak cipta dilindungi."
   },
 
