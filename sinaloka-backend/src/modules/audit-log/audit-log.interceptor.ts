@@ -75,7 +75,9 @@ const URL_SEGMENT_TO_RESOURCE: Record<string, string> = {
 };
 
 function resolveResourceType(endpoint: string): string {
-  const segments = endpoint.replace(/^\/api\/(admin|super-admin|tutor|parent)\//, '').split('/');
+  const segments = endpoint
+    .replace(/^\/api\/(admin|super-admin|tutor|parent)\//, '')
+    .split('/');
   let resource = segments[0] ?? 'unknown';
   if (resource === 'finance' && segments[1]) resource = segments[1];
   return URL_SEGMENT_TO_RESOURCE[resource] ?? resource;
@@ -131,7 +133,11 @@ export class AuditLogInterceptor implements NestInterceptor {
     const needsBeforeState =
       (action === 'UPDATE' || action === 'DELETE') && resourceIdFromUrl;
     const beforeStatePromise = needsBeforeState
-      ? this.fetchBeforeState(resourceType, resourceIdFromUrl!, request.tenantId ?? user.institutionId ?? null)
+      ? this.fetchBeforeState(
+          resourceType,
+          resourceIdFromUrl,
+          request.tenantId ?? user.institutionId ?? null,
+        )
       : Promise.resolve(null);
 
     return from(beforeStatePromise).pipe(
@@ -224,11 +230,16 @@ export class AuditLogInterceptor implements NestInterceptor {
       const modelName = RESOURCE_TO_MODEL[resourceType];
       if (!modelName) return null;
 
-      const delegate = (this.prisma as unknown as Record<string, any>)[modelName];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const delegate = (this.prisma as unknown as Record<string, any>)[
+        modelName
+      ];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (!delegate?.findFirst) return null;
 
       // Use findFirst with both id and institution_id for tenant isolation
       // Models without institution_id will simply ignore the extra filter
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return await delegate.findFirst({
         where: {
           id: resourceId,
