@@ -1,4 +1,5 @@
 import { FOOTER_LINKS, SOCIAL_LINKS } from "../lib/constants";
+import { SinalokaLogo } from "./shared/SinalokaLogo";
 
 export function Footer() {
   const columns = [
@@ -11,7 +12,10 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-6 lg:px-10">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-8">
           <div className="col-span-2 md:col-span-1">
-            <span className="text-xl font-bold text-[#111]">Sinaloka</span>
+            <div className="flex items-center gap-2.5">
+              <SinalokaLogo size={28} />
+              <span className="text-xl font-bold text-[#111]">Sinaloka</span>
+            </div>
             <p className="mt-3 text-sm text-[#999] leading-relaxed max-w-xs">
               Platform manajemen bimbingan belajar.
             </p>

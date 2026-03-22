@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { WhatsAppIcon } from "./shared/WhatsAppIcon";
+import { SinalokaLogo } from "./shared/SinalokaLogo";
 import { WHATSAPP_URL, NAV_LINKS } from "../lib/constants";
 import { cn } from "../lib/utils";
 
@@ -28,10 +29,11 @@ export function Navbar() {
         <a
           href="#"
           className={cn(
-            "text-xl font-bold transition-colors duration-300",
+            "flex items-center gap-2.5 text-xl font-bold transition-colors duration-300",
             scrolled ? "text-[#111]" : "text-white"
           )}
         >
+          <SinalokaLogo size={28} />
           Sinaloka
         </a>
 
