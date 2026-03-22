@@ -34,18 +34,23 @@
 
 **Total: 1 item besar, 1 PR, merged.**
 
+### Session 3 (2026-03-22) — Sprint 7
+
+| Sprint | PR | Items | Status |
+|---|---|---|---|
+| **Sprint 7: Notification Center** | #64 | In-app notification center — event-driven architecture (`@nestjs/event-emitter`), SSE real-time push, notification bell dropdown + full `/notifications` page, 7 event types (payment, student, parent, session create/cancel, attendance, tutor invite), mark as read, unread badge, multi-tenant scoped | Merged |
+
+**Total: 1 item besar, 1 PR, merged.**
+
 ---
 
 ## Upcoming
 
-### Session 3 — Sprint 7: Notification Center atau Audit Log (1 item besar)
+### Session 4 — Sprint 8: Audit Log (1 item besar)
 
 | # | Item | Effort | Detail |
 |---|---|---|---|
-| 1a | **Notification center (in-app)** | Besar | Saat ini tidak ada in-app notifications — hanya WhatsApp. Perlu: notification model, real-time delivery (WebSocket/SSE), notification bell di header, mark as read, notification preferences. |
-| 1b | **Audit log** | Besar | Siapa melakukan apa, kapan. Perlu: audit_log table, interceptor/decorator untuk auto-log, audit log viewer di SuperAdmin, filter by user/action/date. Penting untuk akuntabilitas institusi. |
-
-**Pilih salah satu — keduanya terlalu besar untuk satu sprint.**
+| 1 | **Audit log** | Besar | Siapa melakukan apa, kapan. Perlu: audit_log table, interceptor/decorator untuk auto-log, audit log viewer di SuperAdmin + Admin (institusi sendiri), filter by user/action/date. Penting untuk akuntabilitas institusi. |
 
 ---
 
@@ -54,7 +59,8 @@
 | # | Item | Effort | Detail |
 |---|---|---|---|
 | 1 | Multi-branch support | Besar | Tercantum di pricing card (BUSINESS plan) tapi belum implemented. Perlu: branch model, branch-scoped data, branch selector UI. |
-| 3 | Advanced Reporting | Besar | Tercantum di pricing card. Report saat ini masih basic (3 PDF reports). Perlu: custom report builder, scheduled reports, email delivery. |
+| 2 | Advanced Reporting | Besar | Tercantum di pricing card. Report saat ini masih basic (3 PDF reports). Perlu: custom report builder, scheduled reports, email delivery. |
+| 3 | Notification preferences | Medium | Per-user toggle per notification type. Extend notification center dari Sprint 7. |
 
 ---
 
