@@ -66,7 +66,9 @@ export const Dashboard = () => {
   const isLoading = statsLoading || activityLoading;
   const greeting = getGreeting();
   const userName = auth?.user?.name?.split(' ')[0] ?? '';
-  const institutionName = auth?.user?.institution?.name ?? 'Dashboard';
+  const institutionName = auth?.isImpersonating
+    ? auth.impersonatedInstitution?.name ?? 'Dashboard'
+    : auth?.user?.institution?.name ?? 'Dashboard';
   const institutionInitial = institutionName.charAt(0).toUpperCase();
 
   const getTimeAgo = (dateStr: string) => {
