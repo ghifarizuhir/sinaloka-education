@@ -747,6 +747,7 @@
     "toast": {
       "enrolled": "{{count}} siswa didaftarkan",
       "enrollError": "Gagal mendaftarkan beberapa siswa",
+      "conflictSkipped": "Konflik jadwal — dilewati: {{names}}",
       "statusUpdated": "Status diperbarui menjadi {{status}}",
       "statusError": "Gagal memperbarui status",
       "deleted": "Pendaftaran dihapus",

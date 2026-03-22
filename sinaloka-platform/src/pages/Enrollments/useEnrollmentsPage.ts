@@ -96,10 +96,40 @@ export const useEnrollmentsPage = () => {
     return students.filter(s => s.name.toLowerCase().includes(studentSearch.toLowerCase()));
   }, [students, studentSearch]);
 
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     if (selectedStudentIds.length === 0 || !selectedClassId) return;
 
-    const promises = selectedStudentIds.map(sid =>
+    // Check conflicts for each student before enrolling
+    const conflictingStudentNames: string[] = [];
+    const eligibleStudentIds: string[] = [];
+
+    await Promise.all(
+      selectedStudentIds.map(async (sid) => {
+        const student = students.find(s => s.id === sid);
+        const studentName = student?.name ?? sid;
+        try {
+          const result = await checkConflict.mutateAsync({ student_id: sid, class_id: selectedClassId });
+          if (result.has_conflict) {
+            conflictingStudentNames.push(studentName);
+          } else {
+            eligibleStudentIds.push(sid);
+          }
+        } catch {
+          // If conflict check fails (network error), allow enrollment to proceed
+          eligibleStudentIds.push(sid);
+        }
+      })
+    );
+
+    // Warn about conflicting students
+    if (conflictingStudentNames.length > 0) {
+      toast.warning(t('enrollments.toast.conflictSkipped', { names: conflictingStudentNames.join(', ') }));
+    }
+
+    // If all students conflict, stop here
+    if (eligibleStudentIds.length === 0) return;
+
+    const promises = eligibleStudentIds.map(sid =>
       createEnrollment.mutateAsync({
         student_id: sid,
         class_id: selectedClassId,
@@ -110,7 +140,7 @@ export const useEnrollmentsPage = () => {
 
     Promise.all(promises)
       .then(() => {
-        toast.success(t('enrollments.toast.enrolled', { count: selectedStudentIds.length }));
+        toast.success(t('enrollments.toast.enrolled', { count: eligibleStudentIds.length }));
         setShowModal(false);
         setSelectedStudentIds([]);
         setSelectedClassId('');

@@ -747,6 +747,7 @@
     "toast": {
       "enrolled": "{{count}} student(s) enrolled",
       "enrollError": "Failed to enroll some students",
+      "conflictSkipped": "Schedule conflict — skipped: {{names}}",
       "statusUpdated": "Status updated to {{status}}",
       "statusError": "Failed to update status",
       "deleted": "Enrollment deleted",
