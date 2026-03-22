@@ -26,22 +26,26 @@
 
 **Total: 3 items, 1 PR, merged. Payment gateway settings UI di-skip (sudah centralized ke platform-level). Profile photos menggantikan slot ke-3.**
 
+### Session 2 (2026-03-22) — Sprint 6
+
+| Sprint | PR | Items | Status |
+|---|---|---|---|
+| **Sprint 6: WhatsApp Templates** | #63 | Custom WhatsApp template editor — split-view editor + live WhatsApp-style preview, `whatsapp_templates` table, template CRUD + variable validation, `sendPaymentReminder` refactored to use custom templates with fallback, XSS protection | Merged |
+
+**Total: 1 item besar, 1 PR, merged.**
+
 ---
 
 ## Upcoming
 
-### Session 3 — Sprint 6: Custom WhatsApp Templates (1 item besar)
-
-| # | Item | Effort | Detail |
-|---|---|---|---|
-| 1 | **Custom WhatsApp templates** | Besar | Saat ini hardcoded 1 template (`payment_reminder`) dalam bahasa Indonesia. Perlu: template management UI di Settings/WhatsApp, template variables (nama, jumlah, tanggal), multi-language, preview. Backend: template CRUD + variable interpolation. |
-
-### Session 4 — Sprint 7: Notification Center atau Audit Log (1 item besar)
+### Session 3 — Sprint 7: Notification Center atau Audit Log (1 item besar)
 
 | # | Item | Effort | Detail |
 |---|---|---|---|
 | 1a | **Notification center (in-app)** | Besar | Saat ini tidak ada in-app notifications — hanya WhatsApp. Perlu: notification model, real-time delivery (WebSocket/SSE), notification bell di header, mark as read, notification preferences. |
 | 1b | **Audit log** | Besar | Siapa melakukan apa, kapan. Perlu: audit_log table, interceptor/decorator untuk auto-log, audit log viewer di SuperAdmin, filter by user/action/date. Penting untuk akuntabilitas institusi. |
+
+**Pilih salah satu — keduanya terlalu besar untuk satu sprint.**
 
 ---
 
