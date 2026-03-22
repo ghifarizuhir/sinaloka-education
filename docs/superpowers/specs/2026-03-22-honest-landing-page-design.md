@@ -88,15 +88,16 @@ Fitur | Demo | Harga | FAQ | [Hubungi Kami via WA]
 **Layout**: Tabbed interface dengan 3 tabs
 
 #### Tab 1: Pembayaran QRIS/VA
-Animated walkthrough menunjukkan flow:
-1. Admin buat tagihan → Invoice terkirim ke orang tua
-2. Orang tua buka link → Scan QRIS atau pilih VA
-3. Pembayaran masuk → Otomatis tercatat di dashboard admin
+Animated walkthrough — **exactly 3 visual steps** (no email/delivery step shown):
+1. **Step 1 (Admin side)**: Dashboard shows invoice list, one invoice highlighted "Menunggu Pembayaran"
+2. **Step 2 (Parent side)**: Phone frame — parent sees QR code, taps "Bayar", status changes to "Memproses..."
+3. **Step 3 (Admin side)**: Dashboard updates — invoice flips to "Lunas", notification badge appears
 
-**Implementation**: CSS-animated step-by-step flow. Bukan screenshot statis, tapi curated mini-interaction:
-- Phone frame mockup (orang tua side): menunjukkan QR code, status "Menunggu Pembayaran" → "Lunas"
-- Dashboard frame (admin side): menunjukkan pembayaran masuk real-time
-- Animated transition antara steps dengan subtle delays
+**Implementation**: CSS-animated step-by-step flow with `animation-delay` between steps:
+- Left side: admin dashboard frame (simplified)
+- Right side: phone frame (parent side)
+- Steps auto-play on loop with ~2s pause between each transition
+- On mobile: stack vertically, single frame switching between admin/parent views
 
 #### Tab 2: Dashboard Overview
 Interactive preview dashboard admin:
@@ -114,7 +115,7 @@ Phone frame mockup showing parent app:
 - Status pembayaran (Lunas / Belum Bayar)
 - Tombol "Bayar Sekarang"
 
-**Implementation**: Phone-shaped frame dengan scrollable content di dalamnya. CSS-only animation yang menunjukkan parent scrolling through the app.
+**Implementation**: Phone-shaped frame dengan content inside. Use a subtle looping CSS keyframe that auto-scrolls the content slowly (translateY animation on the inner container). Alternatively, show static content with hover-triggered scroll. Avoid complex CSS scroll simulation — a simple `@keyframes scroll { 0% { transform: translateY(0) } 50% { transform: translateY(-30%) } 100% { transform: translateY(0) } }` loop is sufficient.
 
 **Technical approach:**
 - Semua demo content di-render sebagai React components
@@ -152,7 +153,11 @@ No changes needed.
 
 ### 7. Pricing — Replace with PricingSection.jsx content
 
-**Full replacement** menggunakan struktur dari `docs/PricingSection.jsx`:
+**Full replacement** menggunakan struktur dari `docs/PricingSection.jsx`.
+
+**Data location**: Pricing data moves INLINE into the new `Pricing.tsx` component (matching PricingSection.jsx pattern where `features` object is defined inside the component). Remove `PRICING_TIERS` from `constants.ts` entirely. The new pricing schema is richer (per-feature `icon`, `note`, `bold`, `highlight` flags) and doesn't fit the old `PricingTier` interface.
+
+**CTA links**: "Coba Gratis 2 Bulan" buttons should link to the WhatsApp URL (same as `WHATSAPP_URL` in constants). There is no `#daftar` section on the landing page.
 
 #### Starter — Rp 199rb/bulan
 - Gratis 2 bulan pertama
