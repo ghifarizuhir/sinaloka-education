@@ -75,7 +75,7 @@ export function mapProfile(raw: any): TutorProfile {
       subject: { id: ts.subject.id, name: ts.subject.name },
     })),
     rating: raw.rating ?? 0,
-    avatar: `https://picsum.photos/seed/${raw.user?.id ?? 'default'}/300/300`,
+    avatar_url: raw.user?.avatar_url ?? null,
   };
 }
 
