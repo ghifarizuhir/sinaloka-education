@@ -4,7 +4,9 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { NOTIFICATION_EVENTS } from '../notification/notification.events.js';
 import type {
   CreateSessionDto,
   UpdateSessionDto,
@@ -41,6 +43,7 @@ export class SessionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly payoutService: PayoutService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private readonly sessionInclude = {
@@ -101,6 +104,13 @@ export class SessionService {
         created_by: userId,
       },
       include: this.sessionInclude,
+    });
+
+    this.eventEmitter.emit(NOTIFICATION_EVENTS.SESSION_CREATED, {
+      institutionId,
+      sessionId: session.id,
+      className: session.class?.name ?? 'Unknown',
+      date: session.date.toISOString().split('T')[0],
     });
 
     return this.flattenSession(session);
@@ -555,6 +565,13 @@ export class SessionService {
       where: { id: sessionId },
       data: { status: 'CANCELLED' },
       include: this.sessionInclude,
+    });
+
+    this.eventEmitter.emit(NOTIFICATION_EVENTS.SESSION_CANCELLED, {
+      institutionId: updated.class?.institution_id,
+      sessionId: updated.id,
+      className: updated.class?.name ?? 'Unknown',
+      date: updated.date.toISOString().split('T')[0],
     });
 
     return this.flattenSession(updated);

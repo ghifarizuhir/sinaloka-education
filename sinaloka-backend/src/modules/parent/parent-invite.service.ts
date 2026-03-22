@@ -5,8 +5,10 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { EmailService } from '../email/email.service.js';
+import { NOTIFICATION_EVENTS } from '../notification/notification.events.js';
 import { CreateParentInviteDto, ParentRegisterDto } from './parent.dto.js';
 
 @Injectable()
@@ -14,6 +16,7 @@ export class ParentInviteService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createInvite(institutionId: string, dto: CreateParentInviteDto) {
@@ -149,6 +152,17 @@ export class ParentInviteService {
       });
 
       return { user, parent };
+    });
+
+    const students = await this.prisma.student.findMany({
+      where: { id: { in: [...invite.student_ids] } },
+      select: { name: true },
+    });
+    this.eventEmitter.emit(NOTIFICATION_EVENTS.PARENT_REGISTERED, {
+      institutionId: invite.institution_id,
+      parentId: result.parent.id,
+      parentName: dto.name,
+      studentNames: students.map((s) => s.name),
     });
 
     return result;
