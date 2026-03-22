@@ -56,6 +56,64 @@ function StatusBadge({ status }: { status: RegistrationStatus }) {
   );
 }
 
+function RegistrationDetailBlock({ registration }: { registration: Registration }) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-3">
+      <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg space-y-1">
+        <p className="font-medium text-sm dark:text-zinc-100">{registration.name}</p>
+        <p className="text-xs text-zinc-500">
+          {registration.email || registration.phone || '—'}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        {registration.type === 'STUDENT' && (
+          <>
+            <div>
+              <p className="text-xs text-zinc-500 mb-0.5">{t('students.form.grade', { defaultValue: 'Grade' })}</p>
+              <p className="font-medium dark:text-zinc-100">{registration.grade || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 mb-0.5">{t('students.form.parentName', { defaultValue: 'Parent Name' })}</p>
+              <p className="font-medium dark:text-zinc-100">{registration.parent_name || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 mb-0.5">{t('students.form.parentPhone', { defaultValue: 'Parent Phone' })}</p>
+              <p className="font-medium dark:text-zinc-100">{registration.parent_phone || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 mb-0.5">{t('students.form.parentEmail', { defaultValue: 'Parent Email' })}</p>
+              <p className="font-medium dark:text-zinc-100">{registration.parent_email || '—'}</p>
+            </div>
+          </>
+        )}
+        {registration.type === 'TUTOR' && (
+          <>
+            <div className="col-span-2">
+              <p className="text-xs text-zinc-500 mb-0.5">{t('tutors.form.subjects', { defaultValue: 'Subjects' })}</p>
+              <p className="font-medium dark:text-zinc-100">
+                {registration.subject_names?.length > 0
+                  ? registration.subject_names.join(', ')
+                  : '—'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 mb-0.5">{t('tutors.form.yearsOfExperience', { defaultValue: 'Experience' })}</p>
+              <p className="font-medium dark:text-zinc-100">
+                {registration.experience_years != null
+                  ? `${registration.experience_years} ${t('common.years', { defaultValue: 'years' })}`
+                  : '—'}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface ApproveModalProps {
   registration: Registration | null;
   onClose: () => void;
@@ -84,12 +142,7 @@ function ApproveModal({ registration, onClose }: ApproveModalProps) {
       {registration && (
         <div className="space-y-4">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">{confirmText}</p>
-          <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg space-y-1">
-            <p className="font-medium text-sm dark:text-zinc-100">{registration.name}</p>
-            <p className="text-xs text-zinc-500">
-              {registration.email ?? registration.phone ?? '—'}
-            </p>
-          </div>
+          <RegistrationDetailBlock registration={registration} />
           <div className="flex gap-2 pt-2">
             <Button variant="outline" size="sm" className="flex-1" onClick={onClose} disabled={approveMutation.isPending}>
               {t('common.cancel')}
@@ -132,12 +185,7 @@ function RejectModal({ registration, onClose }: RejectModalProps) {
     <Modal isOpen={!!registration} onClose={onClose} title={t('registration.reject')}>
       {registration && (
         <div className="space-y-4">
-          <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg space-y-1">
-            <p className="font-medium text-sm dark:text-zinc-100">{registration.name}</p>
-            <p className="text-xs text-zinc-500">
-              {registration.email ?? registration.phone ?? '—'}
-            </p>
-          </div>
+          <RegistrationDetailBlock registration={registration} />
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
               {t('registration.rejectReason')}
