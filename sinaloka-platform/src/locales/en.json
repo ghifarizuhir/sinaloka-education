@@ -120,6 +120,8 @@
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "defaultError": "Invalid email or password. Please try again.",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordInfo": "Contact your system administrator to reset your password.",
     "copyright": "© {{year}} Sinaloka. All rights reserved."
   },
 
