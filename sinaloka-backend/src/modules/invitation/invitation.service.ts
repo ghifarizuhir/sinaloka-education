@@ -8,8 +8,10 @@ import {
 } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import * as bcrypt from 'bcrypt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { EmailService } from '../email/email.service.js';
+import { NOTIFICATION_EVENTS } from '../notification/notification.events.js';
 import type { InviteTutorDto, AcceptInviteDto } from './invitation.dto.js';
 
 const INVITE_EXPIRY_HOURS = 48;
@@ -19,6 +21,7 @@ export class InvitationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async invite(institutionId: string, dto: InviteTutorDto) {
@@ -354,6 +357,16 @@ export class InvitationService {
         where: { id: invitation.id },
         data: { status: 'ACCEPTED' },
       });
+    });
+
+    const acceptedUser = await this.prisma.user.findUnique({
+      where: { id: invitation.tutor.user_id },
+      select: { name: true },
+    });
+    this.eventEmitter.emit(NOTIFICATION_EVENTS.TUTOR_INVITE_ACCEPTED, {
+      institutionId: invitation.institution_id,
+      tutorId: invitation.tutor.user_id,
+      tutorName: acceptedUser?.name ?? dto.name ?? 'Unknown',
     });
 
     return { message: 'Invitation accepted successfully' };

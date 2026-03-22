@@ -87,9 +87,8 @@ export class PaymentGatewayController {
       );
     }
 
-    const gatewayConfig = await this.settingsService.getPaymentGatewayConfig(
-      institutionId,
-    );
+    const gatewayConfig =
+      await this.settingsService.getPaymentGatewayConfig(institutionId);
 
     if (
       !gatewayConfig.midtrans_server_key ||

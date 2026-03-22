@@ -297,15 +297,17 @@ export class WhatsappService {
     const customMap = new Map(customs.map((c) => [c.name, c]));
 
     return {
-      templates: Object.entries(DEFAULT_TEMPLATES).map(([name, defaultBody]) => {
-        const custom = customMap.get(name);
-        return {
-          name,
-          body: custom?.body ?? defaultBody,
-          is_default: !custom,
-          variables: TEMPLATE_VARIABLES[name] ?? [],
-        };
-      }),
+      templates: Object.entries(DEFAULT_TEMPLATES).map(
+        ([name, defaultBody]) => {
+          const custom = customMap.get(name);
+          return {
+            name,
+            body: custom?.body ?? defaultBody,
+            is_default: !custom,
+            variables: TEMPLATE_VARIABLES[name] ?? [],
+          };
+        },
+      ),
     };
   }
 
@@ -327,7 +329,11 @@ export class WhatsappService {
     };
   }
 
-  async updateTemplate(institutionId: string, name: string, dto: UpdateTemplateDto) {
+  async updateTemplate(
+    institutionId: string,
+    name: string,
+    dto: UpdateTemplateDto,
+  ) {
     if (!DEFAULT_TEMPLATES[name]) {
       throw new NotFoundException(`Template "${name}" not found`);
     }
@@ -438,11 +444,10 @@ export class WhatsappService {
     // Generate checkout URL if Midtrans is configured
     let checkoutUrl = '';
     try {
-      const url =
-        await this.paymentGatewayService.getOrCreateCheckoutUrl(
-          paymentId,
-          institutionId,
-        );
+      const url = await this.paymentGatewayService.getOrCreateCheckoutUrl(
+        paymentId,
+        institutionId,
+      );
       if (url) checkoutUrl = url;
     } catch (error) {
       this.logger.warn(

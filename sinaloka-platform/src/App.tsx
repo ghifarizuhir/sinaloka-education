@@ -28,6 +28,7 @@ import { SettingsPage } from './pages/Settings/index';
 import { NotFound } from './pages/NotFound';
 import { WhatsApp } from './pages/WhatsApp';
 import { Registrations } from './pages/Registrations';
+import Notifications from './pages/Notifications';
 
 // --- Super Admin Pages ---
 import Institutions from './pages/SuperAdmin/Institutions';
@@ -70,6 +71,7 @@ export default function App() {
             <Route path="/finance/expenses" element={<OperatingExpenses />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/whatsapp" element={<WhatsApp />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Route>

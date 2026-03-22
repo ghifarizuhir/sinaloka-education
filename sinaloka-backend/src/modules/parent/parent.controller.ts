@@ -60,11 +60,7 @@ export class ParentController {
     @Query(new ZodValidationPipe(ChildSessionsQuerySchema))
     query: ChildSessionsQueryDto,
   ) {
-    return this.parentService.getChildSessions(
-      institutionId,
-      studentId,
-      query,
-    );
+    return this.parentService.getChildSessions(institutionId, studentId, query);
   }
 
   @Get('children/:studentId/payments')
@@ -75,11 +71,7 @@ export class ParentController {
     @Query(new ZodValidationPipe(ChildPaymentsQuerySchema))
     query: ChildPaymentsQueryDto,
   ) {
-    return this.parentService.getChildPayments(
-      institutionId,
-      studentId,
-      query,
-    );
+    return this.parentService.getChildPayments(institutionId, studentId, query);
   }
 
   @Get('children/:studentId/enrollments')
@@ -88,9 +80,6 @@ export class ParentController {
     @InstitutionId() institutionId: string,
     @Param('studentId') studentId: string,
   ) {
-    return this.parentService.getChildEnrollments(
-      institutionId,
-      studentId,
-    );
+    return this.parentService.getChildEnrollments(institutionId, studentId);
   }
 }

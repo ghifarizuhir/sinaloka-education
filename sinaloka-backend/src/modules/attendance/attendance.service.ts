@@ -6,8 +6,10 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { isBefore, startOfDay } from 'date-fns';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js';
+import { NOTIFICATION_EVENTS } from '../notification/notification.events.js';
 import type {
   BatchCreateAttendanceDto,
   UpdateAttendanceDto,
@@ -19,6 +21,7 @@ export class AttendanceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly invoiceGenerator: InvoiceGeneratorService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async batchCreate(userId: string, dto: BatchCreateAttendanceDto) {
@@ -84,6 +87,21 @@ export class AttendanceService {
         classId: session.class_id,
       });
     }
+
+    // Emit attendance submitted event
+    const tutorUser = tutor
+      ? await this.prisma.user.findUnique({
+          where: { id: tutor.user_id },
+          select: { name: true },
+        })
+      : null;
+    this.eventEmitter.emit(NOTIFICATION_EVENTS.ATTENDANCE_SUBMITTED, {
+      institutionId: session.institution_id,
+      sessionId: dto.session_id,
+      className: session.class?.name ?? 'Unknown',
+      tutorName: tutorUser?.name ?? 'Unknown',
+      studentCount: dto.records.length,
+    });
 
     // Return created records
     return this.prisma.attendance.findMany({

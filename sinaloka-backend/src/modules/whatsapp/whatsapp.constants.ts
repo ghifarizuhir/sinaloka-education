@@ -40,10 +40,7 @@ export function interpolateTemplate(
   body: string,
   variables: Record<string, string>,
 ): string {
-  let result = body.replace(
-    /\{\{(\w+)\}\}/g,
-    (_, key) => variables[key] ?? '',
-  );
+  let result = body.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] ?? '');
   // Remove lines that are now empty after interpolation
   result = result.replace(/^\s*\n/gm, '');
   return result.trim();

@@ -80,7 +80,8 @@ export class ExpenseService {
       orderBy: { [sort_by]: sort_order },
     });
 
-    const header = '"Date","Category","Description","Amount","Recurring","Receipt URL"';
+    const header =
+      '"Date","Category","Description","Amount","Recurring","Receipt URL"';
     const rows = expenses.map((e) => {
       const escapeCsv = (val: string) => `"${val.replace(/"/g, '""')}"`;
       const date = new Date(e.date).toISOString().split('T')[0];

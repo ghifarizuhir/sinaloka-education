@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { buildPaginationMeta } from '../../common/dto/pagination.dto.js';
+import { NOTIFICATION_EVENTS } from '../notification/notification.events.js';
 import { CreateStudentSchema } from './student.dto.js';
 import type {
   CreateStudentDto,
@@ -12,10 +14,13 @@ import type {
 
 @Injectable()
 export class StudentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async create(institutionId: string, dto: CreateStudentDto) {
-    return this.prisma.student.create({
+    const student = await this.prisma.student.create({
       data: {
         institution_id: institutionId,
         name: dto.name,
@@ -29,12 +34,17 @@ export class StudentService {
         enrolled_at: dto.enrolled_at ?? new Date(),
       },
     });
+
+    this.eventEmitter.emit(NOTIFICATION_EVENTS.STUDENT_REGISTERED, {
+      institutionId,
+      studentId: student.id,
+      studentName: student.name,
+    });
+
+    return student;
   }
 
-  async findAll(
-    institutionId: string,
-    query: StudentQueryDto,
-  ) {
+  async findAll(institutionId: string, query: StudentQueryDto) {
     const { page, limit, search, grade, status, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 

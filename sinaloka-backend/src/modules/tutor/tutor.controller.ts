@@ -75,7 +75,11 @@ export class TutorController {
     @InstitutionId() institutionId: string,
     @Body(new ZodValidationPipe(BulkVerifyTutorSchema)) dto: BulkVerifyTutorDto,
   ) {
-    return this.tutorService.bulkVerify(institutionId, dto.ids, dto.is_verified);
+    return this.tutorService.bulkVerify(
+      institutionId,
+      dto.ids,
+      dto.is_verified,
+    );
   }
 
   @Delete('bulk')

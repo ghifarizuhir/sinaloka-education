@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { buildPaginationMeta } from '../../common/dto/pagination.dto.js';
 import { SettingsService } from '../settings/settings.service.js';
+import { NOTIFICATION_EVENTS } from '../notification/notification.events.js';
 import type {
   CreatePaymentDto,
   UpdatePaymentDto,
@@ -14,6 +16,7 @@ export class PaymentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly settingsService: SettingsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(institutionId: string, dto: CreatePaymentDto) {
@@ -165,6 +168,20 @@ export class PaymentService {
     // Sync enrollment payment_status for all affected enrollments
     for (const enrollmentId of enrollmentIds) {
       await this.syncEnrollmentPaymentStatus(enrollmentId);
+    }
+
+    // Emit payment received events for each recorded payment
+    const recordedPayments = await this.prisma.payment.findMany({
+      where: { id: { in: dto.payment_ids }, institution_id: institutionId },
+      include: { student: { select: { name: true } } },
+    });
+    for (const payment of recordedPayments) {
+      this.eventEmitter.emit(NOTIFICATION_EVENTS.PAYMENT_RECEIVED, {
+        institutionId,
+        paymentId: payment.id,
+        studentName: payment.student?.name ?? 'Unknown',
+        amount: Number(payment.amount),
+      });
     }
 
     return { updated: result.count };

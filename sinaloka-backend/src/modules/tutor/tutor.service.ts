@@ -376,7 +376,9 @@ export class TutorService {
     const userIds = tutors.map((t) => t.user_id);
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.tutorSubject.deleteMany({ where: { tutor_id: { in: tutorIds } } });
+      await tx.tutorSubject.deleteMany({
+        where: { tutor_id: { in: tutorIds } },
+      });
       await tx.tutor.deleteMany({ where: { id: { in: tutorIds } } });
       await tx.refreshToken.deleteMany({ where: { user_id: { in: userIds } } });
       await tx.user.deleteMany({ where: { id: { in: userIds } } });
@@ -394,11 +396,15 @@ export class TutorService {
 
       const tutorsBelowLimit =
         planConfig.maxTutors === null ||
-        (await this.prisma.tutor.count({ where: { institution_id: institutionId } })) < planConfig.maxTutors;
+        (await this.prisma.tutor.count({
+          where: { institution_id: institutionId },
+        })) < planConfig.maxTutors;
 
       const studentsBelowLimit =
         planConfig.maxStudents === null ||
-        (await this.prisma.student.count({ where: { institution_id: institutionId, status: 'ACTIVE' } })) < planConfig.maxStudents;
+        (await this.prisma.student.count({
+          where: { institution_id: institutionId, status: 'ACTIVE' },
+        })) < planConfig.maxStudents;
 
       if (tutorsBelowLimit && studentsBelowLimit) {
         await this.prisma.institution.update({

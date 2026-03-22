@@ -151,7 +151,12 @@ export class UserService {
     });
   }
 
-  async update(id: string, dto: UpdateUserDto, institutionId?: string | null, callerRole?: string) {
+  async update(
+    id: string,
+    dto: UpdateUserDto,
+    institutionId?: string | null,
+    callerRole?: string,
+  ) {
     await this.findOne(id, institutionId); // throws NotFoundException if not found or out of scope
 
     const data: Record<string, unknown> = {};
@@ -169,7 +174,9 @@ export class UserService {
     }
     if (dto.password !== undefined) {
       if (callerRole && callerRole !== 'SUPER_ADMIN') {
-        throw new ForbiddenException('Only Super Admin can reset user passwords');
+        throw new ForbiddenException(
+          'Only Super Admin can reset user passwords',
+        );
       }
       data.password_hash = await bcrypt.hash(dto.password, 10);
       data.must_change_password = true;

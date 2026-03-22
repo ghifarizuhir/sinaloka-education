@@ -17,9 +17,7 @@ import {
 } from './parent.dto.js';
 @Injectable()
 export class ParentService {
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // --- Parent-facing methods ---
 
@@ -45,7 +43,11 @@ export class ParentService {
                   where: { status: 'ACTIVE' },
                   include: {
                     class: {
-                      select: { id: true, name: true, subject: { select: { name: true } } },
+                      select: {
+                        id: true,
+                        name: true,
+                        subject: { select: { name: true } },
+                      },
                     },
                   },
                 },
@@ -84,7 +86,13 @@ export class ParentService {
             },
             orderBy: { date: 'asc' },
             include: {
-              class: { select: { id: true, name: true, subject: { select: { name: true } } } },
+              class: {
+                select: {
+                  id: true,
+                  name: true,
+                  subject: { select: { name: true } },
+                },
+              },
             },
           })
         : [];
@@ -204,7 +212,9 @@ export class ParentService {
               date: true,
               start_time: true,
               end_time: true,
-              class: { select: { name: true, subject: { select: { name: true } } } },
+              class: {
+                select: { name: true, subject: { select: { name: true } } },
+              },
             },
           },
         },
@@ -284,7 +294,9 @@ export class ParentService {
         take: limit,
         orderBy: { date: 'desc' },
         include: {
-          class: { select: { name: true, subject: { select: { name: true } } } },
+          class: {
+            select: { name: true, subject: { select: { name: true } } },
+          },
         },
       }),
       this.prisma.session.count({ where }),

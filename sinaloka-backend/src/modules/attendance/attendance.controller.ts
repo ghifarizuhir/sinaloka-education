@@ -34,7 +34,10 @@ export class AttendanceController {
     @Query(new ZodValidationPipe(AttendanceQuerySchema))
     query: AttendanceQueryDto,
   ) {
-    return this.attendanceService.findBySession(institutionId, query.session_id);
+    return this.attendanceService.findBySession(
+      institutionId,
+      query.session_id,
+    );
   }
 
   @Get('summary')
