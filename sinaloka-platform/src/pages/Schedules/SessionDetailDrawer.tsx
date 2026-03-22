@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -11,6 +11,7 @@ import { cn, formatDate } from '../../lib/utils';
 import { getSessionDate, getSubjectColor } from './useSchedulesPage';
 import type { Session, SessionStatus } from '@/src/types/session';
 import type { TFunction } from 'i18next';
+import { EditSessionModal } from './EditSessionModal';
 
 interface SessionStudent {
   id: string;
@@ -48,7 +49,10 @@ export const SessionDetailDrawer: React.FC<SessionDetailDrawerProps> = ({
   t,
   language,
 }) => {
+  const [showEditModal, setShowEditModal] = useState(false);
+
   return (
+    <>
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
@@ -238,6 +242,12 @@ export const SessionDetailDrawer: React.FC<SessionDetailDrawerProps> = ({
               <div className="flex items-center gap-3 pt-4 border-t border-border">
                 <Button
                   variant="outline"
+                  onClick={() => setShowEditModal(true)}
+                >
+                  {t('schedules.drawer.editSession', { defaultValue: 'Edit Session' })}
+                </Button>
+                <Button
+                  variant="outline"
                   className="flex-1 justify-center"
                   onClick={() => { onMarkAttendance(selectedSession.id); onClose(); }}
                 >
@@ -257,5 +267,17 @@ export const SessionDetailDrawer: React.FC<SessionDetailDrawerProps> = ({
         </div>
       )}
     </Drawer>
+    <EditSessionModal
+      session={selectedSession ? {
+        id: selectedSession.id,
+        date: selectedSession.date,
+        start_time: selectedSession.start_time,
+        end_time: selectedSession.end_time,
+        status: selectedSession.status,
+      } : null}
+      isOpen={showEditModal}
+      onClose={() => setShowEditModal(false)}
+    />
+    </>
   );
 };
