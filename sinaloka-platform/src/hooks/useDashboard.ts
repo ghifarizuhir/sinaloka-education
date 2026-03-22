@@ -13,3 +13,12 @@ export function useDashboardUpcomingSessions() {
     queryFn: dashboardService.getUpcomingSessions,
   });
 }
+export function useDashboardAttendanceTrend() {
+  return useQuery({ queryKey: ['dashboard', 'attendance-trend'], queryFn: dashboardService.getAttendanceTrend });
+}
+export function useDashboardStudentGrowth() {
+  return useQuery({ queryKey: ['dashboard', 'student-growth'], queryFn: dashboardService.getStudentGrowth });
+}
+export function useDashboardRevenueExpenses() {
+  return useQuery({ queryKey: ['dashboard', 'revenue-expenses'], queryFn: dashboardService.getRevenueExpenses });
+}
