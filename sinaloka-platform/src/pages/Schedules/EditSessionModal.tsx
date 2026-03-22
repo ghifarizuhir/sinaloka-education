@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Modal, Button, Label, Input, Select } from '../../components/UI';
 import { TIME_SLOTS } from './useSchedulesPage';
@@ -18,18 +19,19 @@ interface EditSessionModalProps {
   onClose: () => void;
 }
 
-const STATUS_OPTIONS = [
-  { value: 'SCHEDULED', label: 'Scheduled' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-];
-
 export const EditSessionModal: React.FC<EditSessionModalProps> = ({ session, isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [status, setStatus] = useState('SCHEDULED');
 
   const { mutateAsync, isPending } = useUpdateSession();
+
+  const STATUS_OPTIONS = [
+    { value: 'SCHEDULED', label: t('schedules.status.scheduled', { defaultValue: 'Scheduled' }) },
+    { value: 'CANCELLED', label: t('schedules.status.cancelled', { defaultValue: 'Cancelled' }) },
+  ];
 
   useEffect(() => {
     if (session) {
@@ -47,24 +49,24 @@ export const EditSessionModal: React.FC<EditSessionModalProps> = ({ session, isO
         id: session.id,
         data: { date, start_time: startTime, end_time: endTime, status },
       });
-      toast.success('Session updated successfully.');
+      toast.success(t('schedules.toast.sessionUpdated', { defaultValue: 'Session updated' }));
       onClose();
     } catch {
-      toast.error('Failed to update session. Please try again.');
+      toast.error(t('schedules.toast.sessionUpdateError', { defaultValue: 'Failed to update session' }));
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Session">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('schedules.editSession', { defaultValue: 'Edit Session' })}>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label>Date</Label>
+          <Label>{t('schedules.form.date', { defaultValue: 'Date' })}</Label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Start Time</Label>
+            <Label>{t('schedules.form.startTime', { defaultValue: 'Start Time' })}</Label>
             <Select
               value={startTime}
               onChange={setStartTime}
@@ -73,7 +75,7 @@ export const EditSessionModal: React.FC<EditSessionModalProps> = ({ session, isO
             />
           </div>
           <div className="space-y-1.5">
-            <Label>End Time</Label>
+            <Label>{t('schedules.form.endTime', { defaultValue: 'End Time' })}</Label>
             <Select
               value={endTime}
               onChange={setEndTime}
@@ -84,7 +86,7 @@ export const EditSessionModal: React.FC<EditSessionModalProps> = ({ session, isO
         </div>
 
         <div className="space-y-1.5">
-          <Label>Status</Label>
+          <Label>{t('schedules.form.status', { defaultValue: 'Status' })}</Label>
           <Select
             value={status}
             onChange={setStatus}
@@ -95,14 +97,14 @@ export const EditSessionModal: React.FC<EditSessionModalProps> = ({ session, isO
 
         <div className="flex items-center gap-3 mt-8">
           <Button variant="outline" className="flex-1 justify-center" onClick={onClose}>
-            Cancel
+            {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button
             className="flex-1 justify-center"
             onClick={handleSubmit}
             disabled={!date || !startTime || !endTime || isPending}
           >
-            {isPending ? 'Saving…' : 'Save Changes'}
+            {isPending ? t('common.saving', { defaultValue: 'Saving...' }) : t('common.saveChanges', { defaultValue: 'Save Changes' })}
           </Button>
         </div>
       </div>

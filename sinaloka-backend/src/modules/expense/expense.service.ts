@@ -80,11 +80,12 @@ export class ExpenseService {
       orderBy: { [sort_by]: sort_order },
     });
 
-    const header = 'Date,Category,Description,Amount,Recurring,Receipt URL';
+    const header = '"Date","Category","Description","Amount","Recurring","Receipt URL"';
     const rows = expenses.map((e) => {
+      const escapeCsv = (val: string) => `"${val.replace(/"/g, '""')}"`;
       const date = new Date(e.date).toISOString().split('T')[0];
-      const desc = (e.description ?? '').replace(/,/g, ';').replace(/\n/g, ' ');
-      return `${date},${e.category},${desc},${e.amount},${e.is_recurring ?? false},${e.receipt_url ?? ''}`;
+      const desc = (e.description ?? '').replace(/\n/g, ' ');
+      return `${escapeCsv(date)},${escapeCsv(e.category)},${escapeCsv(desc)},${escapeCsv(String(e.amount))},${escapeCsv(String(e.is_recurring ?? false))},${escapeCsv(e.receipt_url ?? '')}`;
     });
 
     return [header, ...rows].join('\n');

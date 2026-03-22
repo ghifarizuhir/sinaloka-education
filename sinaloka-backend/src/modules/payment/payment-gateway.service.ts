@@ -27,6 +27,11 @@ export class PaymentGatewayService {
 
     if (!payment) return null;
 
+    // Only create checkout for PENDING or OVERDUE payments
+    if (payment.status !== 'PENDING' && payment.status !== 'OVERDUE') {
+      return null;
+    }
+
     // Reuse existing URL if already generated
     if (payment.snap_redirect_url) {
       return payment.snap_redirect_url;
@@ -57,7 +62,7 @@ export class PaymentGatewayService {
 
       // Persist on payment record
       await this.prisma.payment.update({
-        where: { id: paymentId },
+        where: { id: paymentId, institution_id: institutionId },
         data: {
           snap_token: result.token,
           snap_redirect_url: result.redirect_url,
