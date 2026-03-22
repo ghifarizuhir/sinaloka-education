@@ -32,3 +32,11 @@ export const UpdateWhatsappSettingsSchema = z.object({
 export type UpdateWhatsappSettingsDto = z.infer<
   typeof UpdateWhatsappSettingsSchema
 >;
+
+export const UpdateTemplateSchema = z.object({
+  body: z
+    .string()
+    .min(1, 'Template body is required')
+    .max(4000, 'Template body too long'),
+});
+export type UpdateTemplateDto = z.infer<typeof UpdateTemplateSchema>;
