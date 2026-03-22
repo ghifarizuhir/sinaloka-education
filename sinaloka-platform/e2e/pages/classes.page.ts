@@ -17,7 +17,7 @@ export class ClassesPage {
     this.searchInput = page.getByPlaceholder(/search class or tutor/i);
     this.table = page.locator('table');
     this.rows = page.locator('table tbody tr');
-    this.toast = page.locator('[data-sonner-toaster]');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
   async goto() {
@@ -40,6 +40,7 @@ export class ClassesPage {
     tutor?: string;
     capacity?: string;
     fee?: string;
+    tutorFee?: string;
     scheduleDays?: string[];
     startTime?: string;
     endTime?: string;
@@ -103,6 +104,11 @@ export class ClassesPage {
     if (data.fee !== undefined) {
       await modal.locator('#fee').fill(data.fee);
     }
+
+    if (data.tutorFee !== undefined) {
+      // Tutor fee input has placeholder "200000" and no id
+      await modal.locator('input[type="number"][placeholder="200000"]').fill(data.tutorFee);
+    }
   }
 
   async createClass(data: {
@@ -111,6 +117,7 @@ export class ClassesPage {
     tutor?: string;
     capacity?: string;
     fee?: string;
+    tutorFee?: string;
     scheduleDays?: string[];
     startTime?: string;
     endTime?: string;
@@ -118,9 +125,9 @@ export class ClassesPage {
     await this.addButton.click();
     await this.fillForm(data);
     // Submit button text: "Add Class" (classes.modal.createClass)
-    await this.modal
-      .getByRole('button', { name: /add class/i })
-      .click();
+    const submitBtn = this.modal.getByRole('button', { name: /add class/i });
+    await submitBtn.scrollIntoViewIfNeeded();
+    await submitBtn.click();
   }
 
   async editClass(
@@ -131,6 +138,7 @@ export class ClassesPage {
       tutor?: string;
       capacity?: string;
       fee?: string;
+      tutorFee?: string;
       scheduleDays?: string[];
       startTime?: string;
       endTime?: string;
@@ -142,9 +150,9 @@ export class ClassesPage {
 
     await this.fillForm(data);
     // Submit button text: "Save Changes" (classes.modal.updateClass)
-    await this.modal
-      .getByRole('button', { name: /save changes/i })
-      .click();
+    const saveBtn = this.modal.getByRole('button', { name: /save changes/i });
+    // Modal content may overflow viewport — use JS click
+    await saveBtn.evaluate((el: HTMLElement) => el.click());
   }
 
   async deleteClass(name: string) {

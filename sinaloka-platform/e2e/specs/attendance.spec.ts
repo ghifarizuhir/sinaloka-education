@@ -22,7 +22,7 @@ test.describe('Attendance', () => {
       await expect(attendance.sessionPanel).toBeVisible();
       // Session cards should be present (from sessionsData with 3 sessions)
       await expect(
-        attendance.sessionPanel.locator('button').filter({ hasText: 'Math Advanced' }),
+        attendance.sessionPanel.locator('button').filter({ hasText: 'Math Advanced' }).first(),
       ).toBeVisible();
     });
 
@@ -36,7 +36,7 @@ test.describe('Attendance', () => {
       await attendance.goto();
       await attendance.selectSession('Math Advanced');
       // The summary endpoint returns present: 1, so counter text should exist
-      await expect(authedPage.getByText(/1.*present/i).or(authedPage.getByText(/present.*1/i))).toBeVisible({ timeout: 5000 });
+      await expect(authedPage.getByText(/1.*present/i).or(authedPage.getByText(/present.*1/i)).first()).toBeVisible({ timeout: 5000 });
     });
   });
 

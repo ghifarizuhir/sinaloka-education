@@ -21,8 +21,8 @@ test.describe('Expenses', () => {
     test('shows category badges', async () => {
       await expenses.goto();
       await expect(expenses.table).toBeVisible();
-      await expect(expenses.getRowByDescription('Monthly office rent').getByText('RENT')).toBeVisible();
-      await expect(expenses.getRowByDescription('Whiteboard markers').getByText('SUPPLIES')).toBeVisible();
+      await expect(expenses.getRowByDescription('Monthly office rent').getByText('RENT').first()).toBeVisible();
+      await expect(expenses.getRowByDescription('Whiteboard markers').getByText('SUPPLIES').first()).toBeVisible();
     });
   });
 

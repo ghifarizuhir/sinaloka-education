@@ -41,7 +41,7 @@ test.describe('Classes', () => {
   test('shows subject and tutor', async () => {
     await classes.goto();
     const row = classes.getRowByName('Math Advanced');
-    await expect(row).toContainText('Mathematics');
+    await expect(row).toContainText('MATHEMATICS');
     await expect(row).toContainText('Dewi Lestari');
   });
 
@@ -55,6 +55,7 @@ test.describe('Classes', () => {
       tutor: 'Dewi Lestari',
       capacity: '15',
       fee: '100000',
+      tutorFee: '50000',
       scheduleDays: ['Monday'],
       startTime: '10:00',
       endTime: '11:30',
@@ -82,11 +83,10 @@ test.describe('Classes', () => {
   test('empty name shows validation error', async ({ authedPage }) => {
     await classes.goto();
     await classes.addButton.click();
-    // Don't fill name, just try to submit
     const modal = authedPage.getByRole('dialog');
-    await modal.getByRole('button', { name: /add class/i }).click();
-    // Modal should remain open (form didn't submit)
-    await expect(modal).toBeVisible();
+    // Submit button should be disabled when required fields are empty
+    const submitBtn = modal.getByRole('button', { name: /add class/i });
+    await expect(submitBtn).toBeDisabled();
   });
 
   test('capacity zero shows validation error', async ({ authedPage }) => {

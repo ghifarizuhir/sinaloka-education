@@ -127,27 +127,36 @@ export async function setupDashboardMocks(mockApi: MockApi, data = dashboardData
 }
 
 export async function setupSubjectMocks(mockApi: MockApi, data = subjectsData) {
-  await mockApi.onGet('**/api/admin/subjects**').respondWith(200, data);
-  await mockApi.onGet('**/api/admin/subjects/*/tutors').respondWith(200, {
-    data: [
-      { id: 'tut-00000000-0000-0000-0000-000000000001', name: 'Dewi Lestari' },
-    ],
-  });
+  // Public endpoints (used by useSubjects/useSubjectTutors hooks)
+  await mockApi.onGet('**/api/subjects').respondWith(200, data.data);
+  await mockApi.onGet('**/api/subjects/*/tutors').respondWith(200, [
+    { id: 'tut-00000000-0000-0000-0000-000000000001', name: 'Dewi Lestari' },
+  ]);
+  // Admin endpoints (used by settings for create/delete)
+  await mockApi.onPost('**/api/admin/subjects').respondWith(201, data.data[0]);
+  await mockApi.onDelete('**/api/admin/subjects/*').respondWith(200, {});
 }
 
 export async function setupSettingsMocks(mockApi: MockApi, data = settingsData) {
-  await mockApi.onGet('**/api/admin/settings/general').respondWith(200, data.general);
-  await mockApi.onPatch('**/api/admin/settings/general').respondWith(200, data.general);
-  await mockApi.onGet('**/api/admin/settings/billing').respondWith(200, data.billing);
-  await mockApi.onPatch('**/api/admin/settings/billing').respondWith(200, data.billing);
-  await mockApi.onGet('**/api/admin/settings/academic').respondWith(200, data.academic);
-  await mockApi.onPatch('**/api/admin/settings/academic').respondWith(200, data.academic);
-  await mockApi.onPost('**/api/admin/settings/change-password').respondWith(200, {});
-  await mockApi.onGet('**/api/admin/subjects**').respondWith(200, subjectsData);
+  // Settings endpoints use /api/settings/* (no admin prefix)
+  await mockApi.onGet('**/api/settings/general').respondWith(200, data.general);
+  await mockApi.onPatch('**/api/settings/general').respondWith(200, data.general);
+  await mockApi.onGet('**/api/settings/billing').respondWith(200, data.billing);
+  await mockApi.onPatch('**/api/settings/billing').respondWith(200, data.billing);
+  await mockApi.onGet('**/api/settings/academic').respondWith(200, data.academic);
+  await mockApi.onPatch('**/api/settings/academic').respondWith(200, data.academic);
+  // Change password uses /api/auth/change-password
+  await mockApi.onPost('**/api/auth/change-password').respondWith(200, {
+    access_token: 'new-access-token',
+    refresh_token: 'new-refresh-token',
+  });
+  // Subjects use public endpoint
+  await mockApi.onGet('**/api/subjects').respondWith(200, subjectsData.data);
   await mockApi.onPost('**/api/admin/subjects').respondWith(201, subjectsData.data[0]);
   await mockApi.onDelete('**/api/admin/subjects/*').respondWith(200, {});
-  await mockApi.onGet('**/api/admin/settings/registration').respondWith(200, data.registration);
-  await mockApi.onPatch('**/api/admin/settings/registration').respondWith(200, data.registration);
+  // Registration settings
+  await mockApi.onGet('**/api/settings/registration').respondWith(200, data.registration);
+  await mockApi.onPatch('**/api/settings/registration').respondWith(200, data.registration);
 }
 
 export async function setupFinanceOverviewMocks(mockApi: MockApi) {

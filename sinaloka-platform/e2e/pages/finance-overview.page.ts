@@ -25,9 +25,13 @@ export class FinanceOverviewPage {
   readonly toast: Locator;
 
   constructor(private page: Page) {
+    // Finance overview uses responsive layout with duplicate stat card elements.
+    // Some are hidden on mobile (md:hidden), some on desktop (hidden md:grid).
+    // Use nth/last to pick the visible one on Desktop Chrome (1280px = md+).
     this.totalRevenue = page.getByText(/total revenue/i).first();
     this.totalPayouts = page.getByText(/total payouts/i).first();
-    this.totalExpenses = page.getByText(/total expenses/i).first();
+    // Expenses: first instance is mobile (md:hidden), last is desktop (hidden md:grid)
+    this.totalExpenses = page.getByText(/total expenses/i).last();
     this.netProfit = page.getByText(/net profit/i).first();
 
     this.thisMonthTab = page.getByRole('button', { name: /this month/i });
@@ -37,11 +41,11 @@ export class FinanceOverviewPage {
 
     this.generateReportButton = page.getByRole('button', { name: /generate report/i });
 
-    this.studentPaymentsLink = page.getByRole('link', { name: /student payments/i });
-    this.tutorPayoutsLink = page.getByRole('link', { name: /tutor payouts/i });
-    this.operatingExpensesLink = page.getByRole('link', { name: /operating expenses/i });
+    this.studentPaymentsLink = page.getByRole('link', { name: /student payments/i }).first();
+    this.tutorPayoutsLink = page.getByRole('link', { name: /tutor payouts/i }).first();
+    this.operatingExpensesLink = page.getByRole('link', { name: /operating expenses/i }).first();
 
-    this.toast = page.locator('[data-sonner-toaster]');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
   async goto() {

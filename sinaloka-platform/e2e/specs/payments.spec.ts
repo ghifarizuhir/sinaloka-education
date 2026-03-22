@@ -20,9 +20,9 @@ test.describe('Payments', () => {
 
     test('status badges shown', async () => {
       await payments.goto();
-      await expect(payments.getRowByName('Rizki Pratama').getByText('Paid')).toBeVisible();
-      await expect(payments.getRowByName('Aisyah Putri').getByText('Pending')).toBeVisible();
-      await expect(payments.getRowByName('Fajar Hidayat').getByText('Overdue')).toBeVisible();
+      await expect(payments.getRowByName('Rizki Pratama').getByText('Paid').first()).toBeVisible();
+      await expect(payments.getRowByName('Aisyah Putri').getByText('Pending').first()).toBeVisible();
+      await expect(payments.getRowByName('Fajar Hidayat').getByText('Overdue').first()).toBeVisible();
     });
 
     test('status filter works', async () => {

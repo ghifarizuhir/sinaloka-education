@@ -25,13 +25,13 @@ test.describe('Settings', () => {
 
       // Click each tab and verify content changes
       await settings.switchTab('Billing');
-      await expect(authedPage.getByText(/billing mode/i).first()).toBeVisible();
+      await expect(authedPage.getByText(/expense categories/i).first()).toBeVisible();
 
       await settings.switchTab('Academic');
       await expect(authedPage.getByText(/room/i).first()).toBeVisible();
 
       await settings.switchTab('Security');
-      await expect(settings.currentPasswordInput).toBeVisible();
+      await expect(authedPage.getByText(/current password/i)).toBeVisible();
 
       await settings.switchTab('Registration');
       await expect(authedPage.getByText(/registration/i).first()).toBeVisible();
@@ -59,21 +59,18 @@ test.describe('Settings', () => {
       await settings.goto();
       await settings.switchTab('Billing');
 
-      // Find the category input and add a new category
-      const categoryInput = authedPage.getByPlaceholder(/category/i).or(
-        authedPage.locator('input').filter({ hasText: /category/i }),
-      ).first();
+      // Wait for billing content to load
+      await expect(authedPage.getByText(/expense categories/i).first()).toBeVisible();
 
-      if (await categoryInput.isVisible().catch(() => false)) {
-        await categoryInput.fill('TRANSPORT');
-        const addButton = authedPage.getByRole('button', { name: /add/i }).first();
-        await addButton.click();
+      // Find the category input (placeholder: "New category name")
+      const categoryInput = authedPage.getByPlaceholder(/new category name/i);
+      await categoryInput.fill('TRANSPORT');
 
-        await expect(authedPage.getByText('TRANSPORT')).toBeVisible();
-      } else {
-        // Category might be displayed as tags/chips — verify existing ones are visible
-        await expect(authedPage.getByText('RENT')).toBeVisible();
-      }
+      // Click "+ Add Category" button
+      const addButton = authedPage.getByRole('button', { name: /add category/i });
+      await addButton.click();
+
+      await expect(authedPage.getByText('TRANSPORT')).toBeVisible();
     });
   });
 
@@ -82,26 +79,21 @@ test.describe('Settings', () => {
       await settings.goto();
       await settings.switchTab('Academic');
 
-      // Verify existing rooms are visible
-      await expect(authedPage.getByText('Room 101')).toBeVisible();
+      // Wait for academic content to load then verify existing rooms
+      await expect(authedPage.getByText('Room 101')).toBeVisible({ timeout: 5000 });
 
       // Click Add Room button
       const addRoomButton = authedPage.getByRole('button', { name: /add room/i });
-      if (await addRoomButton.isVisible().catch(() => false)) {
-        await addRoomButton.click();
+      await addRoomButton.click();
 
-        // Fill room name in the form/input that appears
-        const roomNameInput = authedPage.getByLabel(/room name/i).or(
-          authedPage.getByPlaceholder(/room name/i),
-        ).first();
-        await roomNameInput.fill('Room 202');
+      // Fill room name in the modal (placeholder: "e.g. Room A")
+      const modal = authedPage.getByRole('dialog');
+      await modal.getByPlaceholder(/room/i).first().fill('Room 202');
 
-        // Save the room
-        const saveButton = authedPage.getByRole('button', { name: /save|add|create/i }).last();
-        await saveButton.click();
+      // Save the room
+      await modal.getByRole('button', { name: /save room/i }).click();
 
-        await expect(settings.getToast()).toBeVisible({ timeout: 5000 });
-      }
+      await expect(settings.getToast()).toBeVisible({ timeout: 5000 });
     });
   });
 
@@ -120,17 +112,21 @@ test.describe('Settings', () => {
 
     test('password mismatch shows error', async ({ authedPage }) => {
       await settings.goto();
+      await settings.switchTab('Security');
+      await authedPage.getByText(/current password/i).waitFor({ state: 'visible' });
 
-      await settings.changePassword({
-        current: 'OldPass123!',
-        newPassword: 'NewPass456!',
-        confirm: 'DifferentPass789!',
-      });
+      // Fill password fields with mismatching confirm
+      const currentInput = authedPage.locator('label').filter({ hasText: /current password/i }).locator('..').locator('input').first();
+      const newInput = authedPage.locator('label').filter({ hasText: /^new password$/i }).locator('..').locator('input').first();
+      const confirmInput = authedPage.locator('label').filter({ hasText: /confirm new password/i }).locator('..').locator('input').first();
 
-      // Verify inline error text about password mismatch
-      await expect(
-        authedPage.getByText(/password.*match|not match|mismatch/i).first(),
-      ).toBeVisible({ timeout: 5000 });
+      await currentInput.fill('OldPass123!');
+      await newInput.fill('NewPass456!');
+      await confirmInput.fill('DifferentPass789!');
+
+      // Submit button should be disabled due to mismatch
+      const submitBtn = authedPage.getByRole('button', { name: /update password/i });
+      await expect(submitBtn).toBeDisabled();
     });
   });
 

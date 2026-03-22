@@ -85,11 +85,13 @@ test.describe('Schedules', () => {
 
   // ── Negative ──
 
-  test('create without class disabled', async ({ authedPage }) => {
+  test('create without class disabled', async ({ mockApi, authedPage }) => {
+    // Override classes to return empty list so no auto-selection happens
+    await mockApi.onGet('**/api/admin/classes**').respondWith(200, { data: [], meta: { total: 0 } });
     await schedules.goto();
     await schedules.scheduleSessionButton.click();
     const modal = authedPage.getByRole('dialog');
-    // Submit button should be disabled before selecting a class
+    // Submit button should be disabled when no class is available
     const submitBtn = modal.getByRole('button', { name: /schedule session/i });
     await expect(submitBtn).toBeDisabled();
   });

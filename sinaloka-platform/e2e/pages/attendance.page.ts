@@ -17,9 +17,9 @@ export class AttendancePage {
   constructor(private page: Page) {
     this.sessionPanel = page.locator('.lg\\:col-span-4');
     this.table = page.locator('table');
-    this.saveButton = page.getByRole('button', { name: /save attendance/i });
+    this.saveButton = page.getByRole('button', { name: /save attendance/i }).first();
     this.markAllPresentButton = page.getByRole('button', { name: /mark all present/i });
-    this.toast = page.locator('[data-sonner-toaster]');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
   async goto() {
@@ -31,6 +31,7 @@ export class AttendancePage {
     await this.sessionPanel
       .locator('button')
       .filter({ hasText: className })
+      .first()
       .click();
   }
 

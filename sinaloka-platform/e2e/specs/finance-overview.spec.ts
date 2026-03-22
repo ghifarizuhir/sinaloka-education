@@ -41,6 +41,8 @@ test.describe('Finance Overview', () => {
       const finance = new FinanceOverviewPage(authedPage);
       await finance.goto();
 
+      // Wait for page to fully render before clicking nav link
+      await finance.studentPaymentsLink.waitFor({ state: 'visible' });
       await finance.studentPaymentsLink.click();
       await authedPage.waitForURL('**/finance/payments**');
       expect(authedPage.url()).toContain('/finance/payments');

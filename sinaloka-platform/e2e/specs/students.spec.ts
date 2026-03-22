@@ -31,7 +31,7 @@ test.describe('Students', () => {
     await expect(students.getRowByName('Rizki Pratama')).toBeVisible();
   });
 
-  test('search no match shows empty state', async ({ mockApi }) => {
+  test('search no match shows empty state', async ({ mockApi, authedPage }) => {
     await students.goto();
     // Override the GET to return empty when searching
     await mockApi.onGet('**/api/admin/students**').respondWith(200, {
@@ -39,7 +39,8 @@ test.describe('Students', () => {
       meta: { total: 0, page: 1, limit: 20, totalPages: 0, hasNextPage: false, hasPreviousPage: false, active_count: 0, inactive_count: 0 },
     });
     await students.search('NonExistent');
-    await expect(students.rows).toHaveCount(0);
+    // Table shows empty state message
+    await expect(authedPage.getByText(/no students found/i)).toBeVisible();
   });
 
   // ── CRUD ──

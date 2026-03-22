@@ -17,7 +17,7 @@ export class StudentsPage {
     this.searchInput = page.getByPlaceholder(/search by name or email/i);
     this.table = page.locator('table');
     this.rows = page.locator('table tbody tr');
-    this.toast = page.locator('[data-sonner-toaster]');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
   async goto() {
@@ -46,7 +46,11 @@ export class StudentsPage {
     if (data.email) await modal.locator('#new-email').fill(data.email);
     if (data.phone) await modal.locator('#new-phone').fill(data.phone);
 
-    // Grade uses the custom Select component — click it and pick the option
+    // Grade uses the custom Select component (native <select>)
+    // Select by value (e.g. 'Kelas 10' for grade '10')
+    const gradeValue = `Kelas ${data.grade}`;
+    await modal.locator('select').first().selectOption(gradeValue);
+
     await modal.locator('#new-parent-name').fill(data.parentName);
     await modal.locator('#new-parent-phone').fill(data.parentPhone);
     if (data.parentEmail) await modal.locator('#new-parent-email').fill(data.parentEmail);
@@ -76,6 +80,10 @@ export class StudentsPage {
     if (data.name) await modal.locator('#new-name').fill(data.name);
     if (data.email) await modal.locator('#new-email').fill(data.email);
     if (data.phone) await modal.locator('#new-phone').fill(data.phone);
+    if (data.grade) {
+      const gradeValue = `Kelas ${data.grade}`;
+      await modal.locator('select').first().selectOption(gradeValue);
+    }
     if (data.parentName) await modal.locator('#new-parent-name').fill(data.parentName);
     if (data.parentPhone) await modal.locator('#new-parent-phone').fill(data.parentPhone);
     if (data.parentEmail) await modal.locator('#new-parent-email').fill(data.parentEmail);
@@ -86,8 +94,10 @@ export class StudentsPage {
 
   async deleteStudent(name: string) {
     await this.openRowMenu(name);
-    // Click "Delete" in the action menu
-    await this.page.getByText(/^delete$/i).click();
+    // Wait for dropdown to appear, then click "Delete"
+    const deleteBtn = this.page.locator('button.text-rose-600, button:has-text("Delete")').filter({ hasText: /delete/i });
+    await deleteBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await deleteBtn.click();
 
     // Students uses a custom Modal with #delete-confirm input
     await this.page.locator('#delete-confirm').fill('delete');

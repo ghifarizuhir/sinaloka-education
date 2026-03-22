@@ -15,12 +15,6 @@ export class SettingsPage {
   readonly supportEmailInput: Locator;
   readonly saveChangesButton: Locator;
 
-  /* ── Security form ── */
-  readonly currentPasswordInput: Locator;
-  readonly newPasswordInput: Locator;
-  readonly confirmPasswordInput: Locator;
-  readonly updatePasswordButton: Locator;
-
   /* ── Toast ── */
   readonly toast: Locator;
 
@@ -32,16 +26,12 @@ export class SettingsPage {
     this.plansTab = page.getByRole('button', { name: /plans/i });
     this.securityTab = page.getByRole('button', { name: /security/i });
 
-    this.institutionNameInput = page.getByLabel(/institution name/i);
-    this.supportEmailInput = page.getByLabel(/support email/i);
+    // General form labels don't have htmlFor, so use label text -> parent -> input
+    this.institutionNameInput = page.locator('label').filter({ hasText: /institution name/i }).locator('..').locator('input').first();
+    this.supportEmailInput = page.locator('label').filter({ hasText: /support email/i }).locator('..').locator('input').first();
     this.saveChangesButton = page.getByRole('button', { name: /save changes/i });
 
-    this.currentPasswordInput = page.getByLabel(/current password/i);
-    this.newPasswordInput = page.getByLabel(/^new password$/i);
-    this.confirmPasswordInput = page.getByLabel(/confirm new password/i);
-    this.updatePasswordButton = page.getByRole('button', { name: /update password/i });
-
-    this.toast = page.locator('[data-sonner-toaster]');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
   async goto() {
@@ -71,12 +61,31 @@ export class SettingsPage {
 
   /* ── Security tab ── */
 
+  /**
+   * Fill the change password form and submit.
+   * The security form uses plain <label> + sibling <div><input></div> without htmlFor,
+   * so we locate inputs by finding the label text then navigating to the sibling input.
+   */
   async changePassword(data: { current: string; newPassword: string; confirm: string }) {
     await this.switchTab('Security');
-    await this.currentPasswordInput.fill(data.current);
-    await this.newPasswordInput.fill(data.newPassword);
-    await this.confirmPasswordInput.fill(data.confirm);
-    await this.updatePasswordButton.click();
+    // Wait for security form to be visible
+    await this.page.getByText(/current password/i).waitFor({ state: 'visible' });
+
+    // The form has 3 password inputs in order: current, new, confirm
+    const inputs = this.page.locator('form input[type="password"], form input[type="text"]').filter({
+      has: this.page.locator('xpath=ancestor::form'),
+    });
+    // Use label-based navigation: find label, go to parent div, find input
+    const currentInput = this.page.locator('label').filter({ hasText: /current password/i }).locator('..').locator('input').first();
+    const newInput = this.page.locator('label').filter({ hasText: /^new password$/i }).locator('..').locator('input').first();
+    const confirmInput = this.page.locator('label').filter({ hasText: /confirm new password/i }).locator('..').locator('input').first();
+
+    await currentInput.fill(data.current);
+    await newInput.fill(data.newPassword);
+    await confirmInput.fill(data.confirm);
+
+    // Click "Update Password" submit button
+    await this.page.getByRole('button', { name: /update password/i }).click();
   }
 
   getToast(): Locator {
