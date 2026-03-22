@@ -37,6 +37,7 @@ import { SubscriptionWarningInterceptor } from './modules/subscription/subscript
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
+import { NotificationModule } from './modules/notification/notification.module.js';
 import { HealthController } from './health.controller.js';
 
 @Module({
@@ -71,6 +72,7 @@ import { HealthController } from './health.controller.js';
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
     WhatsappModule,
+    NotificationModule,
   ],
   providers: [
     {
