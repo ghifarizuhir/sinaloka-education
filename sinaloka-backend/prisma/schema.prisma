@@ -168,6 +168,7 @@ model Institution {
   parent_invites  ParentInvite[]
   invitations         Invitation[]
   whatsapp_messages   WhatsappMessage[]
+  whatsapp_templates WhatsappTemplate[]
   subjects          Subject[]
   upgrade_requests  UpgradeRequest[]
   registrations     Registration[]
@@ -703,4 +704,18 @@ model WhatsappMessage {
   @@index([wa_message_id])
   @@index([institution_id, created_at])
   @@map("whatsapp_messages")
+}
+
+model WhatsappTemplate {
+  id              String   @id @default(uuid())
+  institution_id  String
+  name            String
+  body            String
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  institution Institution @relation(fields: [institution_id], references: [id])
+
+  @@unique([institution_id, name])
+  @@map("whatsapp_templates")
 }
