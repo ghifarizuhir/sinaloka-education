@@ -18,6 +18,8 @@ import { ListNotificationsDto } from './dto/notification.dto.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
+import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 
 @Controller('notifications')
 export class NotificationController {
@@ -34,15 +36,19 @@ export class NotificationController {
   @Roles('ADMIN', 'SUPER_ADMIN')
   findAll(
     @InstitutionId() institutionId: string,
+    @CurrentUser() user: JwtPayload,
     @Query() dto: ListNotificationsDto,
   ) {
-    return this.notificationService.findAll(institutionId, dto);
+    return this.notificationService.findAll(institutionId, user.userId, dto);
   }
 
   @Get('unread-count')
   @Roles('ADMIN', 'SUPER_ADMIN')
-  getUnreadCount(@InstitutionId() institutionId: string) {
-    return this.notificationService.getUnreadCount(institutionId);
+  getUnreadCount(
+    @InstitutionId() institutionId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.notificationService.getUnreadCount(institutionId, user.userId);
   }
 
   @Public()
@@ -94,16 +100,16 @@ export class NotificationController {
 
   @Patch(':id/read')
   @Roles('ADMIN', 'SUPER_ADMIN')
-  markAsRead(
-    @Param('id') id: string,
-    @InstitutionId() institutionId: string,
-  ) {
+  markAsRead(@Param('id') id: string, @InstitutionId() institutionId: string) {
     return this.notificationService.markAsRead(id, institutionId);
   }
 
   @Patch('read-all')
   @Roles('ADMIN', 'SUPER_ADMIN')
-  markAllAsRead(@InstitutionId() institutionId: string) {
-    return this.notificationService.markAllAsRead(institutionId);
+  markAllAsRead(
+    @InstitutionId() institutionId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.notificationService.markAllAsRead(institutionId, user.userId);
   }
 }

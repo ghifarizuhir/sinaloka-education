@@ -568,7 +568,7 @@ export class SessionService {
     });
 
     this.eventEmitter.emit(NOTIFICATION_EVENTS.SESSION_CANCELLED, {
-      institutionId: updated.class?.institution_id,
+      institutionId: updated.class!.institution_id,
       sessionId: updated.id,
       className: updated.class?.name ?? 'Unknown',
       date: updated.date.toISOString().split('T')[0],

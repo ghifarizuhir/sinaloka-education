@@ -2,16 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from '@/src/hooks/useNotifications';
 import { Notification } from '@/src/services/notifications.service';
 import NotificationItem from './NotificationItem';
-
-const DEEP_LINK_MAP: Record<string, (data: Record<string, unknown>) => string> = {
-  'payment.received': (d) => `/finance/payments/${d.paymentId}`,
-  'student.registered': (d) => `/students/${d.studentId}`,
-  'parent.registered': (d) => `/students/${d.parentId}`,
-  'session.created': (d) => `/schedules/${d.sessionId}`,
-  'session.cancelled': (d) => `/schedules/${d.sessionId}`,
-  'attendance.submitted': (d) => `/schedules/${d.sessionId}`,
-  'tutor.invite_accepted': (d) => `/tutors/${d.tutorId}`,
-};
+import { NOTIFICATION_DEEP_LINKS } from './constants';
 
 interface NotificationDropdownProps {
   onClose: () => void;
@@ -25,8 +16,8 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
 
   const handleClick = (notification: Notification) => {
     if (!notification.read_at) markAsRead.mutate(notification.id);
-    const linkFn = DEEP_LINK_MAP[notification.type];
-    if (linkFn && notification.data) navigate(linkFn(notification.data as Record<string, unknown>));
+    const linkFn = NOTIFICATION_DEEP_LINKS[notification.type];
+    if (linkFn) navigate(linkFn());
     onClose();
   };
 

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from '@/src/hooks/useNotifications';
 import { Notification } from '@/src/services/notifications.service';
 import NotificationItem from '@/src/components/notifications/NotificationItem';
+import { NOTIFICATION_DEEP_LINKS } from '@/src/components/notifications/constants';
 
 const NOTIFICATION_TYPES = [
   { value: '', label: 'All' },
@@ -15,16 +16,6 @@ const NOTIFICATION_TYPES = [
   { value: 'attendance.submitted', label: 'Attendance' },
   { value: 'tutor.invite_accepted', label: 'Tutors' },
 ];
-
-const DEEP_LINK_MAP: Record<string, (data: Record<string, unknown>) => string> = {
-  'payment.received': (d) => `/finance/payments/${d.paymentId}`,
-  'student.registered': (d) => `/students/${d.studentId}`,
-  'parent.registered': (d) => `/students/${d.parentId}`,
-  'session.created': (d) => `/schedules/${d.sessionId}`,
-  'session.cancelled': (d) => `/schedules/${d.sessionId}`,
-  'attendance.submitted': (d) => `/schedules/${d.sessionId}`,
-  'tutor.invite_accepted': (d) => `/tutors/${d.tutorId}`,
-};
 
 export default function Notifications() {
   const { t } = useTranslation();
@@ -44,8 +35,8 @@ export default function Notifications() {
 
   const handleClick = (notification: Notification) => {
     if (!notification.read_at) markAsRead.mutate(notification.id);
-    const linkFn = DEEP_LINK_MAP[notification.type];
-    if (linkFn && notification.data) navigate(linkFn(notification.data as Record<string, unknown>));
+    const linkFn = NOTIFICATION_DEEP_LINKS[notification.type];
+    if (linkFn) navigate(linkFn());
   };
 
   return (

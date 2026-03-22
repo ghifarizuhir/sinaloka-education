@@ -33,9 +33,10 @@ export class NotificationService {
     }
   }
 
-  async findAll(institutionId: string, dto: ListNotificationsDto) {
+  async findAll(institutionId: string, userId: string, dto: ListNotificationsDto) {
     const where: Record<string, unknown> = {
       institution_id: institutionId,
+      OR: [{ user_id: null }, { user_id: userId }],
     };
     if (dto.type) where.type = dto.type;
     if (dto.unread) where.read_at = null;
@@ -61,9 +62,13 @@ export class NotificationService {
     };
   }
 
-  async getUnreadCount(institutionId: string) {
+  async getUnreadCount(institutionId: string, userId: string) {
     return this.prisma.notification.count({
-      where: { institution_id: institutionId, read_at: null },
+      where: {
+        institution_id: institutionId,
+        read_at: null,
+        OR: [{ user_id: null }, { user_id: userId }],
+      },
     });
   }
 
@@ -74,9 +79,13 @@ export class NotificationService {
     });
   }
 
-  async markAllAsRead(institutionId: string) {
+  async markAllAsRead(institutionId: string, userId: string) {
     return this.prisma.notification.updateMany({
-      where: { institution_id: institutionId, read_at: null },
+      where: {
+        institution_id: institutionId,
+        read_at: null,
+        OR: [{ user_id: null }, { user_id: userId }],
+      },
       data: { read_at: new Date() },
     });
   }

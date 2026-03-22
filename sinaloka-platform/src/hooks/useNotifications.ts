@@ -24,6 +24,7 @@ export function useUnreadCount() {
 export function useNotificationSSE() {
   const queryClient = useQueryClient();
   const eventSourceRef = useRef<EventSource | null>(null);
+  const retryDelayRef = useRef(1000);
 
   const connect = useCallback(() => {
     const token = localStorage.getItem('access_token');
@@ -33,6 +34,9 @@ export function useNotificationSSE() {
     }
     const url = `${API_URL}/api/notifications/stream?token=${token}`;
     const es = new EventSource(url);
+    es.onopen = () => {
+      retryDelayRef.current = 1000;
+    };
     es.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -43,7 +47,8 @@ export function useNotificationSSE() {
     es.onerror = () => {
       es.close();
       eventSourceRef.current = null;
-      setTimeout(connect, 5000);
+      setTimeout(connect, retryDelayRef.current);
+      retryDelayRef.current = Math.min(retryDelayRef.current * 2, 60000);
     };
     eventSourceRef.current = es;
   }, [queryClient]);
