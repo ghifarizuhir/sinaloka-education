@@ -139,12 +139,14 @@ export class ExpenseService {
         : today;
       endDate.setHours(0, 0, 0, 0);
 
-      const baseDate = new Date(expense.date);
-      baseDate.setHours(0, 0, 0, 0);
+      const startDate = expense.last_generated_at
+        ? new Date(expense.last_generated_at)
+        : new Date(expense.date);
+      startDate.setHours(0, 0, 0, 0);
 
-      // Generate all occurrence dates from baseDate up to min(endDate, today)
+      // Generate all occurrence dates from startDate up to min(endDate, today)
       const upperBound = endDate < today ? endDate : today;
-      const current = new Date(baseDate);
+      const current = new Date(startDate);
 
       // Advance to next occurrence after the base
       if (frequency === 'weekly') {
@@ -181,6 +183,10 @@ export class ExpenseService {
               recurrence_frequency: null,
               recurrence_end_date: null,
             },
+          });
+          await this.prisma.expense.update({
+            where: { id: expense.id },
+            data: { last_generated_at: new Date() },
           });
           created++;
         }
