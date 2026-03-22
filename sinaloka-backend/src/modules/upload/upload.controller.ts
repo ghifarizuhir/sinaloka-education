@@ -15,9 +15,11 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { UploadService } from './upload.service.js';
+import { NoAuditLog } from '../audit-log/decorators/no-audit-log.decorator.js';
 
 const ALLOWED_UPLOAD_TYPES = ['receipts', 'proofs', 'logos', 'avatars'];
 
+@NoAuditLog()
 @Controller('uploads')
 export class UploadController {
   constructor(private uploadService: UploadService) {}

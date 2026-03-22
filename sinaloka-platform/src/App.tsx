@@ -29,6 +29,7 @@ import { NotFound } from './pages/NotFound';
 import { WhatsApp } from './pages/WhatsApp';
 import { Registrations } from './pages/Registrations';
 import Notifications from './pages/Notifications';
+import { AuditLog } from './pages/AuditLog';
 
 // --- Super Admin Pages ---
 import Institutions from './pages/SuperAdmin/Institutions';
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="upgrade-requests" element={<UpgradeRequests />} />
             <Route path="subscriptions" element={<SubscriptionManagement />} />
             <Route path="settlements" element={<Settlements />} />
+            <Route path="audit-logs" element={<AuditLog />} />
           </Route>
         </Route>
         <Route element={<ProtectedRoute />}>
@@ -72,6 +74,7 @@ export default function App() {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/whatsapp" element={<WhatsApp />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/audit-logs" element={<AuditLog />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Route>

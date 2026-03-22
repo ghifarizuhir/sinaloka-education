@@ -305,6 +305,13 @@ export const Layout = () => {
             {!isSidebarMinimized && <p className="px-3 text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-4">{t('nav.system')}</p>}
             <div className="space-y-1">
               <SidebarItem icon={Settings} label={t('nav.settings')} href="/settings" active={location.pathname === '/settings'} minimized={isSidebarMinimized} />
+              <SidebarItem
+                icon={ClipboardList}
+                label="Audit Log"
+                href="/audit-logs"
+                active={location.pathname === '/audit-logs'}
+                minimized={isSidebarMinimized}
+              />
             </div>
           </div>
         </nav>
