@@ -323,4 +323,61 @@ export class TutorService {
       },
     });
   }
+
+  async bulkVerify(institutionId: string, ids: string[], isVerified: boolean) {
+    const result = await this.prisma.tutor.updateMany({
+      where: { id: { in: ids }, institution_id: institutionId },
+      data: { is_verified: isVerified },
+    });
+    return { updated: result.count };
+  }
+
+  async bulkDelete(institutionId: string, ids: string[]) {
+    const tutors = await this.prisma.tutor.findMany({
+      where: { id: { in: ids }, institution_id: institutionId },
+      select: { id: true, user_id: true },
+    });
+
+    if (tutors.length === 0) {
+      return { deleted: 0 };
+    }
+
+    const tutorIds = tutors.map((t) => t.id);
+    const userIds = tutors.map((t) => t.user_id);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.tutorSubject.deleteMany({ where: { tutor_id: { in: tutorIds } } });
+      await tx.tutor.deleteMany({ where: { id: { in: tutorIds } } });
+      await tx.refreshToken.deleteMany({ where: { user_id: { in: userIds } } });
+      await tx.user.deleteMany({ where: { id: { in: userIds } } });
+    });
+
+    // Reset plan grace period if count drops below limit (same pattern as single delete)
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { plan_type: true, plan_limit_reached_at: true },
+    });
+
+    if (institution?.plan_limit_reached_at) {
+      const { PLAN_LIMITS } = await import('../../common/constants/plans.js');
+      const planConfig = PLAN_LIMITS[institution.plan_type as any];
+
+      const tutorsBelowLimit =
+        planConfig.maxTutors === null ||
+        (await this.prisma.tutor.count({ where: { institution_id: institutionId } })) < planConfig.maxTutors;
+
+      const studentsBelowLimit =
+        planConfig.maxStudents === null ||
+        (await this.prisma.student.count({ where: { institution_id: institutionId, status: 'ACTIVE' } })) < planConfig.maxStudents;
+
+      if (tutorsBelowLimit && studentsBelowLimit) {
+        await this.prisma.institution.update({
+          where: { id: institutionId },
+          data: { plan_limit_reached_at: null },
+        });
+      }
+    }
+
+    return { deleted: tutors.length };
+  }
 }

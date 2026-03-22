@@ -358,4 +358,30 @@ export class InvitationService {
 
     return { message: 'Invitation accepted successfully' };
   }
+
+  async bulkResendInvite(institutionId: string, ids: string[]) {
+    let sent = 0;
+    for (const id of ids) {
+      try {
+        await this.resendInvite(institutionId, id);
+        sent++;
+      } catch {
+        // Skip tutors that fail (already active, not found, etc.)
+      }
+    }
+    return { sent };
+  }
+
+  async bulkCancelInvite(institutionId: string, ids: string[]) {
+    let cancelled = 0;
+    for (const id of ids) {
+      try {
+        await this.cancelInvite(institutionId, id);
+        cancelled++;
+      } catch {
+        // Skip tutors that fail (already active, not found, etc.)
+      }
+    }
+    return { cancelled };
+  }
 }

@@ -50,3 +50,19 @@ export const UpdateTutorProfileSchema = z.object({
   bank_account_holder: z.string().min(1).max(255),
 });
 export type UpdateTutorProfileDto = z.infer<typeof UpdateTutorProfileSchema>;
+
+export const BulkVerifyTutorSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+  is_verified: z.boolean(),
+});
+export type BulkVerifyTutorDto = z.infer<typeof BulkVerifyTutorSchema>;
+
+export const BulkDeleteTutorSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+});
+export type BulkDeleteTutorDto = z.infer<typeof BulkDeleteTutorSchema>;
+
+export const BulkTutorIdsSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+});
+export type BulkTutorIdsDto = z.infer<typeof BulkTutorIdsSchema>;
