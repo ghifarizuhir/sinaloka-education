@@ -20,3 +20,19 @@ export interface UpcomingSession {
   tutor_name: string;
   class_name: string;
 }
+
+export interface AttendanceTrendPoint {
+  month: string;
+  rate: number;
+}
+
+export interface StudentGrowthPoint {
+  month: string;
+  count: number;
+}
+
+export interface RevenueExpensesPoint {
+  month: string;
+  revenue: number;
+  expenses: number;
+}

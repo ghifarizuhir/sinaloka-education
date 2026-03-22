@@ -20,11 +20,17 @@ import {
   CreateTutorSchema,
   UpdateTutorSchema,
   TutorQuerySchema,
+  BulkVerifyTutorSchema,
+  BulkDeleteTutorSchema,
+  BulkTutorIdsSchema,
 } from './tutor.dto.js';
 import type {
   CreateTutorDto,
   UpdateTutorDto,
   TutorQueryDto,
+  BulkVerifyTutorDto,
+  BulkDeleteTutorDto,
+  BulkTutorIdsDto,
 } from './tutor.dto.js';
 import { InvitationService } from '../invitation/invitation.service.js';
 import { InviteTutorSchema } from '../invitation/invitation.dto.js';
@@ -62,6 +68,38 @@ export class TutorController {
     @Body(new ZodValidationPipe(InviteTutorSchema)) dto: InviteTutorDto,
   ) {
     return this.invitationService.invite(institutionId, dto);
+  }
+
+  @Patch('bulk')
+  async bulkVerify(
+    @InstitutionId() institutionId: string,
+    @Body(new ZodValidationPipe(BulkVerifyTutorSchema)) dto: BulkVerifyTutorDto,
+  ) {
+    return this.tutorService.bulkVerify(institutionId, dto.ids, dto.is_verified);
+  }
+
+  @Delete('bulk')
+  async bulkDelete(
+    @InstitutionId() institutionId: string,
+    @Body(new ZodValidationPipe(BulkDeleteTutorSchema)) dto: BulkDeleteTutorDto,
+  ) {
+    return this.tutorService.bulkDelete(institutionId, dto.ids);
+  }
+
+  @Post('bulk/resend-invite')
+  async bulkResendInvite(
+    @InstitutionId() institutionId: string,
+    @Body(new ZodValidationPipe(BulkTutorIdsSchema)) dto: BulkTutorIdsDto,
+  ) {
+    return this.invitationService.bulkResendInvite(institutionId, dto.ids);
+  }
+
+  @Post('bulk/cancel-invite')
+  async bulkCancelInvite(
+    @InstitutionId() institutionId: string,
+    @Body(new ZodValidationPipe(BulkTutorIdsSchema)) dto: BulkTutorIdsDto,
+  ) {
+    return this.invitationService.bulkCancelInvite(institutionId, dto.ids);
   }
 
   @Post(':id/resend-invite')

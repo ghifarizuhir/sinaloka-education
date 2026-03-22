@@ -21,7 +21,7 @@ import { usePayouts } from './hooks/usePayouts';
 import { useAttendance } from './hooks/useAttendance';
 
 function MainAppContent() {
-  const { profile, logout } = useAuth();
+  const { profile, logout, refreshProfile } = useAuth();
   const { data: schedule, isLoading: scheduleLoading, activeFilter, setFilter, refetch: refetchSchedule, cancelSession, requestReschedule } = useSchedule();
   const { data: payouts, refetch: refetchPayouts } = usePayouts();
   const { students, setStudents, fetchStudents, submitAttendance } = useAttendance();
@@ -206,7 +206,7 @@ function MainAppContent() {
           />
         );
       case 'profile':
-        return <ProfilePage profile={profile} onLogout={logout} onEditProfile={() => setEditingProfile(true)} />;
+        return <ProfilePage profile={profile} onLogout={logout} onEditProfile={() => setEditingProfile(true)} onAvatarUpdate={() => refreshProfile()} />;
       default:
         return null;
     }

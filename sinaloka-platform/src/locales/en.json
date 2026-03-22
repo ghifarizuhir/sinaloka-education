@@ -172,6 +172,12 @@
       "hours": "{{count}} hours ago",
       "days": "{{count}} days ago"
     },
+    "revenueVsExpenses": "Revenue vs Expenses",
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "attendanceTrend": "Attendance Rate",
+    "studentGrowth": "Student Growth",
+    "noData": "No data yet",
     "commandPalette": {
       "searchPlaceholder": "Search for students, tutors, or actions...",
       "quickActions": "Quick Actions",
@@ -388,7 +394,24 @@
       "rating": "Rating",
       "subjects": "Subjects",
       "years": "years"
-    }
+    },
+    "bulk": {
+      "verify": "Verify",
+      "unverify": "Unverify",
+      "verifySuccess": "Tutors updated",
+      "resendInvite": "Resend Invite",
+      "resendSuccess": "Invites resent",
+      "cancelInvite": "Cancel Invite",
+      "cancelInviteTitle": "Cancel Invitations",
+      "cancelInviteWarning": "Cancelling invitations will permanently delete the selected pending tutors and all their associated data (classes, sessions, enrollments). This cannot be undone.",
+      "cancelInviteSuccess": "Invitations cancelled",
+      "confirmCancel": "Cancel Invitations",
+      "deleteTitle": "Delete Tutors",
+      "deleteWarning": "Are you sure you want to delete {{count}} tutor(s)? This action cannot be undone.",
+      "deleteSuccess": "Tutors deleted"
+    },
+    "avatarUpdated": "Photo updated",
+    "changePhoto": "Change photo"
   },
 
   "classes": {

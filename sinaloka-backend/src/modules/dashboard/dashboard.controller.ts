@@ -23,4 +23,19 @@ export class DashboardController {
   getUpcomingSessions(@InstitutionId() institutionId: string) {
     return this.dashboardService.getUpcomingSessions(institutionId);
   }
+
+  @Get('attendance-trend')
+  getAttendanceTrend(@InstitutionId() institutionId: string) {
+    return this.dashboardService.getAttendanceTrend(institutionId);
+  }
+
+  @Get('student-growth')
+  getStudentGrowth(@InstitutionId() institutionId: string) {
+    return this.dashboardService.getStudentGrowth(institutionId);
+  }
+
+  @Get('revenue-expenses')
+  getRevenueExpenses(@InstitutionId() institutionId: string) {
+    return this.dashboardService.getRevenueExpenses(institutionId);
+  }
 }

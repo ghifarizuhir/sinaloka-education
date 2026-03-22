@@ -141,4 +141,142 @@ export class DashboardService {
       class_name: s.class.name,
     }));
   }
+
+  async getAttendanceTrend(institutionId: string) {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const attendances = await this.prisma.attendance.findMany({
+      where: {
+        institution_id: institutionId,
+        session: { date: { gte: sixMonthsAgo } },
+      },
+      select: { status: true, session: { select: { date: true } } },
+    });
+
+    // Group by session month (not created_at — session date is the actual class date)
+    const byMonth = new Map<string, { present: number; total: number }>();
+    for (let i = 0; i < 6; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - (5 - i));
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      byMonth.set(key, { present: 0, total: 0 });
+    }
+
+    for (const a of attendances) {
+      const key = `${a.session.date.getFullYear()}-${String(a.session.date.getMonth() + 1).padStart(2, '0')}`;
+      const bucket = byMonth.get(key);
+      if (bucket) {
+        bucket.total++;
+        if (a.status === 'PRESENT' || a.status === 'LATE') bucket.present++;
+      }
+    }
+
+    return {
+      data: Array.from(byMonth.entries()).map(([month, { present, total }]) => ({
+        month,
+        rate: total > 0 ? Math.round((present / total) * 10000) / 100 : 0,
+      })),
+    };
+  }
+
+  async getStudentGrowth(institutionId: string) {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const baseCount = await this.prisma.student.count({
+      where: {
+        institution_id: institutionId,
+        created_at: { lt: sixMonthsAgo },
+      },
+    });
+
+    const newStudents = await this.prisma.student.findMany({
+      where: {
+        institution_id: institutionId,
+        created_at: { gte: sixMonthsAgo },
+      },
+      select: { created_at: true },
+      orderBy: { created_at: 'asc' },
+    });
+
+    const months: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - (5 - i));
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+
+    const countByMonth = new Map(months.map((m) => [m, 0]));
+    for (const s of newStudents) {
+      const key = `${s.created_at.getFullYear()}-${String(s.created_at.getMonth() + 1).padStart(2, '0')}`;
+      if (countByMonth.has(key)) countByMonth.set(key, countByMonth.get(key)! + 1);
+    }
+
+    let cumulative = baseCount;
+    return {
+      data: months.map((month) => {
+        cumulative += countByMonth.get(month)!;
+        return { month, count: cumulative };
+      }),
+    };
+  }
+
+  async getRevenueExpenses(institutionId: string) {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const [payments, expenses] = await Promise.all([
+      this.prisma.payment.findMany({
+        where: {
+          institution_id: institutionId,
+          status: 'PAID',
+          paid_date: { gte: sixMonthsAgo },
+        },
+        select: { amount: true, paid_date: true },
+      }),
+      this.prisma.expense.findMany({
+        where: {
+          institution_id: institutionId,
+          date: { gte: sixMonthsAgo },
+        },
+        select: { amount: true, date: true },
+      }),
+    ]);
+
+    const months: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - (5 - i));
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+
+    const revenueByMonth = new Map(months.map((m) => [m, 0]));
+    const expensesByMonth = new Map(months.map((m) => [m, 0]));
+
+    for (const p of payments) {
+      if (!p.paid_date) continue;
+      const key = `${p.paid_date.getFullYear()}-${String(p.paid_date.getMonth() + 1).padStart(2, '0')}`;
+      if (revenueByMonth.has(key)) revenueByMonth.set(key, revenueByMonth.get(key)! + Number(p.amount));
+    }
+
+    for (const e of expenses) {
+      const key = `${e.date.getFullYear()}-${String(e.date.getMonth() + 1).padStart(2, '0')}`;
+      if (expensesByMonth.has(key)) expensesByMonth.set(key, expensesByMonth.get(key)! + Number(e.amount));
+    }
+
+    return {
+      data: months.map((month) => ({
+        month,
+        revenue: revenueByMonth.get(month)!,
+        expenses: expensesByMonth.get(month)!,
+      })),
+    };
+  }
 }

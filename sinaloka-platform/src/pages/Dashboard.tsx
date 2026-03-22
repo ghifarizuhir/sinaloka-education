@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import {
+  ResponsiveContainer, BarChart, Bar, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+} from 'recharts';
+import {
   Users,
   GraduationCap,
   ChevronRight,
@@ -22,7 +26,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Skeleton } from '../components/UI';
 import { cn, formatCurrencyShort, formatCurrency } from '../lib/utils';
-import { useDashboardStats, useDashboardActivity, useDashboardUpcomingSessions } from '@/src/hooks/useDashboard';
+import { useDashboardStats, useDashboardActivity, useDashboardUpcomingSessions, useDashboardAttendanceTrend, useDashboardStudentGrowth, useDashboardRevenueExpenses } from '@/src/hooks/useDashboard';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
 import { AuthContext } from '@/src/contexts/AuthContext';
 
@@ -62,6 +66,9 @@ export const Dashboard = () => {
   const { data: activity, isLoading: activityLoading } = useDashboardActivity();
   const { data: overdueSummary } = useOverdueSummary();
   const { data: upcomingSessions } = useDashboardUpcomingSessions();
+  const { data: attendanceTrend } = useDashboardAttendanceTrend();
+  const { data: studentGrowth } = useDashboardStudentGrowth();
+  const { data: revenueExpenses } = useDashboardRevenueExpenses();
 
   const isLoading = statsLoading || activityLoading;
   const greeting = getGreeting();
@@ -218,6 +225,66 @@ export const Dashboard = () => {
             </Card>
           </motion.div>
         ))}
+      </div>
+
+      {/* ─── Charts Section ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Revenue vs Expenses — large left */}
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">{t('dashboard.revenueVsExpenses', 'Revenue vs Expenses')}</h3>
+          {revenueExpenses?.data?.length ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={revenueExpenses.data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} />
+                <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
+                <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--card)' }} />
+                <Legend />
+                <Bar dataKey="revenue" fill="var(--chart-1)" radius={[6, 6, 0, 0]} name={t('dashboard.revenue', 'Revenue')} />
+                <Bar dataKey="expenses" fill="var(--chart-4)" radius={[6, 6, 0, 0]} name={t('dashboard.expenses', 'Expenses')} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[240px] text-muted-foreground text-sm">{t('dashboard.noData', 'No data yet')}</div>
+          )}
+        </div>
+
+        {/* Right stack: Attendance + Student Growth */}
+        <div className="flex flex-col gap-4">
+          {/* Attendance Trend */}
+          <div className="bg-card border border-border rounded-2xl p-6 flex-1">
+            <h3 className="text-sm font-semibold text-foreground mb-4">{t('dashboard.attendanceTrend', 'Attendance Rate')}</h3>
+            {attendanceTrend?.data?.length ? (
+              <ResponsiveContainer width="100%" height={90}>
+                <LineChart data={attendanceTrend.data}>
+                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} />
+                  <YAxis tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--card)' }} formatter={(v: number) => `${v}%`} />
+                  <Line type="monotone" dataKey="rate" stroke="var(--chart-2)" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[90px] text-muted-foreground text-sm">{t('dashboard.noData', 'No data yet')}</div>
+            )}
+          </div>
+
+          {/* Student Growth */}
+          <div className="bg-card border border-border rounded-2xl p-6 flex-1">
+            <h3 className="text-sm font-semibold text-foreground mb-4">{t('dashboard.studentGrowth', 'Student Growth')}</h3>
+            {studentGrowth?.data?.length ? (
+              <ResponsiveContainer width="100%" height={90}>
+                <LineChart data={studentGrowth.data}>
+                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} />
+                  <YAxis tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--card)' }} />
+                  <Line type="monotone" dataKey="count" stroke="var(--chart-3)" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[90px] text-muted-foreground text-sm">{t('dashboard.noData', 'No data yet')}</div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ─── Main Content: 2/3 + 1/3 Layout ─── */}

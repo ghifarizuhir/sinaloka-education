@@ -172,6 +172,12 @@
       "hours": "{{count}} jam yang lalu",
       "days": "{{count}} hari yang lalu"
     },
+    "revenueVsExpenses": "Pendapatan vs Pengeluaran",
+    "revenue": "Pendapatan",
+    "expenses": "Pengeluaran",
+    "attendanceTrend": "Tingkat Kehadiran",
+    "studentGrowth": "Pertumbuhan Siswa",
+    "noData": "Belum ada data",
     "commandPalette": {
       "searchPlaceholder": "Cari siswa, tutor, atau aksi...",
       "quickActions": "Aksi Cepat",
@@ -388,7 +394,24 @@
       "rating": "Rating",
       "subjects": "Mapel",
       "years": "tahun"
-    }
+    },
+    "bulk": {
+      "verify": "Verifikasi",
+      "unverify": "Batalkan Verifikasi",
+      "verifySuccess": "Tutor diperbarui",
+      "resendInvite": "Kirim Ulang Undangan",
+      "resendSuccess": "Undangan terkirim",
+      "cancelInvite": "Batalkan Undangan",
+      "cancelInviteTitle": "Batalkan Undangan",
+      "cancelInviteWarning": "Membatalkan undangan akan menghapus permanen tutor yang dipilih beserta semua data terkait (kelas, sesi, pendaftaran). Tindakan ini tidak bisa dibatalkan.",
+      "cancelInviteSuccess": "Undangan dibatalkan",
+      "confirmCancel": "Batalkan Undangan",
+      "deleteTitle": "Hapus Tutor",
+      "deleteWarning": "Apakah Anda yakin ingin menghapus {{count}} tutor? Tindakan ini tidak bisa dibatalkan.",
+      "deleteSuccess": "Tutor dihapus"
+    },
+    "avatarUpdated": "Foto diperbarui",
+    "changePhoto": "Ganti foto"
   },
 
   "classes": {

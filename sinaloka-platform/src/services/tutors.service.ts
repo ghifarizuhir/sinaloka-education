@@ -8,6 +8,8 @@ function flattenTutor(raw: any): Tutor {
     ...raw,
     name: raw.name || raw.user?.name || '',
     email: raw.email || raw.user?.email || '',
+    avatar_url: raw.user?.avatar_url || null,
+    user: raw.user ? { id: raw.user.id, is_active: raw.user.is_active } : undefined,
   };
 }
 
@@ -31,4 +33,17 @@ export const tutorsService = {
     api.post<any>(`/api/admin/tutors/${id}/resend-invite`).then((r) => r.data),
   cancelInvite: (id: string) =>
     api.post<any>(`/api/admin/tutors/${id}/cancel-invite`).then((r) => r.data),
+  bulkVerify: (data: { ids: string[]; is_verified: boolean }) =>
+    api.patch<{ updated: number }>('/api/admin/tutors/bulk', data).then((r) => r.data),
+  bulkDelete: (ids: string[]) =>
+    api.delete<{ deleted: number }>('/api/admin/tutors/bulk', { data: { ids } }).then((r) => r.data),
+  bulkResendInvite: (ids: string[]) =>
+    api.post<{ sent: number }>('/api/admin/tutors/bulk/resend-invite', { ids }).then((r) => r.data),
+  bulkCancelInvite: (ids: string[]) =>
+    api.post<{ cancelled: number }>('/api/admin/tutors/bulk/cancel-invite', { ids }).then((r) => r.data),
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<{ url: string }>('/api/uploads/avatars', formData).then((r) => r.data.url);
+  },
 };

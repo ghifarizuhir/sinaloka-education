@@ -4,6 +4,7 @@ export interface Tutor {
   id: string;
   name: string;
   email: string;
+  avatar_url: string | null;
   tutor_subjects: { subject: { id: string; name: string } }[];
   experience_years: number;
   rating: number;
@@ -17,6 +18,7 @@ export interface Tutor {
   institution_id: string;
   created_at: string;
   updated_at: string;
+  user?: { id: string; is_active: boolean };
 }
 
 export interface CreateTutorDto {
@@ -42,6 +44,7 @@ export interface UpdateTutorDto {
   is_verified?: boolean;
   rating?: number;
   monthly_salary?: number | null;
+  avatar_url?: string | null;
 }
 
 export interface TutorQueryParams extends PaginationParams {

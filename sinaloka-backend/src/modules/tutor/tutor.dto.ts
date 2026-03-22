@@ -18,12 +18,13 @@ export const UpdateTutorSchema = z.object({
   subject_ids: z.array(z.string().uuid()).min(1).optional(),
   experience_years: z.number().int().min(0).optional(),
   availability: z.record(z.string(), z.any()).optional().nullable(),
-  bank_name: z.string().min(1).max(255),
-  bank_account_number: z.string().min(1).max(50),
-  bank_account_holder: z.string().min(1).max(255),
+  bank_name: z.string().min(1).max(255).optional(),
+  bank_account_number: z.string().min(1).max(50).optional(),
+  bank_account_holder: z.string().min(1).max(255).optional(),
   is_verified: z.boolean().optional(),
   rating: z.number().min(0).max(5).optional(),
   monthly_salary: z.number().min(0).optional().nullable(),
+  avatar_url: z.string().max(500).optional().nullable(),
 });
 export type UpdateTutorDto = z.infer<typeof UpdateTutorSchema>;
 
@@ -48,5 +49,22 @@ export const UpdateTutorProfileSchema = z.object({
   bank_name: z.string().min(1).max(255),
   bank_account_number: z.string().min(1).max(50),
   bank_account_holder: z.string().min(1).max(255),
+  avatar_url: z.string().max(500).optional().nullable(),
 });
 export type UpdateTutorProfileDto = z.infer<typeof UpdateTutorProfileSchema>;
+
+export const BulkVerifyTutorSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+  is_verified: z.boolean(),
+});
+export type BulkVerifyTutorDto = z.infer<typeof BulkVerifyTutorSchema>;
+
+export const BulkDeleteTutorSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+});
+export type BulkDeleteTutorDto = z.infer<typeof BulkDeleteTutorSchema>;
+
+export const BulkTutorIdsSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+});
+export type BulkTutorIdsDto = z.infer<typeof BulkTutorIdsSchema>;

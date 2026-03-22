@@ -45,7 +45,7 @@ export interface TutorProfile {
   id: string;
   name: string;
   email: string;
-  avatar: string;
+  avatar_url: string | null;
   tutor_subjects: TutorSubject[];
   rating: number;
 }
