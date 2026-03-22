@@ -50,13 +50,35 @@ const RESOURCE_TO_MODEL: Record<string, string> = {
   subscription: 'subscription',
 };
 
+const URL_SEGMENT_TO_RESOURCE: Record<string, string> = {
+  students: 'student',
+  tutors: 'tutor',
+  parents: 'parent',
+  users: 'user',
+  classes: 'class',
+  sessions: 'session',
+  payments: 'payment',
+  enrollments: 'enrollment',
+  attendance: 'attendance',
+  expenses: 'expense',
+  subjects: 'subject',
+  settlements: 'settlement',
+  payouts: 'payout',
+  registrations: 'registration',
+  invitations: 'invitation',
+  notifications: 'notification',
+  institutions: 'institution',
+  subscriptions: 'subscription',
+  'whatsapp-templates': 'whatsapp_template',
+  'audit-logs': 'audit_log',
+  schedules: 'schedule',
+};
+
 function resolveResourceType(endpoint: string): string {
-  const segments = endpoint
-    .replace(/^\/api\/(admin|super-admin|tutor|parent)\//, '')
-    .split('/');
+  const segments = endpoint.replace(/^\/api\/(admin|super-admin|tutor|parent)\//, '').split('/');
   let resource = segments[0] ?? 'unknown';
   if (resource === 'finance' && segments[1]) resource = segments[1];
-  return resource.replace(/-/g, '_').replace(/ies$/, 'y').replace(/s$/, '');
+  return URL_SEGMENT_TO_RESOURCE[resource] ?? resource;
 }
 
 function resolveResourceIdFromUrl(endpoint: string): string | null {

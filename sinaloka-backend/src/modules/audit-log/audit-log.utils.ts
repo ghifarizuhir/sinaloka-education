@@ -1,6 +1,12 @@
 const SENSITIVE_FIELDS = [
-  'password', 'password_hash', 'token', 'refresh_token',
-  'secret', 'api_key', 'reset_token', 'invitation_token',
+  'password',
+  'password_hash',
+  'token',
+  'refresh_token',
+  'secret',
+  'api_key',
+  'reset_token',
+  'invitation_token',
 ];
 
 export function redactSensitiveFields(
@@ -35,7 +41,11 @@ export function computeDiff(
     ...Object.keys(redactedAfter),
   ]);
 
-  for (const key of allKeys) {
+  const commonKeys = [...allKeys].filter(
+    key => key in redactedBefore && key in redactedAfter
+  );
+
+  for (const key of commonKeys) {
     if (['updated_at', 'created_at'].includes(key)) continue;
 
     const beforeVal = redactedBefore[key];

@@ -29,6 +29,12 @@ export function AuditLog() {
         <AuditLogFilters filters={filters} onFilterChange={updateFilter} onReset={resetFilters} />
       </div>
 
+      {isFetching && !isLoading && (
+        <div className="h-1 bg-blue-500/20 rounded-full overflow-hidden">
+          <div className="h-full bg-blue-500 rounded-full animate-pulse w-full" />
+        </div>
+      )}
+
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
         <AuditLogTable
           data={data}
@@ -59,9 +65,6 @@ export function AuditLog() {
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-            {isFetching && !isLoading && (
-              <span className="text-xs text-zinc-400">Loading...</span>
-            )}
           </div>
         )}
       </div>
