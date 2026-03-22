@@ -77,6 +77,7 @@ export class TutorService {
               email: true,
               role: true,
               is_active: true,
+              avatar_url: true,
             },
           },
         },
@@ -143,6 +144,7 @@ export class TutorService {
               email: true,
               role: true,
               is_active: true,
+              avatar_url: true,
             },
           },
         },
@@ -201,6 +203,14 @@ export class TutorService {
       await this.prisma.user.update({
         where: { id: existing.user_id },
         data: { name: dto.name },
+      });
+    }
+
+    // If avatar_url is updated, also update the user record
+    if (dto.avatar_url !== undefined) {
+      await this.prisma.user.update({
+        where: { id: existing.user_id },
+        data: { avatar_url: dto.avatar_url },
       });
     }
 
@@ -299,7 +309,15 @@ export class TutorService {
   async updateProfile(userId: string, dto: UpdateTutorProfileDto) {
     const tutor = await this.getProfile(userId);
 
-    const { availability, ...rest } = dto;
+    // If avatar_url is updated, update the user record (avatar_url lives on User, not Tutor)
+    if (dto.avatar_url !== undefined) {
+      await this.prisma.user.update({
+        where: { id: tutor.user_id },
+        data: { avatar_url: dto.avatar_url },
+      });
+    }
+
+    const { availability, avatar_url: _avatar_url, ...rest } = dto;
 
     return this.prisma.tutor.update({
       where: { id: tutor.id },

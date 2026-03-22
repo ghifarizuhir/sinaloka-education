@@ -16,7 +16,7 @@ import { Public } from '../../common/decorators/public.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { UploadService } from './upload.service.js';
 
-const ALLOWED_UPLOAD_TYPES = ['receipts', 'proofs', 'logos'];
+const ALLOWED_UPLOAD_TYPES = ['receipts', 'proofs', 'logos', 'avatars'];
 
 @Controller('uploads')
 export class UploadController {
@@ -38,11 +38,7 @@ export class UploadController {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
-    const url = await this.uploadService.saveFile(
-      file,
-      institutionId,
-      type,
-    );
+    const url = await this.uploadService.saveFile(file, institutionId, type);
     return { url };
   }
 
