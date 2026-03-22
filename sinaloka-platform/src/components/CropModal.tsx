@@ -24,7 +24,10 @@ export function CropModal({ imageSrc, onCrop, onClose }: CropModalProps) {
 
     const image = new Image();
     image.src = imageSrc;
-    await new Promise((r) => (image.onload = r));
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error('Failed to load image'));
+    });
 
     const canvas = document.createElement('canvas');
     canvas.width = 500;
