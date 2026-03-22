@@ -18,4 +18,11 @@ export const expensesService = {
     formData.append('file', file);
     return api.post<{ url: string }>('/api/uploads/receipts', formData).then((r) => r.data);
   },
+  exportCsv: async (params?: { category?: string; search?: string; date_from?: string; date_to?: string }) => {
+    const response = await api.get('/api/admin/expenses/export', {
+      params,
+      responseType: 'blob',
+    });
+    return response.data as Blob;
+  },
 };

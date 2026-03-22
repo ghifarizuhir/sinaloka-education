@@ -20,3 +20,6 @@ export function useDeleteExpense() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: expensesService.remove, onSuccess: () => { qc.invalidateQueries({ queryKey: ['expenses'] }); qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] }); } });
 }
+export function useExportExpenses() {
+  return useMutation({ mutationFn: expensesService.exportCsv });
+}
