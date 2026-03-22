@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { JwtStrategy } from './jwt.strategy.js';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard.js';
 import { ParentModule } from '../parent/parent.module.js';
 import { EmailModule } from '../email/email.module.js';
 
@@ -24,7 +25,7 @@ import { EmailModule } from '../email/email.module.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, RateLimitGuard],
   exports: [AuthService],
 })
 export class AuthModule {}

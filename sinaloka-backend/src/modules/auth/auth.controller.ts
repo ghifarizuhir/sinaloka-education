@@ -5,6 +5,7 @@ import {
   Body,
   Param,
   UsePipes,
+  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -33,8 +34,13 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { NoAuditLog } from '../audit-log/decorators/no-audit-log.decorator.js';
+import {
+  RateLimitGuard,
+  RateLimit,
+} from '../../common/guards/rate-limit.guard.js';
 
 @NoAuditLog()
+@UseGuards(RateLimitGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -45,6 +51,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @RateLimit(5, 15 * 60 * 1000)
   @UsePipes(new ZodValidationPipe(LoginSchema))
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
@@ -81,6 +88,7 @@ export class AuthController {
   @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
+  @RateLimit(3, 15 * 60 * 1000)
   @UsePipes(new ZodValidationPipe(ForgotPasswordSchema))
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
