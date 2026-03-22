@@ -458,7 +458,7 @@ export class WhatsappService {
       amount,
       due_date: dueDate,
       status: statusLabel,
-      checkout_url: checkoutUrl,
+      checkout_url: checkoutUrl ? `📱 Bayar langsung: ${checkoutUrl}` : '',
     };
 
     const fullMessage = interpolateTemplate(templateBody, variables);

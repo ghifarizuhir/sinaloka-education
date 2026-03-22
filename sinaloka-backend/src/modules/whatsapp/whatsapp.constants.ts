@@ -17,7 +17,7 @@ export const DEFAULT_TEMPLATES: Record<string, string> = {
     '📅 Jatuh tempo: {{due_date}}\n' +
     '📋 Status: {{status}}\n\n' +
     'Mohon segera melakukan pembayaran. Terima kasih.\n\n' +
-    '📱 Bayar langsung: {{checkout_url}}',
+    '{{checkout_url}}',
 };
 
 export const SAMPLE_DATA: Record<string, Record<string, string>> = {
@@ -27,7 +27,7 @@ export const SAMPLE_DATA: Record<string, Record<string, string>> = {
     amount: '500.000',
     due_date: '25 Mar 2026',
     status: 'Menunggu',
-    checkout_url: 'https://pay.sinaloka.com/abc123',
+    checkout_url: '📱 Bayar langsung: https://pay.sinaloka.com/abc123',
   },
 };
 
