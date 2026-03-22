@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { useOverlayClose } from './use-overlay-close';
 
-export function Drawer({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) {
+export function Drawer({ isOpen, onClose, title, children, titleId = 'drawer-title' }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode, titleId?: string }) {
   useOverlayClose(isOpen, onClose);
   return (
   <AnimatePresence>
@@ -23,10 +23,11 @@ export function Drawer({ isOpen, onClose, title, children }: { isOpen: boolean, 
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           role="dialog"
           aria-modal="true"
+          aria-labelledby={titleId}
           className="relative w-full max-w-md bg-card h-full shadow-2xl overflow-hidden flex flex-col border-l border-border"
         >
           <div className="flex items-center justify-between p-6 border-b border-border">
-            <h3 className="text-xl font-bold text-foreground">{title}</h3>
+            <h3 id={titleId} className="text-xl font-bold text-foreground">{title}</h3>
             <button
               onClick={onClose}
               className="p-2 hover:bg-accent rounded-full transition-colors text-muted-foreground"

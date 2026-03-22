@@ -1,66 +1,45 @@
-import { test as base, Page, Route } from '@playwright/test';
+import { type Page, type Route } from '@playwright/test';
+import { test as authedTest } from './auth.fixture';
 
-type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
-
-class MockRoute {
-  private _delay = 0;
-
-  constructor(
-    private page: Page,
-    private urlPattern: string,
-    private method: HttpMethod,
-  ) {}
-
-  delay(ms: number): this {
-    this._delay = ms;
-    return this;
-  }
-
-  async respondWith(status: number, body: unknown = {}): Promise<void> {
-    await this.page.route(this.urlPattern, async (route: Route) => {
-      if (route.request().method() !== this.method) {
-        await route.fallback();
-        return;
-      }
-      if (this._delay > 0) {
-        await new Promise((r) => setTimeout(r, this._delay));
-      }
-      await route.fulfill({
-        status,
-        contentType: 'application/json',
-        body: JSON.stringify(body),
-      });
-    });
-  }
-}
-
-class MockApi {
+export class MockApi {
   constructor(private page: Page) {}
 
-  onGet(url: string) {
-    return new MockRoute(this.page, url, 'GET');
+  private async intercept(method: string, pattern: string, status: number, body: unknown) {
+    await this.page.route(pattern, async (route: Route) => {
+      if (route.request().method() === method) {
+        const contentType = body instanceof Buffer
+          ? 'application/pdf'
+          : 'application/json';
+        await route.fulfill({
+          status,
+          contentType,
+          body: body instanceof Buffer ? body : JSON.stringify(body),
+        });
+      } else {
+        await route.fallback();
+      }
+    });
   }
-  onPost(url: string) {
-    return new MockRoute(this.page, url, 'POST');
+
+  onGet(pattern: string) {
+    return { respondWith: (status: number, body: unknown) => this.intercept('GET', pattern, status, body) };
   }
-  onPatch(url: string) {
-    return new MockRoute(this.page, url, 'PATCH');
+  onPost(pattern: string) {
+    return { respondWith: (status: number, body: unknown) => this.intercept('POST', pattern, status, body) };
   }
-  onPut(url: string) {
-    return new MockRoute(this.page, url, 'PUT');
+  onPatch(pattern: string) {
+    return { respondWith: (status: number, body: unknown) => this.intercept('PATCH', pattern, status, body) };
   }
-  onDelete(url: string) {
-    return new MockRoute(this.page, url, 'DELETE');
+  onDelete(pattern: string) {
+    return { respondWith: (status: number, body: unknown) => this.intercept('DELETE', pattern, status, body) };
   }
 }
 
-export const test = base.extend<{ mockApi: MockApi }>({
-  mockApi: async ({ page }, use) => {
-    const mockApi = new MockApi(page);
+export const test = authedTest.extend<{ mockApi: MockApi }>({
+  mockApi: async ({ authedPage }, use) => {
+    const mockApi = new MockApi(authedPage);
     await use(mockApi);
-    // Routes are auto-cleared when page closes
   },
 });
 
 export { expect } from '@playwright/test';
-export { MockApi };

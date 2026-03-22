@@ -1,56 +1,94 @@
-import { type Locator, type Page } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
+import { confirmDialog } from '../helpers/confirm-dialog';
 
 export class EnrollmentsPage {
+  /* ── Top-level actions ── */
   readonly addButton: Locator;
   readonly searchInput: Locator;
+
+  /* ── Table ── */
   readonly table: Locator;
-  readonly tableRows: Locator;
-  readonly modal: Locator;
-  readonly statusFilter: Locator;
+  readonly rows: Locator;
+
+  /* ── Toast ── */
+  readonly toast: Locator;
 
   constructor(private page: Page) {
-    this.addButton = page.getByRole('button', { name: /new enrollment/i });
+    this.addButton = page.getByRole('button', { name: /add enrollment/i });
     this.searchInput = page.getByPlaceholder(/search student or class/i);
     this.table = page.locator('table');
-    this.tableRows = page.locator('table tbody tr');
-    this.modal = page.locator('[role="dialog"]');
-    this.statusFilter = page.locator('select').first();
+    this.rows = page.locator('table tbody tr');
+    this.toast = page.locator('[data-sonner-toaster]');
   }
 
-  async goto() { await this.page.goto('/enrollments'); }
+  async goto() {
+    await this.page.goto('/enrollments');
+  }
 
-  async createEnrollment(studentName: string, className: string) {
+  /* ── Modal helpers ── */
+
+  private get modal(): Locator {
+    return this.page.getByRole('dialog');
+  }
+
+  /**
+   * Open the "Add Enrollment" modal, select a student and class, then enroll.
+   * The new-enrollment modal uses a click-to-select list (not form inputs).
+   */
+  async enrollStudent(studentName: string, className: string) {
     await this.addButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    // Search and select student in the student list panel
-    await this.modal.locator('input[placeholder="Search students..."]').fill(studentName);
-    await this.modal.getByText(studentName).first().click();
-    // Select class from the class list panel
-    await this.modal.getByText(className).click();
-    await this.modal.getByRole('button', { name: /enroll.*students?/i }).click();
+    const modal = this.modal;
+
+    // Search and select student
+    await modal.getByPlaceholder(/search students/i).fill(studentName);
+    await modal.getByText(studentName, { exact: true }).click();
+
+    // Select class
+    await modal.getByText(className, { exact: true }).click();
+
+    // Click the enroll button (text: "Enroll N Students")
+    await modal.getByRole('button', { name: /enroll/i }).click();
   }
 
+  /**
+   * Open the edit modal for an enrollment row, change status, and save.
+   * The edit modal uses a native <select> for status.
+   */
   async changeStatus(studentName: string, newStatus: string) {
     await this.openRowMenu(studentName);
     await this.page.getByText(/edit enrollment/i).click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.modal.locator('select').selectOption(newStatus);
-    await this.modal.getByRole('button', { name: /save changes/i }).click();
+
+    const modal = this.modal;
+    await modal.locator('select').selectOption(newStatus);
+    await modal.getByRole('button', { name: /save changes/i }).click();
   }
 
+  /**
+   * Delete an enrollment via the row dropdown menu.
+   * Uses ConfirmDialog (role="alertdialog").
+   */
   async deleteEnrollment(studentName: string) {
-    this.page.on('dialog', (dialog) => dialog.accept());
     await this.openRowMenu(studentName);
     await this.page.getByText(/delete record/i).click();
+
+    await confirmDialog(this.page);
   }
 
-  async search(query: string) { await this.searchInput.fill(query); }
+  async search(query: string) {
+    await this.searchInput.fill(query);
+  }
 
-  private async openRowMenu(name: string) {
+  getRowByName(name: string): Locator {
+    return this.rows.filter({ hasText: name });
+  }
+
+  async openRowMenu(name: string) {
     const row = this.getRowByName(name);
+    // The MoreHorizontal icon is the last button in each row
     await row.locator('button').last().click();
   }
 
-  getRowByName(name: string): Locator { return this.tableRows.filter({ hasText: name }); }
-  getToast(): Locator { return this.page.locator('[data-sonner-toaster]'); }
+  getToast(): Locator {
+    return this.toast;
+  }
 }

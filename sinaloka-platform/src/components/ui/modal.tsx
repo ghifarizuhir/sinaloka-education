@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { useOverlayClose } from './use-overlay-close';
 
-export function Modal({ isOpen, onClose, title, children, className }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode, className?: string }) {
+export function Modal({ isOpen, onClose, title, children, className, titleId = 'modal-title' }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode, className?: string, titleId?: string }) {
   useOverlayClose(isOpen, onClose);
   return (
     <AnimatePresence>
@@ -23,10 +23,11 @@ export function Modal({ isOpen, onClose, title, children, className }: { isOpen:
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={titleId}
             className={cn("relative w-full max-w-lg bg-card rounded-2xl shadow-2xl overflow-hidden border border-border", className)}
           >
             <div className="flex items-center justify-between p-6 border-b border-border">
-              <h3 className="text-xl font-bold text-foreground">{title}</h3>
+              <h3 id={titleId} className="text-xl font-bold text-foreground">{title}</h3>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-accent rounded-full transition-colors text-muted-foreground"

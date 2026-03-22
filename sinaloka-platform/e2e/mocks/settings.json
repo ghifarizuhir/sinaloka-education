@@ -1,0 +1,31 @@
+{
+  "general": {
+    "name": "Test Institution",
+    "email": "admin@test.sinaloka.com",
+    "phone": "021-1234567",
+    "address": "Jl. Test No. 1, Jakarta",
+    "timezone": "Asia/Jakarta",
+    "default_language": "id"
+  },
+  "billing": {
+    "billing_mode": "per_session",
+    "currency": "IDR",
+    "invoice_prefix": "INV",
+    "expense_categories": ["RENT", "UTILITIES", "SUPPLIES", "MARKETING", "OTHER"],
+    "bank_accounts": [
+      { "bank_name": "BCA", "account_number": "1234567890", "account_holder": "Test Institution" }
+    ]
+  },
+  "academic": {
+    "working_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "grade_levels": ["10", "11", "12"],
+    "rooms": [
+      { "id": "room-1", "name": "Room 101", "type": "PHYSICAL", "capacity": 30, "status": "ACTIVE" },
+      { "id": "room-2", "name": "Online Room", "type": "ONLINE", "capacity": null, "status": "ACTIVE" }
+    ]
+  },
+  "registration": {
+    "student_registration_enabled": true,
+    "tutor_registration_enabled": false
+  }
+}

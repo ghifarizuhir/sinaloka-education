@@ -1,82 +1,125 @@
-import { type Locator, type Page } from '@playwright/test';
-
-export interface StudentFormData {
-  name: string;
-  email: string;
-  phone?: string;
-  grade: string;
-  status?: string;
-  parent_name?: string;
-  parent_phone?: string;
-  parent_email?: string;
-}
+import { type Page, type Locator } from '@playwright/test';
 
 export class StudentsPage {
+  /* ── Top-level actions ── */
   readonly addButton: Locator;
   readonly searchInput: Locator;
+
+  /* ── Table ── */
   readonly table: Locator;
-  readonly tableRows: Locator;
-  readonly modal: Locator;
-  readonly importButton: Locator;
-  readonly exportButton: Locator;
-  readonly gradeFilter: Locator;
-  readonly statusFilter: Locator;
+  readonly rows: Locator;
+
+  /* ── Toast ── */
+  readonly toast: Locator;
 
   constructor(private page: Page) {
     this.addButton = page.getByRole('button', { name: /add student/i });
     this.searchInput = page.getByPlaceholder(/search by name or email/i);
     this.table = page.locator('table');
-    this.tableRows = page.locator('table tbody tr');
-    this.modal = page.locator('[role="dialog"]');
-    this.importButton = page.getByRole('button', { name: /import/i });
-    this.exportButton = page.getByRole('button', { name: /export/i });
-    this.gradeFilter = page.locator('select').nth(0);
-    this.statusFilter = page.locator('select').nth(1);
+    this.rows = page.locator('table tbody tr');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
-  async goto() { await this.page.goto('/students'); }
+  async goto() {
+    await this.page.goto('/students');
+  }
 
-  async createStudent(data: StudentFormData) {
+  /* ── Modal helpers ── */
+
+  private get modal(): Locator {
+    return this.page.getByRole('dialog');
+  }
+
+  async createStudent(data: {
+    name: string;
+    grade: string;
+    parentName: string;
+    parentPhone: string;
+    email?: string;
+    phone?: string;
+    parentEmail?: string;
+  }) {
     await this.addButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.modal.getByLabel(/full name/i).fill(data.name);
-    await this.modal.getByLabel(/email address/i).fill(data.email);
-    await this.modal.locator('select').first().selectOption(data.grade);
-    if (data.parent_name) await this.modal.getByLabel(/parent\/guardian name/i).fill(data.parent_name);
-    if (data.parent_phone) await this.modal.getByLabel(/parent\/guardian phone/i).fill(data.parent_phone);
-    await this.modal.getByRole('button', { name: /add student/i }).click();
+    const modal = this.modal;
+
+    await modal.locator('#new-name').fill(data.name);
+    if (data.email) await modal.locator('#new-email').fill(data.email);
+    if (data.phone) await modal.locator('#new-phone').fill(data.phone);
+
+    // Grade uses the custom Select component (native <select>)
+    // Select by value (e.g. 'Kelas 10' for grade '10')
+    const gradeValue = `Kelas ${data.grade}`;
+    await modal.locator('select').first().selectOption(gradeValue);
+
+    await modal.locator('#new-parent-name').fill(data.parentName);
+    await modal.locator('#new-parent-phone').fill(data.parentPhone);
+    if (data.parentEmail) await modal.locator('#new-parent-email').fill(data.parentEmail);
+
+    // Submit (create)
+    await modal.getByRole('button', { name: /add student/i }).click();
   }
 
-  async editStudent(name: string, data: Partial<StudentFormData>) {
+  async editStudent(
+    name: string,
+    data: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      grade?: string;
+      parentName?: string;
+      parentPhone?: string;
+      parentEmail?: string;
+    },
+  ) {
     await this.openRowMenu(name);
+    // Click "View / Edit" in the action menu
     await this.page.getByText(/view \/ edit/i).click();
-    await this.modal.waitFor({ state: 'visible' });
-    if (data.name) await this.modal.getByLabel(/full name/i).fill(data.name);
-    if (data.email) await this.modal.getByLabel(/email address/i).fill(data.email);
-    if (data.grade) await this.modal.locator('select').first().selectOption(data.grade);
-    await this.modal.getByRole('button', { name: /save changes/i }).click();
+
+    const modal = this.modal;
+
+    if (data.name) await modal.locator('#new-name').fill(data.name);
+    if (data.email) await modal.locator('#new-email').fill(data.email);
+    if (data.phone) await modal.locator('#new-phone').fill(data.phone);
+    if (data.grade) {
+      const gradeValue = `Kelas ${data.grade}`;
+      await modal.locator('select').first().selectOption(gradeValue);
+    }
+    if (data.parentName) await modal.locator('#new-parent-name').fill(data.parentName);
+    if (data.parentPhone) await modal.locator('#new-parent-phone').fill(data.parentPhone);
+    if (data.parentEmail) await modal.locator('#new-parent-email').fill(data.parentEmail);
+
+    // Submit (save changes)
+    await modal.getByRole('button', { name: /save changes/i }).click();
   }
 
   async deleteStudent(name: string) {
     await this.openRowMenu(name);
-    await this.page.getByRole('button', { name: /delete/i }).click();
-    // Custom confirm modal: type "delete" then click confirm button
+    // Wait for dropdown to appear, then click "Delete"
+    const deleteBtn = this.page.locator('button.text-rose-600, button:has-text("Delete")').filter({ hasText: /delete/i });
+    await deleteBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await deleteBtn.click();
+
+    // Students uses a custom Modal with #delete-confirm input
     await this.page.locator('#delete-confirm').fill('delete');
-    await this.page.getByRole('button', { name: /delete student/i }).click();
+    // Click the delete confirmation button
+    await this.modal.getByRole('button', { name: /delete student/i }).click();
   }
 
-  async search(query: string) { await this.searchInput.fill(query); }
-
-  async importCSV(filePath: string) {
-    const fileInput = this.page.locator('input[type="file"]');
-    await fileInput.setInputFiles(filePath);
+  async search(query: string) {
+    await this.searchInput.fill(query);
   }
 
-  private async openRowMenu(name: string) {
+  getRowByName(name: string): Locator {
+    return this.rows.filter({ hasText: name });
+  }
+
+  async openRowMenu(name: string) {
     const row = this.getRowByName(name);
+    // The MoreHorizontal icon is in the last button of the row
     await row.locator('button').last().click();
   }
 
-  getRowByName(name: string): Locator { return this.tableRows.filter({ hasText: name }); }
-  getToast(): Locator { return this.page.locator('[data-sonner-toaster]'); }
+  getToast(): Locator {
+    return this.toast;
+  }
 }

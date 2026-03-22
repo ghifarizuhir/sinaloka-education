@@ -3,6 +3,8 @@ import { cn } from '../../lib/utils';
 export const Switch = ({ checked, onChange, disabled, className }: { checked: boolean, onChange: (checked: boolean) => void, disabled?: boolean, className?: string }) => (
   <button
     type="button"
+    role="switch"
+    aria-checked={checked}
     disabled={disabled}
     onClick={() => onChange(!checked)}
     className={cn(

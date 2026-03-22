@@ -1,72 +1,105 @@
-import { type Locator, type Page } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 
 export class SchedulesPage {
+  /* ── Top-level actions ── */
   readonly scheduleSessionButton: Locator;
   readonly autoGenerateButton: Locator;
-  readonly modal: Locator;
-  readonly generateModal: Locator;
+
+  /* ── View toggle ── */
   readonly listViewButton: Locator;
   readonly calendarViewButton: Locator;
-  readonly todayButton: Locator;
-  readonly dateFromInput: Locator;
-  readonly dateToInput: Locator;
-  readonly classFilter: Locator;
-  readonly statusFilter: Locator;
+
+  /* ── Table (list view) ── */
   readonly table: Locator;
-  readonly tableRows: Locator;
+  readonly rows: Locator;
+
+  /* ── Toast ── */
+  readonly toast: Locator;
 
   constructor(private page: Page) {
     this.scheduleSessionButton = page.getByRole('button', { name: /schedule session/i });
     this.autoGenerateButton = page.getByRole('button', { name: /auto-generate/i });
-    this.modal = page.locator('[role="dialog"]');
-    // Auto-generate modal identified by its title text
-    this.generateModal = page.locator('[role="dialog"]').filter({ hasText: /auto-generate sessions/i });
-    // View toggle buttons (List / Calendar icons)
-    this.listViewButton = page.locator('.flex.bg-zinc-100 button').first();
-    this.calendarViewButton = page.locator('.flex.bg-zinc-100 button').nth(1);
-    this.todayButton = page.getByRole('button', { name: /today/i });
-    this.dateFromInput = page.locator('input[type="date"]').first();
-    this.dateToInput = page.locator('input[type="date"]').nth(1);
-    this.classFilter = page.locator('select').nth(0);
-    this.statusFilter = page.locator('select').nth(1);
+
+    // View toggle — two icon buttons inside a muted container
+    // List icon button is the first, calendar icon button is the second
+    const viewToggle = page.locator('.bg-muted.p-1.rounded-lg');
+    this.listViewButton = viewToggle.locator('button').first();
+    this.calendarViewButton = viewToggle.locator('button').last();
+
     this.table = page.locator('table');
-    this.tableRows = page.locator('table tbody tr');
+    this.rows = page.locator('table tbody tr');
+    this.toast = page.locator('[data-sonner-toaster]');
   }
 
-  async goto() { await this.page.goto('/schedules'); }
+  async goto() {
+    await this.page.goto('/schedules');
+  }
 
-  async scheduleSession(className: string, date: string, startTime: string, endTime: string) {
+  /* ── View helpers ── */
+
+  async switchToListView() {
+    await this.listViewButton.click();
+  }
+
+  async switchToCalendarView() {
+    await this.calendarViewButton.click();
+  }
+
+  /* ── Modal helpers ── */
+
+  private get modal(): Locator {
+    return this.page.getByRole('dialog');
+  }
+
+  async createSession(data: {
+    className: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  }) {
     await this.scheduleSessionButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.modal.locator('select').first().selectOption({ label: className });
-    await this.modal.locator('input[type="date"]').fill(date);
-    await this.modal.locator('select').nth(1).selectOption(startTime);
-    await this.modal.locator('select').nth(2).selectOption(endTime);
-    await this.modal.getByRole('button', { name: /schedule session/i }).click();
+    const modal = this.modal;
+
+    // Class select — first <select> in modal
+    await modal.locator('select').first().selectOption({ label: data.className });
+
+    // Date input
+    await modal.locator('input[type="date"]').fill(data.date);
+
+    // Start time — second <select>, end time — third <select>
+    await modal.locator('select').nth(1).selectOption(data.startTime);
+    await modal.locator('select').nth(2).selectOption(data.endTime);
+
+    // Submit
+    await modal.getByRole('button', { name: /schedule session/i }).click();
   }
 
-  async autoGenerate(className: string, dateFrom: string, dateTo: string) {
+  async generateSessions(data: {
+    className: string;
+    dateFrom: string;
+    dateTo: string;
+  }) {
     await this.autoGenerateButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.modal.locator('select').first().selectOption({ label: className });
-    await this.modal.locator('input[type="date"]').first().fill(dateFrom);
-    await this.modal.locator('input[type="date"]').nth(1).fill(dateTo);
-    await this.modal.getByRole('button', { name: /generate sessions/i }).click();
+    const modal = this.modal;
+
+    // Class select — first <select> in modal
+    await modal.locator('select').first().selectOption({ label: data.className });
+
+    // Date from — first date input, date to — second date input
+    await modal.locator('input[type="date"]').first().fill(data.dateFrom);
+    await modal.locator('input[type="date"]').last().fill(data.dateTo);
+
+    // Submit
+    await modal.getByRole('button', { name: /generate sessions/i }).click();
   }
 
-  async toggleView(view: 'list' | 'calendar') {
-    if (view === 'list') {
-      await this.listViewButton.click();
-    } else {
-      await this.calendarViewButton.click();
-    }
+  /* ── Row helpers (list view) ── */
+
+  getRowByClass(name: string): Locator {
+    return this.rows.filter({ hasText: name });
   }
 
-  async filterByDateRange(from: string, to: string) {
-    await this.dateFromInput.fill(from);
-    await this.dateToInput.fill(to);
+  getToast(): Locator {
+    return this.toast;
   }
-
-  getRowByClass(className: string): Locator { return this.tableRows.filter({ hasText: className }); }
-  getToast(): Locator { return this.page.locator('[data-sonner-toaster]'); }
 }

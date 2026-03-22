@@ -1,81 +1,106 @@
-import { type Locator, type Page } from '@playwright/test';
-
-export interface TutorFormData {
-  name: string;
-  email: string;
-  password?: string;
-  subjects: string[]; // subject names to select, e.g. ["Math", "Physics"]
-  experience_years?: number;
-  bank_name?: string;
-  bank_account_number?: string;
-  bank_account_holder?: string;
-}
+import { type Page, type Locator } from '@playwright/test';
+import { confirmDialog } from '../helpers/confirm-dialog';
 
 export class TutorsPage {
+  /* ── Top-level actions ── */
   readonly addButton: Locator;
   readonly searchInput: Locator;
-  readonly modal: Locator;
-  readonly subjectFilter: Locator;
-  readonly sortSelect: Locator;
+
+  /* ── Toast ── */
+  readonly toast: Locator;
 
   constructor(private page: Page) {
     this.addButton = page.getByRole('button', { name: /add tutor/i });
     this.searchInput = page.getByPlaceholder(/search tutors/i);
-    this.modal = page.locator('[role="dialog"]');
-    this.subjectFilter = page.locator('select').first();
-    this.sortSelect = page.locator('select').nth(1);
+    this.toast = page.locator('[data-sonner-toaster]');
   }
 
-  async goto() { await this.page.goto('/tutors'); }
+  async goto() {
+    await this.page.goto('/tutors');
+  }
 
-  async createTutor(data: TutorFormData) {
+  /* ── Modal helpers ── */
+
+  private get modal(): Locator {
+    return this.page.getByRole('dialog');
+  }
+
+  async inviteTutor(data: {
+    name: string;
+    email: string;
+    subjects?: string[];
+  }) {
     await this.addButton.click();
-    await this.modal.waitFor({ state: 'visible' });
-    await this.modal.getByLabel(/full name/i).fill(data.name);
-    await this.modal.getByLabel(/email address/i).fill(data.email);
-    if (data.password) await this.modal.getByLabel(/password/i).fill(data.password);
-    // Select subjects via MultiSelect
-    for (const subject of data.subjects) {
-      const input = this.modal.locator('input[placeholder*="Search"], input[placeholder*="Cari"]');
-      await input.fill(subject);
-      await this.modal.locator('button').filter({ hasText: subject }).click();
-    }
-    if (data.bank_name) await this.modal.getByLabel(/bank name/i).fill(data.bank_name);
-    if (data.bank_account_number) await this.modal.getByLabel(/account number/i).fill(data.bank_account_number);
-    if (data.bank_account_holder) await this.modal.getByLabel(/account holder/i).fill(data.bank_account_holder);
-    await this.modal.getByRole('button', { name: /send invitation/i }).click();
-  }
+    const modal = this.modal;
 
-  async editTutor(name: string, data: Partial<TutorFormData>) {
-    await this.openCardMenu(name);
-    await this.page.getByText(/edit profile/i).click();
-    await this.modal.waitFor({ state: 'visible' });
-    if (data.name) await this.modal.getByLabel(/full name/i).fill(data.name);
-    if (data.email) await this.modal.getByLabel(/email address/i).fill(data.email);
-    if (data.subjects) {
+    await modal.locator('#name').fill(data.name);
+    await modal.locator('#email').fill(data.email);
+
+    // Select subjects via MultiSelect
+    if (data.subjects?.length) {
       for (const subject of data.subjects) {
-        const input = this.modal.locator('input[placeholder*="Search"], input[placeholder*="Cari"]');
-        await input.fill(subject);
-        await this.modal.locator('button').filter({ hasText: subject }).click();
+        await modal.getByPlaceholder(/search/i).fill(subject);
+        await this.page.getByText(subject, { exact: true }).click();
       }
     }
-    await this.modal.getByRole('button', { name: /save changes/i }).click();
+
+    // Submit (send invitation)
+    await modal.getByRole('button', { name: /send invitation/i }).click();
+  }
+
+  async editTutor(
+    name: string,
+    data: {
+      name?: string;
+      email?: string;
+      bankName?: string;
+      accountNumber?: string;
+      accountHolder?: string;
+      monthlySalary?: string;
+    },
+  ) {
+    await this.openCardMenu(name);
+    // Click "Edit Profile" in the dropdown menu
+    await this.page.getByText(/edit profile/i).click();
+
+    const modal = this.modal;
+
+    if (data.name) await modal.locator('#name').fill(data.name);
+    if (data.email) await modal.locator('#email').fill(data.email);
+    if (data.bankName) await modal.locator('#bank_name').fill(data.bankName);
+    if (data.accountNumber) await modal.locator('#bank_account_number').fill(data.accountNumber);
+    if (data.accountHolder) await modal.locator('#bank_account_holder').fill(data.accountHolder);
+    if (data.monthlySalary) await modal.locator('#monthly_salary').fill(data.monthlySalary);
+
+    // Submit (save changes)
+    await modal.getByRole('button', { name: /save changes/i }).click();
   }
 
   async deleteTutor(name: string) {
-    this.page.on('dialog', (dialog) => dialog.accept());
     await this.openCardMenu(name);
+    // Click "Delete Tutor" in the dropdown menu
     await this.page.getByText(/delete tutor/i).click();
+
+    // Tutors uses ConfirmDialog (role="alertdialog")
+    await confirmDialog(this.page);
   }
 
-  async search(query: string) { await this.searchInput.fill(query); }
-
-  private async openCardMenu(name: string) {
-    // In grid view, hover the card to reveal the MoreHorizontal menu button
-    const card = this.page.locator('[class*="Card"], .group').filter({ hasText: name }).first();
-    await card.hover();
-    await card.locator('button').filter({ hasText: '' }).last().click();
+  async search(query: string) {
+    await this.searchInput.fill(query);
   }
 
-  getToast(): Locator { return this.page.locator('[data-sonner-toaster]'); }
+  getCardByName(name: string): Locator {
+    // In grid view, each tutor is in a Card component containing their name
+    return this.page.locator('[class*="group"]').filter({ hasText: name });
+  }
+
+  async openCardMenu(name: string) {
+    const card = this.getCardByName(name);
+    // The DropdownMenu trigger is the MoreHorizontal button inside the card
+    await card.locator('button').first().click();
+  }
+
+  getToast(): Locator {
+    return this.toast;
+  }
 }

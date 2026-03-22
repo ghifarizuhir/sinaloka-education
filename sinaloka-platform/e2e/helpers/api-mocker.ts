@@ -13,6 +13,8 @@ const payoutsData = require('../mocks/payouts.json');
 const attendanceData = require('../mocks/attendance.json');
 const expensesData = require('../mocks/expenses.json');
 const dashboardData = require('../mocks/dashboard.json');
+const subjectsData = require('../mocks/subjects.json');
+const settingsData = require('../mocks/settings.json');
 
 export async function setupAuthMocks(mockApi: MockApi) {
   await mockApi.onPost('**/api/auth/login').respondWith(200, authData.login);
@@ -22,19 +24,17 @@ export async function setupAuthMocks(mockApi: MockApi) {
 }
 
 export async function setupStudentMocks(mockApi: MockApi, data = studentsData) {
-  // Register wildcard list pattern first (lowest priority) so specific sub-paths can override
   await mockApi.onGet('**/api/admin/students**').respondWith(200, data);
   await mockApi.onPost('**/api/admin/students').respondWith(201, data.data[0]);
   await mockApi.onPatch('**/api/admin/students/*').respondWith(200, data.data[0]);
   await mockApi.onDelete('**/api/admin/students/*').respondWith(200, {});
-  // Specific sub-paths registered last so they take precedence over the wildcard
   await mockApi.onGet('**/api/admin/students/export').respondWith(200, 'name,email\n');
   await mockApi.onPost('**/api/admin/students/import').respondWith(200, { imported: 1 });
 }
 
 export async function setupTutorMocks(mockApi: MockApi, data = tutorsData) {
   await mockApi.onGet('**/api/admin/tutors**').respondWith(200, data);
-  await mockApi.onPost('**/api/admin/tutors').respondWith(201, data.data[0]);
+  await mockApi.onPost('**/api/admin/tutors/invite').respondWith(201, data.data[0]);
   await mockApi.onPatch('**/api/admin/tutors/*').respondWith(200, data.data[0]);
   await mockApi.onDelete('**/api/admin/tutors/*').respondWith(200, {});
 }
@@ -51,7 +51,7 @@ export async function setupEnrollmentMocks(mockApi: MockApi, data = enrollmentsD
   await mockApi.onPost('**/api/admin/enrollments').respondWith(201, data.data[0]);
   await mockApi.onPatch('**/api/admin/enrollments/*').respondWith(200, data.data[0]);
   await mockApi.onDelete('**/api/admin/enrollments/*').respondWith(200, {});
-  await mockApi.onPost('**/api/admin/enrollments/check-conflict').respondWith(200, { conflict: false });
+  await mockApi.onPost('**/api/admin/enrollments/check-conflict').respondWith(200, { has_conflict: false });
 }
 
 export async function setupSessionMocks(mockApi: MockApi, data = sessionsData) {
@@ -59,16 +59,25 @@ export async function setupSessionMocks(mockApi: MockApi, data = sessionsData) {
   await mockApi.onPost('**/api/admin/sessions').respondWith(201, data.data[0]);
   await mockApi.onPost('**/api/admin/sessions/generate').respondWith(201, { generated: 5 });
   await mockApi.onPatch('**/api/admin/sessions/*').respondWith(200, data.data[0]);
-  await mockApi.onPatch('**/api/admin/sessions/*/approve').respondWith(200, data.data[0]);
   await mockApi.onDelete('**/api/admin/sessions/*').respondWith(200, {});
+  await mockApi.onGet('**/api/admin/sessions/*/students').respondWith(200, {
+    students: [
+      { id: 'stu-00000000-0000-0000-0000-000000000001', name: 'Rizki Pratama', grade: '10', attendance_id: 'att-00000000-0000-0000-0000-000000000001' },
+      { id: 'stu-00000000-0000-0000-0000-000000000002', name: 'Aisyah Putri', grade: '11', attendance_id: 'att-00000000-0000-0000-0000-000000000002' },
+      { id: 'stu-00000000-0000-0000-0000-000000000003', name: 'Fajar Hidayat', grade: '10', attendance_id: 'att-00000000-0000-0000-0000-000000000003' },
+    ],
+  });
 }
 
 export async function setupPaymentMocks(mockApi: MockApi, data = paymentsData) {
   await mockApi.onGet('**/api/admin/payments**').respondWith(200, data);
-  await mockApi.onPost('**/api/admin/payments').respondWith(201, data.data[0]);
   await mockApi.onPatch('**/api/admin/payments/*').respondWith(200, data.data[0]);
   await mockApi.onDelete('**/api/admin/payments/*').respondWith(200, {});
-  await mockApi.onGet('**/api/admin/payments/overdue-summary').respondWith(200, { overdue_count: 1, flagged_students: [{ student_id: 'stu-003', student_name: 'Fajar Hidayat', overdue_count: 1 }] });
+  await mockApi.onGet('**/api/admin/payments/overdue-summary').respondWith(200, {
+    overdue_count: 1,
+    total_overdue_amount: 120000,
+    flagged_students: [{ student_id: 'stu-00000000-0000-0000-0000-000000000003', student_name: 'Fajar Hidayat', overdue_count: 1 }],
+  });
 }
 
 export async function setupPayoutMocks(mockApi: MockApi, data = payoutsData) {
@@ -79,9 +88,21 @@ export async function setupPayoutMocks(mockApi: MockApi, data = payoutsData) {
 }
 
 export async function setupAttendanceMocks(mockApi: MockApi, data = attendanceData) {
-  // attendance uses ?session_id= query param for filtering
   await mockApi.onGet('**/api/admin/attendance**').respondWith(200, data.data);
   await mockApi.onPatch('**/api/admin/attendance/*').respondWith(200, data.data[0]);
+  await mockApi.onGet('**/api/admin/sessions/*/students').respondWith(200, {
+    students: [
+      { id: 'stu-00000000-0000-0000-0000-000000000001', name: 'Rizki Pratama', grade: '10', attendance_id: 'att-00000000-0000-0000-0000-000000000001' },
+      { id: 'stu-00000000-0000-0000-0000-000000000002', name: 'Aisyah Putri', grade: '11', attendance_id: 'att-00000000-0000-0000-0000-000000000002' },
+      { id: 'stu-00000000-0000-0000-0000-000000000003', name: 'Fajar Hidayat', grade: '10', attendance_id: 'att-00000000-0000-0000-0000-000000000003' },
+    ],
+  });
+  await mockApi.onGet('**/api/admin/attendance/summary**').respondWith(200, {
+    rate: 66.7,
+    present: 1,
+    absent: 1,
+    late: 1,
+  });
 }
 
 export async function setupExpenseMocks(mockApi: MockApi, data = expensesData) {
@@ -95,7 +116,78 @@ export async function setupDashboardMocks(mockApi: MockApi, data = dashboardData
   await mockApi.onGet('**/api/admin/dashboard/stats').respondWith(200, data.stats);
   await mockApi.onGet('**/api/admin/dashboard/activity').respondWith(200, data.activity);
   await mockApi.onGet('**/api/admin/dashboard/upcoming-sessions').respondWith(200, data.upcoming_sessions_list);
-  await mockApi.onGet('**/api/admin/payments/overdue-summary').respondWith(200, { overdue_count: 0, flagged_students: [] });
+  await mockApi.onGet('**/api/admin/dashboard/attendance-trend').respondWith(200, data.attendance_trend);
+  await mockApi.onGet('**/api/admin/dashboard/student-growth').respondWith(200, data.student_growth);
+  await mockApi.onGet('**/api/admin/dashboard/revenue-expenses').respondWith(200, data.revenue_expenses);
+  await mockApi.onGet('**/api/admin/payments/overdue-summary').respondWith(200, {
+    overdue_count: 1,
+    total_overdue_amount: 120000,
+    flagged_students: [{ student_id: 'stu-00000000-0000-0000-0000-000000000003', student_name: 'Fajar Hidayat', overdue_count: 1 }],
+  });
+}
+
+export async function setupSubjectMocks(mockApi: MockApi, data = subjectsData) {
+  // Public endpoints (used by useSubjects/useSubjectTutors hooks)
+  await mockApi.onGet('**/api/subjects').respondWith(200, data.data);
+  await mockApi.onGet('**/api/subjects/*/tutors').respondWith(200, [
+    { id: 'tut-00000000-0000-0000-0000-000000000001', name: 'Dewi Lestari' },
+  ]);
+  // Admin endpoints (used by settings for create/delete)
+  await mockApi.onPost('**/api/admin/subjects').respondWith(201, data.data[0]);
+  await mockApi.onDelete('**/api/admin/subjects/*').respondWith(200, {});
+}
+
+export async function setupSettingsMocks(mockApi: MockApi, data = settingsData) {
+  // Settings endpoints use /api/settings/* (no admin prefix)
+  await mockApi.onGet('**/api/settings/general').respondWith(200, data.general);
+  await mockApi.onPatch('**/api/settings/general').respondWith(200, data.general);
+  await mockApi.onGet('**/api/settings/billing').respondWith(200, data.billing);
+  await mockApi.onPatch('**/api/settings/billing').respondWith(200, data.billing);
+  await mockApi.onGet('**/api/settings/academic').respondWith(200, data.academic);
+  await mockApi.onPatch('**/api/settings/academic').respondWith(200, data.academic);
+  // Change password uses /api/auth/change-password
+  await mockApi.onPost('**/api/auth/change-password').respondWith(200, {
+    access_token: 'new-access-token',
+    refresh_token: 'new-refresh-token',
+  });
+  // Subjects use public endpoint
+  await mockApi.onGet('**/api/subjects').respondWith(200, subjectsData.data);
+  await mockApi.onPost('**/api/admin/subjects').respondWith(201, subjectsData.data[0]);
+  await mockApi.onDelete('**/api/admin/subjects/*').respondWith(200, {});
+  // Registration settings
+  await mockApi.onGet('**/api/settings/registration').respondWith(200, data.registration);
+  await mockApi.onPatch('**/api/settings/registration').respondWith(200, data.registration);
+}
+
+export async function setupFinanceOverviewMocks(mockApi: MockApi) {
+  await mockApi.onGet('**/api/admin/finance/financial-summary**').respondWith(200, {
+    total_revenue: 12500000,
+    total_payouts: 750000,
+    total_expenses: 5250000,
+    net_profit: 6500000,
+  });
+  await mockApi.onGet('**/api/admin/finance/revenue-breakdown**').respondWith(200, {
+    by_class: [{ class_name: 'Math Advanced', amount: 7500000 }],
+    by_method: [{ method: 'TRANSFER', amount: 8000000 }],
+  });
+  await mockApi.onGet('**/api/admin/finance/expense-breakdown**').respondWith(200, {
+    by_category: [
+      { category: 'RENT', amount: 5000000 },
+      { category: 'SUPPLIES', amount: 250000 },
+    ],
+  });
+  await mockApi.onGet('**/api/admin/payments/overdue-summary').respondWith(200, {
+    overdue_count: 1,
+    total_overdue_amount: 120000,
+    flagged_students: [{ student_id: 'stu-00000000-0000-0000-0000-000000000003', student_name: 'Fajar Hidayat', overdue_count: 1 }],
+  });
+}
+
+export async function setupReportMocks(mockApi: MockApi) {
+  const fakePdf = Buffer.from('fake-pdf-content');
+  await mockApi.onGet('**/api/admin/reports/finance**').respondWith(200, fakePdf);
+  await mockApi.onGet('**/api/admin/reports/attendance**').respondWith(200, fakePdf);
+  await mockApi.onGet('**/api/admin/reports/student-progress**').respondWith(200, fakePdf);
 }
 
 export async function setupAllMocks(mockApi: MockApi) {
@@ -110,4 +202,8 @@ export async function setupAllMocks(mockApi: MockApi) {
   await setupAttendanceMocks(mockApi);
   await setupExpenseMocks(mockApi);
   await setupDashboardMocks(mockApi);
+  await setupSubjectMocks(mockApi);
+  await setupSettingsMocks(mockApi);
+  await setupFinanceOverviewMocks(mockApi);
+  await setupReportMocks(mockApi);
 }

@@ -32,11 +32,12 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, 
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           role="alertdialog"
           aria-modal="true"
+          aria-labelledby="confirm-dialog-title"
           className="relative w-full max-w-sm bg-card rounded-2xl shadow-2xl overflow-hidden border border-border"
         >
           <div className="p-6 space-y-4">
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-foreground">{title}</h3>
+              <h3 id="confirm-dialog-title" className="text-lg font-bold text-foreground">{title}</h3>
               <p className="text-sm text-muted-foreground">{description}</p>
             </div>
             <div className="flex items-center justify-end gap-3 pt-2">

@@ -1,56 +1,75 @@
-import { type Locator, type Page } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 
 export class AttendancePage {
-  readonly datePicker: Locator;
-  readonly todayButton: Locator;
-  readonly sessionList: Locator;
-  readonly attendanceTable: Locator;
+  /* ── Left panel: session list ── */
+  readonly sessionPanel: Locator;
+
+  /* ── Right panel: attendance table ── */
+  readonly table: Locator;
+
+  /* ── Actions ── */
+  readonly saveButton: Locator;
   readonly markAllPresentButton: Locator;
-  readonly saveBar: Locator;
+
+  /* ── Toast ── */
+  readonly toast: Locator;
 
   constructor(private page: Page) {
-    this.datePicker = page.locator('[class*="date"]').first();
-    this.todayButton = page.getByRole('button', { name: /today/i });
-    // Sessions list is in the lg:col-span-4 left panel
-    this.sessionList = page.locator('.lg\\:col-span-4');
-    this.attendanceTable = page.locator('table');
+    this.sessionPanel = page.locator('.lg\\:col-span-4');
+    this.table = page.locator('table');
+    this.saveButton = page.getByRole('button', { name: /save attendance/i }).first();
     this.markAllPresentButton = page.getByRole('button', { name: /mark all present/i });
-    // Sticky save bar at the bottom
-    this.saveBar = page.locator('.fixed.bottom-6');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
-  async goto() { await this.page.goto('/attendance'); }
+  async goto() {
+    await this.page.goto('/attendance');
+  }
 
+  /** Click a session card by its class name text in the left panel */
   async selectSession(className: string) {
-    await this.sessionList.getByText(className).first().click();
+    await this.sessionPanel
+      .locator('button')
+      .filter({ hasText: className })
+      .first()
+      .click();
   }
 
+  /** Get a student row from the attendance table */
+  getStudentRow(name: string): Locator {
+    return this.table.locator('tr').filter({ hasText: name });
+  }
+
+  /** Mark a student's attendance status (P = Present, A = Absent, L = Late) */
   async markStatus(studentName: string, status: 'P' | 'A' | 'L') {
     const row = this.getStudentRow(studentName);
-    await row.getByRole('button', { name: status }).click();
+    await row.getByRole('button', { name: status, exact: true }).click();
   }
 
-  async markStatusWithKeyboard(studentName: string, key: 'p' | 'a' | 'l') {
-    const row = this.getStudentRow(studentName);
-    await row.click();
-    await this.page.keyboard.press(key);
-  }
-
+  /** Toggle the homework checkbox for a student */
   async toggleHomework(studentName: string) {
     const row = this.getStudentRow(studentName);
     await row.locator('input[type="checkbox"]').click();
   }
 
+  /** Add a note for a student */
   async addNote(studentName: string, note: string) {
     const row = this.getStudentRow(studentName);
-    await row.getByPlaceholder(/note\.\.\./i).fill(note);
+    await row.getByPlaceholder(/note/i).fill(note);
   }
 
+  /** Click the Save Attendance button */
   async save() {
-    // Click the Save Attendance button in the action bar or the sticky save bar
-    await this.page.getByRole('button', { name: /save attendance/i }).first().click();
+    await this.saveButton.click();
   }
 
-  getStudentRow(name: string): Locator { return this.attendanceTable.locator('tr').filter({ hasText: name }); }
-  getToast(): Locator { return this.page.locator('[data-sonner-toaster]'); }
+  /** Mark all students as present */
+  async markAllPresent() {
+    await this.markAllPresentButton.click();
+  }
+
+  /** Return the toast locator for assertions */
+  getToast(): Locator {
+    return this.toast;
+  }
 }
