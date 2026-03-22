@@ -2,10 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import {
-  buildPaginationMeta,
-  PaginatedResponse,
-} from '../../common/dto/pagination.dto.js';
+import { buildPaginationMeta } from '../../common/dto/pagination.dto.js';
 import { CreateStudentSchema } from './student.dto.js';
 import type {
   CreateStudentDto,
@@ -37,7 +34,7 @@ export class StudentService {
   async findAll(
     institutionId: string,
     query: StudentQueryDto,
-  ): Promise<PaginatedResponse<any>> {
+  ) {
     const { page, limit, search, grade, status, sort_by, sort_order } = query;
     const skip = (page - 1) * limit;
 
@@ -60,7 +57,7 @@ export class StudentService {
       ];
     }
 
-    const [data, total] = await Promise.all([
+    const [data, total, activeCount, inactiveCount] = await Promise.all([
       this.prisma.student.findMany({
         where,
         skip,
@@ -68,11 +65,21 @@ export class StudentService {
         orderBy: { [sort_by]: sort_order },
       }),
       this.prisma.student.count({ where }),
+      this.prisma.student.count({
+        where: { institution_id: institutionId, status: 'ACTIVE' },
+      }),
+      this.prisma.student.count({
+        where: { institution_id: institutionId, status: 'INACTIVE' },
+      }),
     ]);
 
     return {
       data,
-      meta: buildPaginationMeta(total, page, limit),
+      meta: {
+        ...buildPaginationMeta(total, page, limit),
+        active_count: activeCount,
+        inactive_count: inactiveCount,
+      },
     };
   }
 

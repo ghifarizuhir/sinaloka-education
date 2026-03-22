@@ -19,3 +19,12 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: PaginationMeta;
 }
+
+export interface ExpensePaginationMeta extends PaginationMeta {
+  total_amount: number;
+}
+
+export interface StudentPaginationMeta extends PaginationMeta {
+  active_count: number;
+  inactive_count: number;
+}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus,
@@ -17,7 +17,9 @@ import {
   X,
   UserPlus,
   MessageSquare,
-  FileText
+  FileText,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import {
   Card,
@@ -189,7 +191,26 @@ export const Tutors = () => {
   const [editingTutor, setEditingTutor] = useState<Tutor | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ type: 'cancel' | 'delete'; tutorId: string } | null>(null);
 
-  const { data, isLoading } = useTutors({ page, limit });
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: allSubjects = [] } = useSubjects();
+
+  const { data, isLoading } = useTutors({
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    subject_id: filterSubject || undefined,
+    sort_by: sortBy,
+    sort_order: sortBy === 'name' ? 'asc' : 'desc',
+  });
   const createTutor = useCreateTutor();
   const updateTutor = useUpdateTutor();
   const deleteTutor = useDeleteTutor();
@@ -198,28 +219,17 @@ export const Tutors = () => {
   const cancelInvite = useCancelInvite();
 
   const tutors = data?.data ?? [];
+  const meta = data?.meta;
 
-  const filteredTutors = useMemo(() => {
-    return tutors
-      .filter(t => {
-        const subs = t.tutor_subjects.map(ts => ts.subject.name);
-        const matchesSearch =
-          t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          subs.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesSubject =
-          !filterSubject ||
-          subs.some(s => s.toLowerCase() === filterSubject.toLowerCase());
-        return matchesSearch && matchesSubject;
-      })
-      .sort((a, b) => {
-        if (sortBy === 'rating') return (b.rating ?? 0) - (a.rating ?? 0);
-        if (sortBy === 'experience_years') return (b.experience_years ?? 0) - (a.experience_years ?? 0);
-        return a.name.localeCompare(b.name);
-      });
-  }, [tutors, searchQuery, filterSubject, sortBy]);
+  const handleFilterSubject = (value: string) => {
+    setFilterSubject(value);
+    setPage(1);
+  };
 
-  // collect unique subjects
-  const subjects = Array.from(new Set(tutors.flatMap(t => t.tutor_subjects.map(ts => ts.subject.name))));
+  const handleSortChange = (value: 'rating' | 'experience_years' | 'name') => {
+    setSortBy(value);
+    setPage(1);
+  };
 
   const handleAddTutor = (data: any) => {
     inviteTutor.mutate(
@@ -322,15 +332,15 @@ export const Tutors = () => {
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
           <Select
             value={filterSubject}
-            onChange={setFilterSubject}
+            onChange={handleFilterSubject}
             options={[
               { value: '', label: t('common.allSubjects') },
-              ...subjects.map(s => ({ value: s, label: s })),
+              ...allSubjects.map(s => ({ value: s.id, label: s.name })),
             ]}
           />
           <Select
             value={sortBy}
-            onChange={(val) => setSortBy(val as any)}
+            onChange={(val) => handleSortChange(val as any)}
             options={[
               { value: 'rating', label: t('tutors.sort.byRating') },
               { value: 'experience_years', label: t('tutors.sort.byExperience') },
@@ -367,7 +377,7 @@ export const Tutors = () => {
           )}
           {filterSubject && (
             <Badge variant="outline" className="flex items-center gap-1 normal-case font-medium">
-              {t('students.filter.subject', { subject: filterSubject })}
+              {t('students.filter.subject', { subject: allSubjects.find(s => s.id === filterSubject)?.name ?? filterSubject })}
               <X size={12} className="cursor-pointer" onClick={() => setFilterSubject('')} />
             </Badge>
           )}
@@ -385,10 +395,10 @@ export const Tutors = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-64" />)}
         </div>
-      ) : filteredTutors.length > 0 ? (
+      ) : tutors.length > 0 ? (
         viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTutors.map((tutor) => (
+            {tutors.map((tutor) => (
               <Card key={tutor.id} className="hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4">
                   <DropdownMenu
@@ -463,7 +473,7 @@ export const Tutors = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {filteredTutors.map((tutor) => (
+                {tutors.map((tutor) => (
                   <tr key={tutor.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -522,6 +532,45 @@ export const Tutors = () => {
           <Button variant="outline" onClick={() => { setSearchQuery(''); setFilterSubject(''); }}>
             {t('common.clearAllFilters')}
           </Button>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {meta && meta.totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-muted-foreground">
+            {t('common.pageInfo', { page, totalPages: meta.totalPages, total: meta.total, defaultValue: `Page ${page} of ${meta.totalPages} - ${meta.total} total tutors` })}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={!meta.hasPreviousPage}
+            >
+              <ChevronLeft size={16} />
+            </Button>
+            {Array.from({ length: meta.totalPages }, (_, i) => i + 1)
+              .filter(p => Math.abs(p - page) <= 2)
+              .map(p => (
+                <Button
+                  key={p}
+                  variant={p === page ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </Button>
+              ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+              disabled={!meta.hasNextPage}
+            >
+              <ChevronRight size={16} />
+            </Button>
+          </div>
         </div>
       )}
 

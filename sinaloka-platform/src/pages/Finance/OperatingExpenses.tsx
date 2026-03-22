@@ -13,6 +13,7 @@ import { useBillingSettings } from '@/src/hooks/useSettings';
 import { expensesService } from '@/src/services/expenses.service';
 import { toast } from 'sonner';
 import type { ExpenseCategory, CreateExpenseDto, UpdateExpenseDto } from '@/src/types/expense';
+import type { ExpensePaginationMeta } from '@/src/types/common';
 
 const DEFAULT_EXPENSE_CATEGORIES: ExpenseCategory[] = ['RENT', 'UTILITIES', 'SUPPLIES', 'MARKETING', 'OTHER'];
 
@@ -71,7 +72,7 @@ export const OperatingExpenses = () => {
   const expenses = expensesData?.data ?? [];
   const total = expensesData?.meta?.total ?? 0;
 
-  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const totalExpenses = (expensesData?.meta as ExpensePaginationMeta)?.total_amount ?? 0;
 
   const handleAddExpense = () => {
     setSelectedExpenseId(null);

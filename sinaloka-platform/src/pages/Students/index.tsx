@@ -87,9 +87,9 @@ export const Students = () => {
         onSearchChange={(e: React.ChangeEvent<HTMLInputElement>) => s.setSearchQuery(e.target.value)}
         onSearchClear={() => s.setSearchQuery('')}
         activeFilters={s.activeFilters}
-        onFilterChange={s.setActiveFilters}
+        onFilterChange={s.updateFilters}
         onRemoveFilter={s.removeFilter}
-        onClearAll={() => { s.setActiveFilters({}); s.setSearchQuery(''); }}
+        onClearAll={() => { s.updateFilters({}); s.setSearchQuery(''); }}
         visibleColumns={s.visibleColumns}
         onToggleColumn={s.setVisibleColumns}
         t={s.t}
@@ -126,7 +126,7 @@ export const Students = () => {
               );
             }}
             onActionMenuToggle={s.setActiveActionMenu}
-            onClearFilters={() => { s.setActiveFilters({}); s.setSearchQuery(''); }}
+            onClearFilters={() => { s.updateFilters({}); s.setSearchQuery(''); }}
             t={s.t}
           />
         )}

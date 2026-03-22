@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -13,6 +13,7 @@ import { useInviteParent } from '@/src/hooks/useParents';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
 import { ALL_GRADES } from '../../lib/constants';
 import type { Student } from '@/src/types/student';
+import type { StudentPaginationMeta } from '@/src/types/common';
 
 export function useStudentPage() {
   const { t, i18n } = useTranslation();
@@ -20,6 +21,16 @@ export function useStudentPage() {
   const [limit] = useState(20);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const [activeFilters, setActiveFilters] = useState<{ grade?: string; status?: string }>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -45,7 +56,13 @@ export function useStudentPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
 
-  const { data, isLoading } = useStudents({ page, limit });
+  const { data, isLoading } = useStudents({
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    grade: activeFilters.grade || undefined,
+    status: activeFilters.status?.toUpperCase() as 'ACTIVE' | 'INACTIVE' | undefined,
+  });
   const { data: overdueSummary } = useOverdueSummary();
   const flaggedStudentIds = new Set(overdueSummary?.flagged_students.map(s => s.student_id) ?? []);
   const createStudent = useCreateStudent();
@@ -55,28 +72,14 @@ export function useStudentPage() {
   const exportStudents = useExportStudents();
   const inviteParent = useInviteParent();
 
-  // Client-side search/filter on current page data
-  const filteredStudents = useMemo(() => {
-    if (!data?.data) return [];
-    return data.data.filter(s => {
-      const matchesSearch =
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (s.email?.toLowerCase() ?? '').includes(searchQuery.toLowerCase());
-      const matchesGrade = !activeFilters.grade || s.grade === activeFilters.grade;
-      const matchesStatus =
-        !activeFilters.status ||
-        s.status === activeFilters.status.toUpperCase();
-      return matchesSearch && matchesGrade && matchesStatus;
-    });
-  }, [data?.data, searchQuery, activeFilters]);
-
   const meta = data?.meta;
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === filteredStudents.length) {
+    const students = data?.data ?? [];
+    if (selectedIds.length === students.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredStudents.map(s => s.id));
+      setSelectedIds(students.map(s => s.id));
     }
   };
 
@@ -86,10 +89,20 @@ export function useStudentPage() {
     );
   };
 
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [debouncedSearch, activeFilters]);
+
+  const updateFilters = (newFilters: { grade?: string; status?: string }) => {
+    setActiveFilters(newFilters);
+    setPage(1);
+  };
+
   const removeFilter = (key: keyof typeof activeFilters) => {
     const newFilters = { ...activeFilters };
     delete newFilters[key];
     setActiveFilters(newFilters);
+    setPage(1);
   };
 
   const handleImportClick = () => {
@@ -264,9 +277,9 @@ export function useStudentPage() {
     });
   };
 
-  const statsTotal = meta?.total ?? data?.data.length ?? 0;
-  const statsActive = data?.data.filter(s => s.status === 'ACTIVE').length ?? 0;
-  const statsInactive = data?.data.filter(s => s.status === 'INACTIVE').length ?? 0;
+  const statsTotal = meta?.total ?? 0;
+  const statsActive = (meta as StudentPaginationMeta)?.active_count ?? 0;
+  const statsInactive = (meta as StudentPaginationMeta)?.inactive_count ?? 0;
 
   return {
     t,
@@ -327,10 +340,11 @@ export function useStudentPage() {
     importStudents,
     exportStudents,
     inviteParent,
-    filteredStudents,
+    filteredStudents: data?.data ?? [],
     meta,
     toggleSelectAll,
     toggleSelect,
+    updateFilters,
     removeFilter,
     handleImportClick,
     handleDownloadTemplate,

@@ -56,6 +56,7 @@ export const Dashboard = () => {
   const { t, i18n } = useTranslation();
   const auth = useContext(AuthContext);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [paletteSearch, setPaletteSearch] = useState('');
 
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: activity, isLoading: activityLoading } = useDashboardActivity();
@@ -76,6 +77,17 @@ export const Dashboard = () => {
     if (hrs < 24) return t('dashboard.timeAgo.hours', { count: hrs });
     return t('dashboard.timeAgo.days', { count: Math.floor(hrs / 24) });
   };
+
+  const quickActions = [
+    { icon: UserPlus, label: t('dashboard.commandPalette.enrollNewStudent'), path: '/enrollments', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { icon: Receipt, label: t('dashboard.commandPalette.recordNewPayment'), path: '/finance/payments', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { icon: Calendar, label: t('dashboard.commandPalette.scheduleMakeupClass'), path: '/schedules', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { icon: Users, label: t('dashboard.commandPalette.addNewTutor'), path: '/tutors', color: 'text-violet-500', bg: 'bg-violet-500/10' },
+  ];
+
+  const filteredActions = paletteSearch.trim()
+    ? quickActions.filter(a => a.label.toLowerCase().includes(paletteSearch.toLowerCase()))
+    : quickActions;
 
   if (isLoading) {
     return (
@@ -118,7 +130,7 @@ export const Dashboard = () => {
             </div>
             <Button
               className="bg-foreground text-background hover:bg-foreground/90 shrink-0"
-              onClick={() => setIsCommandPaletteOpen(true)}
+              onClick={() => { setPaletteSearch(''); setIsCommandPaletteOpen(true); }}
             >
               <Zap size={16} />
               {t('dashboard.quickActions')}
@@ -347,7 +359,7 @@ export const Dashboard = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsCommandPaletteOpen(false)}
+              onClick={() => { setPaletteSearch(''); setIsCommandPaletteOpen(false); }}
               className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             />
             <motion.div
@@ -361,6 +373,8 @@ export const Dashboard = () => {
                 <Search className="text-muted-foreground" size={18} />
                 <input
                   autoFocus
+                  value={paletteSearch}
+                  onChange={(e) => setPaletteSearch(e.target.value)}
                   placeholder={t('dashboard.commandPalette.searchPlaceholder')}
                   className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
                 />
@@ -368,7 +382,7 @@ export const Dashboard = () => {
                   <Command size={10} /> K
                 </kbd>
                 <button
-                  onClick={() => setIsCommandPaletteOpen(false)}
+                  onClick={() => { setPaletteSearch(''); setIsCommandPaletteOpen(false); }}
                   className="p-1 hover:bg-accent rounded-lg transition-colors"
                 >
                   <X size={16} className="text-muted-foreground" />
@@ -377,15 +391,10 @@ export const Dashboard = () => {
 
               <div className="max-h-[50vh] overflow-y-auto p-2 scrollbar-thin">
                 <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.commandPalette.quickActions')}</div>
-                {[
-                  { icon: UserPlus, label: t('dashboard.commandPalette.enrollNewStudent'), path: '/enrollments', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                  { icon: Receipt, label: t('dashboard.commandPalette.recordNewPayment'), path: '/finance/payments', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                  { icon: Calendar, label: t('dashboard.commandPalette.scheduleMakeupClass'), path: '/schedules', color: 'text-amber-500', bg: 'bg-amber-500/10' },
-                  { icon: Users, label: t('dashboard.commandPalette.addNewTutor'), path: '/tutors', color: 'text-violet-500', bg: 'bg-violet-500/10' },
-                ].map((action, i) => (
+                {filteredActions.map((action, i) => (
                   <button
                     key={i}
-                    onClick={() => { navigate(action.path); setIsCommandPaletteOpen(false); }}
+                    onClick={() => { navigate(action.path); setPaletteSearch(''); setIsCommandPaletteOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent transition-colors group text-left"
                   >
                     <div className={cn('p-2 rounded-lg', action.bg, action.color)}>
@@ -398,6 +407,11 @@ export const Dashboard = () => {
                     <ChevronRight size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
                   </button>
                 ))}
+                {filteredActions.length === 0 && (
+                  <div className="px-3 py-8 text-center text-sm text-muted-foreground">
+                    {t('common.noResults', { defaultValue: 'No results found' })}
+                  </div>
+                )}
               </div>
 
               <div className="p-3 bg-muted/50 border-t border-border flex items-center justify-between">
