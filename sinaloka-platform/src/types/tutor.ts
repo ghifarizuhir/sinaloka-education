@@ -45,6 +45,8 @@ export interface UpdateTutorDto {
 }
 
 export interface TutorQueryParams extends PaginationParams {
-  subject?: string;
+  subject_id?: string;
   is_verified?: boolean;
+  sort_by?: 'rating' | 'experience_years' | 'name' | 'created_at';
+  sort_order?: 'asc' | 'desc';
 }
