@@ -32,3 +32,19 @@ export function useCancelInvite() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: tutorsService.cancelInvite, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
 }
+export function useBulkVerifyTutor() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: tutorsService.bulkVerify, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
+}
+export function useBulkDeleteTutor() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: tutorsService.bulkDelete, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
+}
+export function useBulkResendInvite() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: tutorsService.bulkResendInvite, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
+}
+export function useBulkCancelInvite() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: tutorsService.bulkCancelInvite, onSuccess: () => qc.invalidateQueries({ queryKey: ['tutors'] }) });
+}
