@@ -22,6 +22,10 @@ export const test = base.extend<AuthFixtures>({
 });
 
 async function performLogin(page: Page, account: { email: string; password: string }): Promise<void> {
+  // Clear any stale state from previous test
+  await page.context().clearCookies();
+  await page.evaluate(() => localStorage.clear());
+
   await page.goto('/login');
   await page.locator('#email').fill(account.email);
   await page.locator('#password').fill(account.password);
