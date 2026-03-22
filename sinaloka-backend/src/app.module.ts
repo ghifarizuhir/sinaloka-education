@@ -35,6 +35,7 @@ import { SubscriptionGuard } from './modules/subscription/subscription.guard.js'
 import { SettlementModule } from './modules/settlement/settlement.module.js';
 import { SubscriptionWarningInterceptor } from './modules/subscription/subscription-warning.interceptor.js';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
 import { HealthController } from './health.controller.js';
 
@@ -68,6 +69,7 @@ import { HealthController } from './health.controller.js';
     SubscriptionModule,
     SettlementModule,
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     WhatsappModule,
   ],
   providers: [
