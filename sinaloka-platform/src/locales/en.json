@@ -653,7 +653,8 @@
     "tabs": {
       "messages": "Messages",
       "paymentReminders": "Payment Reminders",
-      "settings": "Settings"
+      "settings": "Settings",
+      "templates": "Templates"
     },
     "stats": {
       "totalSent": "Total Sent",
@@ -719,6 +720,23 @@
       "payment": "Payment",
       "attendance": "Attendance",
       "enrollment": "Enrollment"
+    },
+    "templates": {
+      "title": "Templates",
+      "editor": "Editor",
+      "preview": "Preview",
+      "save": "Save Template",
+      "resetToDefault": "Reset to Default",
+      "resetConfirm": "Reset this template to the default version? Your customizations will be lost.",
+      "resetSuccess": "Template reset to default",
+      "saveSuccess": "Template saved",
+      "badge": {
+        "default": "Default",
+        "customized": "Customized"
+      },
+      "variables": "Available Variables",
+      "charCount": "{{count}} characters",
+      "invalidVariable": "Unknown variable: {{name}}. Allowed: {{allowed}}"
     }
   },
 

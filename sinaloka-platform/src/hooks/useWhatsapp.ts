@@ -28,3 +28,23 @@ export function useSendPaymentReminder() {
     },
   });
 }
+export function useWhatsappTemplate(name: string) {
+  return useQuery({
+    queryKey: ['whatsapp-template', name],
+    queryFn: () => whatsappService.getTemplate(name),
+  });
+}
+export function useUpdateWhatsappTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ name, body }: { name: string; body: string }) => whatsappService.updateTemplate(name, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['whatsapp-template'] }),
+  });
+}
+export function useDeleteWhatsappTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => whatsappService.deleteTemplate(name),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['whatsapp-template'] }),
+  });
+}

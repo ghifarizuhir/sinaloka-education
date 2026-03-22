@@ -653,7 +653,8 @@
     "tabs": {
       "messages": "Pesan",
       "paymentReminders": "Pengingat Pembayaran",
-      "settings": "Pengaturan"
+      "settings": "Pengaturan",
+      "templates": "Template"
     },
     "stats": {
       "totalSent": "Total Terkirim",
@@ -719,6 +720,23 @@
       "payment": "Pembayaran",
       "attendance": "Kehadiran",
       "enrollment": "Pendaftaran"
+    },
+    "templates": {
+      "title": "Template",
+      "editor": "Editor",
+      "preview": "Pratinjau",
+      "save": "Simpan Template",
+      "resetToDefault": "Kembalikan ke Default",
+      "resetConfirm": "Kembalikan template ke versi default? Perubahan Anda akan hilang.",
+      "resetSuccess": "Template dikembalikan ke default",
+      "saveSuccess": "Template disimpan",
+      "badge": {
+        "default": "Default",
+        "customized": "Disesuaikan"
+      },
+      "variables": "Variabel Tersedia",
+      "charCount": "{{count}} karakter",
+      "invalidVariable": "Variabel tidak dikenal: {{name}}. Tersedia: {{allowed}}"
     }
   },
 
