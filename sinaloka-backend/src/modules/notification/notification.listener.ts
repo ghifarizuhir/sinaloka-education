@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { NotificationService } from './notification.service.js';
 import { NotificationGateway } from './notification.gateway.js';
-import {
-  NOTIFICATION_EVENTS,
+import { NOTIFICATION_EVENTS } from './notification.events.js';
+import type {
   PaymentReceivedEvent,
   StudentRegisteredEvent,
   ParentRegisteredEvent,

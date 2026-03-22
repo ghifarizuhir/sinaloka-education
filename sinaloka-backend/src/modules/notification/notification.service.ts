@@ -24,7 +24,7 @@ export class NotificationService {
           type: data.type,
           title: data.title,
           body: data.body,
-          data: data.data ?? undefined,
+          data: data.data ? (data.data as object) : undefined,
         },
       });
     } catch (error) {

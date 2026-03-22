@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { NotificationService } from './notification.service.js';
 import { NotificationGateway } from './notification.gateway.js';
 import { ListNotificationsDto } from './dto/notification.dto.js';
