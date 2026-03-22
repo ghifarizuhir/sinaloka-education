@@ -22,6 +22,8 @@ const LABELS = {
     parent: 'Orang Tua',
     description: 'Deskripsi',
     amount: 'Jumlah',
+    subtotal: 'Subtotal',
+    discount: 'Diskon',
     total: 'Total',
     dueDate: 'Jatuh Tempo',
     status: 'Status',
@@ -41,6 +43,8 @@ const LABELS = {
     parent: 'Parent',
     description: 'Description',
     amount: 'Amount',
+    subtotal: 'Subtotal',
+    discount: 'Discount',
     total: 'Total',
     dueDate: 'Due Date',
     status: 'Status',
@@ -275,13 +279,41 @@ export class InvoiceService {
       width: 145,
     });
 
+    const discountAmount = Number(payment.discount_amount ?? 0);
+    const finalAmount = Number(payment.amount) - discountAmount;
+
+    if (discountAmount > 0) {
+      doc.moveDown(1);
+
+      // Subtotal
+      doc.font('Helvetica');
+      doc.text(labels.subtotal, 300, doc.y);
+      doc.text(
+        formatAmount(Number(payment.amount)),
+        400,
+        doc.y - doc.currentLineHeight(),
+        { align: 'right', width: 145 },
+      );
+
+      doc.moveDown(0.5);
+
+      // Discount
+      doc.text(labels.discount, 300, doc.y);
+      doc.text(
+        `- ${formatAmount(discountAmount)}`,
+        400,
+        doc.y - doc.currentLineHeight(),
+        { align: 'right', width: 145 },
+      );
+    }
+
     doc.moveDown(3);
 
     // Total
     doc.font('Helvetica-Bold');
     doc.text(labels.total, 300, doc.y);
     doc.text(
-      formatAmount(Number(payment.amount)),
+      formatAmount(finalAmount),
       400,
       doc.y - doc.currentLineHeight(),
       { align: 'right', width: 145 },

@@ -4,7 +4,7 @@ import { cn } from "../lib/utils";
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 lg:py-32 relative overflow-hidden">
+    <section id="fitur" className="py-24 lg:py-32 relative overflow-hidden">
       <div className="absolute -top-20 -right-40 w-[500px] h-[500px] rounded-full bg-accent-100/20 blur-[100px] pointer-events-none" />
       <div className="relative max-w-6xl mx-auto px-6 lg:px-10">
         <Reveal className="text-center max-w-xl mx-auto mb-16">

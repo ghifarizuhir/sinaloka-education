@@ -77,6 +77,7 @@ export const StudentPayments = () => {
       status: 'PAID',
       paid_date: paymentDate,
       method: paymentMethod,
+      discount_amount: discount > 0 ? discount : undefined,
       notes: discount > 0 ? `Discount applied: ${formatCurrency(discount, i18n.language)}` : 'Payment recorded',
     };
     updatePayment.mutate(
@@ -306,7 +307,18 @@ export const StudentPayments = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm font-bold dark:text-zinc-300">{formatCurrency(Number(p.amount), i18n.language)}</span>
+                    {p.discount_amount && p.discount_amount > 0 ? (
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs text-zinc-400 line-through">
+                          {formatCurrency(Number(p.amount), i18n.language)}
+                        </span>
+                        <span className="text-sm font-bold dark:text-zinc-300">
+                          {formatCurrency(Number(p.amount) - Number(p.discount_amount), i18n.language)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm font-bold dark:text-zinc-300">{formatCurrency(Number(p.amount), i18n.language)}</span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <Badge variant={

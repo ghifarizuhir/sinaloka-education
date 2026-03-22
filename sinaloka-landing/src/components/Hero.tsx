@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { motion } from "motion/react";
-import { ArrowRight, Shield, Star, Users } from "lucide-react";
+import { ArrowRight, Clock, Gift, ShieldCheck } from "lucide-react";
 import { WhatsAppIcon } from "./shared/WhatsAppIcon";
 import { WHATSAPP_URL } from "../lib/constants";
 import { cn } from "../lib/utils";
@@ -61,7 +61,7 @@ export function Hero() {
               transition={{ duration: 0.5 }}
               className="inline-flex items-center bg-accent-400/10 border border-accent-400/20 text-accent-300 text-xs font-medium px-4 py-1.5 rounded-full mb-8 tracking-wide uppercase"
             >
-              Platform Manajemen Bimbel #1
+              Platform Manajemen Bimbel
             </motion.div>
 
             <motion.h1
@@ -104,17 +104,18 @@ export function Hero() {
                 className="group flex items-center gap-2.5 bg-accent-500 hover:bg-accent-400 text-accent-950 font-semibold px-7 py-3.5 rounded-lg text-base transition-colors"
               >
                 <WhatsAppIcon className="w-5 h-5" />
-                Hubungi Kami
+                Coba Gratis 2 Bulan
                 <ArrowRight
                   size={16}
                   className="group-hover:translate-x-1 transition-transform"
                 />
               </a>
               <a
-                href="#features"
-                className="text-accent-300/70 hover:text-accent-200 hover:border-accent-400/30 font-medium text-sm border border-accent-400/20 px-7 py-3.5 rounded-lg transition-all"
+                href="#demo"
+                className="group flex items-center gap-2 text-accent-300/70 hover:text-accent-200 hover:border-accent-400/30 font-medium text-sm border border-accent-400/20 px-7 py-3.5 rounded-lg transition-all"
               >
-                Lihat Fitur
+                Lihat Demo
+                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
               </a>
             </motion.div>
 
@@ -125,18 +126,16 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="mt-10 flex flex-wrap items-center gap-6"
             >
-              <div className="flex items-center gap-2 text-accent-300/50">
-                <Shield size={15} />
-                <span className="text-xs font-medium">Data aman</span>
-              </div>
-              <div className="flex items-center gap-2 text-accent-300/50">
-                <Star size={15} />
-                <span className="text-xs font-medium">150+ bimbel</span>
-              </div>
-              <div className="flex items-center gap-2 text-accent-300/50">
-                <Users size={15} />
-                <span className="text-xs font-medium">10.000+ siswa</span>
-              </div>
+              {[
+                { icon: Gift, text: "Gratis 2 bulan pertama" },
+                { icon: Clock, text: "Setup < 15 menit" },
+                { icon: ShieldCheck, text: "Tanpa kontrak" },
+              ].map((item) => (
+                <div key={item.text} className="flex items-center gap-2 text-accent-300/50">
+                  <item.icon size={15} />
+                  <span className="text-xs font-medium">{item.text}</span>
+                </div>
+              ))}
             </motion.div>
           </div>
 
@@ -262,56 +261,17 @@ export function Hero() {
                   {/* Stats grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
                     {[
-                      {
-                        label: "Total Siswa",
-                        value: "342",
-                        change: "+12%",
-                        color: "bg-blue-50 text-blue-600",
-                        dot: "bg-blue-400",
-                      },
-                      {
-                        label: "Tutor Aktif",
-                        value: "28",
-                        change: "+3",
-                        color: "bg-emerald-50 text-emerald-600",
-                        dot: "bg-emerald-400",
-                      },
-                      {
-                        label: "Kehadiran",
-                        value: "94%",
-                        change: "+2%",
-                        color: "bg-amber-50 text-amber-600",
-                        dot: "bg-amber-400",
-                      },
-                      {
-                        label: "Pendapatan",
-                        value: "Rp 48jt",
-                        change: "+18%",
-                        color: "bg-violet-50 text-violet-600",
-                        dot: "bg-violet-400",
-                      },
+                      { label: "Total Siswa", value: "—", color: "bg-blue-50 text-blue-600", dot: "bg-blue-400" },
+                      { label: "Tutor Aktif", value: "—", color: "bg-emerald-50 text-emerald-600", dot: "bg-emerald-400" },
+                      { label: "Kehadiran", value: "—", color: "bg-amber-50 text-amber-600", dot: "bg-amber-400" },
+                      { label: "Pendapatan", value: "—", color: "bg-violet-50 text-violet-600", dot: "bg-violet-400" },
                     ].map((stat) => (
-                      <div
-                        key={stat.label}
-                        className={cn("rounded-lg p-2.5 sm:p-3", stat.color)}
-                      >
+                      <div key={stat.label} className={cn("rounded-lg p-2.5 sm:p-3", stat.color)}>
                         <div className="flex items-center gap-1 mb-1">
-                          <div
-                            className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              stat.dot,
-                            )}
-                          />
-                          <span className="text-[8px] sm:text-[9px] opacity-70">
-                            {stat.label}
-                          </span>
+                          <div className={cn("w-1.5 h-1.5 rounded-full", stat.dot)} />
+                          <span className="text-[8px] sm:text-[9px] opacity-70">{stat.label}</span>
                         </div>
-                        <div className="text-sm sm:text-base font-extrabold">
-                          {stat.value}
-                        </div>
-                        <div className="text-[8px] opacity-60 mt-0.5">
-                          {stat.change} bulan ini
-                        </div>
+                        <div className="text-sm sm:text-base font-extrabold">{stat.value}</div>
                       </div>
                     ))}
                   </div>
