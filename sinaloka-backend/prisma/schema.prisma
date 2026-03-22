@@ -371,7 +371,7 @@ model AuditLog {
   @@index([institution_id, created_at])
   @@index([resource_type, resource_id])
   @@index([user_id])
-  @@map("audit_log")
+  @@map("audit_logs")
 }
 
 model Student {

@@ -131,7 +131,7 @@ export class AuditLogInterceptor implements NestInterceptor {
     const needsBeforeState =
       (action === 'UPDATE' || action === 'DELETE') && resourceIdFromUrl;
     const beforeStatePromise = needsBeforeState
-      ? this.fetchBeforeState(resourceType, resourceIdFromUrl)
+      ? this.fetchBeforeState(resourceType, resourceIdFromUrl!, request.tenantId ?? user.institutionId ?? null)
       : Promise.resolve(null);
 
     return from(beforeStatePromise).pipe(
@@ -218,19 +218,23 @@ export class AuditLogInterceptor implements NestInterceptor {
   private async fetchBeforeState(
     resourceType: string,
     resourceId: string,
+    tenantId: string | null,
   ): Promise<Record<string, unknown> | null> {
     try {
       const modelName = RESOURCE_TO_MODEL[resourceType];
       if (!modelName) return null;
 
-      const delegate = (this.prisma as unknown as Record<string, unknown>)[
-        modelName
-      ] as {
-        findUnique?: (args: unknown) => Promise<Record<string, unknown> | null>;
-      };
-      if (!delegate?.findUnique) return null;
+      const delegate = (this.prisma as unknown as Record<string, any>)[modelName];
+      if (!delegate?.findFirst) return null;
 
-      return await delegate.findUnique({ where: { id: resourceId } });
+      // Use findFirst with both id and institution_id for tenant isolation
+      // Models without institution_id will simply ignore the extra filter
+      return await delegate.findFirst({
+        where: {
+          id: resourceId,
+          ...(tenantId ? { institution_id: tenantId } : {}),
+        },
+      });
     } catch {
       this.logger.warn(
         `Failed to fetch before-state for ${resourceType}:${resourceId}`,
