@@ -168,13 +168,14 @@ export class UserService {
     }
     if (dto.password !== undefined) {
       data.password_hash = await bcrypt.hash(dto.password, 10);
+      data.must_change_password = true;
     }
     if (dto.role !== undefined) data.role = dto.role;
     if (dto.institution_id !== undefined)
       data.institution_id = dto.institution_id;
     if (dto.is_active !== undefined) data.is_active = dto.is_active;
 
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id },
       data,
       select: {
@@ -188,6 +189,15 @@ export class UserService {
         updated_at: true,
       },
     });
+
+    // Revoke all refresh tokens when password is reset — forces re-login on all devices
+    if (dto.password !== undefined) {
+      await this.prisma.refreshToken.deleteMany({
+        where: { user_id: id },
+      });
+    }
+
+    return updatedUser;
   }
 
   async remove(id: string, institutionId?: string | null) {
