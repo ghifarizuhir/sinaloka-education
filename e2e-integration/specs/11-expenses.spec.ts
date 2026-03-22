@@ -495,9 +495,6 @@ test.describe('Expenses - Search + Filter', () => {
 
     await expenses.search('UniqueSearchTerm');
 
-    // Wait for search debounce
-    await authedPage.waitForTimeout(500);
-
     await expect(expenses.getRowByDescription('UniqueSearchTerm flyers')).toBeVisible();
   });
 
@@ -508,9 +505,6 @@ test.describe('Expenses - Search + Filter', () => {
     await expect(expenses.table).toBeVisible();
 
     await expenses.search('nonexistent-xyz-12345');
-
-    // Wait for search debounce
-    await authedPage.waitForTimeout(500);
 
     // Should show empty state or no rows
     const emptyState = authedPage.getByText(/no expenses|no results|tidak ada/i);

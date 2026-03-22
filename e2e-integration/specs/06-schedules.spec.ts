@@ -66,18 +66,15 @@ test.describe('Schedules - Smoke', () => {
 
     // Switch to week
     await schedules.weekViewButton.click();
-    await authedPage.waitForTimeout(300);
     // Week view should render (no crash)
     await expect(schedules.weekViewButton).toBeVisible();
 
     // Switch to day
     await schedules.dayViewButton.click();
-    await authedPage.waitForTimeout(300);
     await expect(schedules.dayViewButton).toBeVisible();
 
     // Switch back to month
     await schedules.monthViewButton.click();
-    await authedPage.waitForTimeout(300);
     await expect(schedules.monthViewButton).toBeVisible();
   });
 });
@@ -94,8 +91,8 @@ test.describe('Schedules - View/Filter', () => {
 
     // Filter to today only — should show SCHEDULED sessions
     await schedules.filterByDateRange(todayStr, todayStr);
-    await authedPage.waitForTimeout(500);
 
+    await expect(schedules.rows.first()).toBeVisible();
     const rowCount = await schedules.rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(1);
   });
@@ -108,7 +105,6 @@ test.describe('Schedules - View/Filter', () => {
     await expect(schedules.table).toBeVisible();
 
     await schedules.filterByClass(SEED_CLASS_1);
-    await authedPage.waitForTimeout(500);
 
     // All visible rows should contain the class name
     const rows = schedules.getRowByClass(SEED_CLASS_1);
@@ -128,8 +124,8 @@ test.describe('Schedules - View/Filter', () => {
     await expect(schedules.table).toBeVisible();
 
     await schedules.filterByStatus('SCHEDULED');
-    await authedPage.waitForTimeout(500);
 
+    await expect(schedules.rows.first()).toBeVisible();
     const rowCount = await schedules.rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(1);
 
@@ -148,8 +144,8 @@ test.describe('Schedules - View/Filter', () => {
     await expect(schedules.table).toBeVisible();
 
     await schedules.filterByStatus('COMPLETED');
-    await authedPage.waitForTimeout(500);
 
+    await expect(schedules.rows.first()).toBeVisible();
     const rowCount = await schedules.rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(1);
 
@@ -169,8 +165,8 @@ test.describe('Schedules - View/Filter', () => {
     // Filter: class = Matematika SMP + status = SCHEDULED
     await schedules.filterByClass(SEED_CLASS_1);
     await schedules.filterByStatus('SCHEDULED');
-    await authedPage.waitForTimeout(500);
 
+    await expect(schedules.rows.first()).toBeVisible();
     const rowCount = await schedules.rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(1);
 
@@ -191,7 +187,6 @@ test.describe('Schedules - View/Filter', () => {
 
     // Filter to a far-off date range with no sessions
     await schedules.filterByDateRange('2099-01-01', '2099-01-31');
-    await authedPage.waitForTimeout(500);
 
     await expect(schedules.emptyState).toBeVisible();
   });
@@ -218,8 +213,8 @@ test.describe('Schedules - Create Session', () => {
 
     await expect(schedules.getToast()).toBeVisible();
 
-    // Verify session count increased
-    await authedPage.waitForTimeout(500);
+    // Verify session count increased — wait for new row to appear
+    await expect(schedules.rows.nth(initialCount)).toBeVisible();
     const newCount = await schedules.rows.count();
     expect(newCount).toBeGreaterThan(initialCount);
   });
@@ -264,8 +259,8 @@ test.describe('Schedules - Create Session', () => {
 
     await expect(schedules.getToast()).toBeVisible();
 
-    // More sessions should exist now
-    await authedPage.waitForTimeout(500);
+    // More sessions should exist now — wait for new row to appear
+    await expect(schedules.rows.nth(initialCount)).toBeVisible();
     const newCount = await schedules.rows.count();
     expect(newCount).toBeGreaterThan(initialCount);
   });
@@ -283,7 +278,7 @@ test.describe('Schedules - Edit/Reschedule', () => {
 
     // Filter to only SCHEDULED sessions (today's sessions)
     await schedules.filterByStatus('SCHEDULED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     await schedules.editSession(SEED_CLASS_1, {
       date: futureDateStr,
@@ -303,7 +298,7 @@ test.describe('Schedules - Edit/Reschedule', () => {
 
     // Filter to SCHEDULED sessions
     await schedules.filterByStatus('SCHEDULED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     await schedules.editSession(SEED_CLASS_2, {
       status: 'CANCELLED',
@@ -333,7 +328,7 @@ test.describe('Schedules - Edit/Reschedule', () => {
 
     // Filter to COMPLETED sessions
     await schedules.filterByStatus('COMPLETED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     // Open drawer for a completed session
     await schedules.openSessionDrawer(SEED_CLASS_1);
@@ -362,7 +357,7 @@ test.describe('Schedules - Cancel', () => {
 
     // Filter to SCHEDULED sessions only
     await schedules.filterByStatus('SCHEDULED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     const initialCount = await schedules.rows.count();
     expect(initialCount).toBeGreaterThanOrEqual(1);
@@ -397,7 +392,7 @@ test.describe('Schedules - Cancel', () => {
 
     // Filter to SCHEDULED sessions
     await schedules.filterByStatus('SCHEDULED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     // Use the second class to avoid conflicts with test 19
     await schedules.cancelSession(SEED_CLASS_2);
@@ -414,7 +409,10 @@ test.describe('Schedules - Cancel', () => {
 
     // Filter to CANCELLED sessions
     await schedules.filterByStatus('CANCELLED');
-    await authedPage.waitForTimeout(500);
+
+    // Wait for either rows or empty state to appear
+    const rowsOrEmpty = schedules.rows.first().or(schedules.emptyState);
+    await expect(rowsOrEmpty).toBeVisible();
 
     const rowCount = await schedules.rows.count();
 
@@ -452,7 +450,7 @@ test.describe('Schedules - Complete + Drawer', () => {
 
     // Filter to SCHEDULED sessions
     await schedules.filterByStatus('SCHEDULED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     // Note: The edit modal status options only have SCHEDULED and CANCELLED.
     // "Completing" a session is typically done via attendance marking.
@@ -473,7 +471,7 @@ test.describe('Schedules - Complete + Drawer', () => {
 
     // Filter to COMPLETED sessions (which are in the past)
     await schedules.filterByStatus('COMPLETED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     const rowCount = await schedules.rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(1);
@@ -522,15 +520,12 @@ test.describe('Schedules - Complete + Drawer', () => {
 
     // Filter to COMPLETED sessions (which have attendance data)
     await schedules.filterByStatus('COMPLETED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     await schedules.openSessionDrawer(SEED_CLASS_1);
 
     const drawer = schedules.sessionDrawer;
     await expect(drawer).toBeVisible();
-
-    // Wait for student data to load
-    await authedPage.waitForTimeout(1000);
 
     // The attendance section header should show (contains count like "Attendance (1/2)")
     await expect(drawer).toContainText(/attendance/i);
@@ -551,15 +546,12 @@ test.describe('Schedules - Complete + Drawer', () => {
 
     // Filter to COMPLETED sessions
     await schedules.filterByStatus('COMPLETED');
-    await authedPage.waitForTimeout(500);
+    await expect(schedules.rows.first()).toBeVisible();
 
     await schedules.openSessionDrawer(SEED_CLASS_1);
 
     const drawer = schedules.sessionDrawer;
     await expect(drawer).toBeVisible();
-
-    // Wait for session detail to load
-    await authedPage.waitForTimeout(500);
 
     // Completed sessions have topic_covered = 'Review chapter 1'
     await expect(drawer).toContainText(/review chapter 1/i);

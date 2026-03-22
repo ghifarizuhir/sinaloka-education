@@ -239,7 +239,6 @@ test.describe('Dashboard — Edge Cases', () => {
     await expect(dashboard.commandPaletteInput).toBeVisible();
 
     await dashboard.commandPaletteInput.fill('enroll');
-    await authedPage.waitForTimeout(300); // debounce
 
     // Should show filtered results including "Enroll New Student" or similar
     const resultCount = await dashboard.commandPaletteResults.count();
@@ -256,7 +255,6 @@ test.describe('Dashboard — Edge Cases', () => {
     await expect(dashboard.commandPaletteInput).toBeVisible();
 
     await dashboard.commandPaletteInput.fill('xyznonexistent');
-    await authedPage.waitForTimeout(300); // debounce
 
     await expect(dashboard.commandPaletteNoResults).toBeVisible();
   });

@@ -275,9 +275,6 @@ test.describe('Finance Overview - Filters', () => {
 
     await finance.setCustomDateRange(firstDay, TODAY);
 
-    // Wait for data to refresh
-    await authedPage.waitForTimeout(1000);
-
     // Values should update
     await expect(finance.totalRevenueValue).toBeVisible();
   });
@@ -292,9 +289,6 @@ test.describe('Finance Overview - Filters', () => {
 
     // Switch to Year to Date (wider range, may show different data)
     await finance.selectPeriod('Year to Date');
-
-    // Wait for refetch
-    await authedPage.waitForTimeout(1000);
 
     // All sections should still be visible after switch
     await expect(finance.totalRevenueValue).toBeVisible();
@@ -311,9 +305,6 @@ test.describe('Finance Overview - Filters', () => {
 
     // Set custom range far in the past where no data exists
     await finance.setCustomDateRange('2020-01-01', '2020-01-31');
-
-    // Wait for data to refresh
-    await authedPage.waitForTimeout(1000);
 
     // Revenue value should show zero or Rp 0
     const revenueText = await finance.totalRevenueValue.textContent();
@@ -381,12 +372,9 @@ test.describe('Finance Overview - Export + Reports', () => {
 
     await finance.generateReport();
 
-    // Wait for report generation
-    await authedPage.waitForTimeout(2000);
-
-    // Should show download button or PDF preview
+    // Should show download button or PDF preview after generation completes
     const downloadBtn = modal.getByRole('button', { name: /download pdf/i });
-    await expect(downloadBtn).toBeVisible({ timeout: 10000 });
+    await expect(downloadBtn).toBeVisible({ timeout: 15000 });
   });
 
   // 23. Generate attendance PDF report
@@ -408,10 +396,8 @@ test.describe('Finance Overview - Export + Reports', () => {
 
     await finance.generateReport();
 
-    await authedPage.waitForTimeout(2000);
-
     const downloadBtn = modal.getByRole('button', { name: /download pdf/i });
-    await expect(downloadBtn).toBeVisible({ timeout: 10000 });
+    await expect(downloadBtn).toBeVisible({ timeout: 15000 });
   });
 
   // 24. Generate student progress report
@@ -433,10 +419,8 @@ test.describe('Finance Overview - Export + Reports', () => {
 
     await finance.generateReport();
 
-    await authedPage.waitForTimeout(2000);
-
     const downloadBtn = modal.getByRole('button', { name: /download pdf/i });
-    await expect(downloadBtn).toBeVisible({ timeout: 10000 });
+    await expect(downloadBtn).toBeVisible({ timeout: 15000 });
   });
 
   // 25. Download generated PDF
@@ -495,7 +479,6 @@ test.describe('Finance Overview - Export + Reports', () => {
     } else {
       // If not disabled, click and expect error toast or no PDF generated
       await generateBtn.click();
-      await authedPage.waitForTimeout(1000);
 
       // Either error toast appears or download button does NOT appear
       const errorToast = authedPage.locator('[data-sonner-toast][data-type="error"]');

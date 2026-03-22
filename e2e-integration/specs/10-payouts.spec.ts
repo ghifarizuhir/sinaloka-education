@@ -373,9 +373,6 @@ test.describe('Payouts - Reconciliation + Proof + Slip', () => {
         buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64'),
       });
 
-      // Wait for upload response
-      await authedPage.waitForTimeout(1000);
-
       // Toast may appear for upload success
       const toast = payouts.getToast();
       const hasToast = await toast.isVisible().catch(() => false);
@@ -548,9 +545,6 @@ test.describe('Payouts - Delete + Filter + Generate', () => {
     await expect(payouts.table).toBeVisible();
 
     await payouts.search('Siti');
-
-    // Wait for search debounce
-    await authedPage.waitForTimeout(500);
 
     // Siti should be visible
     await expect(payouts.getRowByName(TUTOR_SITI)).toBeVisible();

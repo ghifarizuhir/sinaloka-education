@@ -194,9 +194,6 @@ test.describe('Attendance - Negative', () => {
       await attendance.navigateDate('prev');
     }
 
-    // Wait for sessions to load after date navigation
-    await authedPage.waitForTimeout(500);
-
     await attendance.selectSession(CLASS_MATH);
     await expect(attendance.table).toBeVisible();
 
@@ -222,7 +219,6 @@ test.describe('Attendance - Negative', () => {
     for (let i = 0; i < 7; i++) {
       await attendance.navigateDate('prev');
     }
-    await authedPage.waitForTimeout(500);
 
     await attendance.selectSession(CLASS_ENG);
     await expect(attendance.table).toBeVisible();
@@ -392,7 +388,7 @@ test.describe('Attendance - Notes', () => {
     await expect(attendance.getToast()).toBeVisible();
 
     // Wait for toast to clear, then modify note
-    await authedPage.waitForTimeout(1000);
+    await expect(attendance.getToast()).not.toBeVisible();
 
     await attendance.addNote(STUDENT_RINA, 'Updated note');
     await attendance.save();
@@ -412,7 +408,7 @@ test.describe('Attendance - Notes', () => {
     await attendance.save();
     await expect(attendance.getToast()).toBeVisible();
 
-    await authedPage.waitForTimeout(1000);
+    await expect(attendance.getToast()).not.toBeVisible();
 
     // Clear note
     await attendance.addNote(STUDENT_DIMAS, '');
@@ -469,19 +465,15 @@ test.describe('Attendance - Edge Cases', () => {
 
     // Navigate to previous day
     await attendance.navigateDate('prev');
-    await authedPage.waitForTimeout(300);
 
     // Navigate to next day (back to today)
     await attendance.navigateDate('next');
-    await authedPage.waitForTimeout(300);
 
     // Navigate away and use Today button
     await attendance.navigateDate('prev');
     await attendance.navigateDate('prev');
-    await authedPage.waitForTimeout(300);
 
     await attendance.navigateDate('today');
-    await authedPage.waitForTimeout(300);
 
     // Should be back to today with sessions visible
     const sessionButtons = attendance.sessionPanel.locator('button').filter({ hasText: /SMP/ });
@@ -497,7 +489,6 @@ test.describe('Attendance - Edge Cases', () => {
     for (let i = 0; i < 30; i++) {
       await attendance.navigateDate('next');
     }
-    await authedPage.waitForTimeout(500);
 
     // Should show empty state
     await expect(attendance.emptyState).toBeVisible();

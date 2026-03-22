@@ -42,7 +42,6 @@ test.describe('Classes - Smoke', () => {
     await expect(classes.table).toBeVisible();
 
     await classes.search('Matematika');
-    await authedPage.waitForTimeout(500);
 
     await expect(classes.getRowByName(SEED_CLASS_1)).toBeVisible();
   });
@@ -54,7 +53,6 @@ test.describe('Classes - Smoke', () => {
     await expect(classes.table).toBeVisible();
 
     await classes.search('Budi');
-    await authedPage.waitForTimeout(500);
 
     await expect(classes.getRowByName(SEED_CLASS_1)).toBeVisible();
   });
@@ -545,9 +543,6 @@ test.describe('Classes - Schedule Management', () => {
     await modal.locator('select').first().selectOption({ label: 'Fisika' });
     await modal.locator('select').nth(1).selectOption({ label: 'Budi Santoso' });
 
-    // Wait for tutor classes to load (the conflict check fetches tutor's existing classes)
-    await authedPage.waitForTimeout(500);
-
     // Toggle Monday (same day as seed class 1)
     await modal.getByRole('button', { name: 'Mon', exact: true }).click();
     // Default times are 14:00-15:30, same as seed class 1
@@ -576,9 +571,6 @@ test.describe('Classes - Schedule Management', () => {
     await modal.locator('#class-name').fill('Bad Time Class');
     await modal.locator('select').first().selectOption({ label: 'Matematika' });
     await modal.locator('select').nth(1).selectOption({ label: 'Budi Santoso' });
-
-    // Wait for tutor classes query
-    await authedPage.waitForTimeout(500);
 
     // Toggle Saturday (no conflict with seed data)
     await modal.getByRole('button', { name: 'Sat', exact: true }).click();
@@ -659,9 +651,6 @@ test.describe('Classes - Update', () => {
 
     const modal = authedPage.getByRole('dialog');
 
-    // Wait for tutor classes query
-    await authedPage.waitForTimeout(500);
-
     // Toggle Friday
     await modal.getByRole('button', { name: 'Fri', exact: true }).click();
 
@@ -734,7 +723,7 @@ test.describe('Classes - Delete', () => {
     await expect(classes.getRowByName(CREATED_DELETE)).toBeVisible();
 
     // Wait for toast to clear
-    await authedPage.waitForTimeout(1000);
+    await expect(classes.getToast()).not.toBeVisible();
 
     // Delete the created class
     await classes.deleteClass(CREATED_DELETE);

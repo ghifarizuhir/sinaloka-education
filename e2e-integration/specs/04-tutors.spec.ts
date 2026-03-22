@@ -46,7 +46,6 @@ test.describe('Tutors - Smoke', () => {
     await tutors.goto();
 
     await tutors.search('Budi');
-    await authedPage.waitForTimeout(500);
 
     await expect(tutors.getCardByName(SEED_TUTOR_1)).toBeVisible();
     await expect(tutors.getCardByName(SEED_TUTOR_2)).not.toBeVisible();
@@ -269,7 +268,6 @@ test.describe('Tutors - Subjects & Sort', () => {
     expect(firstSubjectValue).toBeTruthy();
 
     await tutors.filterBySubject(firstSubjectValue!);
-    await authedPage.waitForTimeout(500);
 
     // At least one card should be visible after filtering
     const cards = authedPage.locator('[class*="group"]').filter({ has: authedPage.locator('input[type="checkbox"]') });
@@ -290,7 +288,6 @@ test.describe('Tutors - Subjects & Sort', () => {
 
     // Sort by name
     await sortSelect.selectOption('name');
-    await authedPage.waitForTimeout(500);
 
     // Both tutors should still be visible (just reordered)
     await expect(tutors.getCardByName(SEED_TUTOR_1)).toBeVisible();
@@ -298,7 +295,6 @@ test.describe('Tutors - Subjects & Sort', () => {
 
     // Sort by experience
     await sortSelect.selectOption('experience_years');
-    await authedPage.waitForTimeout(500);
 
     await expect(tutors.getCardByName(SEED_TUTOR_1)).toBeVisible();
   });
@@ -322,7 +318,7 @@ test.describe('Tutors - Invite Lifecycle', () => {
     await expect(tutors.getCardByName(INVITED_NAME)).toBeVisible();
 
     // Wait for toast to clear
-    await authedPage.waitForTimeout(1000);
+    await expect(tutors.getToast()).not.toBeVisible();
 
     // Open card menu on pending tutor
     await tutors.openCardMenu(INVITED_NAME);
@@ -344,7 +340,7 @@ test.describe('Tutors - Invite Lifecycle', () => {
       subjects: ['Matematika'],
     });
     await expect(tutors.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(tutors.getToast()).not.toBeVisible();
 
     await tutors.resendInvite('Resend Target');
 
@@ -364,7 +360,7 @@ test.describe('Tutors - Invite Lifecycle', () => {
     });
     await expect(tutors.getToast()).toBeVisible();
     await expect(tutors.getCardByName('Cancel Target')).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(tutors.getToast()).not.toBeVisible();
 
     await tutors.cancelInvite('Cancel Target');
 
@@ -400,7 +396,7 @@ test.describe('Tutors - Delete & Bulk', () => {
     });
     await expect(tutors.getToast()).toBeVisible();
     await expect(tutors.getCardByName('Delete Target')).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(tutors.getToast()).not.toBeVisible();
 
     // Cancel the invite (which deletes a pending tutor)
     await tutors.cancelInvite('Delete Target');
@@ -441,7 +437,7 @@ test.describe('Tutors - Delete & Bulk', () => {
       subjects: ['Matematika'],
     });
     await expect(tutors.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(tutors.getToast()).not.toBeVisible();
 
     await tutors.inviteTutor({
       name: 'Bulk Del 2',
@@ -449,7 +445,7 @@ test.describe('Tutors - Delete & Bulk', () => {
       subjects: ['Fisika'],
     });
     await expect(tutors.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(tutors.getToast()).not.toBeVisible();
 
     // Select both
     await tutors.selectTutor('Bulk Del 1');
@@ -490,7 +486,7 @@ test.describe('Tutors - Delete & Bulk', () => {
       subjects: ['Matematika'],
     });
     await expect(tutors.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(tutors.getToast()).not.toBeVisible();
 
     // Select the pending tutor
     await tutors.selectTutor('Bulk Resend');
@@ -542,14 +538,12 @@ test.describe('Tutors - View & Pagination', () => {
 
     // Switch to list view — table should render
     await tutors.toggleView('list');
-    await authedPage.waitForTimeout(300);
 
     const table = authedPage.locator('table');
     await expect(table).toBeVisible();
 
     // Switch back to grid — cards should render
     await tutors.toggleView('grid');
-    await authedPage.waitForTimeout(300);
 
     await expect(tutors.getCardByName(SEED_TUTOR_1)).toBeVisible();
   });

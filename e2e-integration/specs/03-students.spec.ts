@@ -55,8 +55,6 @@ test.describe('Students - Search & Filter', () => {
     await expect(students.table).toBeVisible();
 
     await students.search('Rina');
-    // Wait for debounced search to take effect
-    await authedPage.waitForTimeout(500);
 
     await expect(students.getRowByName('Rina Pelajar')).toBeVisible();
   });
@@ -70,7 +68,6 @@ test.describe('Students - Search & Filter', () => {
     // Seed students don't have emails set, so search by a different name
     // to verify the search input works with the "name or email" search endpoint
     await students.search('Dimas');
-    await authedPage.waitForTimeout(500);
 
     await expect(students.getRowByName('Dimas Pelajar')).toBeVisible();
   });
@@ -82,7 +79,6 @@ test.describe('Students - Search & Filter', () => {
     await expect(students.table).toBeVisible();
 
     await students.filterByStatus('ACTIVE');
-    await authedPage.waitForTimeout(500);
 
     // All seed students are ACTIVE, so all should still appear
     const rowCount = await students.rows.count();
@@ -103,8 +99,9 @@ test.describe('Students - Search & Filter', () => {
 
     // Kelas 7: Rina (i=0) and Fajar (i=3)
     await students.filterByGrade('Kelas 7');
-    await authedPage.waitForTimeout(500);
 
+    // Wait for Rina to appear (filter applied)
+    await expect(students.getRowByName('Rina Pelajar')).toBeVisible();
     const rowCount = await students.rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(1);
     await expect(students.getRowByName('Rina Pelajar')).toBeVisible();
@@ -119,7 +116,6 @@ test.describe('Students - Search & Filter', () => {
     // Filter by grade 7 and search for "Rina"
     await students.filterByGrade('Kelas 7');
     await students.search('Rina');
-    await authedPage.waitForTimeout(500);
 
     await expect(students.getRowByName('Rina Pelajar')).toBeVisible();
     // Fajar is also Kelas 7 but should not match the search
@@ -388,7 +384,7 @@ test.describe('Students - Delete', () => {
     await expect(students.getRowByName('Delete Target')).toBeVisible();
 
     // Wait for toast to disappear before proceeding
-    await authedPage.waitForTimeout(1000);
+    await expect(students.getToast()).not.toBeVisible();
 
     await students.deleteStudent('Delete Target');
 

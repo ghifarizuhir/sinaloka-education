@@ -48,7 +48,6 @@ test.describe('Enrollments - Smoke', () => {
     await expect(enrollments.table).toBeVisible();
 
     await enrollments.search('Rina');
-    await authedPage.waitForTimeout(500);
 
     await expect(enrollments.getRowByName(STUDENT_RINA)).toBeVisible();
     // Other students should not be visible
@@ -215,7 +214,7 @@ test.describe('Enrollments - Status Change', () => {
     await expect(enrollments.getToast()).toBeVisible();
 
     // Wait for toast to clear and table to update
-    await authedPage.waitForTimeout(1000);
+    await expect(enrollments.getToast()).not.toBeVisible();
 
     // Now use the "Convert to Full" menu item — it maps to setting status to ACTIVE
     // The "Convert to Full" option only appears for TRIAL enrollments
@@ -246,7 +245,7 @@ test.describe('Enrollments - Delete', () => {
     // Create a new enrollment to delete (avoid deleting seed data with payments/attendance)
     await enrollments.enrollStudent(STUDENT_LINA, CLASS_MATH);
     await expect(enrollments.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(enrollments.getToast()).not.toBeVisible();
 
     // Now delete the newly created enrollment
     await enrollments.deleteEnrollment(STUDENT_LINA);
@@ -265,12 +264,11 @@ test.describe('Enrollments - Delete', () => {
     // Create a new enrollment to delete
     await enrollments.enrollStudent(STUDENT_LINA, CLASS_ENG);
     await expect(enrollments.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(enrollments.getToast()).not.toBeVisible();
 
     // Delete it
     await enrollments.deleteEnrollment(STUDENT_LINA);
     await expect(enrollments.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(500);
 
     // Refresh the page and verify it's still gone
     await enrollments.goto();
@@ -291,7 +289,7 @@ test.describe('Enrollments - Bulk', () => {
     // Create 2 new enrollments to use for bulk operations
     await enrollments.enrollStudent(STUDENT_LINA, CLASS_MATH);
     await expect(enrollments.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(enrollments.getToast()).not.toBeVisible();
 
     // Select Rina and Dimas (seed data in Matematika SMP)
     await enrollments.selectEnrollment(STUDENT_RINA);
@@ -320,15 +318,15 @@ test.describe('Enrollments - Bulk', () => {
     // Create 2 fresh enrollments to delete
     await enrollments.enrollStudent(STUDENT_LINA, CLASS_MATH);
     await expect(enrollments.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(enrollments.getToast()).not.toBeVisible();
 
     await enrollments.enrollStudent(STUDENT_LINA, CLASS_ENG);
     await expect(enrollments.getToast()).toBeVisible();
-    await authedPage.waitForTimeout(1000);
+    await expect(enrollments.getToast()).not.toBeVisible();
 
     // Search for Lina to filter rows
     await enrollments.search('Lina');
-    await authedPage.waitForTimeout(500);
+    await expect(enrollments.getRowByName(STUDENT_LINA)).toBeVisible();
 
     // Select all Lina enrollments
     await enrollments.selectAllCheckbox.click();
@@ -368,7 +366,6 @@ test.describe('Enrollments - Filter', () => {
 
     // Filter by ACTIVE status
     await enrollments.filterByStatus('ACTIVE');
-    await authedPage.waitForTimeout(500);
 
     // All visible rows should have ACTIVE status badge
     // All 4 seed enrollments in inst1 are ACTIVE, so count should be same
@@ -377,8 +374,8 @@ test.describe('Enrollments - Filter', () => {
 
     // Clear filter
     await enrollments.filterByStatus('');
-    await authedPage.waitForTimeout(500);
 
+    await expect(enrollments.rows.first()).toBeVisible();
     const clearedCount = await enrollments.rows.count();
     expect(clearedCount).toBeGreaterThanOrEqual(filteredCount);
   });

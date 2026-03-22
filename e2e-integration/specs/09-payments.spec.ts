@@ -335,8 +335,8 @@ test.describe('Payments - Record Payment', () => {
     // Press Escape to close
     await authedPage.keyboard.press('Escape');
 
-    // Wait a moment and verify no PATCH was made
-    await authedPage.waitForTimeout(500);
+    // Verify modal is closed
+    await expect(modal).not.toBeVisible();
 
     // Verify payment is still PENDING
     const api = new ApiClient();
