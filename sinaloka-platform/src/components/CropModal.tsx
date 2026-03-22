@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 interface CropModalProps {
   imageSrc: string;
-  onCrop: (blob: Blob) => void;
+  onCrop: (blob: Blob) => void | Promise<void>;
   onClose: () => void;
 }
 
@@ -40,9 +40,10 @@ export function CropModal({ imageSrc, onCrop, onClose }: CropModalProps) {
       0, 0, 500, 500,
     );
 
-    canvas.toBlob((blob) => {
-      if (blob) onCrop(blob);
-    }, 'image/jpeg', 0.9);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/jpeg', 0.9),
+    );
+    if (blob) await onCrop(blob);
   };
 
   return (

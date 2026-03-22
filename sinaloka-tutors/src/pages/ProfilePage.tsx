@@ -61,10 +61,14 @@ export function ProfilePage({ profile, onLogout, onEditProfile, onAvatarUpdate }
               onClose={() => setCropSrc(null)}
               onCrop={async (blob) => {
                 setCropSrc(null);
-                const formData = new FormData();
-                formData.append('file', new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
-                await api.post('/api/tutor/profile/avatar', formData);
-                onAvatarUpdate?.();
+                try {
+                  const formData = new FormData();
+                  formData.append('file', new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
+                  await api.post('/api/tutor/profile/avatar', formData);
+                  onAvatarUpdate?.();
+                } catch {
+                  // Upload failed silently — user can retry
+                }
               }}
             />
           )}

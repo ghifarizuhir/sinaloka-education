@@ -127,12 +127,16 @@ const TutorForm = ({ initialData, onSubmit, onCancel, isEditing, queryClient }: 
           onClose={() => setCropSrc(null)}
           onCrop={async (blob) => {
             setCropSrc(null);
-            const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-            const url = await tutorsService.uploadAvatar(file);
-            if (initialData) {
-              await tutorsService.update({ id: initialData.id, data: { avatar_url: url } });
-              queryClient.invalidateQueries({ queryKey: ['tutors'] });
-              toast.success(t('tutors.avatarUpdated', 'Photo updated'));
+            try {
+              const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+              const url = await tutorsService.uploadAvatar(file);
+              if (initialData) {
+                await tutorsService.update({ id: initialData.id, data: { avatar_url: url } });
+                queryClient.invalidateQueries({ queryKey: ['tutors'] });
+                toast.success(t('tutors.avatarUpdated', 'Photo updated'));
+              }
+            } catch {
+              toast.error(t('common.error', 'Something went wrong'));
             }
           }}
         />
@@ -293,7 +297,7 @@ export const Tutors = () => {
 
   // Compute which actions are available for the selection
   const selectedTutors = tutorList.filter((t) => selectedIds.includes(t.id));
-  const hasPending = selectedTutors.some((t) => (t as any).user && !(t as any).user.is_active);
+  const hasPending = selectedTutors.some((t) => t.user && !t.user.is_active);
   const verifiedCount = selectedTutors.filter((t) => t.is_verified).length;
   const shouldVerify = verifiedCount <= selectedTutors.length / 2;
 

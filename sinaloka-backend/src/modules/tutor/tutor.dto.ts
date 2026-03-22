@@ -46,9 +46,9 @@ export type TutorQueryDto = z.infer<typeof TutorQuerySchema>;
 
 export const UpdateTutorProfileSchema = z.object({
   availability: z.record(z.string(), z.any()).optional().nullable(),
-  bank_name: z.string().min(1).max(255).optional(),
-  bank_account_number: z.string().min(1).max(50).optional(),
-  bank_account_holder: z.string().min(1).max(255).optional(),
+  bank_name: z.string().min(1).max(255),
+  bank_account_number: z.string().min(1).max(50),
+  bank_account_holder: z.string().min(1).max(255),
   avatar_url: z.string().max(500).optional().nullable(),
 });
 export type UpdateTutorProfileDto = z.infer<typeof UpdateTutorProfileSchema>;

@@ -53,7 +53,7 @@ export class TutorProfileController {
       throw new BadRequestException('No file provided');
     }
     const url = await this.uploadService.saveFile(file, institutionId, 'avatars');
-    await this.tutorService.updateProfile(user.userId, { avatar_url: url });
+    await this.tutorService.updateAvatar(user.userId, url);
     return { url };
   }
 }

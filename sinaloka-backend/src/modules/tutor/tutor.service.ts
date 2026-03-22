@@ -309,6 +309,14 @@ export class TutorService {
     return tutor;
   }
 
+  async updateAvatar(userId: string, avatarUrl: string) {
+    const tutor = await this.getProfile(userId);
+    await this.prisma.user.update({
+      where: { id: tutor.user_id },
+      data: { avatar_url: avatarUrl },
+    });
+  }
+
   async updateProfile(userId: string, dto: UpdateTutorProfileDto) {
     const tutor = await this.getProfile(userId);
 
