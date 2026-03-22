@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict, useImportEnrollments, useExportEnrollments, useBulkUpdateEnrollment, useBulkDeleteEnrollment } from '@/src/hooks/useEnrollments';
@@ -35,7 +35,17 @@ export const useEnrollmentsPage = () => {
   const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [importModal, setImportModal] = useState(false);
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Modal state
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
@@ -53,7 +63,8 @@ export const useEnrollmentsPage = () => {
   // Queries
   const enrollmentsQuery = useEnrollments({
     page,
-    limit: 100,
+    limit,
+    search: debouncedSearch || undefined,
     ...(filterStatus && { status: filterStatus }),
     ...(filterStudentId && { student_id: filterStudentId }),
     ...(filterClassId && { class_id: filterClassId }),
@@ -80,16 +91,12 @@ export const useEnrollmentsPage = () => {
   const bulkUpdate = useBulkUpdateEnrollment();
   const bulkDelete = useBulkDeleteEnrollment();
 
-  const filteredEnrollments = useMemo(() => {
-    return enrollments.filter(e => {
-      const studentName = e.student?.name ?? '';
-      const className = e.class?.name ?? '';
-      const matchesSearch = studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            className.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = !filterStatus || e.status === filterStatus;
-      return matchesSearch && matchesStatus;
-    });
-  }, [enrollments, searchQuery, filterStatus]);
+  const handleSetFilterStatus = (value: EnrollmentStatus | '') => {
+    setFilterStatus(value);
+    setPage(1);
+  };
+
+  const filteredEnrollments = enrollments;
 
   const filteredStudents = useMemo(() => {
     if (!studentSearch) return students;
@@ -244,12 +251,15 @@ export const useEnrollmentsPage = () => {
     i18n,
     STATUS_LABEL,
     PAYMENT_LABEL,
+    page,
+    setPage,
+    meta: enrollmentsQuery.data?.meta,
     showModal,
     setShowModal,
     searchQuery,
     setSearchQuery,
     filterStatus,
-    setFilterStatus,
+    setFilterStatus: handleSetFilterStatus,
     filterStudentId,
     filterClassId,
     selectedEnrollmentIds,
