@@ -62,6 +62,34 @@ export class ExpenseService {
     };
   }
 
+  async exportCsv(institutionId: string, query: ExpenseQueryDto) {
+    const { category, date_from, date_to, search, sort_by, sort_order } = query;
+    const where: any = { institution_id: institutionId };
+    if (category) where.category = category;
+    if (date_from || date_to) {
+      where.date = {};
+      if (date_from) where.date.gte = date_from;
+      if (date_to) where.date.lte = date_to;
+    }
+    if (search) {
+      where.description = { contains: search, mode: 'insensitive' };
+    }
+
+    const expenses = await this.prisma.expense.findMany({
+      where,
+      orderBy: { [sort_by]: sort_order },
+    });
+
+    const header = 'Date,Category,Description,Amount,Recurring,Receipt URL';
+    const rows = expenses.map((e) => {
+      const date = new Date(e.date).toISOString().split('T')[0];
+      const desc = (e.description ?? '').replace(/,/g, ';').replace(/\n/g, ' ');
+      return `${date},${e.category},${desc},${e.amount},${e.is_recurring ?? false},${e.receipt_url ?? ''}`;
+    });
+
+    return [header, ...rows].join('\n');
+  }
+
   async findOne(institutionId: string, id: string) {
     const expense = await this.prisma.expense.findFirst({
       where: { id, institution_id: institutionId },
