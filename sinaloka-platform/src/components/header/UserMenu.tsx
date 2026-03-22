@@ -46,6 +46,8 @@ export function UserMenu({ userName, userInitials, userRole, institutionName, on
     <div ref={ref} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         className="flex items-center gap-2 p-1 rounded-xl hover:bg-muted/30 transition-colors group"
       >
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-info flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-primary/20 group-hover:shadow-primary/30 transition-shadow">
@@ -87,8 +89,9 @@ export function UserMenu({ userName, userInitials, userRole, institutionName, on
             </div>
 
             {/* Actions */}
-            <div className="p-1.5">
+            <div role="menu" className="p-1.5">
               <button
+                role="menuitem"
                 onClick={() => { navigate('/settings'); setIsOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl hover:bg-sidebar-accent/40 text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -96,14 +99,16 @@ export function UserMenu({ userName, userInitials, userRole, institutionName, on
                 {t('nav.settings')}
               </button>
               <button
+                role="menuitem"
                 onClick={() => { navigate('/settings', { state: { tab: 'security' } }); setIsOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl hover:bg-sidebar-accent/40 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <User size={14} />
-                Profile & Security
+                {t('layout.profileSecurity', 'Profile & Security')}
               </button>
               <div className="h-px bg-border/30 my-1" />
               <button
+                role="menuitem"
                 onClick={() => { onLogout(); setIsOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl hover:bg-destructive/10 text-destructive transition-colors"
               >

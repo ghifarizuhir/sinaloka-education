@@ -6,7 +6,8 @@ import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Settings,
   CalendarClock, UserPlus, Wallet, Receipt, Banknote,
   ClipboardCheck, ClipboardList, TrendingDown, LogOut,
-  MessageSquare, ChevronDown
+  MessageSquare, ChevronDown,
+  type LucideIcon
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePlan } from '../../hooks/usePlan';
@@ -16,7 +17,7 @@ import { usePendingRegistrationCount } from '../../hooks/useRegistrations';
 function SidebarItem({
   icon: Icon, label, href, active, minimized, badge
 }: {
-  icon: any; label: string; href: string; active: boolean;
+  icon: LucideIcon; label: string; href: string; active: boolean;
   minimized: boolean; badge?: number;
 }) {
   return (

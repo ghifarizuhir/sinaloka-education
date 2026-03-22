@@ -11,14 +11,15 @@ import {
   Sun,
   Moon,
   LogOut,
-  Languages
+  Languages,
+  type LucideIcon
 } from 'lucide-react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
 import { cn } from '../lib/utils';
 
-const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: any, label: string, href: string, active: boolean, minimized: boolean }) => (
+const SidebarItem = ({ icon: Icon, label, href, active, minimized }: { icon: LucideIcon, label: string, href: string, active: boolean, minimized: boolean }) => (
   <Link
     to={href}
     title={minimized ? label : undefined}

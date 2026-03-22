@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, KeyboardEvent } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
@@ -6,14 +6,15 @@ import {
   Search, LayoutDashboard, Users, GraduationCap, BookOpen,
   CalendarClock, ClipboardCheck, UserPlus, ClipboardList,
   Wallet, Receipt, Banknote, TrendingDown, Settings,
-  MessageSquare, Command
+  MessageSquare, Command,
+  type LucideIcon
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface PageEntry {
   label: string;
   href: string;
-  icon: any;
+  icon: LucideIcon;
   section: string;
 }
 
@@ -52,7 +53,7 @@ export function CommandPalette() {
 
   // Keyboard shortcut to open
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setIsOpen(prev => !prev);
@@ -72,7 +73,7 @@ export function CommandPalette() {
   }, [isOpen]);
 
   // Keyboard navigation within palette
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex(i => Math.min(i + 1, filtered.length - 1));
@@ -122,6 +123,9 @@ export function CommandPalette() {
 
             {/* Palette */}
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label={t('layout.searchPlaceholder')}
               initial={{ opacity: 0, scale: 0.96, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: -10 }}
@@ -135,9 +139,13 @@ export function CommandPalette() {
                   <input
                     ref={inputRef}
                     type="text"
+                    role="combobox"
+                    aria-expanded={filtered.length > 0}
+                    aria-autocomplete="list"
+                    aria-controls="command-palette-results"
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onKeyDown={handleInputKeyDown}
                     placeholder={t('layout.searchPlaceholder')}
                     className="flex-1 py-4 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
                   />
@@ -147,15 +155,17 @@ export function CommandPalette() {
                 </div>
 
                 {/* Results */}
-                <div className="max-h-72 overflow-y-auto scrollbar-thin p-2">
+                <div id="command-palette-results" role="listbox" className="max-h-72 overflow-y-auto scrollbar-thin p-2">
                   {filtered.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-8">No results found.</p>
+                    <p className="text-sm text-muted-foreground text-center py-8">{t('layout.noResults', 'No results found.')}</p>
                   )}
                   {filtered.map((page, i) => {
                     const Icon = page.icon;
                     return (
                       <button
                         key={page.href}
+                        role="option"
+                        aria-selected={i === selectedIndex}
                         onClick={() => { navigate(page.href); setIsOpen(false); }}
                         onMouseEnter={() => setSelectedIndex(i)}
                         className={cn(
