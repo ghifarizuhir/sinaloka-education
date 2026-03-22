@@ -829,7 +829,12 @@
       "status": "Status",
       "hw": "HW",
       "notes": "Notes"
-    }
+    },
+    "classSummary": "Class Summary (This Month)",
+    "rate": "Rate",
+    "presentLabel": "Present",
+    "absentLabel": "Absent",
+    "lateLabel": "Late"
   },
 
   "finance": {

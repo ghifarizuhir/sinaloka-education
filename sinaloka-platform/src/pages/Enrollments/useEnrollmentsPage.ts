@@ -103,23 +103,23 @@ export const useEnrollmentsPage = () => {
     const conflictingStudentNames: string[] = [];
     const eligibleStudentIds: string[] = [];
 
-    await Promise.all(
-      selectedStudentIds.map(async (sid) => {
-        const student = students.find(s => s.id === sid);
-        const studentName = student?.name ?? sid;
-        try {
-          const result = await checkConflict.mutateAsync({ student_id: sid, class_id: selectedClassId });
-          if (result.has_conflict) {
-            conflictingStudentNames.push(studentName);
-          } else {
-            eligibleStudentIds.push(sid);
-          }
-        } catch {
-          // If conflict check fails (network error), allow enrollment to proceed
-          eligibleStudentIds.push(sid);
+    for (const studentId of selectedStudentIds) {
+      try {
+        const result = await checkConflict.mutateAsync({
+          student_id: studentId,
+          class_id: selectedClassId,
+        });
+        if (result.has_conflict) {
+          // Find student name from the students list
+          const student = students.find(s => s.id === studentId);
+          conflictingStudentNames.push(student?.name ?? studentId);
+        } else {
+          eligibleStudentIds.push(studentId);
         }
-      })
-    );
+      } catch {
+        eligibleStudentIds.push(studentId);
+      }
+    }
 
     // Warn about conflicting students
     if (conflictingStudentNames.length > 0) {

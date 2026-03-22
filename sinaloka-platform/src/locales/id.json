@@ -829,7 +829,12 @@
       "status": "Status",
       "hw": "PR",
       "notes": "Catatan"
-    }
+    },
+    "classSummary": "Ringkasan Kelas (Bulan Ini)",
+    "rate": "Tingkat",
+    "presentLabel": "Hadir",
+    "absentLabel": "Absen",
+    "lateLabel": "Terlambat"
   },
 
   "finance": {

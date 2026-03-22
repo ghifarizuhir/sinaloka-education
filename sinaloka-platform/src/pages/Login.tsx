@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -8,6 +8,7 @@ import { Card, Button, Input, Label, PasswordInput } from '@/src/components/UI';
 export function Login() {
   const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useTranslation();
 
   const [email, setEmail] = useState('');
@@ -20,8 +21,7 @@ export function Login() {
     if (user?.role === 'SUPER_ADMIN') {
       return <Navigate to="/super/institutions" replace />;
     }
-    const params = new URLSearchParams(window.location.search);
-    const redirect = params.get('redirect');
+    const redirect = searchParams.get('redirect');
     const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/';
     return <Navigate to={target} replace />;
   }
@@ -35,8 +35,7 @@ export function Login() {
       if (profile.role === 'SUPER_ADMIN') {
         navigate('/super/institutions', { replace: true });
       } else {
-        const params = new URLSearchParams(window.location.search);
-        const redirect = params.get('redirect');
+        const redirect = searchParams.get('redirect');
         const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/';
         navigate(target, { replace: true });
       }
