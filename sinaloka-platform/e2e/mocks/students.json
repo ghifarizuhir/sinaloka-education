@@ -1,49 +1,50 @@
 {
   "data": [
     {
-      "id": "stu-001",
-      "name": "Aisyah Putri",
-      "email": "aisyah@example.com",
-      "phone": "+62812345678",
-      "grade": "10th Grade",
-      "status": "ACTIVE",
-      "parent_name": "Budi Santoso",
-      "parent_phone": "+62898765432",
-      "parent_email": "budi@example.com",
-      "enrolled_at": "2026-01-15",
-      "institution_id": 1
-    },
-    {
-      "id": "stu-002",
+      "id": "stu-00000000-0000-0000-0000-000000000001",
       "name": "Rizki Pratama",
       "email": "rizki@example.com",
-      "phone": "+62813456789",
-      "grade": "11th Grade",
+      "phone": "081234567890",
+      "grade": "10",
       "status": "ACTIVE",
-      "parent_name": "Siti Rahayu",
-      "parent_phone": "+62897654321",
-      "parent_email": "siti@example.com",
-      "enrolled_at": "2026-02-01",
-      "institution_id": 1
+      "parent_name": "Budi Pratama",
+      "parent_phone": "081234567891",
+      "parent_email": "budi@example.com",
+      "enrolled_at": "2026-01-15T00:00:00.000Z",
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-01-15T00:00:00.000Z",
+      "updated_at": "2026-03-01T00:00:00.000Z"
     },
     {
-      "id": "stu-003",
+      "id": "stu-00000000-0000-0000-0000-000000000002",
+      "name": "Aisyah Putri",
+      "email": "aisyah@example.com",
+      "phone": null,
+      "grade": "11",
+      "status": "ACTIVE",
+      "parent_name": "Siti Aminah",
+      "parent_phone": "081234567892",
+      "parent_email": null,
+      "enrolled_at": "2026-02-01T00:00:00.000Z",
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-02-01T00:00:00.000Z",
+      "updated_at": "2026-03-01T00:00:00.000Z"
+    },
+    {
+      "id": "stu-00000000-0000-0000-0000-000000000003",
       "name": "Fajar Hidayat",
-      "email": "fajar@example.com",
-      "phone": "+62814567890",
-      "grade": "12th Grade",
+      "email": null,
+      "phone": null,
+      "grade": "10",
       "status": "INACTIVE",
       "parent_name": "Ahmad Hidayat",
-      "parent_phone": "+62896543210",
-      "parent_email": "ahmad@example.com",
-      "enrolled_at": "2025-09-01",
-      "institution_id": 1
+      "parent_phone": "081234567893",
+      "parent_email": null,
+      "enrolled_at": "2026-01-20T00:00:00.000Z",
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-01-20T00:00:00.000Z",
+      "updated_at": "2026-03-15T00:00:00.000Z"
     }
   ],
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "total": 3,
-    "total_pages": 1
-  }
+  "meta": { "total": 3, "page": 1, "limit": 20, "totalPages": 1, "hasNextPage": false, "hasPreviousPage": false, "active_count": 2, "inactive_count": 1 }
 }

@@ -1,0 +1,8 @@
+{
+  "data": [
+    { "id": "sub-00000000-0000-0000-0000-000000000001", "name": "Mathematics", "institution_id": "inst-00000000-0000-0000-0000-000000000001", "created_at": "2026-01-01T00:00:00.000Z", "updated_at": "2026-01-01T00:00:00.000Z" },
+    { "id": "sub-00000000-0000-0000-0000-000000000002", "name": "Physics", "institution_id": "inst-00000000-0000-0000-0000-000000000001", "created_at": "2026-01-01T00:00:00.000Z", "updated_at": "2026-01-01T00:00:00.000Z" },
+    { "id": "sub-00000000-0000-0000-0000-000000000003", "name": "English", "institution_id": "inst-00000000-0000-0000-0000-000000000001", "created_at": "2026-01-01T00:00:00.000Z", "updated_at": "2026-01-01T00:00:00.000Z" }
+  ],
+  "meta": { "total": 3, "page": 1, "limit": 100, "totalPages": 1, "hasNextPage": false, "hasPreviousPage": false }
+}

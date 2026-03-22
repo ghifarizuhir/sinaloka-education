@@ -1,46 +1,44 @@
 {
   "data": [
     {
-      "id": "enr-001",
-      "student_id": "stu-001",
-      "class_id": "cls-001",
+      "id": "enr-00000000-0000-0000-0000-000000000001",
+      "student_id": "stu-00000000-0000-0000-0000-000000000001",
+      "class_id": "cls-00000000-0000-0000-0000-000000000001",
       "status": "ACTIVE",
       "payment_status": "PAID",
-      "enrolled_at": "2026-01-15T08:00:00Z",
-      "student": {
-        "id": "stu-001",
-        "name": "Aisyah Putri"
-      },
-      "class": {
-        "id": "cls-001",
-        "name": "Math Advanced",
-        "subject": "Mathematics"
-      },
-      "institution_id": 1
+      "enrolled_at": "2026-01-15T00:00:00.000Z",
+      "student": { "id": "stu-00000000-0000-0000-0000-000000000001", "name": "Rizki Pratama" },
+      "class": { "id": "cls-00000000-0000-0000-0000-000000000001", "name": "Math Advanced" },
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-01-15T00:00:00.000Z",
+      "updated_at": "2026-03-01T00:00:00.000Z"
     },
     {
-      "id": "enr-002",
-      "student_id": "stu-002",
-      "class_id": "cls-002",
+      "id": "enr-00000000-0000-0000-0000-000000000002",
+      "student_id": "stu-00000000-0000-0000-0000-000000000002",
+      "class_id": "cls-00000000-0000-0000-0000-000000000001",
       "status": "TRIAL",
       "payment_status": "PENDING",
-      "enrolled_at": "2026-02-01T08:00:00Z",
-      "student": {
-        "id": "stu-002",
-        "name": "Rizki Pratama"
-      },
-      "class": {
-        "id": "cls-002",
-        "name": "Physics Basic",
-        "subject": "Physics"
-      },
-      "institution_id": 1
+      "enrolled_at": "2026-02-01T00:00:00.000Z",
+      "student": { "id": "stu-00000000-0000-0000-0000-000000000002", "name": "Aisyah Putri" },
+      "class": { "id": "cls-00000000-0000-0000-0000-000000000001", "name": "Math Advanced" },
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-02-01T00:00:00.000Z",
+      "updated_at": "2026-03-01T00:00:00.000Z"
+    },
+    {
+      "id": "enr-00000000-0000-0000-0000-000000000003",
+      "student_id": "stu-00000000-0000-0000-0000-000000000003",
+      "class_id": "cls-00000000-0000-0000-0000-000000000002",
+      "status": "ACTIVE",
+      "payment_status": "OVERDUE",
+      "enrolled_at": "2026-01-20T00:00:00.000Z",
+      "student": { "id": "stu-00000000-0000-0000-0000-000000000003", "name": "Fajar Hidayat" },
+      "class": { "id": "cls-00000000-0000-0000-0000-000000000002", "name": "Physics Basic" },
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-01-20T00:00:00.000Z",
+      "updated_at": "2026-03-15T00:00:00.000Z"
     }
   ],
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "total": 2,
-    "total_pages": 1
-  }
+  "meta": { "total": 3, "page": 1, "limit": 20, "totalPages": 1, "hasNextPage": false, "hasPreviousPage": false }
 }

@@ -1,73 +1,59 @@
 {
   "data": [
     {
-      "id": "pay-001",
-      "student_id": "stu-001",
-      "enrollment_id": "enr-001",
-      "amount": 500000,
+      "id": "pay-00000000-0000-0000-0000-000000000001",
+      "student_id": "stu-00000000-0000-0000-0000-000000000001",
+      "enrollment_id": "enr-00000000-0000-0000-0000-000000000001",
+      "amount": 150000,
       "due_date": "2026-02-01",
-      "paid_date": "2026-02-01",
+      "paid_date": "2026-01-28T00:00:00.000Z",
       "status": "PAID",
       "method": "TRANSFER",
-      "student": {
-        "id": "stu-001",
-        "name": "Aisyah Putri"
-      },
-      "enrollment": {
-        "id": "enr-001",
-        "class": {
-          "id": "cls-001",
-          "name": "Math Advanced"
-        }
-      }
+      "notes": null,
+      "invoice_number": "INV-202601-001",
+      "invoice_url": null,
+      "student": { "id": "stu-00000000-0000-0000-0000-000000000001", "name": "Rizki Pratama" },
+      "enrollment": { "id": "enr-00000000-0000-0000-0000-000000000001", "class": { "id": "cls-00000000-0000-0000-0000-000000000001", "name": "Math Advanced" } },
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-01-15T00:00:00.000Z",
+      "updated_at": "2026-01-28T00:00:00.000Z"
     },
     {
-      "id": "pay-002",
-      "student_id": "stu-002",
-      "enrollment_id": "enr-002",
-      "amount": 450000,
+      "id": "pay-00000000-0000-0000-0000-000000000002",
+      "student_id": "stu-00000000-0000-0000-0000-000000000002",
+      "enrollment_id": "enr-00000000-0000-0000-0000-000000000002",
+      "amount": 150000,
       "due_date": "2026-03-01",
       "paid_date": null,
       "status": "PENDING",
       "method": null,
-      "student": {
-        "id": "stu-002",
-        "name": "Rizki Pratama"
-      },
-      "enrollment": {
-        "id": "enr-002",
-        "class": {
-          "id": "cls-002",
-          "name": "Physics Basic"
-        }
-      }
+      "notes": null,
+      "invoice_number": "INV-202603-001",
+      "invoice_url": null,
+      "student": { "id": "stu-00000000-0000-0000-0000-000000000002", "name": "Aisyah Putri" },
+      "enrollment": { "id": "enr-00000000-0000-0000-0000-000000000002", "class": { "id": "cls-00000000-0000-0000-0000-000000000001", "name": "Math Advanced" } },
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-02-01T00:00:00.000Z",
+      "updated_at": "2026-02-01T00:00:00.000Z"
     },
     {
-      "id": "pay-003",
-      "student_id": "stu-003",
-      "enrollment_id": "enr-003",
-      "amount": 500000,
-      "due_date": "2026-01-15",
+      "id": "pay-00000000-0000-0000-0000-000000000003",
+      "student_id": "stu-00000000-0000-0000-0000-000000000003",
+      "enrollment_id": "enr-00000000-0000-0000-0000-000000000003",
+      "amount": 120000,
+      "due_date": "2026-02-15",
       "paid_date": null,
       "status": "OVERDUE",
       "method": null,
-      "student": {
-        "id": "stu-003",
-        "name": "Fajar Hidayat"
-      },
-      "enrollment": {
-        "id": "enr-003",
-        "class": {
-          "id": "cls-001",
-          "name": "Math Advanced"
-        }
-      }
+      "notes": null,
+      "invoice_number": null,
+      "invoice_url": null,
+      "student": { "id": "stu-00000000-0000-0000-0000-000000000003", "name": "Fajar Hidayat" },
+      "enrollment": { "id": "enr-00000000-0000-0000-0000-000000000003", "class": { "id": "cls-00000000-0000-0000-0000-000000000002", "name": "Physics Basic" } },
+      "institution_id": "inst-00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-01-20T00:00:00.000Z",
+      "updated_at": "2026-03-01T00:00:00.000Z"
     }
   ],
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "total": 3,
-    "total_pages": 1
-  }
+  "meta": { "total": 3, "page": 1, "limit": 20, "totalPages": 1, "hasNextPage": false, "hasPreviousPage": false }
 }

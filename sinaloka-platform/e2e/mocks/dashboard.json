@@ -1,52 +1,33 @@
 {
   "stats": {
-    "total_students": 150,
-    "active_tutors": 12,
-    "monthly_revenue": 75000000,
+    "total_students": 45,
+    "active_tutors": 8,
     "attendance_rate": 92.5,
+    "monthly_revenue": 12500000,
     "upcoming_sessions": 8
   },
   "activity": [
-    {
-      "type": "enrollment",
-      "description": "Aisyah Putri enrolled in Math Advanced",
-      "created_at": "2026-03-15T10:00:00Z"
-    },
-    {
-      "type": "payment",
-      "description": "Payment received from Rizki Pratama",
-      "created_at": "2026-03-15T09:30:00Z"
-    },
-    {
-      "type": "attendance",
-      "description": "Attendance marked for Physics Basic",
-      "created_at": "2026-03-15T09:00:00Z"
-    }
+    { "id": "act-1", "type": "enrollment", "description": "Rizki Pratama enrolled in Math Advanced", "created_at": "2026-03-22T10:00:00.000Z" },
+    { "id": "act-2", "type": "payment", "description": "Payment received from Aisyah Putri", "created_at": "2026-03-22T09:00:00.000Z" },
+    { "id": "act-3", "type": "attendance", "description": "Attendance marked for Physics Basic", "created_at": "2026-03-21T14:00:00.000Z" }
   ],
   "upcoming_sessions_list": [
-    {
-      "id": "session-mock-1",
-      "date": "2026-03-20T00:00:00Z",
-      "start_time": "10:00",
-      "subject_name": "Mathematics",
-      "tutor_name": "Pak Budi",
-      "class_name": "Math Advanced"
-    },
-    {
-      "id": "session-mock-2",
-      "date": "2026-03-20T00:00:00Z",
-      "start_time": "13:00",
-      "subject_name": "English",
-      "tutor_name": "Bu Ani",
-      "class_name": "English Basic"
-    },
-    {
-      "id": "session-mock-3",
-      "date": "2026-03-21T00:00:00Z",
-      "start_time": "09:00",
-      "subject_name": "Physics",
-      "tutor_name": "Pak Rudi",
-      "class_name": "Physics Basic"
-    }
+    { "id": "ses-00000000-0000-0000-0000-000000000001", "date": "2026-03-25", "start_time": "09:00", "subject_name": "Mathematics", "tutor_name": "Dewi Lestari", "class_name": "Math Advanced" },
+    { "id": "ses-upcoming-2", "date": "2026-03-25", "start_time": "13:00", "subject_name": "Physics", "tutor_name": "Rina Wijaya", "class_name": "Physics Basic" }
+  ],
+  "attendance_trend": [
+    { "month": "Jan", "rate": 88 },
+    { "month": "Feb", "rate": 91 },
+    { "month": "Mar", "rate": 93 }
+  ],
+  "student_growth": [
+    { "month": "Jan", "count": 35 },
+    { "month": "Feb", "count": 40 },
+    { "month": "Mar", "count": 45 }
+  ],
+  "revenue_expenses": [
+    { "month": "Jan", "revenue": 10000000, "expenses": 6000000 },
+    { "month": "Feb", "revenue": 11500000, "expenses": 5800000 },
+    { "month": "Mar", "revenue": 12500000, "expenses": 6200000 }
   ]
 }
