@@ -20,10 +20,10 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: 'cd ../sinaloka-platform && VITE_API_URL=http://localhost:5555/api npm run build && VITE_API_URL=http://localhost:5555/api npx vite preview --port 3000',
+      command: 'cd ../sinaloka-platform && VITE_API_URL=http://localhost:5555/api npx vite preview --port 3000',
       port: 3000,
       reuseExistingServer: !process.env.CI,
-      timeout: 120_000,
+      timeout: 30_000,
     },
   ],
 

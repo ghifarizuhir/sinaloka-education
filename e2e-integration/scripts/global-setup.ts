@@ -44,5 +44,11 @@ export default async function globalSetup() {
   await client.query(sql);
   await client.end();
 
+  console.log('[global-setup] Building frontend...');
+  execSync('VITE_API_URL=http://localhost:5555/api npm run build', {
+    cwd: resolve(ROOT, '../sinaloka-platform'),
+    stdio: 'inherit',
+  });
+
   console.log('[global-setup] Done.');
 }
