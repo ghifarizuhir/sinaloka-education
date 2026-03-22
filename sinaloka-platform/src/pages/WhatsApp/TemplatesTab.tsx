@@ -9,7 +9,14 @@ function interpolatePreview(body: string, sampleData: Record<string, string>): s
 }
 
 function renderPreviewHtml(text: string): string {
-  let html = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
+  // Escape HTML entities first to prevent XSS
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+  // Then apply WhatsApp-style formatting
+  html = html.replace(/\*(.*?)\*/g, '<b>$1</b>');
   html = html.replace(/\{\{\w+\}\}/g, '<span style="color:#ef4444">$&</span>');
   html = html.replace(/\n/g, '<br>');
   return html;
