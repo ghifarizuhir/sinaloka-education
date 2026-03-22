@@ -6,7 +6,6 @@ import {
   BookOpen,
   Settings,
   Search,
-  Bell,
   PanelLeftClose,
   PanelLeftOpen,
   Sun,
@@ -30,6 +29,7 @@ import { usePendingRegistrationCount } from '../hooks/useRegistrations';
 import { cn } from '../lib/utils';
 import ImpersonationBanner from './ImpersonationBanner';
 import { PlanWarningBanner } from './PlanWarningBanner';
+import NotificationBell from './notifications/NotificationBell';
 
 const SidebarItem = ({ icon: Icon, label, href, active, minimized, badge }: { icon: any, label: string, href: string, active: boolean, minimized: boolean, badge?: number }) => (
   <Link
@@ -113,10 +113,7 @@ const Header = ({ title, isDarkMode, toggleDarkMode, toggleSidebar, isSidebarMin
         {i18n.language === 'id' ? 'ID' : 'EN'}
       </button>
 
-      <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-colors relative">
-        <Bell size={20} />
-        <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>
-      </button>
+      <NotificationBell />
       <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
         {userInitials}
       </div>
