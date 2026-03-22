@@ -177,6 +177,7 @@ model Institution {
   subscription_invoices  SubscriptionInvoice[]
   settlements            Settlement[]
   notifications          Notification[]
+  audit_logs             AuditLog[]
 
   @@map("institutions")
 }
@@ -322,6 +323,7 @@ model User {
   refresh_tokens        RefreshToken[]
   password_reset_tokens PasswordResetToken[]
   notifications         Notification[]
+  audit_logs            AuditLog[]
 
   @@map("users")
 }
@@ -344,6 +346,32 @@ model Notification {
   @@index([institution_id, user_id, read_at, created_at])
   @@index([institution_id, created_at])
   @@map("notifications")
+}
+
+model AuditLog {
+  id              String    @id @default(cuid())
+  institution_id  String?
+  user_id         String
+  user_role       String
+  action          String
+  resource_type   String
+  resource_id     String?
+  summary         String
+  changes         Json?
+  http_method     String
+  endpoint        String
+  status_code     Int
+  ip_address      String?
+  user_agent      String?
+  created_at      DateTime  @default(now())
+
+  institution     Institution? @relation(fields: [institution_id], references: [id])
+  user            User         @relation(fields: [user_id], references: [id])
+
+  @@index([institution_id, created_at])
+  @@index([resource_type, resource_id])
+  @@index([user_id])
+  @@map("audit_log")
 }
 
 model Student {
