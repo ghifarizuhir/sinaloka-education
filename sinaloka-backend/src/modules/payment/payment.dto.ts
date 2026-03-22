@@ -7,6 +7,7 @@ export const CreatePaymentSchema = z.object({
   student_id: z.string().uuid(),
   enrollment_id: z.string().uuid(),
   amount: z.coerce.number().positive(),
+  discount_amount: z.coerce.number().min(0).default(0),
   due_date: z.coerce.date(),
   paid_date: z.coerce.date().optional().nullable(),
   status: PaymentStatus.default('PENDING'),
@@ -17,6 +18,7 @@ export type CreatePaymentDto = z.infer<typeof CreatePaymentSchema>;
 
 export const UpdatePaymentSchema = z.object({
   amount: z.coerce.number().positive().optional(),
+  discount_amount: z.coerce.number().min(0).optional(),
   due_date: z.coerce.date().optional(),
   paid_date: z.coerce.date().optional().nullable(),
   status: PaymentStatus.optional(),

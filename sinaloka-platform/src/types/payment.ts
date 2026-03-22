@@ -5,6 +5,7 @@ export interface Payment {
   student_id: string;
   enrollment_id: string;
   amount: number;
+  discount_amount: number | null;
   due_date: string;
   paid_date: string | null;
   status: 'PAID' | 'PENDING' | 'OVERDUE';
@@ -23,6 +24,7 @@ export interface CreatePaymentDto {
   student_id: string;
   enrollment_id: string;
   amount: number;
+  discount_amount?: number;
   due_date: string;
   paid_date?: string;
   status?: 'PAID' | 'PENDING' | 'OVERDUE';
@@ -32,6 +34,7 @@ export interface CreatePaymentDto {
 
 export interface UpdatePaymentDto {
   amount?: number;
+  discount_amount?: number;
   due_date?: string;
   paid_date?: string;
   status?: 'PAID' | 'PENDING' | 'OVERDUE';
