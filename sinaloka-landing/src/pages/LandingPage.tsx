@@ -1,10 +1,8 @@
 import { Navbar } from "../components/Navbar";
 import { Hero } from "../components/Hero";
-import { PartnerMarquee } from "../components/PartnerMarquee";
 import { ProblemSection } from "../components/ProblemSection";
 import { FeaturesSection } from "../components/FeaturesSection";
 import { HowItWorks } from "../components/HowItWorks";
-import { OutcomeMetrics } from "../components/OutcomeMetrics";
 import { Pricing } from "../components/Pricing";
 import { FAQ } from "../components/FAQ";
 import { FinalCTA } from "../components/FinalCTA";
@@ -16,11 +14,10 @@ export default function LandingPage() {
     <div className="min-h-screen overflow-x-hidden relative bg-white">
       <Navbar />
       <Hero />
-      <PartnerMarquee />
       <ProblemSection />
+      {/* InteractiveDemo will be added in Task 4 */}
       <FeaturesSection />
       <HowItWorks />
-      <OutcomeMetrics />
       <Pricing />
       <FAQ />
       <FinalCTA />
