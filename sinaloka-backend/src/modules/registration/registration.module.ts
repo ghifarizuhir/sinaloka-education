@@ -4,9 +4,10 @@ import { RegisterController } from './register.controller.js';
 import { RegistrationService } from './registration.service.js';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard.js';
 import { InvitationModule } from '../invitation/invitation.module.js';
+import { EmailModule } from '../email/email.module.js';
 
 @Module({
-  imports: [InvitationModule],
+  imports: [InvitationModule, EmailModule],
   controllers: [RegistrationController, RegisterController],
   providers: [RegistrationService, RateLimitGuard],
 })

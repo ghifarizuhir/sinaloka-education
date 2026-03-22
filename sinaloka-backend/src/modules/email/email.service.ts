@@ -465,6 +465,56 @@ export class EmailService {
     }
   }
 
+  async sendRegistrationRejected(
+    to: string,
+    params: { name: string; institutionName: string; reason?: string },
+  ) {
+    try {
+      await this.resend.emails.send({
+        from: this.from,
+        to,
+        subject: `Registrasi Anda di ${params.institutionName}`,
+        html: this.buildRegistrationRejectedHtml(params),
+      });
+      return { success: true };
+    } catch (error) {
+      this.logger.error(`Failed to send rejection email to ${to}`, error);
+      return { success: false };
+    }
+  }
+
+  private buildRegistrationRejectedHtml(params: {
+    name: string;
+    institutionName: string;
+    reason?: string;
+  }): string {
+    const reasonSection = params.reason
+      ? `<div style="background: #fef3c7; border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+          <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Alasan:</strong> ${params.reason}</p>
+        </div>`
+      : '';
+
+    return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: #18181b; border-radius: 12px 12px 0 0; padding: 24px; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 20px;">Sinaloka</h1>
+  </div>
+  <div style="border: 1px solid #e4e4e7; border-top: none; border-radius: 0 0 12px 12px; padding: 32px 24px;">
+    <h2 style="margin: 0 0 16px; font-size: 18px; color: #18181b;">Pemberitahuan Registrasi</h2>
+    <p style="color: #52525b; line-height: 1.6;">Halo <strong>${params.name}</strong>,</p>
+    <p style="color: #52525b; line-height: 1.6;">Mohon maaf, registrasi Anda di <strong>${params.institutionName}</strong> tidak dapat kami terima saat ini.</p>
+    ${reasonSection}
+    <p style="color: #52525b; line-height: 1.6;">Jika Anda memiliki pertanyaan, silakan hubungi institusi terkait.</p>
+    <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;">
+    <p style="color: #a1a1aa; font-size: 12px; text-align: center;">Email ini dikirim otomatis oleh Sinaloka.</p>
+  </div>
+</body>
+</html>`;
+  }
+
   private buildSubscriptionReminderHtml(params: {
     planType: string;
     expiresAt: Date;

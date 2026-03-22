@@ -1,11 +1,13 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { InvitationService } from '../invitation/invitation.service.js';
+import { EmailService } from '../email/email.service.js';
 import { PLAN_LIMITS } from '../../common/constants/plans.js';
 import {
   buildPaginationMeta,
@@ -22,9 +24,12 @@ const REGISTRATION_DEFAULTS = { student_enabled: false, tutor_enabled: false };
 
 @Injectable()
 export class RegistrationService {
+  private readonly logger = new Logger(RegistrationService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly invitationService: InvitationService,
+    private readonly emailService: EmailService,
   ) {}
 
   async getInstitutionInfo(slug: string) {
@@ -344,6 +349,22 @@ export class RegistrationService {
         reviewed_by: userId,
       },
     });
+
+    if (registration.email) {
+      const institution = await this.prisma.institution.findUnique({
+        where: { id: institutionId },
+        select: { name: true },
+      });
+      await this.emailService
+        .sendRegistrationRejected(registration.email, {
+          name: registration.name,
+          institutionName: institution?.name ?? 'Institusi',
+          reason: dto.reason ?? undefined,
+        })
+        .catch((err) => {
+          this.logger.error('Failed to send rejection email', err);
+        });
+    }
 
     return { message: 'Registration rejected' };
   }

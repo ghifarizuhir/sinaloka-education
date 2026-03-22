@@ -5,7 +5,7 @@ export const StudentRegistrationSchema = z.object({
   grade: z.string().min(1).max(50),
   parent_name: z.string().min(1).max(255),
   parent_phone: z.string().min(1).max(20),
-  email: z.string().email().optional(),
+  email: z.string().email('Email is required'),
   phone: z.string().max(20).optional(),
   parent_email: z.string().email().optional(),
 });
