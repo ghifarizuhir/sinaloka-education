@@ -38,6 +38,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { WhatsappModule } from './modules/whatsapp/whatsapp.module.js';
 import { NotificationModule } from './modules/notification/notification.module.js';
+import { AuditLogModule } from './modules/audit-log/audit-log.module.js';
+import { AuditLogInterceptor } from './modules/audit-log/audit-log.interceptor.js';
 import { HealthController } from './health.controller.js';
 
 @Module({
@@ -73,6 +75,7 @@ import { HealthController } from './health.controller.js';
     EventEmitterModule.forRoot(),
     WhatsappModule,
     NotificationModule,
+    AuditLogModule,
   ],
   providers: [
     {
@@ -98,6 +101,10 @@ import { HealthController } from './health.controller.js';
     {
       provide: APP_INTERCEPTOR,
       useClass: TenantInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLogInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

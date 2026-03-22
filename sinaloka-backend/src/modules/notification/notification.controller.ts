@@ -20,6 +20,7 @@ import { Public } from '../../common/decorators/public.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
+import { NoAuditLog } from '../audit-log/decorators/no-audit-log.decorator.js';
 
 @Controller('notifications')
 export class NotificationController {
@@ -51,6 +52,7 @@ export class NotificationController {
     return this.notificationService.getUnreadCount(institutionId, user.userId);
   }
 
+  @NoAuditLog()
   @Public()
   @Get('stream')
   async stream(

@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { AUDIT_EVENTS, AuditLogEvent } from './audit-log.events.js';
+import { AUDIT_EVENTS } from './audit-log.events.js';
+import type { AuditLogEvent } from './audit-log.events.js';
 
 @Injectable()
 export class AuditLogListener {
@@ -21,7 +22,7 @@ export class AuditLogListener {
           resource_type: event.resourceType,
           resource_id: event.resourceId,
           summary: event.summary,
-          changes: event.changes ?? undefined,
+          changes: event.changes ? (event.changes as object) : undefined,
           http_method: event.httpMethod,
           endpoint: event.endpoint,
           status_code: event.statusCode,

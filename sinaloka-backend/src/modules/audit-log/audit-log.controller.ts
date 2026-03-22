@@ -4,7 +4,8 @@ import { InstitutionId } from '../../common/decorators/institution-id.decorator.
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { AuditLogService } from './audit-log.service.js';
-import { AuditLogQuerySchema, AuditLogQueryDto } from './dto/audit-log.dto.js';
+import { AuditLogQuerySchema } from './dto/audit-log.dto.js';
+import type { AuditLogQueryDto } from './dto/audit-log.dto.js';
 import { NoAuditLog } from './decorators/no-audit-log.decorator.js';
 import { Role } from '../../../generated/prisma/client.js';
 
