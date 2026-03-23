@@ -27,7 +27,10 @@ export class AcademicYearService {
     return this.prisma.academicYear.findMany({
       where,
       include: {
-        semesters: { orderBy: { start_date: 'asc' } },
+        semesters: {
+          orderBy: { start_date: 'asc' },
+          include: { _count: { select: { classes: true } } },
+        },
       },
       orderBy: { start_date: 'desc' },
     });
@@ -55,7 +58,8 @@ export class AcademicYearService {
         institution_id_name: { institution_id: tenantId, name: dto.name },
       },
     });
-    if (existing) throw new ConflictException('Academic year name already exists');
+    if (existing)
+      throw new ConflictException('Academic year name already exists');
 
     return this.prisma.academicYear.create({
       data: {
@@ -79,7 +83,8 @@ export class AcademicYearService {
           institution_id_name: { institution_id: tenantId, name: dto.name },
         },
       });
-      if (existing) throw new ConflictException('Academic year name already exists');
+      if (existing)
+        throw new ConflictException('Academic year name already exists');
     }
 
     return this.prisma.academicYear.update({
@@ -132,7 +137,11 @@ export class AcademicYearService {
     return semester;
   }
 
-  async createSemester(tenantId: string, yearId: string, dto: CreateSemesterDto) {
+  async createSemester(
+    tenantId: string,
+    yearId: string,
+    dto: CreateSemesterDto,
+  ) {
     const year = await this.prisma.academicYear.findFirst({
       where: { id: yearId, institution_id: tenantId },
     });
@@ -143,7 +152,10 @@ export class AcademicYearService {
         academic_year_id_name: { academic_year_id: yearId, name: dto.name },
       },
     });
-    if (existing) throw new ConflictException('Semester name already exists in this academic year');
+    if (existing)
+      throw new ConflictException(
+        'Semester name already exists in this academic year',
+      );
 
     return this.prisma.semester.create({
       data: {
@@ -171,7 +183,10 @@ export class AcademicYearService {
           },
         },
       });
-      if (existing) throw new ConflictException('Semester name already exists in this academic year');
+      if (existing)
+        throw new ConflictException(
+          'Semester name already exists in this academic year',
+        );
     }
 
     return this.prisma.semester.update({
@@ -190,12 +205,12 @@ export class AcademicYearService {
     });
     if (!semester) throw new NotFoundException('Semester not found');
 
-    const classCount = await this.prisma.class.count({
-      where: { semester_id: id },
+    const activeClassCount = await this.prisma.class.count({
+      where: { semester_id: id, status: 'ACTIVE' },
     });
-    if (classCount > 0) {
+    if (activeClassCount > 0) {
       throw new BadRequestException(
-        'Cannot delete semester: still has classes. Archive the semester instead.',
+        'Cannot delete semester: still has active classes. Archive the semester first.',
       );
     }
 
@@ -246,20 +261,26 @@ export class AcademicYearService {
 
   async rollOver(tenantId: string, targetSemesterId: string, dto: RollOverDto) {
     if (dto.source_semester_id === targetSemesterId) {
-      throw new BadRequestException('Source and target semester must be different');
+      throw new BadRequestException(
+        'Source and target semester must be different',
+      );
     }
 
     const targetSemester = await this.prisma.semester.findFirst({
       where: { id: targetSemesterId, institution_id: tenantId },
     });
-    if (!targetSemester) throw new NotFoundException('Target semester not found');
+    if (!targetSemester)
+      throw new NotFoundException('Target semester not found');
 
     const sourceSemester = await this.prisma.semester.findFirst({
       where: { id: dto.source_semester_id, institution_id: tenantId },
     });
-    if (!sourceSemester) throw new NotFoundException('Source semester not found');
+    if (!sourceSemester)
+      throw new NotFoundException('Source semester not found');
 
-    const whereClasses: Record<string, unknown> = { semester_id: dto.source_semester_id };
+    const whereClasses: Record<string, unknown> = {
+      semester_id: dto.source_semester_id,
+    };
     if (dto.class_ids?.length) {
       whereClasses.id = { in: dto.class_ids };
     }
@@ -270,7 +291,9 @@ export class AcademicYearService {
     });
 
     if (sourceClasses.length === 0) {
-      throw new BadRequestException('No classes found in source semester to roll over');
+      throw new BadRequestException(
+        'No classes found in source semester to roll over',
+      );
     }
 
     const existingTargetClasses = await this.prisma.class.findMany({
@@ -278,10 +301,14 @@ export class AcademicYearService {
       select: { name: true },
     });
     const existingNames = new Set(existingTargetClasses.map((c) => c.name));
-    const classesToCopy = sourceClasses.filter((c) => !existingNames.has(c.name));
+    const classesToCopy = sourceClasses.filter(
+      (c) => !existingNames.has(c.name),
+    );
 
     if (classesToCopy.length === 0) {
-      throw new BadRequestException('All classes already exist in target semester');
+      throw new BadRequestException(
+        'All classes already exist in target semester',
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {

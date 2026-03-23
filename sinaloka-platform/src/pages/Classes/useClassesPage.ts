@@ -71,8 +71,8 @@ export function useClassesPage() {
 
   const formErrors = useFormErrors();
 
-  const { data, isLoading } = useClasses({ page, limit });
-  const { data: allClassesData } = useClasses({ page: 1, limit: 100 });
+  const { data, isLoading } = useClasses({ page, limit, semester_id: filterSemesterId || undefined });
+  const { data: allClassesData } = useClasses({ page: 1, limit: 100, semester_id: filterSemesterId || undefined });
   const { data: subjectsList } = useSubjects();
   const { data: academicYears } = useAcademicYears();
   const { data: subjectTutors } = useSubjectTutors(formSubjectId || null);
@@ -104,14 +104,9 @@ export function useClassesPage() {
       const matchesSubject = !filterSubject || c.subject.name === filterSubject;
       // "available" means not archived and enrolled (enrollments not in class object; use capacity as proxy)
       const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
-      const matchesSemester = !filterSemesterId
-        ? true
-        : filterSemesterId === 'none'
-          ? !c.semester_id
-          : c.semester_id === filterSemesterId;
-      return matchesSearch && matchesSubject && matchesAvailability && matchesSemester;
+      return matchesSearch && matchesSubject && matchesAvailability;
     });
-  }, [classes, searchQuery, filterSubject, filterSemesterId, showOnlyAvailable]);
+  }, [classes, searchQuery, filterSubject, showOnlyAvailable]);
 
   const allClasses = allClassesData?.data ?? [];
   const filteredTimetableClasses = useMemo(() => {
@@ -122,14 +117,9 @@ export function useClassesPage() {
         tutorName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesSubject = !filterSubject || c.subject.name === filterSubject;
       const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
-      const matchesSemester = !filterSemesterId
-        ? true
-        : filterSemesterId === 'none'
-          ? !c.semester_id
-          : c.semester_id === filterSemesterId;
-      return matchesSearch && matchesSubject && matchesAvailability && matchesSemester;
+      return matchesSearch && matchesSubject && matchesAvailability;
     });
-  }, [allClasses, searchQuery, filterSubject, filterSemesterId, showOnlyAvailable]);
+  }, [allClasses, searchQuery, filterSubject, showOnlyAvailable]);
 
   const selectedClass = filteredClasses.find((c) => c.id === selectedClassId) ?? null;
 
@@ -339,7 +329,7 @@ export function useClassesPage() {
     filterSubject,
     setFilterSubject,
     filterSemesterId,
-    setFilterSemesterId,
+    setFilterSemesterId: (v: string) => { setFilterSemesterId(v); setPage(1); },
     showOnlyAvailable,
     setShowOnlyAvailable,
     activeActionMenu,
