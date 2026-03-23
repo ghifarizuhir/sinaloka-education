@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useChildDetail } from '../hooks/useChildDetail';
 import { AttendanceList } from '../components/AttendanceList';
 import { SessionList } from '../components/SessionList';
@@ -26,8 +26,55 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
     attendance, attendanceSummary, sessions, payments, enrollments,
     isLoading, activeTab, setActiveTab,
     fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments,
+    lastFetchedAt, refresh,
   } = useChildDetail(child.id, initialTab);
 
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const touchStartY = useRef(0);
+  const isPulling = useRef(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (window.scrollY === 0 && !isLoading && !isRefreshing) {
+      touchStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+    }
+  }, [isLoading, isRefreshing]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling.current) return;
+    const diff = e.touches[0].clientY - touchStartY.current;
+    if (diff > 0) {
+      setPullDistance(Math.min(diff * 0.5, 80));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(async () => {
+    if (!isPulling.current) return;
+    isPulling.current = false;
+    if (pullDistance > 40) {
+      setIsRefreshing(true);
+      setPullDistance(0);
+      await refresh();
+      setIsRefreshing(false);
+    } else {
+      setPullDistance(0);
+    }
+  }, [pullDistance, refresh]);
+
+  const [minutesAgo, setMinutesAgo] = useState(0);
+
+  useEffect(() => {
+    if (!lastFetchedAt) return;
+    const update = () => {
+      setMinutesAgo(Math.floor((Date.now() - lastFetchedAt.getTime()) / 60000));
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [lastFetchedAt]);
+
+  const isStale = minutesAgo >= 5;
 
   useEffect(() => {
     switch (activeTab) {
@@ -38,9 +85,13 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
     }
   }, [activeTab, fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments]);
 
-
   return (
-    <div className="pb-24">
+    <div
+      className="pb-24"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <button onClick={onBack} className="flex items-center gap-2 text-zinc-400 mb-4 text-sm">
         <ArrowLeft className="w-4 h-4" /> Kembali
       </button>
@@ -62,7 +113,26 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
         ))}
       </div>
 
-      {isLoading ? (
+      {/* Pull indicator */}
+      {(pullDistance > 0 || isRefreshing) && (
+        <div className="flex items-center justify-center py-3 text-zinc-400 text-xs">
+          <RefreshCw className={cn("w-4 h-4 mr-2", isRefreshing && "animate-spin")} />
+          {isRefreshing ? 'Memperbarui...' : pullDistance > 40 ? 'Lepas untuk refresh' : 'Tarik untuk refresh'}
+        </div>
+      )}
+
+      {/* Stale banner */}
+      {isStale && !isRefreshing && (
+        <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 mb-4">
+          <span className="text-zinc-400 text-xs">Diperbarui {minutesAgo} menit lalu</span>
+          <button onClick={async () => { setIsRefreshing(true); await refresh(); setIsRefreshing(false); }}
+            className="flex items-center gap-1 text-xs font-semibold text-lime-400 hover:text-lime-300">
+            <RefreshCw className="w-3 h-3" /> Refresh
+          </button>
+        </div>
+      )}
+
+      {isLoading && !isRefreshing ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <div key={i} className="bg-zinc-900 rounded-lg h-16 animate-pulse" />)}
         </div>
