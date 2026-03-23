@@ -50,8 +50,8 @@ export class NotificationService {
     if (dto.type) where.type = dto.type;
     if (dto.unread) where.read_at = null;
 
-    const page = Number(dto.page);
-    const limit = Number(dto.limit);
+    const page = Number(dto.page) || 1;
+    const limit = Number(dto.limit) || 20;
     const [notifications, total] = await this.prisma.$transaction([
       this.prisma.notification.findMany({
         where,

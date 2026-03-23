@@ -10,7 +10,7 @@ interface NotificationDropdownProps {
 
 export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {
   const navigate = useNavigate();
-  const { data } = useNotifications({ limit: 10 });
+  const { data } = useNotifications({ page: 1, limit: 10 });
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
 
