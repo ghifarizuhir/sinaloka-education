@@ -10,14 +10,14 @@ import type {
 } from '../types';
 import { mapAttendance, mapSession, mapPayment, mapEnrollment } from '../mappers';
 
-export function useChildDetail(studentId: string | null) {
+export function useChildDetail(studentId: string | null, initialTab?: 'attendance' | 'sessions' | 'payments' | 'enrollments') {
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [attendanceSummary, setAttendanceSummary] = useState<AttendanceSummary | null>(null);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [enrollments, setEnrollments] = useState<EnrollmentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'attendance' | 'sessions' | 'payments' | 'enrollments'>('attendance');
+  const [activeTab, setActiveTab] = useState<'attendance' | 'sessions' | 'payments' | 'enrollments'>(initialTab ?? 'attendance');
 
   const fetchAttendance = useCallback(async () => {
     if (!studentId) return;
