@@ -5,3 +5,7 @@
 .mcp.json
 tunnels.sh
 docs/.obsidian/
+.playwright-mcp/
+.wrangler/
+capture/
+sinaloka-platform/playwright-report/
