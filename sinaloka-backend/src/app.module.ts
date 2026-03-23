@@ -41,6 +41,7 @@ import { NotificationModule } from './modules/notification/notification.module.j
 import { AuditLogModule } from './modules/audit-log/audit-log.module.js';
 import { AuditLogInterceptor } from './modules/audit-log/audit-log.interceptor.js';
 import { HealthController } from './health.controller.js';
+import { AcademicYearModule } from './modules/academic-year/academic-year.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -76,6 +77,7 @@ import { HealthController } from './health.controller.js';
     WhatsappModule,
     NotificationModule,
     AuditLogModule,
+    AcademicYearModule,
   ],
   providers: [
     {
