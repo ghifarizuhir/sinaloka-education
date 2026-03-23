@@ -43,12 +43,11 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
 
     await expect(instPage.table).toBeVisible();
 
-    // Seeded data should have at least 2 data rows
+    // Seeded data should have at least 2 data rows (tbody excludes header)
     const rows = instPage.table.locator('tbody tr');
     await expect(rows.first()).toBeVisible({ timeout: 10_000 });
     const rowCount = await rows.count();
-    // First row is header, so data rows = rowCount - 1
-    expect(rowCount - 1).toBeGreaterThanOrEqual(2);
+    expect(rowCount).toBeGreaterThanOrEqual(2);
   });
 
   test('TC-SA-INST-02: Create institution, capture ID, write state', async ({

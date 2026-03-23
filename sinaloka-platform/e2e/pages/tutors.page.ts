@@ -12,7 +12,7 @@ export class TutorsPage {
   constructor(private page: Page) {
     this.addButton = page.getByRole('button', { name: /add tutor/i });
     this.searchInput = page.getByPlaceholder(/search tutors/i);
-    this.toast = page.locator('[data-sonner-toaster]');
+    this.toast = page.locator('[data-sonner-toast]');
   }
 
   async goto() {

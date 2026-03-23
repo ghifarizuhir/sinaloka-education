@@ -21,6 +21,7 @@ export default defineConfig({
       name: 'uat',
       testDir: './uat/specs',
       fullyParallel: false,
+      workers: 1,
       retries: 0,
       use: {
         baseURL: 'http://localhost:3000',
