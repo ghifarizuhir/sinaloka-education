@@ -46,18 +46,16 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    // Reset password via URL with ?reset_token=
     if (resetToken) {
       return <ResetPasswordPage token={resetToken} onBack={() => { window.history.replaceState({}, '', window.location.pathname); setAuthScreen('login'); }} />;
     }
-    // Registration only accessible via invite link (URL with ?token=)
     if (inviteToken) {
       return <RegisterPage inviteToken={inviteToken} onSwitchToLogin={() => window.history.replaceState({}, '', window.location.pathname)} />;
     }
@@ -103,16 +101,16 @@ export default function App() {
       case 'children':
         return (
           <div className="space-y-4 pb-24">
-            <h1 className="text-2xl font-bold tracking-tight">Anak Anda</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Anak Anda</h1>
             {childrenLoading ? (
-              <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="bg-zinc-900 rounded-xl h-28 animate-pulse" />)}</div>
+              <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="bg-card rounded-xl h-28 animate-pulse shadow-sm" />)}</div>
             ) : (
               children.map((child) => (
                 <div key={child.id}>
                   <div className="cursor-pointer" onClick={() => setSelectedChildId(child.id)}>
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-                      <h3 className="font-semibold text-white">{child.name}</h3>
-                      <p className="text-zinc-500 text-xs">Kelas {child.grade} · Kehadiran {child.attendance_rate}%</p>
+                    <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
+                      <h3 className="font-semibold text-foreground">{child.name}</h3>
+                      <p className="text-muted-foreground text-xs">Kelas {child.grade} · Kehadiran {child.attendance_rate}%</p>
                     </div>
                   </div>
                 </div>
@@ -123,13 +121,13 @@ export default function App() {
       case 'profile':
         return (
           <div className="space-y-6 pb-24">
-            <h1 className="text-2xl font-bold tracking-tight">Profil</h1>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white">{profile?.name}</h2>
-              <p className="text-zinc-500 text-sm">{profile?.email}</p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Profil</h1>
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground">{profile?.name}</h2>
+              <p className="text-muted-foreground text-sm">{profile?.email}</p>
             </div>
             <button onClick={logout}
-              className="w-full flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl py-4 text-red-400 font-semibold transition-all hover:bg-red-500/10">
+              className="w-full flex items-center justify-center gap-2 bg-card border border-border rounded-xl py-4 text-destructive font-semibold transition-all hover:bg-destructive-muted shadow-sm">
               <LogOut className="w-5 h-5" /> Keluar
             </button>
           </div>
@@ -140,7 +138,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-lime-400 selection:text-black overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary overflow-x-hidden">
       <main className="relative z-10 max-w-md mx-auto px-6 pt-8 min-h-screen">
         <AnimatePresence mode="wait">
           <motion.div

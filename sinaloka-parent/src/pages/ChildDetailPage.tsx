@@ -92,13 +92,13 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <button onClick={onBack} className="flex items-center gap-2 text-zinc-400 mb-4 text-sm">
+      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground mb-4 text-sm">
         <ArrowLeft className="w-4 h-4" /> Kembali
       </button>
 
       <div className="mb-6">
-        <h1 className="text-xl font-bold">{child.name}</h1>
-        <p className="text-zinc-500 text-xs">Kelas {child.grade} · {child.enrollment_count} mata pelajaran</p>
+        <h1 className="text-xl font-bold text-foreground">{child.name}</h1>
+        <p className="text-muted-foreground text-xs">Kelas {child.grade} · {child.enrollment_count} mata pelajaran</p>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
@@ -106,7 +106,7 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={cn(
               "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all",
-              activeTab === tab.id ? "bg-lime-400 text-black" : "bg-zinc-900 border border-zinc-800 text-zinc-400"
+              activeTab === tab.id ? "bg-primary text-primary-foreground shadow-sm" : "bg-card border border-border text-muted-foreground"
             )}>
             {tab.label}
           </button>
@@ -115,7 +115,7 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
 
       {/* Pull indicator */}
       {(pullDistance > 0 || isRefreshing) && (
-        <div className="flex items-center justify-center py-3 text-zinc-400 text-xs">
+        <div className="flex items-center justify-center py-3 text-muted-foreground text-xs">
           <RefreshCw className={cn("w-4 h-4 mr-2", isRefreshing && "animate-spin")} />
           {isRefreshing ? 'Memperbarui...' : pullDistance > 40 ? 'Lepas untuk refresh' : 'Tarik untuk refresh'}
         </div>
@@ -123,10 +123,10 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
 
       {/* Stale banner */}
       {isStale && !isRefreshing && (
-        <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 mb-4">
-          <span className="text-zinc-400 text-xs">Diperbarui {minutesAgo} menit lalu</span>
+        <div className="flex items-center justify-between bg-muted border border-border rounded-lg px-3 py-2 mb-4">
+          <span className="text-muted-foreground text-xs">Diperbarui {minutesAgo} menit lalu</span>
           <button onClick={async () => { setIsRefreshing(true); await refresh(); setIsRefreshing(false); }}
-            className="flex items-center gap-1 text-xs font-semibold text-lime-400 hover:text-lime-300">
+            className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80">
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>
         </div>
@@ -134,7 +134,7 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
 
       {isLoading && !isRefreshing ? (
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="bg-zinc-900 rounded-lg h-16 animate-pulse" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="bg-card rounded-lg h-16 animate-pulse shadow-sm" />)}
         </div>
       ) : (
         <>

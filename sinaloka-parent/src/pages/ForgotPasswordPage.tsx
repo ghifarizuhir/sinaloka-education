@@ -68,7 +68,7 @@ export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen bg-background text-foreground font-sans flex items-center justify-center selection:bg-primary/20 selection:text-primary">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -76,7 +76,7 @@ export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
       >
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Lupa Password</h1>
-          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">
+          <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
             Masukkan email untuk reset password
           </p>
         </div>
@@ -84,19 +84,19 @@ export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
         {sent ? (
           <div className="space-y-6">
             {error && (
-              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-lg text-sm">
+              <div className="flex items-center gap-3 bg-destructive-muted border border-destructive/15 text-destructive px-5 py-4 rounded-lg text-sm">
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
-            <div className="flex items-start gap-3 bg-lime-400/10 border border-lime-400/20 text-lime-400 px-5 py-4 rounded-lg text-sm">
+            <div className="flex items-start gap-3 bg-success-muted border border-success/15 text-success px-5 py-4 rounded-lg text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
               <span>Jika <strong>{email}</strong> terdaftar, link reset password akan dikirim. Periksa inbox atau folder spam.</span>
             </div>
             <button
               onClick={handleResend}
               disabled={loading || cooldown > 0}
-              className="w-full bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-muted hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed text-foreground font-semibold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-all"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               {cooldown > 0 ? `Kirim Ulang (${cooldown}s)` : 'Kirim Ulang'}
@@ -104,7 +104,7 @@ export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
             <button
               type="button"
               onClick={onBack}
-              className="w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Kembali ke Login
@@ -113,14 +113,14 @@ export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-lg text-sm">
+              <div className="flex items-center gap-3 bg-destructive-muted border border-destructive/15 text-destructive px-5 py-4 rounded-lg text-sm">
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-2">
                 Email
               </label>
               <input
@@ -129,23 +129,23 @@ export function ForgotPasswordPage({ onBack }: { onBack: () => void }) {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="parent@example.com"
-                className="w-full px-6 py-4 rounded-lg bg-zinc-900 border border-zinc-800 focus:outline-none focus:border-lime-400 transition-all text-white text-sm"
+                className="w-full px-5 py-3.5 rounded-lg bg-card border border-input focus:outline-none focus:border-primary focus:ring-1 focus:ring-ring transition-all text-foreground text-sm shadow-sm"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
+              className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-semibold py-3.5 rounded-lg shadow-sm text-base flex items-center justify-center gap-3 transition-all"
             >
-              <Mail className="w-6 h-6" />
+              <Mail className="w-5 h-5" />
               {loading ? 'Mengirim...' : 'Kirim Link Reset'}
             </button>
 
             <button
               type="button"
               onClick={onBack}
-              className="w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Kembali ke Login

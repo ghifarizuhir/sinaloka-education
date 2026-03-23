@@ -58,31 +58,31 @@ export function PaymentStatusView({ paymentId, onBack }: PaymentStatusViewProps)
 
   return (
     <div className="pb-24">
-      <button onClick={onBack} className="flex items-center gap-2 text-zinc-400 mb-6 text-sm">
+      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground mb-6 text-sm">
         <ArrowLeft className="w-4 h-4" /> Kembali
       </button>
 
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4">
         {pollStatus === 'polling' && (
           <>
-            <div className="w-16 h-16 border-4 border-lime-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             <div className="space-y-1">
-              <p className="text-lg font-semibold text-white">Memproses Pembayaran...</p>
-              <p className="text-sm text-zinc-500">Mohon tunggu, kami sedang memverifikasi pembayaran Anda.</p>
+              <p className="text-lg font-semibold text-foreground">Memproses Pembayaran...</p>
+              <p className="text-sm text-muted-foreground">Mohon tunggu, kami sedang memverifikasi pembayaran Anda.</p>
             </div>
           </>
         )}
 
         {pollStatus === 'paid' && (
           <>
-            <CheckCircle className="w-20 h-20 text-lime-400" strokeWidth={1.5} />
+            <CheckCircle className="w-20 h-20 text-success" strokeWidth={1.5} />
             <div className="space-y-1">
-              <p className="text-xl font-bold text-white">Pembayaran Berhasil!</p>
-              <p className="text-sm text-zinc-500">Terima kasih, pembayaran Anda telah dikonfirmasi.</p>
+              <p className="text-xl font-bold text-foreground">Pembayaran Berhasil!</p>
+              <p className="text-sm text-muted-foreground">Terima kasih, pembayaran Anda telah dikonfirmasi.</p>
             </div>
             <button
               onClick={onBack}
-              className="mt-4 px-8 py-3 bg-lime-400 text-black font-bold rounded-xl transition-all active:scale-95">
+              className="mt-4 px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl transition-all active:scale-95 shadow-sm">
               Selesai
             </button>
           </>
@@ -90,21 +90,21 @@ export function PaymentStatusView({ paymentId, onBack }: PaymentStatusViewProps)
 
         {pollStatus === 'timeout' && (
           <>
-            <div className="w-20 h-20 rounded-full bg-orange-500/20 flex items-center justify-center">
-              <RefreshCw className="w-10 h-10 text-orange-400" strokeWidth={1.5} />
+            <div className="w-20 h-20 rounded-full bg-warning-muted flex items-center justify-center">
+              <RefreshCw className="w-10 h-10 text-warning" strokeWidth={1.5} />
             </div>
             <div className="space-y-1">
-              <p className="text-lg font-semibold text-white">Masih Diproses</p>
-              <p className="text-sm text-zinc-500">
+              <p className="text-lg font-semibold text-foreground">Masih Diproses</p>
+              <p className="text-sm text-muted-foreground">
                 Pembayaran Anda sedang diverifikasi. Coba cek kembali sebentar lagi.
               </p>
             </div>
             <button
               onClick={handleManualRefresh}
-              className="mt-4 flex items-center gap-2 px-8 py-3 bg-zinc-800 border border-zinc-700 text-white font-semibold rounded-xl transition-all active:scale-95">
+              className="mt-4 flex items-center gap-2 px-8 py-3 bg-muted border border-border text-foreground font-semibold rounded-xl transition-all active:scale-95">
               <RefreshCw className="w-4 h-4" /> Cek Lagi
             </button>
-            <button onClick={onBack} className="text-zinc-500 text-sm underline">
+            <button onClick={onBack} className="text-muted-foreground text-sm underline">
               Kembali ke daftar
             </button>
           </>
