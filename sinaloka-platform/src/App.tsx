@@ -46,6 +46,8 @@ import UpgradeRequests from './pages/SuperAdmin/UpgradeRequests';
 import SubscriptionManagement from './pages/SuperAdmin/SubscriptionManagement';
 import Settlements from './pages/SuperAdmin/Settlements';
 
+const RegisterPage = React.lazy(() => import('./pages/Register'));
+
 function InstitutionGate({ children }: { children: React.ReactNode }) {
   const { isLoading, error } = useInstitution();
 
@@ -83,6 +85,15 @@ export default function App() {
           <Routes>
             <Route path="/welcome" element={<InstitutionLanding />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={
+              <React.Suspense fallback={
+                <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
+                </div>
+              }>
+                <RegisterPage />
+              </React.Suspense>
+            } />
             <Route path="/super" element={<SuperAdminRoute />}>
               <Route element={<SuperAdminLayout />}>
                 <Route path="institutions" element={<Institutions />} />

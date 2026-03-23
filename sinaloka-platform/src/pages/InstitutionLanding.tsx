@@ -77,21 +77,14 @@ export function InstitutionLanding() {
           >
             Masuk
           </Button>
-          {institution.registration_enabled && (
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() =>
-                window.open(
-                  `https://sinaloka.com/register/${institution.slug}`,
-                  '_blank',
-                )
-              }
-              className={bgImage ? 'border-white/30 text-white hover:bg-white/10' : ''}
-            >
-              Daftar
-            </Button>
-          )}
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => navigate('/register')}
+            className={bgImage ? 'border-white/30 text-white hover:bg-white/10' : ''}
+          >
+            Daftar
+          </Button>
         </div>
       </div>
 
