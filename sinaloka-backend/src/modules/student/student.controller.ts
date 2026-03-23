@@ -32,11 +32,17 @@ import type {
   UpdateStudentDto,
   StudentQueryDto,
 } from './student.dto.js';
+import { AttendanceService } from '../attendance/attendance.service.js';
+import { StudentAttendanceQuerySchema } from '../attendance/attendance.dto.js';
+import type { StudentAttendanceQueryDto } from '../attendance/attendance.dto.js';
 
 @Controller('admin/students')
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)
 export class StudentController {
-  constructor(private readonly studentService: StudentService) {}
+  constructor(
+    private readonly studentService: StudentService,
+    private readonly attendanceService: AttendanceService,
+  ) {}
 
   @PlanLimit('students')
   @Post()
@@ -81,6 +87,17 @@ export class StudentController {
       'Content-Disposition': 'attachment; filename=students.csv',
     });
     res.send(csv);
+  }
+
+  @Get(':id/attendance')
+  async getStudentAttendance(
+    @InstitutionId() institutionId: string,
+    @Param('id') id: string,
+    @Query(new ZodValidationPipe(StudentAttendanceQuerySchema)) query: StudentAttendanceQueryDto,
+  ) {
+    // Verify student exists and belongs to tenant
+    await this.studentService.findOne(institutionId, id);
+    return this.attendanceService.findByStudent(institutionId, id, query);
   }
 
   @Get(':id')
