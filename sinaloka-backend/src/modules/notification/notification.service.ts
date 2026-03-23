@@ -50,12 +50,14 @@ export class NotificationService {
     if (dto.type) where.type = dto.type;
     if (dto.unread) where.read_at = null;
 
+    const page = Number(dto.page);
+    const limit = Number(dto.limit);
     const [notifications, total] = await this.prisma.$transaction([
       this.prisma.notification.findMany({
         where,
         orderBy: { created_at: 'desc' },
-        skip: (dto.page - 1) * dto.limit,
-        take: dto.limit,
+        skip: (page - 1) * limit,
+        take: limit,
       }),
       this.prisma.notification.count({ where }),
     ]);
@@ -64,9 +66,9 @@ export class NotificationService {
       data: notifications,
       meta: {
         total,
-        page: dto.page,
-        limit: dto.limit,
-        totalPages: Math.ceil(total / dto.limit),
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
     };
   }
