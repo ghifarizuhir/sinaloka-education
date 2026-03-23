@@ -14,6 +14,7 @@ import type {
   BatchCreateAttendanceDto,
   UpdateAttendanceDto,
   AttendanceSummaryQueryDto,
+  StudentAttendanceQueryDto,
 } from './attendance.dto.js';
 
 @Injectable()
@@ -238,6 +239,51 @@ export class AttendanceService {
       late,
       homework_done,
       attendance_rate: Math.round(attendance_rate * 100) / 100,
+    };
+  }
+
+  async findByStudent(
+    institutionId: string,
+    studentId: string,
+    query: StudentAttendanceQueryDto,
+  ) {
+    const { date_from, date_to } = query;
+
+    const records = await this.prisma.attendance.findMany({
+      where: {
+        institution_id: institutionId,
+        student_id: studentId,
+        session: {
+          date: { gte: date_from, lte: date_to },
+        },
+      },
+      include: {
+        session: {
+          select: {
+            id: true,
+            date: true,
+            start_time: true,
+            end_time: true,
+            status: true,
+            class: { select: { id: true, name: true } },
+          },
+        },
+      },
+      orderBy: { session: { date: 'desc' } },
+    });
+
+    const total_sessions = records.length;
+    const present = records.filter((r) => r.status === 'PRESENT').length;
+    const absent = records.filter((r) => r.status === 'ABSENT').length;
+    const late = records.filter((r) => r.status === 'LATE').length;
+    const attendance_rate =
+      total_sessions > 0
+        ? Math.round(((present + late) / total_sessions) * 100 * 100) / 100
+        : 0;
+
+    return {
+      summary: { total_sessions, present, absent, late, attendance_rate },
+      records,
     };
   }
 }
