@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
@@ -17,6 +18,19 @@ import {
 
 @Injectable()
 export class InstitutionService {
+  private static readonly RESERVED_SLUGS = [
+    'platform',
+    'parent',
+    'tutors',
+    'api',
+    'www',
+    'mail',
+    'ftp',
+    'admin',
+    'app',
+    'dashboard',
+  ];
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: PaginationDto): Promise<PaginatedResponse<any>> {
@@ -141,6 +155,46 @@ export class InstitutionService {
     );
   }
 
+  // Public endpoint — no tenantId scoping needed (pre-authentication discovery).
+  // settings is selected to extract registration_enabled; the full blob is never returned.
+  async findBySlugPublic(slug: string): Promise<{
+    name: string;
+    slug: string;
+    logo_url: string | null;
+    description: string | null;
+    brand_color: string | null;
+    background_image_url: string | null;
+    registration_enabled: boolean;
+  }> {
+    const institution = await this.prisma.institution.findFirst({
+      where: { slug, is_active: true },
+      select: {
+        name: true,
+        slug: true,
+        logo_url: true,
+        description: true,
+        brand_color: true,
+        background_image_url: true,
+        settings: true,
+      },
+    });
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+    const settings = institution.settings as Record<string, any> | null;
+    const registrationEnabled =
+      settings?.registration?.student_enabled ?? false;
+    return {
+      name: institution.name,
+      slug: institution.slug,
+      logo_url: institution.logo_url,
+      description: institution.description,
+      brand_color: institution.brand_color,
+      background_image_url: institution.background_image_url,
+      registration_enabled: registrationEnabled,
+    };
+  }
+
   async getSummary(institutionId: string) {
     const [studentCount, tutorCount, adminCount, activeClassCount] =
       await Promise.all([
@@ -166,6 +220,12 @@ export class InstitutionService {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
+
+    if (InstitutionService.RESERVED_SLUGS.includes(baseSlug)) {
+      throw new BadRequestException(
+        `Institution name "${name}" generates a reserved slug "${baseSlug}". Please choose a different name.`,
+      );
+    }
 
     let slug = baseSlug;
     let suffix = 2;

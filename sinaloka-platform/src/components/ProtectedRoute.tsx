@@ -1,9 +1,11 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/src/hooks/useAuth';
+import { useInstitution } from '@/src/contexts/InstitutionContext';
 import { Skeleton } from '@/src/components/UI';
 
 export function ProtectedRoute() {
   const { user, isAuthenticated, isLoading, isImpersonating } = useAuth();
+  const { slug } = useInstitution();
   const location = useLocation();
 
   if (isLoading) {
@@ -19,6 +21,10 @@ export function ProtectedRoute() {
   }
 
   if (!isAuthenticated) {
+    // On institution subdomains, redirect to the branded landing page instead of login
+    if (slug && location.pathname === '/') {
+      return <Navigate to="/welcome" replace />;
+    }
     const currentPath = location.pathname + location.search;
     return <Navigate to={`/login?redirect=${encodeURIComponent(currentPath)}`} replace />;
   }

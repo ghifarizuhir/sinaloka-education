@@ -11,6 +11,9 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import SuperAdminRoute from './components/SuperAdminRoute';
 import SuperAdminLayout from './components/SuperAdminLayout';
 
+// --- Contexts ---
+import { InstitutionProvider, useInstitution } from '@/src/contexts/InstitutionContext';
+
 // --- Pages ---
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -30,6 +33,8 @@ import { WhatsApp } from './pages/WhatsApp';
 import { Registrations } from './pages/Registrations';
 import Notifications from './pages/Notifications';
 import { AuditLog } from './pages/AuditLog';
+import { InstitutionLanding } from './pages/InstitutionLanding';
+import { InstitutionNotFound } from './pages/InstitutionNotFound';
 
 // --- Super Admin Pages ---
 import Institutions from './pages/SuperAdmin/Institutions';
@@ -40,45 +45,79 @@ import UpgradeRequests from './pages/SuperAdmin/UpgradeRequests';
 import SubscriptionManagement from './pages/SuperAdmin/SubscriptionManagement';
 import Settlements from './pages/SuperAdmin/Settlements';
 
+function InstitutionGate({ children }: { children: React.ReactNode }) {
+  const { isLoading, error } = useInstitution();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error === 'not_found') return <InstitutionNotFound />;
+
+  if (error === 'network_error') {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-zinc-500">Gagal memuat data institusi. Silakan coba lagi.</p>
+          <button onClick={() => window.location.reload()} className="mt-4 text-sm underline text-zinc-700 dark:text-zinc-300">
+            Muat ulang
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/super" element={<SuperAdminRoute />}>
-          <Route element={<SuperAdminLayout />}>
-            <Route path="institutions" element={<Institutions />} />
-            <Route path="institutions/new" element={<InstitutionForm />} />
-            <Route path="institutions/:id" element={<InstitutionDetail />} />
-            <Route path="users" element={<SuperAdminUsers />} />
-            <Route path="upgrade-requests" element={<UpgradeRequests />} />
-            <Route path="subscriptions" element={<SubscriptionManagement />} />
-            <Route path="settlements" element={<Settlements />} />
-            <Route path="audit-logs" element={<AuditLog />} />
-          </Route>
-        </Route>
-        <Route element={<ProtectedRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/students" element={<Students />} />
-            <Route path="/tutors" element={<Tutors />} />
-            <Route path="/classes" element={<Classes />} />
-            <Route path="/schedules" element={<Schedules />} />
-            <Route path="/enrollments" element={<Enrollments />} />
-            <Route path="/registrations" element={<Registrations />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/finance" element={<FinanceOverview />} />
-            <Route path="/finance/payments" element={<StudentPayments />} />
-            <Route path="/finance/payouts" element={<TutorPayouts />} />
-            <Route path="/finance/expenses" element={<OperatingExpenses />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/whatsapp" element={<WhatsApp />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/audit-logs" element={<AuditLog />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Route>
-      </Routes>
-    </Router>
+    <InstitutionProvider>
+      <InstitutionGate>
+        <Router>
+          <Routes>
+            <Route path="/welcome" element={<InstitutionLanding />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/super" element={<SuperAdminRoute />}>
+              <Route element={<SuperAdminLayout />}>
+                <Route path="institutions" element={<Institutions />} />
+                <Route path="institutions/new" element={<InstitutionForm />} />
+                <Route path="institutions/:id" element={<InstitutionDetail />} />
+                <Route path="users" element={<SuperAdminUsers />} />
+                <Route path="upgrade-requests" element={<UpgradeRequests />} />
+                <Route path="subscriptions" element={<SubscriptionManagement />} />
+                <Route path="settlements" element={<Settlements />} />
+                <Route path="audit-logs" element={<AuditLog />} />
+              </Route>
+            </Route>
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/students" element={<Students />} />
+                <Route path="/tutors" element={<Tutors />} />
+                <Route path="/classes" element={<Classes />} />
+                <Route path="/schedules" element={<Schedules />} />
+                <Route path="/enrollments" element={<Enrollments />} />
+                <Route path="/registrations" element={<Registrations />} />
+                <Route path="/attendance" element={<Attendance />} />
+                <Route path="/finance" element={<FinanceOverview />} />
+                <Route path="/finance/payments" element={<StudentPayments />} />
+                <Route path="/finance/payouts" element={<TutorPayouts />} />
+                <Route path="/finance/expenses" element={<OperatingExpenses />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/whatsapp" element={<WhatsApp />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/audit-logs" element={<AuditLog />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Route>
+          </Routes>
+        </Router>
+      </InstitutionGate>
+    </InstitutionProvider>
   );
 }

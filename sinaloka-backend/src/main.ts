@@ -9,12 +9,53 @@ async function bootstrap() {
   const port = configService.get<number>('PORT', 3000);
 
   const corsOrigins = configService.get<string>('CORS_ORIGINS', '');
+  const wildcardDomain = configService.get<string>('CORS_WILDCARD_DOMAIN', '');
   // Trust proxy for correct client IP behind Railway reverse proxy
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.set('trust proxy', 1);
 
   app.enableCors({
-    origin: corsOrigins ? corsOrigins.split(',').map((o) => o.trim()) : true,
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      // Allow requests with no origin (non-browser, e.g. mobile apps, curl)
+      if (!origin) return callback(null, true);
+
+      // Check static allowed origins
+      const allowed = corsOrigins
+        ? corsOrigins.split(',').map((o) => o.trim())
+        : [];
+
+      if (allowed.length === 0 && !wildcardDomain) {
+        // No restrictions configured — allow all (backward compatible)
+        return callback(null, true);
+      }
+
+      if (allowed.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Check wildcard subdomain (exactly one level)
+      if (wildcardDomain) {
+        try {
+          const url = new URL(origin);
+          const parts = url.hostname.split('.');
+          const domainParts = wildcardDomain.split('.');
+          // Ensure exactly one subdomain level: slug.domain.tld
+          if (
+            parts.length === domainParts.length + 1 &&
+            url.hostname.endsWith(`.${wildcardDomain}`)
+          ) {
+            return callback(null, true);
+          }
+        } catch {
+          // malformed origin — reject
+        }
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   });
   app.setGlobalPrefix('api');

@@ -143,7 +143,10 @@ model Institution {
   address    String?
   phone      String?
   email      String?
-  logo_url   String?
+  logo_url             String?
+  description          String?
+  brand_color          String?
+  background_image_url String?
   settings         Json?
   timezone         String   @default("Asia/Jakarta")
   default_language String   @default("id")

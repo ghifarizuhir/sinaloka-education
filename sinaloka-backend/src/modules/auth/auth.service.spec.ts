@@ -11,8 +11,16 @@ jest.mock('../../common/prisma/prisma.service', () => {
   };
 });
 
+// Mock EmailService module
+jest.mock('../email/email.service', () => {
+  return {
+    EmailService: jest.fn(),
+  };
+});
+
 import { AuthService } from './auth.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { EmailService } from '../email/email.service.js';
 
 // Mock bcrypt
 jest.mock('bcrypt', () => ({
@@ -49,6 +57,13 @@ describe('AuthService', () => {
     role: 'ADMIN',
     is_active: true,
     institution_id: 'inst-1',
+    institution: {
+      id: 'inst-1',
+      name: 'Bimbel Cerdas',
+      slug: 'bimbelcerdas',
+      is_active: true,
+    },
+    must_change_password: false,
     last_login_at: null,
     created_at: new Date(),
     updated_at: new Date(),
@@ -86,6 +101,12 @@ describe('AuthService', () => {
               };
               return config[key] ?? defaultValue;
             }),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendPasswordReset: jest.fn(),
           },
         },
       ],
@@ -147,6 +168,57 @@ describe('AuthService', () => {
 
       await expect(
         service.login({ email: 'admin@test.com', password: 'password123' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should succeed when slug matches user institution', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        institution: { ...mockUser.institution, slug: 'bimbelcerdas' },
+      } as any);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.refreshToken.create.mockResolvedValue({} as any);
+      prisma.user.update.mockResolvedValue({} as any);
+
+      const result = await service.login({
+        email: 'admin@test.com',
+        password: 'password',
+        slug: 'bimbelcerdas',
+      });
+      expect(result).toHaveProperty('access_token');
+    });
+
+    it('should reject when slug does not match user institution', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        institution: { ...mockUser.institution, slug: 'other-inst' },
+      } as any);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        service.login({
+          email: 'admin@test.com',
+          password: 'password',
+          slug: 'bimbelcerdas',
+        }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should reject SUPER_ADMIN login with slug', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        role: 'SUPER_ADMIN',
+        institution_id: null,
+        institution: null,
+      } as any);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        service.login({
+          email: 'super@test.com',
+          password: 'password',
+          slug: 'bimbelcerdas',
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
   });

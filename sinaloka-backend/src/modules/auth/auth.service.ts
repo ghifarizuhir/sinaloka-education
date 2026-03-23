@@ -71,6 +71,33 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    // Subdomain slug validation
+    if (dto.slug) {
+      // SUPER_ADMIN must login at platform.sinaloka.com (no slug)
+      if (user.role === 'SUPER_ADMIN') {
+        throw new UnauthorizedException(
+          'Silakan login di platform.sinaloka.com',
+        );
+      }
+      // Verify user belongs to the institution matching this slug
+      if (!user.institution || user.institution.slug !== dto.slug) {
+        throw new UnauthorizedException(
+          'Akun tidak terdaftar di institusi ini',
+        );
+      }
+    } else {
+      // No slug provided — check enforcement
+      const enforceSubdomain = this.configService.get<string>(
+        'ENFORCE_SUBDOMAIN_LOGIN',
+        'false',
+      );
+      if (enforceSubdomain === 'true' && user.role !== 'SUPER_ADMIN') {
+        throw new UnauthorizedException(
+          'Silakan akses melalui subdomain institusi Anda',
+        );
+      }
+    }
+
     // Update last_login_at
     await this.prisma.user.update({
       where: { id: user.id },
