@@ -83,7 +83,7 @@ export class PaymentReminderCron {
     for (const payment of payments) {
       const parentUserIds = payment.student.parent_links
         .map((link) => link.parent.user_id)
-        .filter(Boolean) as string[];
+        .filter(Boolean);
 
       if (parentUserIds.length === 0) {
         skippedNoParent++;
@@ -100,7 +100,8 @@ export class PaymentReminderCron {
         year: 'numeric',
       });
 
-      const statusLabel = payment.status === 'OVERDUE' ? 'Terlambat' : 'Menunggu';
+      const statusLabel =
+        payment.status === 'OVERDUE' ? 'Terlambat' : 'Menunggu';
 
       for (const parentUserId of parentUserIds) {
         try {
@@ -146,10 +147,11 @@ export class PaymentReminderCron {
           } else {
             failed++;
           }
-        } catch (error: any) {
+        } catch (error) {
           failed++;
           this.logger.error(
-            `Failed to create reminder for payment ${payment.id}: ${error.message}`,
+            `Failed to create reminder for payment ${payment.id}`,
+            error,
           );
         }
       }
