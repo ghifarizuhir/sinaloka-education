@@ -12,7 +12,7 @@ export const RegistrationTab = () => {
   const updateSettings = useUpdateRegistrationSettings();
 
   const slug = user?.institution?.slug ?? '';
-  const registrationLink = `sinaloka.com/register/${slug}`;
+  const registrationLink = `${slug}.sinaloka.com/register`;
 
   const handleToggleStudent = (enabled: boolean) => {
     updateSettings.mutate({
