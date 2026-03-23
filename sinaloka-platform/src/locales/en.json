@@ -458,8 +458,14 @@
       "roomMismatchWarning": "This class has a custom room value '{{value}}'. Please select a room from the list below.",
       "selectRoom": "Select a room",
       "noRoomsAvailable": "No rooms configured — add rooms in Settings > Academic",
+      "semester": "Semester (optional)",
+      "noSemester": "No semester",
       "schedulePreview": "Schedule Preview",
       "selectTutorForPreview": "Select a tutor to view schedule"
+    },
+    "filters": {
+      "allSemesters": "All Semesters",
+      "noSemester": "No Semester"
     },
     "table": {
       "className": "Class Name",

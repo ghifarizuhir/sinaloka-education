@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Search,
   Calendar,
   Table2
 } from 'lucide-react';
@@ -8,9 +7,9 @@ import {
   SearchInput,
   Select,
   Switch,
-  Skeleton
 } from '../../components/UI';
 import { cn } from '../../lib/utils';
+import type { AcademicYear } from '@/src/types/academic-year';
 
 interface ClassFiltersProps {
   t: (key: string) => string;
@@ -18,11 +17,14 @@ interface ClassFiltersProps {
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   filterSubject: string;
   onFilterSubjectChange: (val: string) => void;
+  filterSemesterId: string;
+  onFilterSemesterChange: (val: string) => void;
   showOnlyAvailable: boolean;
   onShowOnlyAvailableChange: (val: boolean) => void;
   viewMode: 'table' | 'timetable';
   onViewModeChange: (mode: 'table' | 'timetable') => void;
   subjectsList: { id: string; name: string }[] | undefined;
+  academicYears: AcademicYear[] | undefined;
 }
 
 export const ClassFilters = ({
@@ -31,12 +33,26 @@ export const ClassFilters = ({
   onSearchChange,
   filterSubject,
   onFilterSubjectChange,
+  filterSemesterId,
+  onFilterSemesterChange,
   showOnlyAvailable,
   onShowOnlyAvailableChange,
   viewMode,
   onViewModeChange,
   subjectsList,
+  academicYears,
 }: ClassFiltersProps) => {
+  const semesterOptions = [
+    { value: '', label: t('classes.filters.allSemesters') },
+    { value: 'none', label: t('classes.filters.noSemester') },
+    ...(academicYears ?? []).flatMap(year =>
+      (year.semesters ?? []).map(sem => ({
+        value: sem.id,
+        label: `${year.name} - ${sem.name}`,
+      }))
+    ),
+  ];
+
   return (
     <div className="flex flex-col sm:flex-row items-center gap-4">
       <SearchInput
@@ -45,7 +61,7 @@ export const ClassFilters = ({
         value={searchQuery}
         onChange={onSearchChange}
       />
-      <div className="flex items-center gap-4 w-full sm:w-auto">
+      <div className="flex items-center gap-4 w-full sm:w-auto flex-wrap">
         <Select
           value={filterSubject}
           onChange={onFilterSubjectChange}
@@ -53,6 +69,12 @@ export const ClassFilters = ({
             { value: '', label: t('common.allSubjects') },
             ...(subjectsList ?? []).map(s => ({ value: s.name, label: s.name })),
           ]}
+        />
+
+        <Select
+          value={filterSemesterId}
+          onChange={onFilterSemesterChange}
+          options={semesterOptions}
         />
 
         <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900 px-3 py-2 rounded-lg border border-zinc-100 dark:border-zinc-800">

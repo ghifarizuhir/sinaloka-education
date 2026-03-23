@@ -9,6 +9,7 @@ import {
   useDeleteClass
 } from '@/src/hooks/useClasses';
 import { useSubjects, useSubjectTutors } from '@/src/hooks/useSubjects';
+import { useAcademicYears } from '@/src/hooks/useAcademicYears';
 import { useBillingSettings, useAcademicSettings } from '@/src/hooks/useSettings';
 import { useGenerateSessions } from '@/src/hooks/useSessions';
 import { useFormErrors } from '@/src/hooks/useFormErrors';
@@ -42,6 +43,7 @@ export function useClassesPage() {
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
+  const [filterSemesterId, setFilterSemesterId] = useState('');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Class | null>(null);
@@ -65,12 +67,14 @@ export function useClassesPage() {
   const [formSchedules, setFormSchedules] = useState<ClassScheduleItem[]>([]);
   const [formRoom, setFormRoom] = useState('');
   const [formStatus, setFormStatus] = useState<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
+  const [formSemesterId, setFormSemesterId] = useState<string>('');
 
   const formErrors = useFormErrors();
 
   const { data, isLoading } = useClasses({ page, limit });
   const { data: allClassesData } = useClasses({ page: 1, limit: 100 });
   const { data: subjectsList } = useSubjects();
+  const { data: academicYears } = useAcademicYears();
   const { data: subjectTutors } = useSubjectTutors(formSubjectId || null);
   const { data: billingSettings } = useBillingSettings();
   const { data: academicSettings } = useAcademicSettings();
@@ -100,9 +104,14 @@ export function useClassesPage() {
       const matchesSubject = !filterSubject || c.subject.name === filterSubject;
       // "available" means not archived and enrolled (enrollments not in class object; use capacity as proxy)
       const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
-      return matchesSearch && matchesSubject && matchesAvailability;
+      const matchesSemester = !filterSemesterId
+        ? true
+        : filterSemesterId === 'none'
+          ? !c.semester_id
+          : c.semester_id === filterSemesterId;
+      return matchesSearch && matchesSubject && matchesAvailability && matchesSemester;
     });
-  }, [classes, searchQuery, filterSubject, showOnlyAvailable]);
+  }, [classes, searchQuery, filterSubject, filterSemesterId, showOnlyAvailable]);
 
   const allClasses = allClassesData?.data ?? [];
   const filteredTimetableClasses = useMemo(() => {
@@ -113,9 +122,14 @@ export function useClassesPage() {
         tutorName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesSubject = !filterSubject || c.subject.name === filterSubject;
       const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
-      return matchesSearch && matchesSubject && matchesAvailability;
+      const matchesSemester = !filterSemesterId
+        ? true
+        : filterSemesterId === 'none'
+          ? !c.semester_id
+          : c.semester_id === filterSemesterId;
+      return matchesSearch && matchesSubject && matchesAvailability && matchesSemester;
     });
-  }, [allClasses, searchQuery, filterSubject, showOnlyAvailable]);
+  }, [allClasses, searchQuery, filterSubject, filterSemesterId, showOnlyAvailable]);
 
   const selectedClass = filteredClasses.find((c) => c.id === selectedClassId) ?? null;
 
@@ -138,6 +152,7 @@ export function useClassesPage() {
     setFormSchedules([]);
     setFormRoom('');
     setFormStatus('ACTIVE');
+    setFormSemesterId('');
     setShowModal(true);
   };
 
@@ -156,6 +171,7 @@ export function useClassesPage() {
     setFormTutorFeeMode(cls.tutor_fee_mode ?? 'FIXED_PER_SESSION');
     setFormTutorFeePerStudent(cls.tutor_fee_per_student ? String(cls.tutor_fee_per_student) : '');
     setFormStatus(cls.status);
+    setFormSemesterId(cls.semester_id ?? '');
     setShowModal(true);
   };
 
@@ -216,6 +232,7 @@ export function useClassesPage() {
       tutor_fee_mode: formTutorFeeMode,
       tutor_fee_per_student: formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' ? Number(formTutorFeePerStudent) : null,
       status: formStatus,
+      semester_id: formSemesterId || null,
     };
 
     if (editingClass) {
@@ -321,6 +338,8 @@ export function useClassesPage() {
     setSearchQuery,
     filterSubject,
     setFilterSubject,
+    filterSemesterId,
+    setFilterSemesterId,
     showOnlyAvailable,
     setShowOnlyAvailable,
     activeActionMenu,
@@ -362,9 +381,12 @@ export function useClassesPage() {
     setFormRoom,
     formStatus,
     setFormStatus,
+    formSemesterId,
+    setFormSemesterId,
     formErrors,
     isLoading,
     subjectsList,
+    academicYears,
     subjectTutors,
     billingMode,
     createClass,

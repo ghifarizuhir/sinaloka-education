@@ -88,6 +88,11 @@ export const Classes = () => {
           state.setFilterSubject(val);
           state.setPage(1);
         }}
+        filterSemesterId={state.filterSemesterId}
+        onFilterSemesterChange={(val) => {
+          state.setFilterSemesterId(val);
+          state.setPage(1);
+        }}
         showOnlyAvailable={state.showOnlyAvailable}
         onShowOnlyAvailableChange={(val: boolean) => {
           state.setShowOnlyAvailable(val);
@@ -96,6 +101,7 @@ export const Classes = () => {
         viewMode={state.viewMode}
         onViewModeChange={state.setViewMode}
         subjectsList={state.subjectsList}
+        academicYears={state.academicYears}
       />
 
       {state.viewMode === 'table' ? (
@@ -159,6 +165,9 @@ export const Classes = () => {
         updateClass={state.updateClass}
         tutorClasses={state.tutorClasses}
         availableRooms={state.availableRooms}
+        academicYears={state.academicYears}
+        formSemesterId={state.formSemesterId}
+        setFormSemesterId={state.setFormSemesterId}
         toggleScheduleDay={state.toggleScheduleDay}
         handleFormSubmit={state.handleFormSubmit}
         errors={state.formErrors.errors}
