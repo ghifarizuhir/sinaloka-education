@@ -1,6 +1,9 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator.js';
-import { RateLimitGuard, RateLimit } from '../../common/guards/rate-limit.guard.js';
+import {
+  RateLimitGuard,
+  RateLimit,
+} from '../../common/guards/rate-limit.guard.js';
 import { InstitutionService } from './institution.service.js';
 
 @Controller('institutions/public')

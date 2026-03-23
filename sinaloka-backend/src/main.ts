@@ -9,16 +9,16 @@ async function bootstrap() {
   const port = configService.get<number>('PORT', 3000);
 
   const corsOrigins = configService.get<string>('CORS_ORIGINS', '');
-  const wildcardDomain = configService.get<string>(
-    'CORS_WILDCARD_DOMAIN',
-    '',
-  );
+  const wildcardDomain = configService.get<string>('CORS_WILDCARD_DOMAIN', '');
   // Trust proxy for correct client IP behind Railway reverse proxy
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.set('trust proxy', 1);
 
   app.enableCors({
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       // Allow requests with no origin (non-browser, e.g. mobile apps, curl)
       if (!origin) return callback(null, true);
 

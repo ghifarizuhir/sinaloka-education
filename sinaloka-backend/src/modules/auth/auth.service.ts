@@ -91,10 +91,7 @@ export class AuthService {
         'ENFORCE_SUBDOMAIN_LOGIN',
         'false',
       );
-      if (
-        enforceSubdomain === 'true' &&
-        user.role !== 'SUPER_ADMIN'
-      ) {
+      if (enforceSubdomain === 'true' && user.role !== 'SUPER_ADMIN') {
         throw new UnauthorizedException(
           'Silakan akses melalui subdomain institusi Anda',
         );

@@ -146,13 +146,23 @@ describe('InstitutionService', () => {
 
     it('should reject reserved slugs', async () => {
       await expect(
-        service.create({ name: 'Platform', address: null, phone: null, email: null }),
+        service.create({
+          name: 'Platform',
+          address: null,
+          phone: null,
+          email: null,
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should reject slug that generates a reserved word', async () => {
       await expect(
-        service.create({ name: 'Admin', address: null, phone: null, email: null }),
+        service.create({
+          name: 'Admin',
+          address: null,
+          phone: null,
+          email: null,
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -265,7 +275,9 @@ describe('InstitutionService', () => {
 
     it('should throw NotFoundException for unknown slug', async () => {
       prisma.institution.findFirst.mockResolvedValue(null);
-      await expect(service.findBySlugPublic('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findBySlugPublic('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

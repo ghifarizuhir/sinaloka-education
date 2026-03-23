@@ -19,8 +19,16 @@ import {
 @Injectable()
 export class InstitutionService {
   private static readonly RESERVED_SLUGS = [
-    'platform', 'parent', 'tutors', 'api', 'www',
-    'mail', 'ftp', 'admin', 'app', 'dashboard',
+    'platform',
+    'parent',
+    'tutors',
+    'api',
+    'www',
+    'mail',
+    'ftp',
+    'admin',
+    'app',
+    'dashboard',
   ];
 
   constructor(private readonly prisma: PrismaService) {}
@@ -151,8 +159,12 @@ export class InstitutionService {
     const institution = await this.prisma.institution.findFirst({
       where: { slug, is_active: true },
       select: {
-        name: true, slug: true, logo_url: true,
-        description: true, brand_color: true, background_image_url: true,
+        name: true,
+        slug: true,
+        logo_url: true,
+        description: true,
+        brand_color: true,
+        background_image_url: true,
         settings: true,
       },
     });
@@ -160,10 +172,14 @@ export class InstitutionService {
       throw new NotFoundException('Institution not found');
     }
     const settings = institution.settings as Record<string, any> | null;
-    const registrationEnabled = settings?.registration?.student_enabled ?? false;
+    const registrationEnabled =
+      settings?.registration?.student_enabled ?? false;
     return {
-      name: institution.name, slug: institution.slug, logo_url: institution.logo_url,
-      description: institution.description, brand_color: institution.brand_color,
+      name: institution.name,
+      slug: institution.slug,
+      logo_url: institution.logo_url,
+      description: institution.description,
+      brand_color: institution.brand_color,
       background_image_url: institution.background_image_url,
       registration_enabled: registrationEnabled,
     };
