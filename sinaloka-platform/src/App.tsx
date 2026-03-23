@@ -34,6 +34,7 @@ import { WhatsApp } from './pages/WhatsApp';
 import { Registrations } from './pages/Registrations';
 import Notifications from './pages/Notifications';
 import { AuditLog } from './pages/AuditLog';
+import { AcademicYears } from './pages/AcademicYears';
 import { InstitutionLanding } from './pages/InstitutionLanding';
 import { InstitutionNotFound } from './pages/InstitutionNotFound';
 
@@ -102,6 +103,7 @@ export default function App() {
                 <Route path="/students/:id" element={<StudentDetail />} />
                 <Route path="/tutors" element={<Tutors />} />
                 <Route path="/classes" element={<Classes />} />
+                <Route path="/academic-years" element={<AcademicYears />} />
                 <Route path="/schedules" element={<Schedules />} />
                 <Route path="/enrollments" element={<Enrollments />} />
                 <Route path="/registrations" element={<Registrations />} />
