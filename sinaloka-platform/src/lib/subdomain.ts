@@ -36,6 +36,30 @@ export function getInstitutionSlug(): string | null {
   return null;
 }
 
+/**
+ * Validate that a string is a safe hex color (e.g. #1a2b3c).
+ * Prevents CSS injection via style attributes.
+ */
+export function isValidHexColor(color: string | null | undefined): boolean {
+  return !!color && /^#[0-9a-fA-F]{6}$/.test(color);
+}
+
+/**
+ * Returns the color only if it's a valid hex color, otherwise undefined.
+ */
+export function sanitizeBrandColor(color: string | null | undefined): string | undefined {
+  return isValidHexColor(color) ? color! : undefined;
+}
+
+/**
+ * Validate that a URL is safe to use in CSS url() or img src.
+ * Only allows http(s) URLs and absolute paths.
+ */
+export function isValidImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return url.startsWith('https://') || url.startsWith('http://') || url.startsWith('/');
+}
+
 export function isReservedSubdomain(): boolean {
   const hostname = window.location.hostname;
   const parts = hostname.split('.');

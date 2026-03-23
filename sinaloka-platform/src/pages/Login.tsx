@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { useInstitution } from '@/src/contexts/InstitutionContext';
+import { sanitizeBrandColor } from '@/src/lib/subdomain';
 import { Card, Button, Input, Label, PasswordInput } from '@/src/components/UI';
 
 export function Login() {
@@ -73,7 +74,7 @@ export function Login() {
               ) : (
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg text-white text-lg font-bold"
-                  style={{ backgroundColor: institution.brand_color || '#18181b' }}
+                  style={{ backgroundColor: sanitizeBrandColor(institution.brand_color) ?? '#18181b' }}
                 >
                   {institution.name.charAt(0).toUpperCase()}
                 </div>

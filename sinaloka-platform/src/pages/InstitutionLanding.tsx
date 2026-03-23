@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useInstitution } from '@/src/contexts/InstitutionContext';
+import { sanitizeBrandColor, isValidImageUrl } from '@/src/lib/subdomain';
 import { Button } from '@/src/components/UI';
 
 export function InstitutionLanding() {
@@ -8,8 +9,8 @@ export function InstitutionLanding() {
 
   if (!institution) return null;
 
-  const brandColor = institution.brand_color || '#18181b';
-  const bgImage = institution.background_image_url;
+  const brandColor = sanitizeBrandColor(institution.brand_color) ?? '#18181b';
+  const bgImage = isValidImageUrl(institution.background_image_url) ? institution.background_image_url : null;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
