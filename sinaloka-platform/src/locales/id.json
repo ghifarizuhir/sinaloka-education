@@ -251,6 +251,7 @@
       "importSuccess": "Siswa diimpor",
       "importError": "Gagal mengimpor siswa",
       "exportSuccess": "Siswa berhasil diekspor",
+      "exportEmpty": "Tidak ada data siswa untuk diekspor",
       "exportError": "Gagal mengekspor siswa",
       "createError": "Gagal membuat siswa",
       "updateError": "Gagal memperbarui siswa",

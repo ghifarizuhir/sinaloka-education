@@ -251,6 +251,7 @@
       "importSuccess": "Students imported",
       "importError": "Failed to import students",
       "exportSuccess": "Students exported",
+      "exportEmpty": "No student data to export",
       "exportError": "Failed to export students",
       "createError": "Failed to create student",
       "updateError": "Failed to update student",

@@ -126,6 +126,10 @@ export function useStudentPage() {
   };
 
   const handleExportClick = () => {
+    if ((data?.data ?? []).length === 0) {
+      toast.warning(t('students.toast.exportEmpty'));
+      return;
+    }
     const exportParams = {
       search: debouncedSearch || undefined,
       grade: activeFilters.grade || undefined,
