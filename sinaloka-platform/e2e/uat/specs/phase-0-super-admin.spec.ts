@@ -132,12 +132,13 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
 
     await instPage.submitCreate();
 
-    // Validation errors should appear (required fields)
-    // Look for any validation message near admin fields
-    const validationError = page.locator(
-      'text=/required|must|please|field/i',
-    );
-    await expect(validationError.first()).toBeVisible({ timeout: 5_000 });
+    // Browser native validation blocks submit on required fields (adminName, adminEmail, adminPassword)
+    // Verify the form was NOT submitted by checking we're still on the create page
+    await expect(page).toHaveURL(/\/super\/institutions\/new/);
+    // Check that required admin fields are invalid via :invalid pseudo-class
+    const invalidFields = page.locator('#adminName:invalid, #adminEmail:invalid, #adminPassword:invalid');
+    const count = await invalidFields.count();
+    expect(count).toBeGreaterThan(0);
   });
 
   test('TC-NEG-SA-03: Create institution with invalid admin email shows format error', async ({
