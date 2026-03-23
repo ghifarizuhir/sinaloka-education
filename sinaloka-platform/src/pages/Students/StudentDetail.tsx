@@ -7,6 +7,7 @@ import { Button, Badge, Avatar, PageHeader } from '../../components/UI';
 import { cn } from '../../lib/utils';
 import { useStudent } from '@/src/hooks/useStudents';
 import { useInviteParent } from '@/src/hooks/useParents';
+import type { Student } from '@/src/types/student';
 import { StudentProfileTab } from './StudentProfileTab';
 import { StudentAttendanceTab } from './StudentAttendanceTab';
 
@@ -22,7 +23,7 @@ export const StudentDetail = () => {
   const { data: student, isLoading } = useStudent(id ?? '');
   const inviteParent = useInviteParent();
 
-  const handleInviteParent = async (s: any) => {
+  const handleInviteParent = async (s: Student) => {
     try {
       await inviteParent.mutateAsync(s.id);
       toast.success(t('students.drawer.inviteSent'));

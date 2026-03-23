@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CheckCircle, XCircle, Clock, Percent } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Card, Badge, EmptyState } from '../../components/UI';
+import { Card, EmptyState } from '../../components/UI';
 import { cn, formatDate } from '../../lib/utils';
 import { useStudentAttendance } from '@/src/hooks/useAttendance';
 import type { AttendanceStatus } from '@/src/types/attendance';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Mail, Phone, Calendar, UserPlus } from 'lucide-react';
-import { Card, Button, Badge, Avatar } from '../../components/UI';
+import { Card, Button, Avatar } from '../../components/UI';
 import { formatDate } from '../../lib/utils';
 import type { Student } from '@/src/types/student';
 import { useTranslation } from 'react-i18next';
