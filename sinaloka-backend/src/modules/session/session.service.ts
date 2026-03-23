@@ -222,6 +222,7 @@ export class SessionService {
             name: session.snapshot_class_name ?? session.class.name,
             fee: Number(session.snapshot_class_fee ?? session.class.fee),
             room: session.snapshot_class_room ?? session.class.room ?? null,
+            tutor_fee_mode: session.snapshot_tutor_fee_mode ?? session.class.tutor_fee_mode,
             tutor: session.snapshot_tutor_id
               ? {
                   id: session.snapshot_tutor_id,

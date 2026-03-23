@@ -219,7 +219,7 @@ export class PayoutService {
       period_end: params.period_end,
       sessions: sessions.map((s) => ({
         session_id: s.id,
-        class_name: s.class.name,
+        class_name: (s as any).snapshot_class_name ?? s.class?.name ?? '',
         date: s.date,
         tutor_fee_amount: Number(s.tutor_fee_amount),
       })),
