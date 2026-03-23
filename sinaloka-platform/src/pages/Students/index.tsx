@@ -7,7 +7,11 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Users,
+  UserCheck,
+  UserX,
+  AlertTriangle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, Button, Badge, Skeleton, PageHeader } from '../../components/UI';
@@ -50,34 +54,77 @@ export const Students = () => {
       {/* Stats Cards */}
       {s.isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-[104px] rounded-xl" />)}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4 flex flex-col justify-between h-24">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{s.t('students.totalStudents')}</span>
-            <span className="text-2xl font-bold">{s.statsTotal}</span>
-          </Card>
-          <Card className="p-4 flex flex-col justify-between h-24">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{s.t('students.activeStudents')}</span>
-            <div className="flex items-end justify-between">
-              <span className="text-2xl font-bold text-emerald-600">{s.statsActive}</span>
-              {s.statsTotal > 0 && (
-                <Badge variant="success">{((s.statsActive / s.statsTotal) * 100).toFixed(0)}%</Badge>
-              )}
-            </div>
-          </Card>
-          <Card className="p-4 flex flex-col justify-between h-24">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{s.t('students.inactive')}</span>
-            <span className="text-2xl font-bold text-zinc-500">{s.statsInactive}</span>
-          </Card>
-          <Card className="p-4 flex flex-col justify-between h-24">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{s.t('students.totalAllPages')}</span>
-            <div className="flex items-end justify-between">
-              <span className="text-2xl font-bold text-indigo-600">{s.meta?.total ?? 0}</span>
-              <span className="text-[10px] text-zinc-400">{s.t('common.allRecords')}</span>
-            </div>
-          </Card>
+          {[
+            {
+              label: s.t('students.totalStudents'),
+              value: s.statsTotal,
+              icon: Users,
+              iconBg: 'bg-indigo-50 dark:bg-indigo-900/20',
+              iconColor: 'text-indigo-600 dark:text-indigo-400',
+              accent: 'group-hover:border-indigo-200 dark:group-hover:border-indigo-800/40',
+            },
+            {
+              label: s.t('students.activeStudents'),
+              value: s.statsActive,
+              icon: UserCheck,
+              iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
+              iconColor: 'text-emerald-600 dark:text-emerald-400',
+              accent: 'group-hover:border-emerald-200 dark:group-hover:border-emerald-800/40',
+              badge: s.statsTotal > 0 ? `${((s.statsActive / s.statsTotal) * 100).toFixed(0)}%` : undefined,
+              badgeColor: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+            },
+            {
+              label: s.t('students.inactive'),
+              value: s.statsInactive,
+              icon: UserX,
+              iconBg: 'bg-zinc-100 dark:bg-zinc-800/50',
+              iconColor: 'text-zinc-500 dark:text-zinc-400',
+              accent: 'group-hover:border-zinc-300 dark:group-hover:border-zinc-700',
+            },
+            {
+              label: s.t('students.overduePayments'),
+              value: s.flaggedStudentIds.size,
+              icon: AlertTriangle,
+              iconBg: s.flaggedStudentIds.size > 0 ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-zinc-100 dark:bg-zinc-800/50',
+              iconColor: s.flaggedStudentIds.size > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400',
+              accent: s.flaggedStudentIds.size > 0
+                ? 'group-hover:border-amber-200 dark:group-hover:border-amber-800/40'
+                : 'group-hover:border-zinc-300 dark:group-hover:border-zinc-700',
+              badge: s.flaggedStudentIds.size > 0 ? s.t('common.needsAttention') : undefined,
+              badgeColor: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+            },
+          ].map((card, i) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.05 }}
+            >
+              <Card className={cn(
+                "group p-4 flex items-center gap-4 transition-all duration-200 hover:shadow-md",
+                card.accent,
+              )}>
+                <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center shrink-0", card.iconBg)}>
+                  <card.icon size={20} className={card.iconColor} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">{card.label}</p>
+                  <div className="flex items-baseline gap-2 mt-0.5">
+                    <p className="text-xl font-bold tracking-tight">{card.value}</p>
+                    {card.badge && (
+                      <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded-md", card.badgeColor)}>
+                        {card.badge}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
         </div>
       )}
 
