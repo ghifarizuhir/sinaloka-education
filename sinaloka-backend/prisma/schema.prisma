@@ -562,7 +562,15 @@ model Session {
   proposed_date        DateTime?     @db.Date
   proposed_start_time  String?
   proposed_end_time    String?
-  reschedule_reason    String?
+  reschedule_reason              String?
+  snapshot_tutor_id              String?
+  snapshot_tutor_name            String?
+  snapshot_subject_name          String?
+  snapshot_class_name            String?
+  snapshot_class_fee             Decimal?
+  snapshot_class_room            String?
+  snapshot_tutor_fee_mode        String?
+  snapshot_tutor_fee_per_student Decimal?
   created_at           DateTime      @default(now())
   updated_at           DateTime      @updatedAt
 
