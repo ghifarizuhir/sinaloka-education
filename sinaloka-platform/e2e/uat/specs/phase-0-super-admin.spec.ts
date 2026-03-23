@@ -656,7 +656,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
       // No pending requests — verify UI structure only
       const table = upgPage.getTable();
       const tableVisible = await table.isVisible().catch(() => false);
-      expect(tableVisible).toBeDefined(); // page loaded without error
+      expect(tableVisible).toBeTruthy(); // page loaded and table visible
       return;
     }
 
@@ -692,7 +692,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
       // No pending requests — verify UI structure only
       const table = upgPage.getTable();
       const tableVisible = await table.isVisible().catch(() => false);
-      expect(tableVisible).toBeDefined();
+      expect(tableVisible).toBeTruthy();
       return;
     }
 

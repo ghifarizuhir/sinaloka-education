@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const isUat = process.argv.includes('--project=uat') || process.env.UAT === '1';
+
 export default defineConfig({
   testDir: './specs',
   fullyParallel: true,
@@ -7,6 +9,10 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? 'github' : 'html',
+  // globalSetup/globalTeardown must be top-level (not per-project).
+  // Only activate for UAT runs to avoid resetting DB during normal E2E.
+  globalSetup: isUat ? require.resolve('./uat/global-setup.ts') : undefined,
+  globalTeardown: isUat ? require.resolve('./uat/global-teardown.ts') : undefined,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -32,8 +38,6 @@ export default defineConfig({
         actionTimeout: 15_000,
         navigationTimeout: 30_000,
       },
-      globalSetup: require.resolve('./uat/global-setup.ts'),
-      globalTeardown: require.resolve('./uat/global-teardown.ts'),
     },
   ],
   webServer: {

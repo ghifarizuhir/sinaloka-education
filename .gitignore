@@ -16,7 +16,7 @@ tunnels.sh
 test-results/
 sinaloka-platform/playwright-report/
 capture/
-e2e/uat/state/uat-state.json
+sinaloka-platform/e2e/uat/state/uat-state.json
 
 # Docs (local only, except superpowers)
 docs/
