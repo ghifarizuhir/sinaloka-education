@@ -25,12 +25,25 @@ interface NotificationPageProps {
 export function NotificationPage({ onNavigateToChild }: NotificationPageProps) {
   const { notifications, isLoading, error, hasMore, loadMore, refresh, markAsRead, markAllAsRead } = useNotifications();
 
+  const resolveTab = (notification: (typeof notifications)[0]): string | undefined => {
+    const type = (notification.type ?? '').toLowerCase();
+    const title = (notification.title ?? '').toLowerCase();
+    const body = (notification.body ?? '').toLowerCase();
+    const text = `${type} ${title} ${body}`;
+
+    if (/payment|tagihan|bayar|lunas|jatuh tempo/.test(text)) return 'payments';
+    if (/attendance|kehadiran|hadir|absen/.test(text)) return 'attendance';
+    if (/session|sesi|jadwal/.test(text)) return 'sessions';
+    if (/enrollment|pendaftaran|daftar|kelas/.test(text)) return 'enrollments';
+    return undefined;
+  };
+
   const handleTap = async (notification: (typeof notifications)[0]) => {
     if (!notification.read_at) {
       await markAsRead(notification.id);
     }
     if (notification.data?.studentId) {
-      onNavigateToChild(notification.data.studentId, 'payments');
+      onNavigateToChild(notification.data.studentId, resolveTab(notification));
     }
   };
 
