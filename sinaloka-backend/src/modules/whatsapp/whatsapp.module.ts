@@ -3,11 +3,12 @@ import { WhatsappService } from './whatsapp.service.js';
 import { WhatsappController } from './whatsapp.controller.js';
 import { WhatsappCron } from './whatsapp.cron.js';
 import { PaymentModule } from '../payment/payment.module.js';
+import { PaymentRemindListener } from './listeners/payment-remind.listener.js';
 
 @Module({
   imports: [PaymentModule],
   controllers: [WhatsappController],
-  providers: [WhatsappService, WhatsappCron],
+  providers: [WhatsappService, WhatsappCron, PaymentRemindListener],
   exports: [WhatsappService],
 })
 export class WhatsappModule {}

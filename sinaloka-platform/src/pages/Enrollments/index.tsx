@@ -10,6 +10,7 @@ import {
   PageHeader,
   ConfirmDialog,
 } from '../../components/UI';
+import { Pagination } from '../../components/ui/pagination';
 import { useEnrollmentsPage } from './useEnrollmentsPage';
 import { EnrollmentStats } from './EnrollmentStats';
 import { EnrollmentTable } from './EnrollmentTable';
@@ -74,6 +75,17 @@ export const Enrollments = () => {
         t={state.t}
         i18n={state.i18n}
       />
+
+      {/* Pagination */}
+      {state.meta && (
+        <Pagination
+          currentPage={state.page}
+          totalPages={state.meta.totalPages}
+          total={state.meta.total}
+          itemsPerPage={state.meta.limit}
+          onPageChange={state.setPage}
+        />
+      )}
 
       {/* New Enrollment Modal */}
       <NewEnrollmentModal

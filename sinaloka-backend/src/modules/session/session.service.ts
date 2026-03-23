@@ -49,6 +49,7 @@ export class SessionService {
   private readonly sessionInclude = {
     class: {
       include: {
+        subject: true,
         tutor: { include: { user: { select: { id: true, name: true } } } },
       },
     },
@@ -60,6 +61,7 @@ export class SessionService {
       class: session.class
         ? {
             ...session.class,
+            subject: session.class.subject?.name ?? null,
             fee: Number(session.class.fee),
             tutor: session.class.tutor
               ? {

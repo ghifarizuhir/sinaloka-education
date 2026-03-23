@@ -189,9 +189,15 @@ export class PaymentService {
 
   async remind(institutionId: string, paymentId: string) {
     const payment = await this.findOne(institutionId, paymentId);
+
+    this.eventEmitter.emit('payment.remind', {
+      institutionId,
+      paymentId: payment.id,
+    });
+
     return {
       reminded: true,
-      method: 'logged',
+      method: 'whatsapp',
       payment_id: payment.id,
       student_id: payment.student_id,
     };

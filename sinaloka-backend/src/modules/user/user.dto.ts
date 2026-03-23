@@ -5,11 +5,6 @@ export const CreateUserSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.enum(['SUPER_ADMIN', 'ADMIN', 'TUTOR']),
-  institution_id: z
-    .string()
-    .uuid('Invalid institution ID')
-    .optional()
-    .nullable(),
 });
 
 export type CreateUserDto = z.infer<typeof CreateUserSchema>;

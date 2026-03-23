@@ -117,7 +117,7 @@ export class UserService {
     return user;
   }
 
-  async create(dto: CreateUserDto) {
+  async create(institutionId: string, dto: CreateUserDto) {
     // Check email uniqueness
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -135,7 +135,7 @@ export class UserService {
         email: dto.email,
         password_hash: passwordHash,
         role: dto.role,
-        institution_id: dto.institution_id ?? null,
+        institution_id: institutionId,
         must_change_password: true,
       },
       select: {

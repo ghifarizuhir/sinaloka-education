@@ -78,7 +78,7 @@ export const StudentPayments = () => {
       paid_date: paymentDate,
       method: paymentMethod,
       discount_amount: discount > 0 ? discount : undefined,
-      notes: discount > 0 ? `Discount applied: ${formatCurrency(discount, i18n.language)}` : 'Payment recorded',
+      notes: undefined,
     };
     updatePayment.mutate(
       { id: selectedPayment.id, data: updateDto },
