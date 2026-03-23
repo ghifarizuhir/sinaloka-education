@@ -62,6 +62,7 @@ export class ClassService {
           tutor_fee_per_student: dto.tutor_fee_per_student ?? null,
           room: dto.room ?? null,
           status: dto.status ?? 'ACTIVE',
+          semester_id: dto.semester_id ?? null,
         },
       });
 
@@ -130,6 +131,12 @@ export class ClassService {
       where.status = status;
     }
 
+    if (query.semester_id === 'none') {
+      where.semester_id = null;
+    } else if (query.semester_id) {
+      where.semester_id = query.semester_id;
+    }
+
     if (search) {
       where.OR = [{ name: { contains: search, mode: 'insensitive' } }];
     }
@@ -149,6 +156,7 @@ export class ClassService {
           subject: true,
           tutor: { include: { user: { select: { id: true, name: true } } } },
           schedules: true,
+          semester: { select: { id: true, name: true, academic_year: { select: { id: true, name: true } } } },
           _count: {
             select: {
               enrollments: { where: { status: { in: ['ACTIVE', 'TRIAL'] } } },
@@ -286,6 +294,7 @@ export class ClassService {
       tutor_fee_mode,
       tutor_fee_per_student,
       status,
+      semester_id,
     } = dto;
 
     return this.prisma.$transaction(async (tx) => {
@@ -315,6 +324,7 @@ export class ClassService {
           ...(tutor_fee_mode !== undefined && { tutor_fee_mode }),
           ...(tutor_fee_per_student !== undefined && { tutor_fee_per_student }),
           ...(status !== undefined && { status }),
+          ...(semester_id !== undefined && { semester_id }),
         },
         include: {
           subject: true,

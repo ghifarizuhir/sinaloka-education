@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Settings,
-  CalendarClock, UserPlus, Wallet, Receipt, Banknote,
+  CalendarClock, CalendarRange, UserPlus, Wallet, Receipt, Banknote,
   ClipboardCheck, ClipboardList, TrendingDown, LogOut,
   ChevronDown,
   type LucideIcon
@@ -208,10 +208,11 @@ export function Sidebar({
           <SidebarItem icon={LayoutDashboard} label={t('nav.dashboard')} href="/" active={location.pathname === '/'} minimized={minimized} />
         </SidebarSection>
 
-        <SidebarSection label={t('nav.academics')} minimized={minimized} itemCount={3}>
+        <SidebarSection label={t('nav.academics')} minimized={minimized} itemCount={4}>
           <SidebarItem icon={Users} label={t('nav.students')} href="/students" active={location.pathname === '/students'} minimized={minimized} />
           <SidebarItem icon={GraduationCap} label={t('nav.tutors')} href="/tutors" active={location.pathname === '/tutors'} minimized={minimized} />
           <SidebarItem icon={BookOpen} label={t('nav.classes')} href="/classes" active={location.pathname === '/classes'} minimized={minimized} />
+          <SidebarItem icon={CalendarRange} label="Tahun Ajaran" href="/academic-years" active={location.pathname === '/academic-years'} minimized={minimized} />
         </SidebarSection>
 
         <SidebarSection label={t('nav.operations')} minimized={minimized} itemCount={4}>

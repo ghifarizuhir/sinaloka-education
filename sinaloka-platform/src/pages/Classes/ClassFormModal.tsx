@@ -15,6 +15,7 @@ import { ScheduleWeekPreview } from '../../components/ScheduleWeekPreview';
 import { DAYS_OF_WEEK } from './useClassesPage';
 import type { Class, ScheduleDay, ClassScheduleItem } from '@/src/types/class';
 import type { Room } from '@/src/types/settings';
+import type { AcademicYear } from '@/src/types/academic-year';
 
 interface ClassFormModalProps {
   t: (key: string, options?: Record<string, unknown>) => string;
@@ -53,6 +54,9 @@ interface ClassFormModalProps {
   updateClass: { isPending: boolean };
   tutorClasses: any[];
   availableRooms: Room[];
+  academicYears: AcademicYear[] | undefined;
+  formSemesterId: string;
+  setFormSemesterId: (val: string) => void;
   toggleScheduleDay: (day: ScheduleDay) => void;
   handleFormSubmit: () => void;
   errors: Record<string, string>;
@@ -96,6 +100,9 @@ export const ClassFormModal = ({
   updateClass,
   tutorClasses,
   availableRooms,
+  academicYears,
+  formSemesterId,
+  setFormSemesterId,
   toggleScheduleDay,
   handleFormSubmit,
   errors,
@@ -333,6 +340,25 @@ export const ClassFormModal = ({
               {t('classes.form.noRoomsAvailable')}
             </p>
           )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="semester">{t('classes.form.semester')}</Label>
+          <Select
+            className="w-full"
+            value={formSemesterId}
+            onChange={(val) => setFormSemesterId(val)}
+            options={[
+              { value: '', label: t('classes.form.noSemester') },
+              ...(academicYears ?? []).flatMap(year =>
+                (year.semesters ?? []).map(sem => ({
+                  value: sem.id,
+                  label: `${year.name} - ${sem.name}`,
+                }))
+              ),
+            ]}
+            placeholder={t('classes.form.noSemester')}
+          />
         </div>
 
         <div className="flex items-center gap-3 mt-8">

@@ -48,6 +48,7 @@ export const CreateClassSchema = z
     tutor_fee_mode: TutorFeeMode.default('FIXED_PER_SESSION'),
     tutor_fee_per_student: z.number().min(0).optional().nullable(),
     status: ClassStatus.default('ACTIVE'),
+    semester_id: z.string().uuid().optional().nullable(),
   })
   .refine(
     (data) =>
@@ -80,6 +81,7 @@ export const UpdateClassSchema = z.object({
   tutor_fee_mode: TutorFeeMode.optional(),
   tutor_fee_per_student: z.number().min(0).optional().nullable(),
   status: ClassStatus.optional(),
+  semester_id: z.string().uuid().optional().nullable(),
 });
 export type UpdateClassDto = z.infer<typeof UpdateClassSchema>;
 
@@ -90,6 +92,7 @@ export const ClassQuerySchema = z.object({
   subject_id: z.string().uuid().optional(),
   tutor_id: z.string().uuid().optional(),
   status: ClassStatus.optional(),
+  semester_id: z.string().optional(),
   sort_by: z
     .enum(['name', 'subject_name', 'capacity', 'created_at'])
     .default('created_at'),
