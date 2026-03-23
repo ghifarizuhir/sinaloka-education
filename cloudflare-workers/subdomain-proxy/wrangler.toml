@@ -1,0 +1,17 @@
+name = "sinaloka-subdomain-proxy"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Catch all *.sinaloka.com requests
+# Worker handles routing internally:
+#   - platform/parent/tutors → proxy to their respective .pages.dev origins
+#   - api/www/mail/ftp → passthrough
+#   - everything else (institution slugs) → proxy to sinaloka-platform.pages.dev
+#
+# IMPORTANT: After deploying, verify in Cloudflare dashboard that
+# api.sinaloka.com is NOT intercepted by this Worker.
+# If it is, add a more specific route "api.sinaloka.com/*" pointing to no Worker
+# in the dashboard to exclude it.
+[[routes]]
+pattern = "*.sinaloka.com/*"
+zone_name = "sinaloka.com"
