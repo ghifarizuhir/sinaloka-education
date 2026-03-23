@@ -5,6 +5,7 @@ import { NotificationController } from './notification.controller.js';
 import { NotificationService } from './notification.service.js';
 import { NotificationListener } from './notification.listener.js';
 import { NotificationGateway } from './notification.gateway.js';
+import { PaymentReminderCron } from './payment-reminder.cron.js';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { NotificationGateway } from './notification.gateway.js';
     }),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, NotificationListener, NotificationGateway],
+  providers: [NotificationService, NotificationListener, NotificationGateway, PaymentReminderCron],
   exports: [NotificationService],
 })
 export class NotificationModule {}

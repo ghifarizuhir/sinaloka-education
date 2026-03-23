@@ -11,6 +11,7 @@ import { cn } from '../lib/utils';
 interface ChildDetailPageProps {
   child: ChildSummary;
   onBack: () => void;
+  initialTab?: 'attendance' | 'sessions' | 'payments' | 'enrollments';
 }
 
 const TABS = [
@@ -20,12 +21,12 @@ const TABS = [
   { id: 'enrollments' as const, label: 'Kelas' },
 ];
 
-export function ChildDetailPage({ child, onBack }: ChildDetailPageProps) {
+export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPageProps) {
   const {
     attendance, attendanceSummary, sessions, payments, enrollments,
     isLoading, activeTab, setActiveTab,
     fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments,
-  } = useChildDetail(child.id);
+  } = useChildDetail(child.id, initialTab);
 
 
   useEffect(() => {

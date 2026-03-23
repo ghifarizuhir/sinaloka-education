@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Settings,
   CalendarClock, UserPlus, Wallet, Receipt, Banknote,
   ClipboardCheck, ClipboardList, TrendingDown, LogOut,
-  MessageSquare, ChevronDown,
+  ChevronDown,
   type LucideIcon
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -226,10 +226,6 @@ export function Sidebar({
           <SidebarItem icon={Receipt} label={t('nav.studentPayments')} href="/finance/payments" active={location.pathname === '/finance/payments'} minimized={minimized} />
           <SidebarItem icon={Banknote} label={t('nav.tutorPayouts')} href="/finance/payouts" active={location.pathname === '/finance/payouts'} minimized={minimized} />
           <SidebarItem icon={TrendingDown} label={t('nav.operatingExpenses')} href="/finance/expenses" active={location.pathname === '/finance/expenses'} minimized={minimized} />
-        </SidebarSection>
-
-        <SidebarSection label={t('nav.messaging')} minimized={minimized}>
-          <SidebarItem icon={MessageSquare} label={t('nav.whatsapp')} href="/whatsapp" active={location.pathname === '/whatsapp'} minimized={minimized} />
         </SidebarSection>
 
         <SidebarSection label={t('nav.system')} minimized={minimized}>

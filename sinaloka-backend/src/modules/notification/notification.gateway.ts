@@ -49,6 +49,26 @@ export class NotificationGateway {
     }
   }
 
+  pushToUser(
+    institutionId: string,
+    userId: string,
+    notification: Record<string, unknown>,
+  ) {
+    const clients = this.connections.get(institutionId);
+    if (!clients || clients.size === 0) return;
+
+    const data = JSON.stringify(notification);
+    for (const client of clients) {
+      if (client.userId !== userId) continue;
+      try {
+        client.res.write(`data: ${data}\n\n`);
+      } catch {
+        clients.delete(client);
+        this.logger.debug(`Removed dead SSE client: user=${client.userId}`);
+      }
+    }
+  }
+
   getConnectionCount(institutionId?: string): number {
     if (institutionId) {
       return this.connections.get(institutionId)?.size ?? 0;

@@ -33,10 +33,14 @@ export class NotificationService {
     }
   }
 
-  async findAll(institutionId: string, userId: string, dto: ListNotificationsDto) {
+  async findAll(institutionId: string, userId: string, dto: ListNotificationsDto, role?: string) {
+    const userFilter =
+      role === 'PARENT'
+        ? { user_id: userId }
+        : { OR: [{ user_id: null }, { user_id: userId }] };
     const where: Record<string, unknown> = {
       institution_id: institutionId,
-      OR: [{ user_id: null }, { user_id: userId }],
+      ...userFilter,
     };
     if (dto.type) where.type = dto.type;
     if (dto.unread) where.read_at = null;
@@ -62,33 +66,45 @@ export class NotificationService {
     };
   }
 
-  async getUnreadCount(institutionId: string, userId: string) {
+  async getUnreadCount(institutionId: string, userId: string, role?: string) {
+    const userFilter =
+      role === 'PARENT'
+        ? { user_id: userId }
+        : { OR: [{ user_id: null }, { user_id: userId }] };
     return this.prisma.notification.count({
       where: {
         institution_id: institutionId,
         read_at: null,
-        OR: [{ user_id: null }, { user_id: userId }],
+        ...userFilter,
       },
     });
   }
 
-  async markAsRead(id: string, institutionId: string, userId: string) {
+  async markAsRead(id: string, institutionId: string, userId: string, role?: string) {
+    const userFilter =
+      role === 'PARENT'
+        ? { user_id: userId }
+        : { OR: [{ user_id: null }, { user_id: userId }] };
     return this.prisma.notification.update({
       where: {
         id,
         institution_id: institutionId,
-        OR: [{ user_id: null }, { user_id: userId }],
+        ...userFilter,
       },
       data: { read_at: new Date() },
     });
   }
 
-  async markAllAsRead(institutionId: string, userId: string) {
+  async markAllAsRead(institutionId: string, userId: string, role?: string) {
+    const userFilter =
+      role === 'PARENT'
+        ? { user_id: userId }
+        : { OR: [{ user_id: null }, { user_id: userId }] };
     return this.prisma.notification.updateMany({
       where: {
         institution_id: institutionId,
         read_at: null,
-        OR: [{ user_id: null }, { user_id: userId }],
+        ...userFilter,
       },
       data: { read_at: new Date() },
     });

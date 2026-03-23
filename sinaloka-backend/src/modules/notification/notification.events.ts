@@ -6,6 +6,7 @@ export const NOTIFICATION_EVENTS = {
   SESSION_CANCELLED: 'session.cancelled',
   ATTENDANCE_SUBMITTED: 'attendance.submitted',
   TUTOR_INVITE_ACCEPTED: 'tutor.invite_accepted',
+  PAYMENT_REMINDER: 'payment.reminder',
 } as const;
 
 export interface PaymentReceivedEvent {
@@ -55,4 +56,15 @@ export interface TutorInviteAcceptedEvent {
   institutionId: string;
   tutorId: string;
   tutorName: string;
+}
+
+export interface PaymentReminderEvent {
+  institutionId: string;
+  parentUserId: string;
+  paymentId: string;
+  studentId: string;
+  studentName: string;
+  amount: number;
+  dueDate: string;
+  status: 'PENDING' | 'OVERDUE';
 }

@@ -8,17 +8,21 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ChildDetailPage } from './pages/ChildDetailPage';
 import { PaymentRedirectPage } from './pages/PaymentRedirectPage';
+import { NotificationPage } from './pages/NotificationPage';
 import { useAuth } from './hooks/useAuth';
 import { useChildren } from './hooks/useChildren';
+import { useUnreadCount } from './hooks/useNotifications';
 import { LogOut } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, isLoading: authLoading, profile, logout } = useAuth();
   const { data: children, isLoading: childrenLoading } = useChildren();
+  const { count: unreadCount, refresh: refreshUnread } = useUnreadCount();
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [authScreen, setAuthScreen] = useState<'login' | 'forgot'>('login');
+  const [selectedChildTab, setSelectedChildTab] = useState<string | undefined>();
 
   // Check URL params for invite token or reset token
   const urlParams = new URLSearchParams(window.location.search);
@@ -67,9 +71,14 @@ export default function App() {
   const firstName = parentName.split(' ')[0];
   const selectedChild = selectedChildId ? children.find((c) => c.id === selectedChildId) ?? null : null;
 
+  const handleNavigateToChild = (studentId: string, tab?: string) => {
+    setSelectedChildId(studentId);
+    setSelectedChildTab(tab);
+  };
+
   const renderPage = () => {
     if (selectedChild) {
-      return <ChildDetailPage child={selectedChild} onBack={() => setSelectedChildId(null)} />;
+      return <ChildDetailPage child={selectedChild} onBack={() => { setSelectedChildId(null); setSelectedChildTab(undefined); }} initialTab={selectedChildTab as any} />;
     }
 
     switch (activeTab) {
@@ -80,6 +89,15 @@ export default function App() {
             children={children}
             isLoading={childrenLoading}
             onSelectChild={setSelectedChildId}
+          />
+        );
+      case 'notifications':
+        return (
+          <NotificationPage
+            onNavigateToChild={(studentId, tab) => {
+              handleNavigateToChild(studentId, tab);
+              refreshUnread();
+            }}
           />
         );
       case 'children':
@@ -137,7 +155,7 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {!selectedChild && <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />}
+      {!selectedChild && <BottomNav activeTab={activeTab} setActiveTab={(tab) => { setActiveTab(tab); if (tab === 'notifications') refreshUnread(); }} unreadCount={unreadCount} />}
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
