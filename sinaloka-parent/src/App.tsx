@@ -59,7 +59,7 @@ export default function App() {
       return <ResetPasswordPage token={resetToken} onBack={() => { window.history.replaceState({}, '', window.location.pathname); setAuthScreen('login'); }} />;
     }
     if (inviteToken) {
-      return <RegisterPage inviteToken={inviteToken} onSwitchToLogin={() => window.history.replaceState({}, '', window.location.pathname)} />;
+      return <RegisterPage inviteToken={inviteToken} onSwitchToLogin={() => { window.history.replaceState({}, '', window.location.pathname); setAuthScreen('login'); }} />;
     }
     if (authScreen === 'forgot') {
       return <ForgotPasswordPage onBack={() => setAuthScreen('login')} />;

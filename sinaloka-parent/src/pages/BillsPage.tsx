@@ -42,42 +42,52 @@ export function BillsPage({ children, isLoading, onNavigateToChild }: BillsPageP
     if (children.length === 0) return;
     setIsFetching(true);
     setFetchError(null);
-    try {
-      const allBills: BillWithChild[] = [];
 
-      await Promise.all(
-        children.map(async (child) => {
-          const res = await api.get(`/api/parent/children/${child.id}/payments`, { params: { limit: 50 } });
-          const payments: PaymentRecord[] = res.data.data.map((p: any) => ({
-            id: p.id,
-            amount: p.amount,
-            due_date: p.due_date,
-            paid_date: p.paid_date,
-            status: p.status,
-            method: p.method,
-            gateway_configured: res.data.gateway_configured ?? false,
-            enrollment: {
-              class: { name: p.enrollment?.class?.name ?? '', subject: p.enrollment?.class?.subject ?? '' },
-            },
-          }));
-          const pending = payments.filter((p) => p.status === 'PENDING' || p.status === 'OVERDUE');
-          pending.forEach((p) => allBills.push({ ...p, childName: child.name, childId: child.id }));
-        }),
-      );
+    const results = await Promise.allSettled(
+      children.map(async (child) => {
+        const res = await api.get(`/api/parent/children/${child.id}/payments`, { params: { limit: 50 } });
+        const payments: PaymentRecord[] = res.data.data.map((p: any) => ({
+          id: p.id,
+          amount: p.amount,
+          due_date: p.due_date,
+          paid_date: p.paid_date,
+          status: p.status,
+          method: p.method,
+          gateway_configured: res.data.gateway_configured ?? false,
+          enrollment: {
+            class: { name: p.enrollment?.class?.name ?? '', subject: p.enrollment?.class?.subject ?? '' },
+          },
+        }));
+        return payments
+          .filter((p) => p.status === 'PENDING' || p.status === 'OVERDUE')
+          .map((p) => ({ ...p, childName: child.name, childId: child.id }));
+      }),
+    );
 
-      // Sort: OVERDUE first, then by due_date ascending
-      allBills.sort((a, b) => {
-        if (a.status === 'OVERDUE' && b.status !== 'OVERDUE') return -1;
-        if (a.status !== 'OVERDUE' && b.status === 'OVERDUE') return 1;
-        return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-      });
-
-      setBills(allBills);
-    } catch {
-      setFetchError('Gagal memuat data tagihan');
-    } finally {
-      setIsFetching(false);
+    const allBills: BillWithChild[] = [];
+    let failedCount = 0;
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        allBills.push(...result.value);
+      } else {
+        failedCount++;
+      }
     }
+
+    // Sort: OVERDUE first, then by due_date ascending
+    allBills.sort((a, b) => {
+      if (a.status === 'OVERDUE' && b.status !== 'OVERDUE') return -1;
+      if (a.status !== 'OVERDUE' && b.status === 'OVERDUE') return 1;
+      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    });
+
+    setBills(allBills);
+    if (failedCount > 0 && allBills.length === 0) {
+      setFetchError('Gagal memuat data tagihan');
+    } else if (failedCount > 0) {
+      toast.error(`Gagal memuat tagihan ${failedCount} anak`);
+    }
+    setIsFetching(false);
   }, [children]);
 
   useEffect(() => {

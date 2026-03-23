@@ -57,7 +57,7 @@ export function RegisterPage({ inviteToken, onSwitchToLogin }: { inviteToken: st
         </form>
         <p className="text-center text-muted-foreground text-sm mt-6">
           Sudah punya akun?{' '}
-          <button onClick={() => { onSwitchToLogin(); window.location.reload(); }} className="text-primary font-semibold">Masuk</button>
+          <button onClick={onSwitchToLogin} className="text-primary font-semibold">Masuk</button>
         </p>
       </motion.div>
     </div>
