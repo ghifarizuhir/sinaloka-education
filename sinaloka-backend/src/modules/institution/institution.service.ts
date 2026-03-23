@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
@@ -17,6 +18,11 @@ import {
 
 @Injectable()
 export class InstitutionService {
+  private static readonly RESERVED_SLUGS = [
+    'platform', 'parent', 'tutors', 'api', 'www',
+    'mail', 'ftp', 'admin', 'app', 'dashboard',
+  ];
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: PaginationDto): Promise<PaginatedResponse<any>> {
@@ -166,6 +172,12 @@ export class InstitutionService {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
+
+    if (InstitutionService.RESERVED_SLUGS.includes(baseSlug)) {
+      throw new BadRequestException(
+        `Institution name "${name}" generates a reserved slug "${baseSlug}". Please choose a different name.`,
+      );
+    }
 
     let slug = baseSlug;
     let suffix = 2;

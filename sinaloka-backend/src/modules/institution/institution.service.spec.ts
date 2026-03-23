@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -140,6 +140,18 @@ describe('InstitutionService', () => {
           slug: 'my-new-school',
         }),
       });
+    });
+
+    it('should reject reserved slugs', async () => {
+      await expect(
+        service.create({ name: 'Platform', address: null, phone: null, email: null }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject slug that generates a reserved word', async () => {
+      await expect(
+        service.create({ name: 'Admin', address: null, phone: null, email: null }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should append suffix for duplicate slug', async () => {
