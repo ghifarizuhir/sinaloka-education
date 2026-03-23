@@ -14,7 +14,12 @@
     "test:e2e:smoke": "playwright test --config e2e/playwright.config.ts e2e/specs/smoke",
     "test:e2e:integration": "playwright test --config e2e/playwright.config.ts --grep @integration",
     "test:e2e:light": "playwright test --config e2e/playwright.config.ts --project=light-mode",
-    "test:e2e:dark": "playwright test --config e2e/playwright.config.ts --project=dark-mode"
+    "test:e2e:dark": "playwright test --config e2e/playwright.config.ts --project=dark-mode",
+    "test:uat": "playwright test --config e2e/playwright.config.ts --project=uat --workers=1",
+    "test:uat:phase0": "playwright test --config e2e/playwright.config.ts --project=uat --workers=1 phase-0",
+    "test:uat:phase1": "playwright test --config e2e/playwright.config.ts --project=uat --workers=1 phase-1",
+    "test:uat:phase2": "playwright test --config e2e/playwright.config.ts --project=uat --workers=1 phase-2",
+    "test:uat:phase3": "playwright test --config e2e/playwright.config.ts --project=uat --workers=1 phase-3"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
