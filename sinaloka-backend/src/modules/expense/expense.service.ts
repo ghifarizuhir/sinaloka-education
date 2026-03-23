@@ -184,10 +184,6 @@ export class ExpenseService {
               recurrence_end_date: null,
             },
           });
-          await this.prisma.expense.update({
-            where: { id: expense.id },
-            data: { last_generated_at: new Date() },
-          });
           created++;
         }
 
@@ -196,6 +192,14 @@ export class ExpenseService {
         } else {
           current.setMonth(current.getMonth() + 1);
         }
+      }
+
+      // Update last_generated_at once after processing all occurrences
+      if (created > 0 || expense.last_generated_at === null) {
+        await this.prisma.expense.update({
+          where: { id: expense.id },
+          data: { last_generated_at: new Date() },
+        });
       }
     }
 
