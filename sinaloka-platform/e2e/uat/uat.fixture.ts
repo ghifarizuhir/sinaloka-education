@@ -10,10 +10,32 @@ export interface UatFixtures {
   setState: (partial: Partial<UatState>) => void;
 }
 
+// Cache tokens per email to avoid repeated login API calls (rate limit: 5/15min)
+const tokenCache = new Map<string, { access_token: string; refresh_token: string }>();
+
+async function getTokens(email: string, password: string): Promise<{ access_token: string; refresh_token: string }> {
+  const cached = tokenCache.get(email);
+  if (cached) return cached;
+
+  const res = await fetch('http://localhost:5000/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`[uat] Login API failed for ${email}: ${res.status} ${body}`);
+  }
+
+  const data = await res.json();
+  const tokens = { access_token: data.access_token, refresh_token: data.refresh_token };
+  tokenCache.set(email, tokens);
+  return tokens;
+}
+
 export const test = base.extend<UatFixtures>({
-  // CRITICAL: Override base page to set language to English.
-  // All fixtures (uatPage, loginAs, loggedInPage) depend on page,
-  // so this single override ensures all i18n-based locators work.
+  // Set language to English for all tests
   page: async ({ page }, use) => {
     await page.addInitScript(() => {
       localStorage.setItem('sinaloka-lang', 'en');
@@ -25,17 +47,18 @@ export const test = base.extend<UatFixtures>({
     await use(page);
   },
 
+  // loginAs: real UI login (used only when testing the login flow itself)
   loginAs: async ({ page }, use) => {
     await use(async (email: string, password: string) => {
       const loginPage = new LoginPage(page);
       await loginPage.goto();
       await loginPage.login(email, password);
-      // Wait for navigation away from login page
       await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 });
       return page;
     });
   },
 
+  // loggedInPage: inject tokens via API + localStorage (bypasses rate limit)
   loggedInPage: async ({ page }, use) => {
     await use(async (role: 'superAdmin' | 'admin') => {
       const state = readState();
@@ -53,10 +76,18 @@ export const test = base.extend<UatFixtures>({
         password = state.phase1?.newAdminPassword ?? state.phase0.adminCredentials.password;
       }
 
-      const loginPage = new LoginPage(page);
-      await loginPage.goto();
-      await loginPage.login(email, password);
-      await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 });
+      const tokens = await getTokens(email, password);
+
+      // Inject tokens into localStorage and navigate
+      await page.addInitScript((t) => {
+        localStorage.setItem('access_token', t.access_token);
+        localStorage.setItem('refresh_token', t.refresh_token);
+      }, tokens);
+
+      // Navigate to home — the app will read tokens from localStorage
+      await page.goto(role === 'superAdmin' ? '/super/institutions' : '/');
+      await page.waitForLoadState('networkidle');
+
       return page;
     });
   },

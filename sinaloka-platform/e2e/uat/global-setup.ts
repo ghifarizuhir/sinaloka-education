@@ -1,8 +1,24 @@
 import { execSync } from 'child_process';
+import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { writeState } from './state/uat-state';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const BACKEND_DIR = path.resolve(__dirname, '../../../sinaloka-backend');
+
+// Load backend .env so DATABASE_URL is available for prisma commands
+const backendEnvPath = path.resolve(BACKEND_DIR, '.env');
+if (fs.existsSync(backendEnvPath)) {
+  const envContent = fs.readFileSync(backendEnvPath, 'utf-8');
+  for (const line of envContent.split('\n')) {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match && !process.env[match[1].trim()]) {
+      process.env[match[1].trim()] = match[2].trim();
+    }
+  }
+}
 const MAX_RETRIES = 15;
 const RETRY_DELAY_MS = 3000;
 
@@ -26,11 +42,24 @@ async function waitForUrl(url: string, label: string): Promise<void> {
 }
 
 export default async function globalSetup(): Promise<void> {
+  const execEnv = {
+    ...process.env,
+    PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
+  };
+
   console.log('[uat-setup] Resetting database...');
   execSync('npx prisma migrate reset --force', {
     cwd: BACKEND_DIR,
     stdio: 'inherit',
-    env: { ...process.env },
+    env: execEnv,
+  });
+
+  // Seed separately with tsx (prisma.config.ts uses bun which may not be available)
+  console.log('[uat-setup] Seeding database...');
+  execSync('npx tsx prisma/seed.ts', {
+    cwd: BACKEND_DIR,
+    stdio: 'inherit',
+    env: execEnv,
   });
 
   // Backend connection pool may need to reconnect after DB reset

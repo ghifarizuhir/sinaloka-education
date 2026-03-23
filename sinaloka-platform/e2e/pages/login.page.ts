@@ -10,10 +10,10 @@ export class LoginPage {
 
   constructor(private page: Page) {
     this.emailInput = page.getByLabel(/email address/i);
-    this.passwordInput = page.getByLabel(/password/i);
+    this.passwordInput = page.locator('#password');
     this.submitButton = page.getByRole('button', { name: /sign in/i });
     this.errorMessage = page.locator('.bg-red-50, .dark\\:bg-red-900\\/20').locator('p');
-    this.toast = page.locator('[data-sonner-toaster]');
+    this.toast = page.locator('[data-sonner-toast]');
     this.logoutButton = page.getByRole('button', { name: /log out/i });
   }
 

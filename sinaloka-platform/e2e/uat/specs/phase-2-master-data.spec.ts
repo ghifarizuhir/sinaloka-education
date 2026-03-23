@@ -1,11 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { test, expect } from '../uat.fixture';
 import { StudentsPage } from '../../pages/students.page';
 import { TutorsPage } from '../../pages/tutors.page';
 
 // ── Test data files (created in beforeAll, cleaned in afterAll) ──
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const SPECS_DIR = path.resolve(__dirname);
 const CSV_VALID_PATH = path.join(SPECS_DIR, 'test-import.csv');
 const CSV_EMPTY_PATH = path.join(SPECS_DIR, 'test-import-empty.csv');

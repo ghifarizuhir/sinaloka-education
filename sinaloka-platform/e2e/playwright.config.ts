@@ -1,4 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const isUat = process.argv.includes('--project=uat') || process.env.UAT === '1';
 
@@ -11,8 +16,8 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'html',
   // globalSetup/globalTeardown must be top-level (not per-project).
   // Only activate for UAT runs to avoid resetting DB during normal E2E.
-  globalSetup: isUat ? require.resolve('./uat/global-setup.ts') : undefined,
-  globalTeardown: isUat ? require.resolve('./uat/global-teardown.ts') : undefined,
+  globalSetup: isUat ? resolve(__dirname, './uat/global-setup.ts') : undefined,
+  globalTeardown: isUat ? resolve(__dirname, './uat/global-teardown.ts') : undefined,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
