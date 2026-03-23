@@ -12,7 +12,7 @@ import { FloatingWhatsApp } from "../components/FloatingWhatsApp";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen overflow-x-hidden relative bg-white">
+    <main className="min-h-screen overflow-x-hidden relative bg-white">
       <Navbar />
       <Hero />
       <ProblemSection />
@@ -24,6 +24,6 @@ export default function LandingPage() {
       <FinalCTA />
       <Footer />
       <FloatingWhatsApp />
-    </div>
+    </main>
   );
 }

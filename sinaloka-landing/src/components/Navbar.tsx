@@ -18,6 +18,7 @@ export function Navbar() {
 
   return (
     <nav
+      aria-label="Navigasi utama"
       className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-300",
         scrolled
