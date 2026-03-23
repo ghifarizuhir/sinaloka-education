@@ -294,6 +294,7 @@ export default function RegisterPage() {
           tutor_enabled: reg.tutor_enabled,
         };
         setInstitution(data);
+        document.title = `Daftar di ${data.name} — Sinaloka`;
 
         if (!data.student_enabled && !data.tutor_enabled) {
           setPageState("closed");
