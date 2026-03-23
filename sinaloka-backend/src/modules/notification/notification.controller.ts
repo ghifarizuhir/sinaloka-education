@@ -34,22 +34,22 @@ export class NotificationController {
   ) {}
 
   @Get()
-  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Roles('ADMIN', 'SUPER_ADMIN', 'PARENT')
   findAll(
     @InstitutionId() institutionId: string,
     @CurrentUser() user: JwtPayload,
     @Query() dto: ListNotificationsDto,
   ) {
-    return this.notificationService.findAll(institutionId, user.userId, dto);
+    return this.notificationService.findAll(institutionId, user.userId, dto, user.role);
   }
 
   @Get('unread-count')
-  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Roles('ADMIN', 'SUPER_ADMIN', 'PARENT')
   getUnreadCount(
     @InstitutionId() institutionId: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.notificationService.getUnreadCount(institutionId, user.userId);
+    return this.notificationService.getUnreadCount(institutionId, user.userId, user.role);
   }
 
   @NoAuditLog()
@@ -77,7 +77,7 @@ export class NotificationController {
       throw new UnauthorizedException('Institution context required');
     }
 
-    if (payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN') {
+    if (payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN' && payload.role !== 'PARENT') {
       throw new UnauthorizedException('Insufficient role');
     }
 
@@ -105,21 +105,21 @@ export class NotificationController {
   }
 
   @Patch('read-all')
-  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Roles('ADMIN', 'SUPER_ADMIN', 'PARENT')
   markAllAsRead(
     @InstitutionId() institutionId: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.notificationService.markAllAsRead(institutionId, user.userId);
+    return this.notificationService.markAllAsRead(institutionId, user.userId, user.role);
   }
 
   @Patch(':id/read')
-  @Roles('ADMIN', 'SUPER_ADMIN')
+  @Roles('ADMIN', 'SUPER_ADMIN', 'PARENT')
   markAsRead(
     @Param('id') id: string,
     @InstitutionId() institutionId: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.notificationService.markAsRead(id, institutionId, user.userId);
+    return this.notificationService.markAsRead(id, institutionId, user.userId, user.role);
   }
 }
