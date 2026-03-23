@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Toaster } from 'sonner';
 import { BottomNav } from './components/BottomNav';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -9,14 +10,15 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ChildDetailPage } from './pages/ChildDetailPage';
 import { PaymentRedirectPage } from './pages/PaymentRedirectPage';
 import { NotificationPage } from './pages/NotificationPage';
+import { BillsPage } from './pages/BillsPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { useAuth } from './hooks/useAuth';
 import { useChildren } from './hooks/useChildren';
 import { useUnreadCount } from './hooks/useNotifications';
-import { LogOut } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, isLoading: authLoading, profile, logout } = useAuth();
-  const { data: children, isLoading: childrenLoading } = useChildren();
+  const { data: children, isLoading: childrenLoading, error: childrenError, refetch: refetchChildren } = useChildren();
   const { count: unreadCount, refresh: refreshUnread } = useUnreadCount();
 
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -57,7 +59,7 @@ export default function App() {
       return <ResetPasswordPage token={resetToken} onBack={() => { window.history.replaceState({}, '', window.location.pathname); setAuthScreen('login'); }} />;
     }
     if (inviteToken) {
-      return <RegisterPage inviteToken={inviteToken} onSwitchToLogin={() => window.history.replaceState({}, '', window.location.pathname)} />;
+      return <RegisterPage inviteToken={inviteToken} onSwitchToLogin={() => { window.history.replaceState({}, '', window.location.pathname); setAuthScreen('login'); }} />;
     }
     if (authScreen === 'forgot') {
       return <ForgotPasswordPage onBack={() => setAuthScreen('login')} />;
@@ -68,6 +70,7 @@ export default function App() {
   const parentName = profile?.name ?? 'Orang Tua';
   const firstName = parentName.split(' ')[0];
   const selectedChild = selectedChildId ? children.find((c) => c.id === selectedChildId) ?? null : null;
+  const totalPendingBills = children.reduce((acc, c) => acc + c.pending_payments + c.overdue_payments, 0);
 
   const handleNavigateToChild = (studentId: string, tab?: string) => {
     setSelectedChildId(studentId);
@@ -86,6 +89,8 @@ export default function App() {
             firstName={firstName}
             children={children}
             isLoading={childrenLoading}
+            error={childrenError}
+            onRetry={refetchChildren}
             onSelectChild={setSelectedChildId}
           />
         );
@@ -98,40 +103,16 @@ export default function App() {
             }}
           />
         );
-      case 'children':
+      case 'bills':
         return (
-          <div className="space-y-4 pb-24">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Anak Anda</h1>
-            {childrenLoading ? (
-              <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="bg-card rounded-xl h-28 animate-pulse shadow-sm" />)}</div>
-            ) : (
-              children.map((child) => (
-                <div key={child.id}>
-                  <div className="cursor-pointer" onClick={() => setSelectedChildId(child.id)}>
-                    <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-                      <h3 className="font-semibold text-foreground">{child.name}</h3>
-                      <p className="text-muted-foreground text-xs">Kelas {child.grade} · Kehadiran {child.attendance_rate}%</p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <BillsPage
+            children={children}
+            isLoading={childrenLoading}
+            onNavigateToChild={handleNavigateToChild}
+          />
         );
       case 'profile':
-        return (
-          <div className="space-y-6 pb-24">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Profil</h1>
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-foreground">{profile?.name}</h2>
-              <p className="text-muted-foreground text-sm">{profile?.email}</p>
-            </div>
-            <button onClick={logout}
-              className="w-full flex items-center justify-center gap-2 bg-card border border-border rounded-xl py-4 text-destructive font-semibold transition-all hover:bg-destructive-muted shadow-sm">
-              <LogOut className="w-5 h-5" /> Keluar
-            </button>
-          </div>
-        );
+        return <ProfilePage profile={profile} onLogout={logout} />;
       default:
         return null;
     }
@@ -153,7 +134,30 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {!selectedChild && <BottomNav activeTab={activeTab} setActiveTab={(tab) => { setActiveTab(tab); if (tab === 'notifications') refreshUnread(); }} unreadCount={unreadCount} />}
+      {!selectedChild && (
+        <BottomNav
+          activeTab={activeTab}
+          setActiveTab={(tab) => { setActiveTab(tab); if (tab === 'notifications') refreshUnread(); }}
+          unreadCount={unreadCount}
+          pendingBills={totalPendingBills}
+        />
+      )}
+
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          className: 'font-sans',
+          style: {
+            background: 'color-mix(in oklch, var(--color-card) 92%, transparent)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-foreground)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '13px',
+            fontWeight: '500',
+          },
+        }}
+      />
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }

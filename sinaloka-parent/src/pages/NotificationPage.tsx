@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell, CheckCheck, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { useNotifications } from '../hooks/useNotifications';
 import { cn } from '../lib/utils';
 
@@ -24,12 +25,25 @@ interface NotificationPageProps {
 export function NotificationPage({ onNavigateToChild }: NotificationPageProps) {
   const { notifications, isLoading, error, hasMore, loadMore, refresh, markAsRead, markAllAsRead } = useNotifications();
 
+  const resolveTab = (notification: (typeof notifications)[0]): string | undefined => {
+    const type = (notification.type ?? '').toLowerCase();
+    const title = (notification.title ?? '').toLowerCase();
+    const body = (notification.body ?? '').toLowerCase();
+    const text = `${type} ${title} ${body}`;
+
+    if (/payment|tagihan|bayar|lunas|jatuh tempo/.test(text)) return 'payments';
+    if (/attendance|kehadiran|hadir|absen/.test(text)) return 'attendance';
+    if (/session|sesi|jadwal/.test(text)) return 'sessions';
+    if (/enrollment|pendaftaran|daftar|kelas/.test(text)) return 'enrollments';
+    return undefined;
+  };
+
   const handleTap = async (notification: (typeof notifications)[0]) => {
     if (!notification.read_at) {
       await markAsRead(notification.id);
     }
     if (notification.data?.studentId) {
-      onNavigateToChild(notification.data.studentId, 'payments');
+      onNavigateToChild(notification.data.studentId, resolveTab(notification));
     }
   };
 
@@ -39,7 +53,14 @@ export function NotificationPage({ onNavigateToChild }: NotificationPageProps) {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Notifikasi</h1>
         {notifications.some((n) => !n.read_at) && (
           <button
-            onClick={markAllAsRead}
+            onClick={async () => {
+              try {
+                await markAllAsRead();
+                toast.success('Semua notifikasi ditandai dibaca');
+              } catch {
+                toast.error('Gagal menandai notifikasi');
+              }
+            }}
             className="flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary/80"
           >
             <CheckCheck className="w-4 h-4" />

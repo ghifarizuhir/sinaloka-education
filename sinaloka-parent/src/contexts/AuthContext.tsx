@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
+import { toast } from 'sonner';
 import api, { setAccessToken, setRefreshToken, getRefreshToken, clearTokens } from '../api/client';
 import type { ParentProfile } from '../types';
 import { mapProfile } from '../mappers';
@@ -75,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   useEffect(() => {
-    const handler = () => { clearTokens(); setIsAuthenticated(false); setProfile(null); };
+    const handler = () => { clearTokens(); setIsAuthenticated(false); setProfile(null); toast.error('Sesi habis, silakan login kembali'); };
     window.addEventListener('auth:logout', handler);
     return () => window.removeEventListener('auth:logout', handler);
   }, []);

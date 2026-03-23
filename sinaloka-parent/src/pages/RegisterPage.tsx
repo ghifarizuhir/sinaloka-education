@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { UserPlus, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { PasswordInput } from '../components/PasswordInput';
+import { PasswordStrength } from '../components/PasswordStrength';
 import { SinalokaLogo } from '../components/SinalokaLogo';
 
 export function RegisterPage({ inviteToken, onSwitchToLogin }: { inviteToken: string; onSwitchToLogin: () => void }) {
@@ -46,6 +47,7 @@ export function RegisterPage({ inviteToken, onSwitchToLogin }: { inviteToken: st
           <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-2">Password</label>
             <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Minimal 8 karakter" minLength={8} />
+            <PasswordStrength password={password} />
           </div>
           <button type="submit" disabled={loading}
             className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-semibold py-3.5 rounded-lg shadow-sm text-base flex items-center justify-center gap-3 transition-all">

@@ -1,61 +1,103 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { GraduationCap, Clock, AlertTriangle, ChevronRight } from 'lucide-react';
-import { format } from 'date-fns';
-import { id as localeId } from 'date-fns/locale';
+import { AlertTriangle, ChevronRight } from 'lucide-react';
 import type { ChildSummary } from '../types';
+import { cn } from '../lib/utils';
+import { getInitials, getAvatarColor } from '../lib/avatar';
+
+// Mini SVG progress ring
+function AttendanceRing({ rate, size = 36 }: { rate: number; size?: number }) {
+  const strokeWidth = 3;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (rate / 100) * circumference;
+  const color = rate >= 80 ? 'var(--color-success)' : rate >= 60 ? 'var(--color-warning)' : 'var(--color-destructive)';
+
+  return (
+    <svg width={size} height={size} className="block mx-auto">
+      <circle
+        cx={size / 2} cy={size / 2} r={radius}
+        fill="none" stroke="var(--color-border)" strokeWidth={strokeWidth}
+      />
+      <circle
+        cx={size / 2} cy={size / 2} r={radius}
+        fill="none" stroke={color} strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        className="transition-all duration-700"
+      />
+      <text
+        x={size / 2} y={size / 2}
+        textAnchor="middle" dominantBaseline="central"
+        fill={color}
+        fontSize="9" fontWeight="700"
+      >
+        {rate}%
+      </text>
+    </svg>
+  );
+}
 
 interface ChildCardProps {
   child: ChildSummary;
   onSelect: (id: string) => void;
+  index?: number;
 }
 
-export function ChildCard({ child, onSelect }: ChildCardProps) {
+export function ChildCard({ child, onSelect, index = 0 }: ChildCardProps) {
   const hasPaymentIssue = child.pending_payments > 0 || child.overdue_payments > 0;
+  const initials = getInitials(child.name);
+  const avatarColor = getAvatarColor(child.name);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.3 }}
       onClick={() => onSelect(child.id)}
-      className="bg-card border border-border rounded-xl p-5 mb-3 cursor-pointer active:scale-[0.98] transition-transform shadow-sm"
+      className="bg-card border border-border rounded-xl p-4 mb-3 cursor-pointer active:scale-[0.98] transition-transform shadow-sm"
     >
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h3 className="font-semibold text-foreground">{child.name}</h3>
-          <p className="text-muted-foreground text-xs">Kelas {child.grade} · {child.enrollment_count} mata pelajaran</p>
+      {/* Header: avatar + name + chevron */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0", avatarColor)}>
+          {initials}
         </div>
-        <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-foreground text-sm truncate">{child.name}</h3>
+          <p className="text-muted-foreground text-xs">Kelas {child.grade} · {child.enrollment_count} mapel</p>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <div className="text-center">
-          <div className={`text-lg font-bold ${child.attendance_rate >= 80 ? 'text-success' : child.attendance_rate >= 60 ? 'text-warning' : 'text-destructive'}`}>
-            {child.attendance_rate}%
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Kehadiran</p>
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="flex flex-col items-center">
+          <AttendanceRing rate={child.attendance_rate} />
+          <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mt-1">Hadir</p>
         </div>
-        <div className="text-center">
+        <div className="flex flex-col items-center justify-center">
           {child.next_session ? (
             <>
-              <div className="text-xs font-semibold text-foreground">{child.next_session.subject}</div>
+              <p className="text-xs font-semibold text-foreground leading-tight text-center">{child.next_session.subject}</p>
               <p className="text-[10px] text-muted-foreground">{child.next_session.start_time}</p>
             </>
           ) : (
-            <div className="text-xs text-muted-foreground/40">—</div>
+            <p className="text-xs text-muted-foreground/40">—</p>
           )}
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sesi Berikut</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mt-1">Sesi</p>
         </div>
-        <div className="text-center">
+        <div className="flex flex-col items-center justify-center">
           {hasPaymentIssue ? (
-            <div className="flex items-center justify-center gap-1">
-              <AlertTriangle className="w-3 h-3 text-warning" />
-              <span className="text-xs font-semibold text-warning">{child.pending_payments + child.overdue_payments}</span>
+            <div className="flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5 text-warning" />
+              <span className="text-sm font-bold text-warning">{child.pending_payments + child.overdue_payments}</span>
             </div>
           ) : (
-            <div className="text-xs font-semibold text-success">Lunas</div>
+            <span className="text-xs font-semibold text-success">Lunas</span>
           )}
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Bayar</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mt-1">Bayar</p>
         </div>
       </div>
     </motion.div>
