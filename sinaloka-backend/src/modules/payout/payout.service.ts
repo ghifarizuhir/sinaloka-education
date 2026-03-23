@@ -117,7 +117,10 @@ export class PayoutService {
         ? await this.prisma.session.findMany({
             where: {
               institution_id: institutionId,
-              class: { tutor_id: payout.tutor_id },
+              OR: [
+                { snapshot_tutor_id: payout.tutor_id },
+                { snapshot_tutor_id: null, class: { tutor_id: payout.tutor_id } },
+              ],
               status: 'COMPLETED',
               tutor_fee_amount: { not: null },
               date: { gte: payout.period_start, lte: payout.period_end },
@@ -143,7 +146,7 @@ export class PayoutService {
       ['Date', 'Class', 'Fee'],
       ...sessions.map((s) => [
         s.date.toISOString().split('T')[0],
-        s.class?.name ?? '',
+        (s as any).snapshot_class_name ?? s.class?.name ?? '',
         String(Number(s.tutor_fee_amount ?? 0)),
       ]),
     ];
@@ -179,7 +182,10 @@ export class PayoutService {
     const sessions = await this.prisma.session.findMany({
       where: {
         institution_id: institutionId,
-        class: { tutor_id: params.tutor_id },
+        OR: [
+          { snapshot_tutor_id: params.tutor_id },
+          { snapshot_tutor_id: null, class: { tutor_id: params.tutor_id } },
+        ],
         status: 'COMPLETED',
         tutor_fee_amount: { not: null },
         date: { gte: params.period_start, lte: params.period_end },
