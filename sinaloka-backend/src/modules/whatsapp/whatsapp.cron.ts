@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+// Cron disabled — payment reminders moved to notification module
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { WhatsappService } from './whatsapp.service.js';
 
@@ -12,8 +12,6 @@ export class WhatsappCron {
     private readonly prisma: PrismaService,
   ) {}
 
-  // Daily at 09:00 WIB (UTC+7 = 02:00 UTC)
-  @Cron('0 2 * * *')
   async sendPaymentReminders() {
     if (!this.whatsappService.isConfigured()) {
       return;
