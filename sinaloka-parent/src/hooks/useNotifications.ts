@@ -69,17 +69,25 @@ export function useNotifications() {
   }, [fetch]);
 
   const markAsRead = useCallback(async (id: string) => {
-    await notificationApi.markAsRead(id);
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n)),
-    );
+    try {
+      await notificationApi.markAsRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n)),
+      );
+    } catch {
+      // Silent fail — notification stays unread visually
+    }
   }, []);
 
   const markAllAsRead = useCallback(async () => {
-    await notificationApi.markAllAsRead();
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() })),
-    );
+    try {
+      await notificationApi.markAllAsRead();
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() })),
+      );
+    } catch {
+      // Silent fail — notifications stay unread visually
+    }
   }, []);
 
   return { notifications, isLoading, error, hasMore, loadMore, refresh, markAsRead, markAllAsRead };

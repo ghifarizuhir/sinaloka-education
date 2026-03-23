@@ -94,8 +94,8 @@ export default function App() {
       case 'notifications':
         return (
           <NotificationPage
-            onNavigateToChild={(studentId) => {
-              handleNavigateToChild(studentId);
+            onNavigateToChild={(studentId, tab) => {
+              handleNavigateToChild(studentId, tab);
               refreshUnread();
             }}
           />
