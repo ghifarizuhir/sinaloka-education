@@ -321,7 +321,12 @@ export interface UatFixtures {
 }
 
 export const test = base.extend<UatFixtures>({
+  // CRITICAL: Set language to English so all i18n-based locators work consistently.
+  // Without this, the UI may render in Indonesian and all English text locators will fail.
   uatPage: async ({ page }, use) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('sinaloka-lang', 'en');
+    });
     await use(page);
   },
 
@@ -330,6 +335,8 @@ export const test = base.extend<UatFixtures>({
       const loginPage = new LoginPage(page);
       await loginPage.goto();
       await loginPage.login(email, password);
+      // Wait for navigation away from login page
+      await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 });
       return page;
     });
   },
@@ -354,6 +361,7 @@ export const test = base.extend<UatFixtures>({
       const loginPage = new LoginPage(page);
       await loginPage.goto();
       await loginPage.login(email, password);
+      await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 });
       return page;
     });
   },
@@ -466,7 +474,8 @@ export class InstitutionsPage {
   }
 
   async clickTab(tabName: 'General' | 'Billing & Payment' | 'Admins' | 'Overview' | 'Plan') {
-    await this.page.getByRole('tab', { name: new RegExp(tabName, 'i') }).click();
+    // NOTE: InstitutionDetail tabs are plain <button> elements, not role="tab"
+    await this.page.getByRole('button', { name: new RegExp(tabName, 'i') }).click();
   }
 
   async overridePlan(plan: 'STARTER' | 'GROWTH' | 'BUSINESS') {
@@ -641,14 +650,14 @@ export class SubscriptionsPage {
 
   async goto() {
     await this.page.goto('/super/subscriptions');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.getByRole('table').or(this.page.getByRole('heading')).first().waitFor({ state: 'visible', timeout: 10_000 });
   }
 
   // --- Tabs ---
 
   async switchTab(tab: 'SUBSCRIPTIONS' | 'PENDING_PAYMENTS' | 'PAYMENT_HISTORY') {
     await this.page.getByRole('tab', { name: new RegExp(tab.replace('_', ' '), 'i') }).click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.getByRole('table').or(this.page.getByRole('heading')).first().waitFor({ state: 'visible', timeout: 10_000 });
   }
 
   get statsCards(): Locator {
@@ -732,12 +741,12 @@ export class UpgradeRequestsPage {
 
   async goto() {
     await this.page.goto('/super/upgrade-requests');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.getByRole('table').or(this.page.getByRole('heading')).first().waitFor({ state: 'visible', timeout: 10_000 });
   }
 
   async switchTab(tab: 'All Statuses' | 'Pending' | 'Approved' | 'Rejected') {
     await this.page.getByRole('tab', { name: new RegExp(`^${tab}$`, 'i') }).click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.getByRole('table').or(this.page.getByRole('heading')).first().waitFor({ state: 'visible', timeout: 10_000 });
   }
 
   getTable(): Locator {
@@ -917,9 +926,9 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
       const instPage = new InstitutionsPage(page);
       await instPage.goto();
       await instPage.openDetail(INSTITUTION_NAME);
-      // Verify tabs exist
+      // Verify tabs exist (tabs are plain <button> elements, not role="tab")
       for (const tab of ['General', 'Billing', 'Admins', 'Overview', 'Plan']) {
-        await expect(page.getByRole('tab', { name: new RegExp(tab, 'i') })).toBeVisible();
+        await expect(page.getByRole('button', { name: new RegExp(tab, 'i') })).toBeVisible();
       }
     });
 
