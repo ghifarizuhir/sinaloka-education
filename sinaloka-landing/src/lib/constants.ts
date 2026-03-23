@@ -15,8 +15,8 @@ export const WHATSAPP_NUMBER = "62895358468523";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Halo%2C%20saya%20tertarik%20dengan%20Sinaloka%20untuk%20bimbel%20saya`;
 
 export const NAV_LINKS = [
-  { href: "#fitur", label: "Fitur" },
   { href: "#demo", label: "Demo" },
+  { href: "#fitur", label: "Fitur" },
   { href: "#harga", label: "Harga" },
   { href: "#faq", label: "FAQ" },
 ] as const;
