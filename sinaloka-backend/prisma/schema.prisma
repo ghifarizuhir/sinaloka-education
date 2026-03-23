@@ -136,6 +136,16 @@ enum RegistrationStatus {
   REJECTED
 }
 
+enum AcademicYearStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum SemesterStatus {
+  ACTIVE
+  ARCHIVED
+}
+
 model Institution {
   id         String   @id @default(uuid())
   name       String
@@ -181,6 +191,8 @@ model Institution {
   settlements            Settlement[]
   notifications          Notification[]
   audit_logs             AuditLog[]
+  academic_years         AcademicYear[]
+  semesters              Semester[]
 
   @@map("institutions")
 }
@@ -499,11 +511,13 @@ model Class {
   tutor_fee_per_student Decimal?
   room                String?
   status              ClassStatus @default(ACTIVE)
+  semester_id         String?
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
 
   institution         Institution  @relation(fields: [institution_id], references: [id])
   tutor               Tutor        @relation(fields: [tutor_id], references: [id])
+  semester            Semester?    @relation(fields: [semester_id], references: [id])
   enrollments         Enrollment[]
   sessions            Session[]
   schedules           ClassSchedule[]
@@ -733,6 +747,45 @@ model Subject {
 
   @@unique([name, institution_id])
   @@map("subjects")
+}
+
+model AcademicYear {
+  id             String             @id @default(uuid())
+  institution_id String
+  name           String
+  start_date     DateTime           @db.Date
+  end_date       DateTime           @db.Date
+  status         AcademicYearStatus @default(ACTIVE)
+  created_at     DateTime           @default(now())
+  updated_at     DateTime           @updatedAt
+
+  institution    Institution        @relation(fields: [institution_id], references: [id])
+  semesters      Semester[]
+
+  @@unique([institution_id, name])
+  @@index([institution_id])
+  @@map("academic_years")
+}
+
+model Semester {
+  id               String         @id @default(uuid())
+  institution_id   String
+  academic_year_id String
+  name             String
+  start_date       DateTime       @db.Date
+  end_date         DateTime       @db.Date
+  status           SemesterStatus @default(ACTIVE)
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  institution      Institution    @relation(fields: [institution_id], references: [id])
+  academic_year    AcademicYear   @relation(fields: [academic_year_id], references: [id])
+  classes          Class[]
+
+  @@unique([academic_year_id, name])
+  @@index([institution_id])
+  @@index([academic_year_id])
+  @@map("semesters")
 }
 
 model TutorSubject {
