@@ -17,5 +17,6 @@ test-results/
 sinaloka-platform/playwright-report/
 capture/
 
-# Docs (local only)
+# Docs (local only, except superpowers)
 docs/
+!docs/superpowers/
