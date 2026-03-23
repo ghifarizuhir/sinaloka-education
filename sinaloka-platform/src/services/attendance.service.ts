@@ -1,5 +1,5 @@
 import api from '@/src/lib/api';
-import type { Attendance, UpdateAttendanceDto, AttendanceQueryParams, AttendanceSummaryParams } from '@/src/types/attendance';
+import type { Attendance, UpdateAttendanceDto, AttendanceQueryParams, AttendanceSummaryParams, StudentAttendanceParams, StudentAttendanceResponse } from '@/src/types/attendance';
 
 export const attendanceService = {
   getBySession: (params: AttendanceQueryParams) =>
@@ -8,4 +8,6 @@ export const attendanceService = {
     api.get('/api/admin/attendance/summary', { params }).then((r) => r.data),
   update: ({ id, data }: { id: string; data: UpdateAttendanceDto }) =>
     api.patch<Attendance>(`/api/admin/attendance/${id}`, data).then((r) => r.data),
+  getByStudent: (studentId: string, params: StudentAttendanceParams) =>
+    api.get<StudentAttendanceResponse>(`/api/admin/students/${studentId}/attendance`, { params }).then((r) => r.data),
 };

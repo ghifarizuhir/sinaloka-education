@@ -29,3 +29,37 @@ export interface AttendanceSummaryParams {
   date_from: string;
   date_to: string;
 }
+
+export interface StudentAttendanceSummary {
+  total_sessions: number;
+  present: number;
+  absent: number;
+  late: number;
+  attendance_rate: number;
+}
+
+export interface StudentAttendanceRecord {
+  id: string;
+  session_id: string;
+  status: AttendanceStatus;
+  homework_done: boolean;
+  notes: string | null;
+  session: {
+    id: string;
+    date: string;
+    start_time: string;
+    end_time: string;
+    status: string;
+    class: { id: string; name: string };
+  };
+}
+
+export interface StudentAttendanceResponse {
+  summary: StudentAttendanceSummary;
+  records: StudentAttendanceRecord[];
+}
+
+export interface StudentAttendanceParams {
+  date_from: string;
+  date_to: string;
+}

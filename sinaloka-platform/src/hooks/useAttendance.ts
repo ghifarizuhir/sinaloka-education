@@ -8,6 +8,13 @@ export function useAttendanceBySession(sessionId: string) {
 export function useAttendanceSummary(params: AttendanceSummaryParams) {
   return useQuery({ queryKey: ['attendance', 'summary', params], queryFn: () => attendanceService.getSummary(params), enabled: !!params.class_id && !!params.date_from && !!params.date_to });
 }
+export function useStudentAttendance(studentId: string, params: { date_from: string; date_to: string }) {
+  return useQuery({
+    queryKey: ['attendance', 'student', studentId, params],
+    queryFn: () => attendanceService.getByStudent(studentId, params),
+    enabled: !!studentId && !!params.date_from && !!params.date_to,
+  });
+}
 export function useUpdateAttendance() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: attendanceService.update, onSuccess: () => { qc.invalidateQueries({ queryKey: ['attendance'] }); qc.invalidateQueries({ queryKey: ['session-students'] }); qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] }); } });
