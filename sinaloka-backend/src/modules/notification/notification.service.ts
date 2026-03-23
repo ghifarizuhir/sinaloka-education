@@ -33,12 +33,17 @@ export class NotificationService {
     }
   }
 
-  async findAll(institutionId: string, userId: string, dto: ListNotificationsDto, role?: string) {
+  async findAll(
+    institutionId: string,
+    userId: string,
+    dto: ListNotificationsDto,
+    role?: string,
+  ) {
     const userFilter =
       role === 'PARENT'
         ? { user_id: userId }
         : { OR: [{ user_id: null }, { user_id: userId }] };
-    const where: Record<string, unknown> = {
+    const where: any = {
       institution_id: institutionId,
       ...userFilter,
     };
@@ -80,7 +85,12 @@ export class NotificationService {
     });
   }
 
-  async markAsRead(id: string, institutionId: string, userId: string, role?: string) {
+  async markAsRead(
+    id: string,
+    institutionId: string,
+    userId: string,
+    role?: string,
+  ) {
     const userFilter =
       role === 'PARENT'
         ? { user_id: userId }
