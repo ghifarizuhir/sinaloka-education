@@ -265,6 +265,7 @@ export class AttendanceService {
             start_time: true,
             end_time: true,
             status: true,
+            snapshot_class_name: true,
             class: { select: { id: true, name: true } },
           },
         },
@@ -281,9 +282,20 @@ export class AttendanceService {
         ? Math.round(((present + late) / total_sessions) * 100 * 100) / 100
         : 0;
 
+    const mappedRecords = records.map((r) => ({
+      ...r,
+      session: {
+        ...r.session,
+        class: {
+          id: r.session.class?.id ?? '',
+          name: r.session.snapshot_class_name ?? r.session.class?.name ?? '',
+        },
+      },
+    }));
+
     return {
       summary: { total_sessions, present, absent, late, attendance_rate },
-      records,
+      records: mappedRecords,
     };
   }
 }

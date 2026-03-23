@@ -32,7 +32,7 @@ describe('AttendanceService', () => {
   };
 
   const mockInvoiceGenerator = {
-    generateForSession: jest.fn(),
+    generatePerSessionPayment: jest.fn(),
   };
 
   const mockEventEmitter = {
@@ -55,7 +55,7 @@ describe('AttendanceService', () => {
     service = module.get<AttendanceService>(AttendanceService);
     prisma = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
-    mockInvoiceGenerator.generateForSession.mockReset();
+    mockInvoiceGenerator.generatePerSessionPayment.mockReset();
     mockEventEmitter.emit.mockReset();
   });
 
@@ -332,9 +332,9 @@ describe('AttendanceService', () => {
 
     it('should return summary and records for a student', async () => {
       const mockRecords = [
-        { id: 'att-1', status: 'PRESENT', student_id: studentId, session: { id: 's1', date: '2026-03-20', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', class: { id: 'c1', name: 'Math' } } },
-        { id: 'att-2', status: 'ABSENT', student_id: studentId, session: { id: 's2', date: '2026-03-18', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', class: { id: 'c1', name: 'Math' } } },
-        { id: 'att-3', status: 'LATE', student_id: studentId, session: { id: 's3', date: '2026-03-15', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', class: { id: 'c1', name: 'Math' } } },
+        { id: 'att-1', status: 'PRESENT', student_id: studentId, session: { id: 's1', date: '2026-03-20', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', snapshot_class_name: null, class: { id: 'c1', name: 'Math' } } },
+        { id: 'att-2', status: 'ABSENT', student_id: studentId, session: { id: 's2', date: '2026-03-18', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', snapshot_class_name: 'Old Math', class: { id: 'c1', name: 'Math' } } },
+        { id: 'att-3', status: 'LATE', student_id: studentId, session: { id: 's3', date: '2026-03-15', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', snapshot_class_name: null, class: { id: 'c1', name: 'Math' } } },
       ];
 
       mockPrisma.attendance.findMany.mockResolvedValue(mockRecords);
@@ -363,12 +363,15 @@ describe('AttendanceService', () => {
               start_time: true,
               end_time: true,
               status: true,
+              snapshot_class_name: true,
               class: { select: { id: true, name: true } },
             },
           },
         },
         orderBy: { session: { date: 'desc' } },
       });
+      // Verify snapshot_class_name fallback: record with snapshot uses it, without uses class.name
+      expect(result.records[1].session.class.name).toBe('Old Math');
     });
 
     it('should return zero rate when no records exist', async () => {
