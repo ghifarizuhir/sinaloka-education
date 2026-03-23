@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AttendanceService } from './attendance.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   NotFoundException,
   ForbiddenException,
@@ -29,6 +31,14 @@ describe('AttendanceService', () => {
     $transaction: jest.fn((fn: any) => fn(mockPrisma)),
   };
 
+  const mockInvoiceGenerator = {
+    generateForSession: jest.fn(),
+  };
+
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
+
   const institutionId = 'inst-uuid-1';
   const userId = 'user-uuid-1';
 
@@ -37,12 +47,16 @@ describe('AttendanceService', () => {
       providers: [
         AttendanceService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: InvoiceGeneratorService, useValue: mockInvoiceGenerator },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
     service = module.get<AttendanceService>(AttendanceService);
     prisma = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
+    mockInvoiceGenerator.generateForSession.mockReset();
+    mockEventEmitter.emit.mockReset();
   });
 
   describe('batchCreate', () => {
@@ -306,6 +320,70 @@ describe('AttendanceService', () => {
       expect(result.late).toBe(1);
       expect(result.homework_done).toBe(2);
       expect(result.attendance_rate).toBeCloseTo(75); // (2+1)/4 * 100, PRESENT+LATE
+    });
+  });
+
+  describe('findByStudent', () => {
+    const studentId = 'student-uuid-1';
+    const query = {
+      date_from: new Date('2026-03-01'),
+      date_to: new Date('2026-03-31'),
+    };
+
+    it('should return summary and records for a student', async () => {
+      const mockRecords = [
+        { id: 'att-1', status: 'PRESENT', student_id: studentId, session: { id: 's1', date: '2026-03-20', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', class: { id: 'c1', name: 'Math' } } },
+        { id: 'att-2', status: 'ABSENT', student_id: studentId, session: { id: 's2', date: '2026-03-18', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', class: { id: 'c1', name: 'Math' } } },
+        { id: 'att-3', status: 'LATE', student_id: studentId, session: { id: 's3', date: '2026-03-15', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', class: { id: 'c1', name: 'Math' } } },
+      ];
+
+      mockPrisma.attendance.findMany.mockResolvedValue(mockRecords);
+
+      const result = await service.findByStudent(institutionId, studentId, query);
+
+      expect(result.summary).toEqual({
+        total_sessions: 3,
+        present: 1,
+        absent: 1,
+        late: 1,
+        attendance_rate: 66.67,
+      });
+      expect(result.records).toHaveLength(3);
+      expect(mockPrisma.attendance.findMany).toHaveBeenCalledWith({
+        where: {
+          institution_id: institutionId,
+          student_id: studentId,
+          session: { date: { gte: query.date_from, lte: query.date_to } },
+        },
+        include: {
+          session: {
+            select: {
+              id: true,
+              date: true,
+              start_time: true,
+              end_time: true,
+              status: true,
+              class: { select: { id: true, name: true } },
+            },
+          },
+        },
+        orderBy: { session: { date: 'desc' } },
+      });
+    });
+
+    it('should return zero rate when no records exist', async () => {
+      mockPrisma.attendance.findMany.mockResolvedValue([]);
+
+      const result = await service.findByStudent(institutionId, studentId, query);
+
+      expect(result.summary).toEqual({
+        total_sessions: 0,
+        present: 0,
+        absent: 0,
+        late: 0,
+        attendance_rate: 0,
+      });
+      expect(result.records).toHaveLength(0);
     });
   });
 });
