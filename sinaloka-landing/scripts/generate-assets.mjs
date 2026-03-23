@@ -126,7 +126,7 @@ async function generateOgImage(browser) {
 
 async function generateFavicons(browser) {
   // 32x32 favicon
-  for (const [size, name] of [[32, "favicon-32x32.png"], [180, "apple-touch-icon.png"]]) {
+  for (const [size, name] of [[32, "favicon-32x32.png"], [180, "apple-touch-icon.png"], [192, "icon-192x192.png"], [512, "icon-512x512.png"]]) {
     const page = await browser.newPage();
     await page.setViewportSize({ width: size, height: size });
 
