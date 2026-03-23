@@ -37,8 +37,15 @@ Model: e-commerce checkout pattern. Session completion = checkout moment. All co
 | `snapshot_class_fee` | Decimal? | null | `class.fee` |
 | `snapshot_class_room` | String? | null | `class.room` |
 | `snapshot_tutor_fee_mode` | String? | null | `class.tutor_fee_mode` |
+| `snapshot_tutor_fee_per_student` | Decimal? | null | `class.tutor_fee_per_student` |
 
 All nullable — backward compatible with existing COMPLETED sessions that predate this feature.
+
+**Design decisions:**
+- `snapshot_tutor_fee_mode` stored as String (not enum) for forward compatibility if enum values change later.
+- `snapshot_tutor_fee_per_student` included for audit trail — the existing `tutor_fee_amount` stores the computed total, but not the per-student rate used in the calculation.
+- `package_fee` excluded — not relevant to session-level history (package fees are billing-level, not session-level).
+- Snapshot is **immutable**. Completed sessions cannot be re-edited (existing guard: `BadRequestException('Cannot edit a completed session')`). If a session was completed with wrong data, admin must handle via correction, not re-edit.
 
 ### Trigger Point
 
@@ -49,11 +56,15 @@ Snapshot happens when session status transitions to `COMPLETED`. Two code paths:
 
 Both paths already fetch class with tutor + subject includes. Add snapshot fields to the `prisma.session.update()` data payload.
 
+**Implementation note:** The admin completion path has a limited `select` that does not include `subject.name`, `tutor.user.name`, or `room`. The `select`/`include` clause must be expanded to fetch these fields before snapshot.
+
 Sessions that are SCHEDULED, CANCELLED, or RESCHEDULE_REQUESTED are NOT snapshot.
 
 ### Display Logic: Snapshot-First Fallback
 
-In `flattenSession()` helper (session.service.ts), use snapshot values when available, fall back to live reference for pre-feature sessions:
+In `flattenSession()` helper (session.service.ts), use snapshot values when available, fall back to live reference for pre-feature sessions.
+
+**Important:** `findOne()` has its own inline flattening that bypasses `flattenSession()`. It must also be updated with snapshot-first fallback, or refactored to use `flattenSession()` to avoid duplication.
 
 ```
 tutor_name  = snapshot_tutor_name  ?? class.tutor.user.name
@@ -70,6 +81,16 @@ room        = snapshot_class_room  ?? class.room
 - `exportAudit()`: change session filter to use `snapshot_tutor_id` with fallback to `class.tutor_id`
 - `calculatePayout()`: same approach
 
+**Query pattern** (Prisma cannot do `snapshot ?? fallback` in a single where, use OR clause):
+```prisma
+where: {
+  OR: [
+    { snapshot_tutor_id: payout.tutor_id },
+    { snapshot_tutor_id: null, class: { tutor_id: payout.tutor_id } },
+  ]
+}
+```
+
 ### What Does NOT Change
 
 - **Frontend**: Zero changes. API response shape stays the same.
@@ -81,14 +102,14 @@ room        = snapshot_class_room  ?? class.room
 
 | File | Change |
 |------|--------|
-| `prisma/schema.prisma` | Add 7 snapshot columns to Session model |
+| `prisma/schema.prisma` | Add 8 snapshot columns to Session model |
 | `prisma/migrations/*/` | Additive migration (nullable columns) |
 | `src/modules/session/session.service.ts` | Snapshot on complete, fallback in flattenSession |
 | `src/modules/payout/payout.service.ts` | Use snapshot_tutor_id for audit queries |
 
 ## Migration
 
-- Additive only — 7 nullable columns, no data transformation
+- Additive only — 8 nullable columns, no data transformation
 - Zero downtime deployment
 - No backfill script needed
 
