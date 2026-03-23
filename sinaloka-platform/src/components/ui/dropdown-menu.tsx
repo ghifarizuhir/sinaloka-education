@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -12,27 +12,56 @@ export function DropdownMenu({ trigger, items, align = 'right' }: {
   align?: 'left' | 'right';
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const pos: { top: number; left?: number; right?: number } = {
+      top: rect.bottom + 4,
+    };
+    if (align === 'right') {
+      pos.right = window.innerWidth - rect.right;
+    } else {
+      pos.left = rect.left;
+    }
+    setMenuPos(pos);
+  }, [align]);
+
+  useLayoutEffect(() => {
+    if (isOpen) updatePosition();
+  }, [isOpen, updatePosition]);
 
   useEffect(() => {
     if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+      if (!triggerRef.current?.contains(e.target as Node) &&
+          !menuRef.current?.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
     };
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsOpen(false);
     };
+    const handleScrollOrResize = () => setIsOpen(false);
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
     };
   }, [isOpen]);
 
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={(e) => { e.stopPropagation(); setIsOpen(prev => !prev); }}
         className="p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent"
@@ -40,16 +69,15 @@ export function DropdownMenu({ trigger, items, align = 'right' }: {
         {trigger}
       </button>
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && menuPos && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -4 }}
+            ref={menuRef}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className={cn(
-              "absolute top-full mt-1 w-48 bg-popover border border-border rounded-xl shadow-xl z-10 p-1",
-              align === 'right' ? 'right-0' : 'left-0'
-            )}
+            className="fixed w-48 bg-popover border border-border rounded-xl shadow-xl z-50 p-1"
+            style={menuPos}
           >
             {items.map((item, i) => {
               if ('separator' in item) {
@@ -82,6 +110,6 @@ export function DropdownMenu({ trigger, items, align = 'right' }: {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
