@@ -601,7 +601,7 @@ export class SessionService {
 
     // Use end-of-day so enrollments created on the session date are included
     const sessionDateEnd = new Date(session.date);
-    sessionDateEnd.setHours(23, 59, 59, 999);
+    sessionDateEnd.setUTCHours(23, 59, 59, 999);
 
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
@@ -652,7 +652,7 @@ export class SessionService {
 
     // Use end-of-day so enrollments created on the session date are included
     const sessionDateEnd = new Date(session.date);
-    sessionDateEnd.setHours(23, 59, 59, 999);
+    sessionDateEnd.setUTCHours(23, 59, 59, 999);
 
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
