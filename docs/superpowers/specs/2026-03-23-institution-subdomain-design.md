@@ -125,7 +125,7 @@ Login logic with slug:
 | `slug` provided + user does NOT belong to that institution | Reject: "Akun tidak terdaftar di institusi ini" |
 | `slug` provided + user is SUPER_ADMIN | Reject: "Silakan login di platform.sinaloka.com" |
 | `slug` not provided + user is SUPER_ADMIN | Login succeeds (backward compatible) |
-| `slug` not provided + user is regular (ADMIN/TUTOR) | Reject: "Silakan akses melalui subdomain institusi Anda" |
+| `slug` not provided + user is regular (ADMIN/TUTOR) | Phase 1: login succeeds (backward compatible). Phase 3: Reject: "Silakan akses melalui subdomain institusi Anda" |
 
 Validation happens after password check to avoid leaking which institution a user belongs to.
 
@@ -269,7 +269,7 @@ Frontend routing handles `platform.sinaloka.com` for non-SUPER_ADMIN users **bef
       {slug && !authenticated → <InstitutionLandingPage />}
       {slug && authenticated → <Routes> (existing dashboard routes)}
       {!slug && isSuperAdminMode → <Routes> (existing routes, SUPER_ADMIN only)}
-      {!slug && !isSuperAdminMode → <SubdomainRequired /> (message: "Silakan akses melalui subdomain institusi Anda")}
+      {!slug && !isSuperAdminMode → <SubdomainRequired />}  // Phase 3 only (ENFORCE_SUBDOMAIN_LOGIN=true); Phase 1: show login form normally
       {error === 'not_found' → <InstitutionNotFound />}
     </BrowserRouter>
   </AuthProvider>
