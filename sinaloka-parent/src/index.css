@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand: Primary Teal (Light Mode) */
+  --color-primary: oklch(0.555 0.155 180);
+  --color-primary-foreground: white;
+
+  /* Warm Light Neutrals — exact brand guideline values */
+  --color-background: oklch(0.995 0.002 90);
+  --color-foreground: oklch(0.185 0.015 260);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.185 0.015 260);
+  --color-muted: oklch(0.960 0.006 90);
+  --color-muted-foreground: oklch(0.520 0.012 260);
+  --color-secondary: oklch(0.965 0.008 90);
+  --color-accent: oklch(0.955 0.020 180);
+  --color-border: oklch(0.915 0.006 90);
+  --color-input: oklch(0.905 0.008 90);
+  --color-ring: oklch(0.555 0.155 180);
+
+  /* Semantic Status (Light Mode) — per brand guidelines */
+  --color-success: oklch(0.565 0.155 160);
+  --color-success-muted: oklch(0.925 0.045 160);
+  --color-warning: oklch(0.750 0.170 75);
+  --color-warning-muted: oklch(0.945 0.050 75);
+  --color-info: oklch(0.546 0.245 262);
+  --color-info-muted: oklch(0.935 0.050 262);
+  --color-destructive: oklch(0.577 0.245 27);
+  --color-destructive-muted: oklch(0.945 0.050 27);
 }

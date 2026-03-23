@@ -5,9 +5,9 @@ import { cn } from '../lib/utils';
 import { checkoutPayment } from '../api/client';
 
 const STATUS_COLORS: Record<string, string> = {
-  PAID: 'bg-lime-500/20 text-lime-400',
-  PENDING: 'bg-orange-500/20 text-orange-400',
-  OVERDUE: 'bg-red-500/20 text-red-400',
+  PAID: 'bg-success-muted text-success',
+  PENDING: 'bg-warning-muted text-warning',
+  OVERDUE: 'bg-destructive-muted text-destructive',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -51,8 +51,8 @@ export function PaymentList({ data }: PaymentListProps) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl p-8 text-center">
-        <p className="text-zinc-500 text-sm">Belum ada data pembayaran.</p>
+      <div className="bg-muted border border-dashed border-border rounded-xl p-8 text-center">
+        <p className="text-muted-foreground text-sm">Belum ada data pembayaran.</p>
       </div>
     );
   }
@@ -60,7 +60,7 @@ export function PaymentList({ data }: PaymentListProps) {
   return (
     <div className="space-y-3">
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
+        <div className="bg-destructive-muted border border-destructive/20 rounded-lg p-3 text-destructive text-sm">
           {error}
         </div>
       )}
@@ -69,13 +69,13 @@ export function PaymentList({ data }: PaymentListProps) {
           payment.status === 'PENDING' || payment.status === 'OVERDUE';
 
         return (
-          <div key={payment.id} className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center gap-3">
+          <div key={payment.id} className="bg-card border border-border rounded-lg p-4 flex items-center gap-3 shadow-sm">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{payment.enrollment.class.subject}</p>
-              <p className="text-xs text-zinc-500">Jatuh tempo: {format(new Date(payment.due_date), 'dd MMM yyyy')}</p>
+              <p className="text-sm font-medium text-foreground truncate">{payment.enrollment.class.subject}</p>
+              <p className="text-xs text-muted-foreground">Jatuh tempo: {format(new Date(payment.due_date), 'dd MMM yyyy')}</p>
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
-              <p className="text-sm font-bold text-white">Rp {payment.amount.toLocaleString('id-ID')}</p>
+              <p className="text-sm font-bold text-foreground">Rp {payment.amount.toLocaleString('id-ID')}</p>
               <span className={cn('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full', STATUS_COLORS[payment.status])}>
                 {STATUS_LABELS[payment.status]}
               </span>
@@ -83,7 +83,7 @@ export function PaymentList({ data }: PaymentListProps) {
                 <button
                   onClick={() => handleBayar(payment)}
                   disabled={loadingId === payment.id}
-                  className="mt-1 px-3 py-1 bg-lime-400 text-black text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-60">
+                  className="mt-1 px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-60 shadow-sm">
                   {loadingId === payment.id ? '...' : 'Bayar'}
                 </button>
               )}

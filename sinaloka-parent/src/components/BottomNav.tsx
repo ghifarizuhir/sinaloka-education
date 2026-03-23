@@ -17,18 +17,18 @@ export function BottomNav({ activeTab, setActiveTab, unreadCount = 0 }: BottomNa
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900/80 backdrop-blur-xl border-t border-zinc-800 px-6 py-3 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-border shadow-[0_-1px_12px_rgba(0,0,0,0.04)] px-6 py-3 z-50">
       <div className="max-w-md mx-auto flex justify-between items-center">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={cn("relative flex flex-col items-center gap-1 transition-all duration-300", isActive ? "text-lime-400 scale-110" : "text-zinc-500")}>
+              className={cn("relative flex flex-col items-center gap-1 transition-all duration-300", isActive ? "text-primary scale-105" : "text-muted-foreground")}>
               <div className="relative">
-                <Icon className={cn("w-6 h-6", isActive && "fill-lime-400/20")} />
+                <Icon className={cn("w-5 h-5", isActive && "fill-primary/15")} />
                 {tab.id === 'notifications' && unreadCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
+                  <span className="absolute -top-1.5 -right-1.5 bg-destructive text-white text-[9px] font-bold min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}

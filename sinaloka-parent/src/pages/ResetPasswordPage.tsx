@@ -53,30 +53,30 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
 
   if (validating) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!valid) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+      <div className="min-h-screen bg-background text-foreground font-sans flex items-center justify-center selection:bg-primary/20 selection:text-primary">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 w-full max-w-sm mx-6 text-center"
         >
           <div className="mb-8">
-            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-red-400" />
+            <div className="w-16 h-16 rounded-full bg-destructive-muted flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-destructive" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight mb-2">Link Tidak Valid</h1>
-            <p className="text-zinc-500 text-sm">Link reset password sudah kedaluwarsa atau tidak valid. Silakan minta link baru.</p>
+            <p className="text-muted-foreground text-sm">Link reset password sudah kedaluwarsa atau tidak valid. Silakan minta link baru.</p>
           </div>
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-lime-400 hover:text-lime-300 text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Kembali ke Login
@@ -88,24 +88,24 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
 
   if (success) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+      <div className="min-h-screen bg-background text-foreground font-sans flex items-center justify-center selection:bg-primary/20 selection:text-primary">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 w-full max-w-sm mx-6 text-center"
         >
-          <div className="w-16 h-16 rounded-full bg-lime-400/10 flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-lime-400" />
+          <div className="w-16 h-16 rounded-full bg-success-muted flex items-center justify-center mx-auto mb-4">
+            <Lock className="w-8 h-8 text-success" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight mb-2">Password Berhasil Direset</h1>
-          <p className="text-zinc-500 text-sm">Mengalihkan ke halaman login...</p>
+          <p className="text-muted-foreground text-sm">Mengalihkan ke halaman login...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen bg-background text-foreground font-sans flex items-center justify-center selection:bg-primary/20 selection:text-primary">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -113,19 +113,19 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
       >
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Reset Password</h1>
-          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">{email}</p>
+          <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">{email}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-lg text-sm">
+            <div className="flex items-center gap-3 bg-destructive-muted border border-destructive/15 text-destructive px-5 py-4 rounded-lg text-sm">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-2">
               Password Baru
             </label>
             <PasswordInput
@@ -137,7 +137,7 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 ml-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-2">
               Konfirmasi Password
             </label>
             <PasswordInput
@@ -151,16 +151,16 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-lime-400 hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-lg shadow-sm text-lg flex items-center justify-center gap-3 transition-all"
+            className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-semibold py-3.5 rounded-lg shadow-sm text-base flex items-center justify-center gap-3 transition-all"
           >
-            <Lock className="w-6 h-6" />
+            <Lock className="w-5 h-5" />
             {loading ? 'Menyimpan...' : 'Simpan Password Baru'}
           </button>
 
           <button
             type="button"
             onClick={onBack}
-            className="w-full flex items-center justify-center gap-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Kembali ke Login
