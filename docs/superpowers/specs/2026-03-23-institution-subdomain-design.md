@@ -129,6 +129,16 @@ Login logic with slug:
 
 Validation happens after password check to avoid leaking which institution a user belongs to.
 
+#### Migration & Transition Strategy
+
+Enforcing slug-based login is a **breaking change** for existing ADMIN/TUTOR users who currently login at `platform.sinaloka.com`. Rollout strategy:
+
+1. **Phase 1 (deploy)**: `slug` is optional. If not provided, login works as before (backward compatible). Subdomain login is available but not enforced.
+2. **Phase 2 (notify)**: Admin users receive notification/email with their institution's subdomain URL. Dashboard shows banner: "Mulai [tanggal], login hanya bisa dilakukan melalui [subdomain].sinaloka.com"
+3. **Phase 3 (enforce)**: After grace period (2 weeks), enforce slug requirement — `platform.sinaloka.com` becomes SUPER_ADMIN only.
+
+The `slug` optional field in LoginSchema supports both phases. A feature flag `ENFORCE_SUBDOMAIN_LOGIN` (env var, default `false`) controls whether Phase 1 or Phase 3 behavior is active. This avoids a hard cutover.
+
 ### 2c. CORS — dynamic origin validation
 
 Replace static comma-separated list with dynamic function:
@@ -155,7 +165,7 @@ app.enableCors({
 
 For production: `*.sinaloka.com` subdomains are always allowed. Existing static list still works for dev/other origins.
 
-Environment variable `CORS_WILDCARD_DOMAIN` (optional) to make the wildcard domain configurable rather than hardcoded.
+Environment variable `CORS_WILDCARD_DOMAIN` (optional, default: `sinaloka.com`) to make the wildcard domain configurable rather than hardcoded. Add to `.env.example` with documentation.
 
 ### 2d. Reserved slug validation
 
@@ -208,7 +218,12 @@ export function getInstitutionSlug(): string | null {
 }
 
 export function isReservedSubdomain(): boolean {
-  // Returns true if on platform.sinaloka.com or similar reserved subdomain
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  if (parts.length === 3 && hostname.endsWith('.sinaloka.com')) {
+    return RESERVED_SUBDOMAINS.includes(parts[0]);
+  }
+  return false;
 }
 ```
 
@@ -245,6 +260,8 @@ Flow:
 
 ### 3c. Routing changes — `src/App.tsx`
 
+Frontend routing handles `platform.sinaloka.com` for non-SUPER_ADMIN users **before** login — during Phase 1 (grace period), the login form is shown normally with a banner suggesting the subdomain URL; during Phase 3 (enforced), a `SubdomainRequired` page is shown instead of the login form.
+
 ```
 <InstitutionProvider>
   <AuthProvider>
@@ -252,6 +269,7 @@ Flow:
       {slug && !authenticated → <InstitutionLandingPage />}
       {slug && authenticated → <Routes> (existing dashboard routes)}
       {!slug && isSuperAdminMode → <Routes> (existing routes, SUPER_ADMIN only)}
+      {!slug && !isSuperAdminMode → <SubdomainRequired /> (message: "Silakan akses melalui subdomain institusi Anda")}
       {error === 'not_found' → <InstitutionNotFound />}
     </BrowserRouter>
   </AuthProvider>
@@ -308,13 +326,15 @@ export async function getPublicInstitution(slug: string): Promise<InstitutionPub
 
 ### 4a. Cloudflare DNS
 
-Add wildcard DNS record (in Hostinger DNS or Cloudflare DNS):
+Domain `sinaloka.com` uses Cloudflare as authoritative nameserver (DNS managed in Cloudflare dashboard, not Hostinger). Add wildcard DNS record in **Cloudflare DNS**:
 
 ```
-*.sinaloka.com  CNAME  sinaloka-platform.pages.dev
+*.sinaloka.com  CNAME  sinaloka-platform.pages.dev  (Proxied)
 ```
 
-Existing specific records (`platform`, `parent`, `tutors`, `api`) take priority over wildcard — no conflict.
+**Important**: The wildcard record must be **proxied** (orange cloud) in Cloudflare, not DNS-only, so that Cloudflare can provision SSL and route to Pages. Existing specific records (`platform`, `parent`, `tutors`, `api`) take priority over wildcard — no conflict.
+
+**SSL**: Cloudflare Universal SSL covers `*.sinaloka.com` automatically when the wildcard record is proxied. No additional certificate configuration needed.
 
 ### 4b. Cloudflare Pages
 
@@ -368,13 +388,13 @@ Add `.sinaloka.com` and `.localhost` to `vite.config.ts` `allowedHosts`.
 
 ### Rate limiting
 
-- `GET /api/institutions/public/:slug` rate limited to prevent slug enumeration
+- `GET /api/institutions/public/:slug` rate limited (30 requests per minute per IP) to prevent slug enumeration
 - Login endpoint already rate limited (5 attempts per 15 minutes)
 
 ### Reserved slug enforcement
 
 - Backend validates on institution create/update — rejects reserved slugs
-- One-time migration check: verify no existing institution has a reserved slug
+- One-time migration check: run SQL query `SELECT id, slug FROM institutions WHERE slug IN ('platform','parent','tutors','api','www','mail','ftp','admin','app','dashboard');` — if any results, rename those slugs before deploying
 
 ## Testing Strategy
 
