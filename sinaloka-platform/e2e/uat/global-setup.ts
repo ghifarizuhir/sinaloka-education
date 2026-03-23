@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { writeState } from './state/uat-state';
+import { writeState, clearTokenCache, readTokenCache, writeTokenCache, type TokenEntry } from './state/uat-state';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +41,29 @@ async function waitForUrl(url: string, label: string): Promise<void> {
   }
 }
 
+async function prefetchToken(email: string, password: string): Promise<void> {
+  const res = await fetch('http://localhost:5000/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    console.warn(`[uat-setup] Warning: could not prefetch token for ${email}: ${res.status}`);
+    return;
+  }
+
+  const data = await res.json();
+  const cache = readTokenCache();
+  cache.set(email, {
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    obtained_at: Date.now(),
+  });
+  writeTokenCache(cache);
+  console.log(`[uat-setup] Token cached for ${email}`);
+}
+
 export default async function globalSetup(): Promise<void> {
   const execEnv = {
     ...process.env,
@@ -65,6 +88,12 @@ export default async function globalSetup(): Promise<void> {
   // Backend connection pool may need to reconnect after DB reset
   await waitForUrl('http://localhost:5000/api/health', 'Backend API');
   await waitForUrl('http://localhost:3000', 'Frontend');
+
+  // Clear stale token cache (DB was reset, old tokens are invalid)
+  clearTokenCache();
+
+  // Pre-fetch super admin token (uses 1 of 5 allowed login attempts)
+  await prefetchToken('super@sinaloka.com', 'password');
 
   writeState({
     superAdmin: { email: 'super@sinaloka.com', password: 'password' },

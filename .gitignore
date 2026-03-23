@@ -17,6 +17,7 @@ test-results/
 sinaloka-platform/playwright-report/
 capture/
 sinaloka-platform/e2e/uat/state/uat-state.json
+sinaloka-platform/e2e/uat/state/token-cache.json
 
 # Docs (local only, except superpowers)
 docs/

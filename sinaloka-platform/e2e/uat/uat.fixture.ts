@@ -1,6 +1,9 @@
 import { test as base, type Page } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
-import { readState, patchState, type UatState } from './state/uat-state';
+import {
+  readState, patchState, type UatState,
+  readTokenCache, writeTokenCache, type TokenEntry,
+} from './state/uat-state';
 
 export interface UatFixtures {
   uatPage: Page;
@@ -10,12 +13,18 @@ export interface UatFixtures {
   setState: (partial: Partial<UatState>) => void;
 }
 
-// Cache tokens per email to avoid repeated login API calls (rate limit: 5/15min)
-const tokenCache = new Map<string, { access_token: string; refresh_token: string }>();
+function isTokenValid(entry: TokenEntry): boolean {
+  // JWT_EXPIRY is 15m (900s). Use 12min as safe margin.
+  const MAX_AGE_MS = 12 * 60 * 1000;
+  return Date.now() - entry.obtained_at < MAX_AGE_MS;
+}
 
-async function getTokens(email: string, password: string): Promise<{ access_token: string; refresh_token: string }> {
-  const cached = tokenCache.get(email);
-  if (cached) return cached;
+async function getTokens(email: string, password: string): Promise<TokenEntry> {
+  const cache = readTokenCache();
+  const cached = cache.get(email);
+  if (cached && isTokenValid(cached)) {
+    return cached;
+  }
 
   const res = await fetch('http://localhost:5000/api/auth/login', {
     method: 'POST',
@@ -29,9 +38,15 @@ async function getTokens(email: string, password: string): Promise<{ access_toke
   }
 
   const data = await res.json();
-  const tokens = { access_token: data.access_token, refresh_token: data.refresh_token };
-  tokenCache.set(email, tokens);
-  return tokens;
+  const entry: TokenEntry = {
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    obtained_at: Date.now(),
+  };
+
+  cache.set(email, entry);
+  writeTokenCache(cache);
+  return entry;
 }
 
 export const test = base.extend<UatFixtures>({
@@ -58,7 +73,7 @@ export const test = base.extend<UatFixtures>({
     });
   },
 
-  // loggedInPage: inject tokens via API + localStorage (bypasses rate limit)
+  // loggedInPage: inject tokens via localStorage (bypasses UI login + rate limit)
   loggedInPage: async ({ page }, use) => {
     await use(async (role: 'superAdmin' | 'admin') => {
       const state = readState();
@@ -78,13 +93,13 @@ export const test = base.extend<UatFixtures>({
 
       const tokens = await getTokens(email, password);
 
-      // Inject tokens into localStorage and navigate
+      // Inject tokens into localStorage before any navigation
       await page.addInitScript((t) => {
         localStorage.setItem('access_token', t.access_token);
         localStorage.setItem('refresh_token', t.refresh_token);
-      }, tokens);
+      }, { access_token: tokens.access_token, refresh_token: tokens.refresh_token });
 
-      // Navigate to home — the app will read tokens from localStorage
+      // Navigate — app reads tokens from localStorage
       await page.goto(role === 'superAdmin' ? '/super/institutions' : '/');
       await page.waitForLoadState('networkidle');
 

@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const STATE_FILE = path.resolve(__dirname, 'uat-state.json');
+export const TOKEN_CACHE_FILE = path.resolve(__dirname, 'token-cache.json');
 
 export interface Credentials {
   email: string;
@@ -59,4 +60,32 @@ export function writeState(state: UatState): void {
 export function patchState(patch: Partial<UatState>): void {
   const current = readState();
   writeState({ ...current, ...patch });
+}
+
+// --- Token cache (persistent across runs to avoid rate limiting) ---
+
+export interface TokenEntry {
+  access_token: string;
+  refresh_token: string;
+  obtained_at: number;
+}
+
+export function readTokenCache(): Map<string, TokenEntry> {
+  try {
+    if (fs.existsSync(TOKEN_CACHE_FILE)) {
+      const data = JSON.parse(fs.readFileSync(TOKEN_CACHE_FILE, 'utf-8'));
+      return new Map(Object.entries(data));
+    }
+  } catch { /* corrupt — start fresh */ }
+  return new Map();
+}
+
+export function writeTokenCache(cache: Map<string, TokenEntry>): void {
+  fs.writeFileSync(TOKEN_CACHE_FILE, JSON.stringify(Object.fromEntries(cache), null, 2), 'utf-8');
+}
+
+export function clearTokenCache(): void {
+  if (fs.existsSync(TOKEN_CACHE_FILE)) {
+    fs.unlinkSync(TOKEN_CACHE_FILE);
+  }
 }
