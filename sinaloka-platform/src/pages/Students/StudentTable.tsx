@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   MoreHorizontal,
@@ -29,6 +29,82 @@ interface StudentTableProps {
   onClearFilters: () => void;
   t: TFunction;
 }
+
+const ActionMenu: React.FC<{
+  student: Student;
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  onEdit: (s: Student) => void;
+  onDelete: (s: Student) => void;
+  onInviteParent: (s: Student) => void;
+  t: TFunction;
+}> = ({ student, isOpen, onToggle, onClose, onEdit, onDelete, onInviteParent, t }) => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
+
+  useLayoutEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, [isOpen]);
+
+  return (
+    <div className="flex items-center justify-end gap-2">
+      <button
+        ref={buttonRef}
+        onClick={onToggle}
+        className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+      >
+        <MoreHorizontal size={16} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-10"
+              onClick={onClose}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed w-36 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-20 p-1"
+              style={{ top: menuPos.top, right: menuPos.right }}
+            >
+              <button
+                onClick={() => { onEdit(student); onClose(); }}
+                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
+              >
+                <Eye size={14} /> {t('students.bulk.viewEdit')}
+              </button>
+              {student.parent_email && (
+                <button
+                  onClick={() => { onInviteParent(student); onClose(); }}
+                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
+                >
+                  <UserPlus size={14} /> {t('students.bulk.inviteParent')}
+                </button>
+              )}
+              <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
+              <button
+                onClick={() => { onDelete(student); onClose(); }}
+                className="w-full text-left px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg flex items-center gap-2"
+              >
+                <Trash2 size={14} /> {t('common.delete')}
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export const StudentTable: React.FC<StudentTableProps> = ({
   students,
@@ -116,58 +192,16 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                   </td>
                 )}
                 <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-2 relative">
-                    <div className="relative">
-                      <button
-                        onClick={() => onActionMenuToggle(activeActionMenu === student.id ? null : student.id)}
-                        className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                      >
-                        <MoreHorizontal size={16} />
-                      </button>
-
-                      <AnimatePresence>
-                        {activeActionMenu === student.id && (
-                          <>
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => onActionMenuToggle(null)}
-                            />
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                              className="absolute right-0 top-full mt-2 w-36 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-20 p-1"
-                            >
-                              <button
-                                onClick={() => { onEdit(student); onActionMenuToggle(null); }}
-                                className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-                              >
-                                <Eye size={14} /> {t('students.bulk.viewEdit')}
-                              </button>
-                              {student.parent_email && (
-                                <button
-                                  onClick={() => {
-                                    onInviteParent(student);
-                                    onActionMenuToggle(null);
-                                  }}
-                                  className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2"
-                                >
-                                  <UserPlus size={14} /> {t('students.bulk.inviteParent')}
-                                </button>
-                              )}
-                              <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
-                              <button
-                                onClick={() => { onDelete(student); onActionMenuToggle(null); }}
-                                className="w-full text-left px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg flex items-center gap-2"
-                              >
-                                <Trash2 size={14} /> {t('common.delete')}
-                              </button>
-                            </motion.div>
-                          </>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
+                  <ActionMenu
+                    student={student}
+                    isOpen={activeActionMenu === student.id}
+                    onToggle={() => onActionMenuToggle(activeActionMenu === student.id ? null : student.id)}
+                    onClose={() => onActionMenuToggle(null)}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onInviteParent={onInviteParent}
+                    t={t}
+                  />
                 </td>
               </tr>
             ))

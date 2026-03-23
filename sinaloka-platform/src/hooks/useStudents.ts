@@ -25,5 +25,5 @@ export function useImportStudents() {
   return useMutation({ mutationFn: studentsService.importCsv, onSuccess: () => qc.invalidateQueries({ queryKey: ['students'] }) });
 }
 export function useExportStudents() {
-  return useMutation({ mutationFn: studentsService.exportCsv });
+  return useMutation({ mutationFn: (params?: StudentQueryParams) => studentsService.exportCsv(params) });
 }

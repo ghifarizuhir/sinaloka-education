@@ -20,6 +20,6 @@ export const studentsService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }).then((r) => r.data);
   },
-  exportCsv: () =>
-    api.get('/api/admin/students/export', { responseType: 'blob' }).then((r) => r.data),
+  exportCsv: (params?: StudentQueryParams) =>
+    api.get('/api/admin/students/export', { params, responseType: 'blob' }).then((r) => r.data),
 };

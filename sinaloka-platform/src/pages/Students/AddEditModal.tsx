@@ -102,8 +102,12 @@ export const AddEditModal: React.FC<AddEditModalProps> = ({
               id="new-phone"
               placeholder={t('students.form.phonePlaceholder')}
               value={formPhone}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPhone(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFormPhone(e.target.value);
+                if (formErrors.phone) setFormErrors(prev => { const { phone, ...rest } = prev; return rest; });
+              }}
             />
+            {formErrors.phone && <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

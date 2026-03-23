@@ -126,7 +126,12 @@ export function useStudentPage() {
   };
 
   const handleExportClick = () => {
-    exportStudents.mutate(undefined, {
+    const exportParams = {
+      search: debouncedSearch || undefined,
+      grade: activeFilters.grade || undefined,
+      status: activeFilters.status?.toUpperCase() as 'ACTIVE' | 'INACTIVE' | undefined,
+    };
+    exportStudents.mutate(exportParams, {
       onSuccess: (blob: Blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -220,9 +225,22 @@ export function useStudentPage() {
       errors.grade = formGrade === '__custom__' ? 'Kelas wajib diisi' : 'Kelas wajib dipilih';
     }
     if (!formParentName.trim()) errors.parent_name = 'Nama orang tua wajib diisi';
-    if (!formParentPhone.trim()) errors.parent_phone = 'Telepon orang tua wajib diisi';
+    if (formPhone) {
+      const digitsOnly = formPhone.replace(/\D/g, '');
+      if (digitsOnly.length < 10 || digitsOnly.length > 13) {
+        errors.phone = 'Nomor telepon harus 10-13 digit';
+      }
+    }
     if (formEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)) {
       errors.email = 'Format email tidak valid';
+    }
+    if (formParentPhone) {
+      const digitsOnly = formParentPhone.replace(/\D/g, '');
+      if (digitsOnly.length < 10 || digitsOnly.length > 13) {
+        errors.parent_phone = 'Nomor telepon harus 10-13 digit';
+      }
+    } else if (!formParentPhone.trim()) {
+      errors.parent_phone = 'Telepon orang tua wajib diisi';
     }
     if (formParentEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formParentEmail)) {
       errors.parent_email = 'Format email tidak valid';
