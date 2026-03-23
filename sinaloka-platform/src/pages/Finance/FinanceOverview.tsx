@@ -8,7 +8,7 @@ import {
   MessageSquare, ChevronRight, Minus,
   FileText, ChevronDown, Equal
 } from 'lucide-react';
-import { Card, Button, Badge, Skeleton, PageHeader, Tabs, DropdownMenu } from '../../components/UI';
+import { Card, Button, Badge, Skeleton, PageHeader, Tabs, DropdownMenu, DatePicker } from '../../components/UI';
 import { cn, formatCurrencyShort, formatCurrency } from '../../lib/utils';
 import { useDashboardStats } from '@/src/hooks/useDashboard';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
@@ -133,18 +133,16 @@ export const FinanceOverview = () => {
       {/* Custom Date Range */}
       {activePeriod === 'custom' && (
         <div className="flex items-center gap-2 justify-end">
-          <input
-            type="date"
+          <DatePicker
             value={customStart}
-            onChange={(e) => { setCustomStart(e.target.value); handleCustomDateChange(e.target.value, customEnd); }}
-            className="px-3 py-1.5 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onChange={(val) => { setCustomStart(val); handleCustomDateChange(val, customEnd); }}
+            className="w-36"
           />
           <span className="text-xs text-muted-foreground">—</span>
-          <input
-            type="date"
+          <DatePicker
             value={customEnd}
-            onChange={(e) => { setCustomEnd(e.target.value); handleCustomDateChange(customStart, e.target.value); }}
-            className="px-3 py-1.5 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onChange={(val) => { setCustomEnd(val); handleCustomDateChange(customStart, val); }}
+            className="w-36"
           />
         </div>
       )}

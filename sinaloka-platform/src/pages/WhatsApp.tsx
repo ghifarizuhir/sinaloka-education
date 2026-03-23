@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, CheckCircle2, Eye, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
-import { Card, Button, Badge, Drawer, Input, Label, SearchInput, Switch, Skeleton, PageHeader, Select, Tabs } from '../components/UI';
+import { Card, Button, Badge, Drawer, Input, Label, SearchInput, Switch, Skeleton, PageHeader, Select, Tabs, DatePicker } from '../components/UI';
 import { cn, formatDate, formatCurrency } from '../lib/utils';
 import { toast } from 'sonner';
 import { useWhatsappMessages, useWhatsappStats, useWhatsappSettings, useUpdateWhatsappSettings, useSendPaymentReminder } from '@/src/hooks/useWhatsapp';
@@ -168,19 +168,15 @@ export const WhatsApp = () => {
                 { value: 'FAILED', label: t('whatsapp.statusLabel.failed') },
               ]}
             />
-            <Input
-              type="date"
+            <DatePicker
               value={filterDateFrom}
-              onChange={(e) => { setFilterDateFrom(e.target.value); setPage(1); }}
+              onChange={(val) => { setFilterDateFrom(val); setPage(1); }}
               placeholder={t('whatsapp.filter.dateFrom')}
-              className="w-auto"
             />
-            <Input
-              type="date"
+            <DatePicker
               value={filterDateTo}
-              onChange={(e) => { setFilterDateTo(e.target.value); setPage(1); }}
+              onChange={(val) => { setFilterDateTo(val); setPage(1); }}
               placeholder={t('whatsapp.filter.dateTo')}
-              className="w-auto"
             />
             <Select
               value={filterRelatedType}
