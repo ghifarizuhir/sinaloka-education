@@ -1,6 +1,6 @@
 import React from 'react';
 import { Info } from 'lucide-react';
-import { Modal, Button, Label, Input, Select } from '../../components/UI';
+import { Modal, Button, Label, Select, DatePicker } from '../../components/UI';
 import type { TFunction } from 'i18next';
 
 interface ClassOption {
@@ -67,11 +67,11 @@ export const GenerateSessionsModal: React.FC<GenerateSessionsModalProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>{t('schedules.form.dateFrom')}</Label>
-            <Input type="date" value={genDateFrom} onChange={(e) => onGenDateFromChange(e.target.value)} />
+            <DatePicker value={genDateFrom} onChange={onGenDateFromChange} />
           </div>
           <div className="space-y-1.5">
             <Label>{t('schedules.form.dateTo')}</Label>
-            <Input type="date" value={genDateTo} onChange={(e) => onGenDateToChange(e.target.value)} />
+            <DatePicker value={genDateTo} onChange={onGenDateToChange} />
           </div>
         </div>
 

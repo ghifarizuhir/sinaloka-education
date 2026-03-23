@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, Select } from '../../components/UI';
+import { Select, DatePicker } from '../../components/UI';
 import type { SessionStatus } from '@/src/types/session';
 import type { TFunction } from 'i18next';
 
@@ -35,20 +35,8 @@ export const ScheduleFilters: React.FC<ScheduleFiltersProps> = ({
 }) => {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Input
-        type="date"
-        value={filterDateFrom}
-        onChange={(e) => onFilterDateFromChange(e.target.value)}
-        className="h-9 text-xs w-36"
-        placeholder={t('schedules.form.dateFrom')}
-      />
-      <Input
-        type="date"
-        value={filterDateTo}
-        onChange={(e) => onFilterDateToChange(e.target.value)}
-        className="h-9 text-xs w-36"
-        placeholder={t('schedules.form.dateTo')}
-      />
+      <DatePicker value={filterDateFrom} onChange={onFilterDateFromChange} className="h-9 text-xs w-36" placeholder={t('schedules.form.dateFrom')} />
+      <DatePicker value={filterDateTo} onChange={onFilterDateToChange} className="h-9 text-xs w-36" placeholder={t('schedules.form.dateTo')} />
       <Select
         value={filterClassId}
         onChange={onFilterClassIdChange}
