@@ -1,13 +1,21 @@
 # Tool-generated scratch files
+.agent/
+.agents/
+.claude/
 .superpowers/
 .coordination/
-.claude/
-.mcp.json
-tunnels.sh
-docs/.obsidian/
+.planning/
 .playwright-mcp/
 .wrangler/
-capture/
+.mcp.json
+skills/
+skills-lock.json
+tunnels.sh
+
+# Test output
+test-results/
 sinaloka-platform/playwright-report/
-.agents/
+capture/
+
+# Docs (local only)
 docs/
