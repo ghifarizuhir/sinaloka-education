@@ -10,13 +10,4 @@ docs/.obsidian/
 capture/
 sinaloka-platform/playwright-report/
 .agents/
-docs/superpowers/
-docs/PricingSection.jsx
-docs/UAT-TEST-CASES.md
-docs/check.png
-docs/platform-analysis-v5-business-evaluation.md
-docs/platform-failed-create-class.png
-docs/platform-failed-to-save-payment-setting.png
-docs/platform-failed-upload-proof-payment.png
-docs/sinaloka-sprint-breakdown.docx
-docs/tutors-cannot_login.png
+docs/
