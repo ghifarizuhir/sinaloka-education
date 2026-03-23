@@ -14,7 +14,7 @@ export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string, slug?: string) => Promise<User>;
   logout: () => Promise<void>;
   mustChangePassword: boolean;
   impersonatedInstitution: { id: string; name: string } | null;
@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<User> => {
-    const tokens = await authService.login({ email, password });
+  const login = useCallback(async (email: string, password: string, slug?: string): Promise<User> => {
+    const tokens = await authService.login({ email, password, slug });
     localStorage.setItem('access_token', tokens.access_token);
     localStorage.setItem('refresh_token', tokens.refresh_token);
     const profile = await authService.getMe();

@@ -3,10 +3,12 @@ import { useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
+import { useInstitution } from '@/src/contexts/InstitutionContext';
 import { Card, Button, Input, Label, PasswordInput } from '@/src/components/UI';
 
 export function Login() {
   const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const { institution, slug } = useInstitution();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
@@ -31,7 +33,7 @@ export function Login() {
     setError(null);
     setIsSubmitting(true);
     try {
-      const profile = await login(email, password);
+      const profile = await login(email, password, slug || undefined);
       if (profile.role === 'SUPER_ADMIN') {
         navigate('/super/institutions', { replace: true });
       } else {
@@ -60,15 +62,42 @@ export function Login() {
       <div className="relative w-full max-w-sm">
         {/* Logo / Branding */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-            <div className="w-6 h-6 bg-white dark:bg-zinc-900 rounded-sm rotate-45" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            {t('login.title')}
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            {t('login.subtitle')}
-          </p>
+          {institution ? (
+            <>
+              {institution.logo_url ? (
+                <img
+                  src={institution.logo_url}
+                  alt={institution.name}
+                  className="w-12 h-12 rounded-xl mb-4 shadow-lg object-cover"
+                />
+              ) : (
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg text-white text-lg font-bold"
+                  style={{ backgroundColor: institution.brand_color || '#18181b' }}
+                >
+                  {institution.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                {institution.name}
+              </h1>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                Masuk ke dashboard
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                <div className="w-6 h-6 bg-white dark:bg-zinc-900 rounded-sm rotate-45" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                {t('login.title')}
+              </h1>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                {t('login.subtitle')}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Login card */}
