@@ -11,12 +11,17 @@ export interface UatFixtures {
 }
 
 export const test = base.extend<UatFixtures>({
-  // CRITICAL: Set language to English so all i18n-based locators work consistently.
-  // Without this, the UI may render in Indonesian and all English text locators will fail.
-  uatPage: async ({ page }, use) => {
+  // CRITICAL: Override base page to set language to English.
+  // All fixtures (uatPage, loginAs, loggedInPage) depend on page,
+  // so this single override ensures all i18n-based locators work.
+  page: async ({ page }, use) => {
     await page.addInitScript(() => {
       localStorage.setItem('sinaloka-lang', 'en');
     });
+    await use(page);
+  },
+
+  uatPage: async ({ page }, use) => {
     await use(page);
   },
 

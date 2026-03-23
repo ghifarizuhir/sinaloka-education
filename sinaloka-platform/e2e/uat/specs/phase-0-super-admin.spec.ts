@@ -43,9 +43,9 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
 
     await expect(instPage.table).toBeVisible();
 
-    // Seeded data should have at least 2 rows (excluding header)
-    const rows = instPage.table.getByRole('row');
-    await expect(rows).toHaveCount(await rows.count()); // ensure loaded
+    // Seeded data should have at least 2 data rows
+    const rows = instPage.table.locator('tbody tr');
+    await expect(rows.first()).toBeVisible({ timeout: 10_000 });
     const rowCount = await rows.count();
     // First row is header, so data rows = rowCount - 1
     expect(rowCount - 1).toBeGreaterThanOrEqual(2);
