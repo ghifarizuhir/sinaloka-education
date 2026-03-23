@@ -27,11 +27,6 @@ export const SUBJECT_COLORS: Record<string, string> = {
   'English': 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-800',
 };
 
-export const TIME_SLOTS = Array.from({ length: 24 * 2 }, (_, i) => {
-  const hour = Math.floor(i / 2);
-  const min = i % 2 === 0 ? '00' : '30';
-  return `${hour.toString().padStart(2, '0')}:${min}`;
-});
 
 export function getSessionDate(session: Session): Date {
   return parseISO(session.date);

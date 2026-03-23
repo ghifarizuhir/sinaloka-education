@@ -1,4 +1,3 @@
-import React from 'react';
 import { DayPicker, type DayPickerProps } from 'react-day-picker';
 import { id } from 'react-day-picker/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';

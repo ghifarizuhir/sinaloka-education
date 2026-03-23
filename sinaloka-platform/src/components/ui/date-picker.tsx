@@ -35,8 +35,8 @@ function DatePicker({
   const handleSelect = (date: Date | undefined) => {
     if (date) {
       onChange(format(date, 'yyyy-MM-dd'));
+      setOpen(false);
     }
-    setOpen(false);
   };
 
   return (
