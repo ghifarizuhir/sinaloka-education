@@ -147,6 +147,28 @@ export class InstitutionService {
     );
   }
 
+  async findBySlugPublic(slug: string) {
+    const institution = await this.prisma.institution.findFirst({
+      where: { slug, is_active: true },
+      select: {
+        name: true, slug: true, logo_url: true,
+        description: true, brand_color: true, background_image_url: true,
+        settings: true,
+      },
+    });
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+    const settings = institution.settings as Record<string, any> | null;
+    const registrationEnabled = settings?.registration?.student_enabled ?? false;
+    return {
+      name: institution.name, slug: institution.slug, logo_url: institution.logo_url,
+      description: institution.description, brand_color: institution.brand_color,
+      background_image_url: institution.background_image_url,
+      registration_enabled: registrationEnabled,
+    };
+  }
+
   async getSummary(institutionId: string) {
     const [studentCount, tutorCount, adminCount, activeClassCount] =
       await Promise.all([

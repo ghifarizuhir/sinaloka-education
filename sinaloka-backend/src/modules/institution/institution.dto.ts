@@ -30,6 +30,9 @@ export const UpdateInstitutionSchema = z.object({
   timezone: z.string().optional().nullable(),
   default_language: z.string().optional().nullable(),
   is_active: z.boolean().optional(),
+  description: z.string().max(500).nullable().optional(),
+  brand_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').nullable().optional(),
+  background_image_url: z.string().url().nullable().optional(),
 });
 
 export type UpdateInstitutionDto = z.infer<typeof UpdateInstitutionSchema>;

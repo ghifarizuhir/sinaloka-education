@@ -16,6 +16,7 @@ describe('InstitutionService', () => {
     institution: {
       findMany: jest.Mock;
       findUnique: jest.Mock;
+      findFirst: jest.Mock;
       count: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
@@ -41,6 +42,7 @@ describe('InstitutionService', () => {
       institution: {
         findMany: jest.fn(),
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         count: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
@@ -232,6 +234,38 @@ describe('InstitutionService', () => {
       await expect(service.remove('nonexistent')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('findBySlugPublic', () => {
+    it('should return public institution data by slug', async () => {
+      const mockInstitution = {
+        name: 'Test Bimbel',
+        slug: 'test-bimbel',
+        logo_url: null,
+        description: 'A test institution',
+        brand_color: '#2563eb',
+        background_image_url: null,
+        settings: { registration: { student_enabled: true } },
+        is_active: true,
+      };
+      prisma.institution.findFirst.mockResolvedValue(mockInstitution as any);
+
+      const result = await service.findBySlugPublic('test-bimbel');
+      expect(result).toEqual({
+        name: 'Test Bimbel',
+        slug: 'test-bimbel',
+        logo_url: null,
+        description: 'A test institution',
+        brand_color: '#2563eb',
+        background_image_url: null,
+        registration_enabled: true,
+      });
+    });
+
+    it('should throw NotFoundException for unknown slug', async () => {
+      prisma.institution.findFirst.mockResolvedValue(null);
+      await expect(service.findBySlugPublic('nonexistent')).rejects.toThrow(NotFoundException);
     });
   });
 });
