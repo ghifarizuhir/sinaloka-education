@@ -1,11 +1,17 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useInstitution } from '@/src/contexts/InstitutionContext';
+import { useAuth } from '@/src/hooks/useAuth';
 import { sanitizeBrandColor, isValidImageUrl } from '@/src/lib/subdomain';
 import { Button } from '@/src/components/UI';
 
 export function InstitutionLanding() {
   const { institution } = useInstitution();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   if (!institution) return null;
 
@@ -17,7 +23,7 @@ export function InstitutionLanding() {
       {bgImage ? (
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bgImage})` }}
+          style={{ backgroundImage: `url("${bgImage}")` }}
         >
           <div className="absolute inset-0 bg-black/60" />
         </div>

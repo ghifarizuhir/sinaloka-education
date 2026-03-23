@@ -31,6 +31,9 @@ export function InstitutionProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<'not_found' | 'network_error' | null>(null);
 
   const slug = getInstitutionSlug();
+  // No slug means we're on a non-institution hostname (platform.sinaloka.com, localhost, or IP).
+  // This is NOT a security check — all auth is server-side via JWT roles.
+  // Used only for routing decisions (show generic login vs institution-specific landing page).
   const isSuperAdminMode = slug === null;
 
   useEffect(() => {

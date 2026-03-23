@@ -36,11 +36,17 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      // Check wildcard subdomain
+      // Check wildcard subdomain (exactly one level)
       if (wildcardDomain) {
         try {
           const url = new URL(origin);
-          if (url.hostname.endsWith(`.${wildcardDomain}`)) {
+          const parts = url.hostname.split('.');
+          const domainParts = wildcardDomain.split('.');
+          // Ensure exactly one subdomain level: slug.domain.tld
+          if (
+            parts.length === domainParts.length + 1 &&
+            url.hostname.endsWith(`.${wildcardDomain}`)
+          ) {
             return callback(null, true);
           }
         } catch {

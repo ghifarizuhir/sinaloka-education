@@ -155,7 +155,17 @@ export class InstitutionService {
     );
   }
 
-  async findBySlugPublic(slug: string) {
+  // Public endpoint — no tenantId scoping needed (pre-authentication discovery).
+  // settings is selected to extract registration_enabled; the full blob is never returned.
+  async findBySlugPublic(slug: string): Promise<{
+    name: string;
+    slug: string;
+    logo_url: string | null;
+    description: string | null;
+    brand_color: string | null;
+    background_image_url: string | null;
+    registration_enabled: boolean;
+  }> {
     const institution = await this.prisma.institution.findFirst({
       where: { slug, is_active: true },
       select: {
