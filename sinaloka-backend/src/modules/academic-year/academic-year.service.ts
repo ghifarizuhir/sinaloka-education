@@ -82,7 +82,14 @@ export class AcademicYearService {
       if (existing) throw new ConflictException('Academic year name already exists');
     }
 
-    return this.prisma.academicYear.update({ where: { id }, data: dto });
+    return this.prisma.academicYear.update({
+      where: { id },
+      data: {
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.start_date !== undefined && { start_date: dto.start_date }),
+        ...(dto.end_date !== undefined && { end_date: dto.end_date }),
+      },
+    });
   }
 
   async deleteYear(tenantId: string, id: string) {
@@ -167,7 +174,14 @@ export class AcademicYearService {
       if (existing) throw new ConflictException('Semester name already exists in this academic year');
     }
 
-    return this.prisma.semester.update({ where: { id }, data: dto });
+    return this.prisma.semester.update({
+      where: { id },
+      data: {
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.start_date !== undefined && { start_date: dto.start_date }),
+        ...(dto.end_date !== undefined && { end_date: dto.end_date }),
+      },
+    });
   }
 
   async deleteSemester(tenantId: string, id: string) {
@@ -194,6 +208,9 @@ export class AcademicYearService {
       include: { academic_year: true },
     });
     if (!semester) throw new NotFoundException('Semester not found');
+    if (semester.status === 'ARCHIVED') {
+      throw new BadRequestException('Semester is already archived');
+    }
 
     return this.prisma.$transaction(async (tx) => {
       await tx.semester.update({
@@ -228,6 +245,10 @@ export class AcademicYearService {
   // ─── Roll-over ───
 
   async rollOver(tenantId: string, targetSemesterId: string, dto: RollOverDto) {
+    if (dto.source_semester_id === targetSemesterId) {
+      throw new BadRequestException('Source and target semester must be different');
+    }
+
     const targetSemester = await this.prisma.semester.findFirst({
       where: { id: targetSemesterId, institution_id: tenantId },
     });
