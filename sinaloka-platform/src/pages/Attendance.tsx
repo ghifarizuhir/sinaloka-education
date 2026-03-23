@@ -12,7 +12,6 @@ import {
   Unlock,
   MessageSquare,
   Paperclip,
-  History,
   Info,
   ChevronLeft,
   ChevronRight,
@@ -172,17 +171,11 @@ export const Attendance = () => {
       <PageHeader
         title={t('attendance.title')}
         subtitle={t('attendance.subtitle')}
-        actions={
-          <Button variant="outline" className="gap-2">
-            <History size={18} />
-            {t('attendance.viewHistory')}
-          </Button>
-        }
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Panel: Date Picker & Sessions List */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
           {/* Date Picker */}
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">

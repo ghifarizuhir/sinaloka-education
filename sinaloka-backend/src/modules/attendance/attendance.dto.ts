@@ -37,3 +37,9 @@ export const AttendanceSummaryQuerySchema = z.object({
 export type AttendanceSummaryQueryDto = z.infer<
   typeof AttendanceSummaryQuerySchema
 >;
+
+export const StudentAttendanceQuerySchema = z.object({
+  date_from: z.coerce.date(),
+  date_to: z.coerce.date(),
+});
+export type StudentAttendanceQueryDto = z.infer<typeof StudentAttendanceQuerySchema>;

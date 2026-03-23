@@ -1,5 +1,6 @@
 import React from 'react';
-import { Mail, Phone, Calendar, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Phone, Calendar, UserPlus, ExternalLink } from 'lucide-react';
 import { Card, Button, Badge, Drawer, Avatar } from '../../components/UI';
 import { formatDate } from '../../lib/utils';
 import type { Student } from '@/src/types/student';
@@ -24,6 +25,7 @@ export const StudentDrawer: React.FC<StudentDrawerProps> = ({
   t,
   language,
 }) => {
+  const navigate = useNavigate();
   return (
     <Drawer
       isOpen={isOpen}
@@ -101,6 +103,20 @@ export const StudentDrawer: React.FC<StudentDrawerProps> = ({
                 <p className="text-xs text-zinc-500 text-center">{t('students.drawer.noParentEmail')}</p>
               )}
             </Card>
+          </div>
+
+          <div className="pt-2">
+            <Button
+              className="w-full justify-center gap-2"
+              variant="outline"
+              onClick={() => {
+                onClose();
+                navigate(`/students/${student.id}`);
+              }}
+            >
+              <ExternalLink size={16} />
+              {t('students.drawer.viewDetail', 'Lihat Detail')}
+            </Button>
           </div>
         </div>
       )}
