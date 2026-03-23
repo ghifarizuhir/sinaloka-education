@@ -18,6 +18,7 @@ import { InstitutionProvider, useInstitution } from '@/src/contexts/InstitutionC
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
+import { StudentDetail } from './pages/Students/StudentDetail';
 import { Tutors } from './pages/Tutors';
 import { Classes } from './pages/Classes';
 import { Schedules } from './pages/Schedules';
@@ -98,6 +99,7 @@ export default function App() {
               <Route element={<Layout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/students" element={<Students />} />
+                <Route path="/students/:id" element={<StudentDetail />} />
                 <Route path="/tutors" element={<Tutors />} />
                 <Route path="/classes" element={<Classes />} />
                 <Route path="/schedules" element={<Schedules />} />
