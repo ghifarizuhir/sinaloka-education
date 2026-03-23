@@ -234,13 +234,13 @@ export function useStudentPage() {
     if (formEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)) {
       errors.email = 'Format email tidak valid';
     }
-    if (formParentPhone) {
+    if (!formParentPhone.trim()) {
+      errors.parent_phone = 'Telepon orang tua wajib diisi';
+    } else {
       const digitsOnly = formParentPhone.replace(/\D/g, '');
       if (digitsOnly.length < 10 || digitsOnly.length > 13) {
         errors.parent_phone = 'Nomor telepon harus 10-13 digit';
       }
-    } else if (!formParentPhone.trim()) {
-      errors.parent_phone = 'Telepon orang tua wajib diisi';
     }
     if (formParentEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formParentEmail)) {
       errors.parent_email = 'Format email tidak valid';

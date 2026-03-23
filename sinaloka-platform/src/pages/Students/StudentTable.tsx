@@ -53,6 +53,17 @@ const ActionMenu: React.FC<{
     }
   }, [isOpen]);
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleScrollOrResize = () => onClose();
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [isOpen, onClose]);
+
   return (
     <div className="flex items-center justify-end gap-2">
       <button
