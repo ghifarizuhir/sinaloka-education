@@ -11,7 +11,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-export const WHATSAPP_NUMBER = "62895358468523";
+export const WHATSAPP_NUMBER = "6285121094946";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Halo%2C%20saya%20tertarik%20dengan%20Sinaloka%20untuk%20bimbel%20saya`;
 
 export const NAV_LINKS = [
