@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Toaster } from 'sonner';
 import { BottomNav } from './components/BottomNav';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -16,7 +17,7 @@ import { LogOut } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, isLoading: authLoading, profile, logout } = useAuth();
-  const { data: children, isLoading: childrenLoading } = useChildren();
+  const { data: children, isLoading: childrenLoading, error: childrenError, refetch: refetchChildren } = useChildren();
   const { count: unreadCount, refresh: refreshUnread } = useUnreadCount();
 
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -86,6 +87,8 @@ export default function App() {
             firstName={firstName}
             children={children}
             isLoading={childrenLoading}
+            error={childrenError}
+            onRetry={refetchChildren}
             onSelectChild={setSelectedChildId}
           />
         );
@@ -154,6 +157,22 @@ export default function App() {
       </main>
 
       {!selectedChild && <BottomNav activeTab={activeTab} setActiveTab={(tab) => { setActiveTab(tab); if (tab === 'notifications') refreshUnread(); }} unreadCount={unreadCount} />}
+
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          className: 'font-sans',
+          style: {
+            background: 'color-mix(in oklch, var(--color-card) 92%, transparent)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-foreground)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '13px',
+            fontWeight: '500',
+          },
+        }}
+      />
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }

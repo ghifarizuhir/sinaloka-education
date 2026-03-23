@@ -1,16 +1,19 @@
 import React from 'react';
 import { Users, GraduationCap } from 'lucide-react';
 import { ChildCard } from '../components/ChildCard';
+import { ErrorState } from '../components/ErrorState';
 import type { ChildSummary } from '../types';
 
 interface DashboardPageProps {
   firstName: string;
   children: ChildSummary[];
   isLoading: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onSelectChild: (id: string) => void;
 }
 
-export function DashboardPage({ firstName, children, isLoading, onSelectChild }: DashboardPageProps) {
+export function DashboardPage({ firstName, children, isLoading, error, onRetry, onSelectChild }: DashboardPageProps) {
   const totalPending = children.reduce((acc, c) => acc + c.pending_payments + c.overdue_payments, 0);
 
   return (
@@ -43,7 +46,9 @@ export function DashboardPage({ firstName, children, isLoading, onSelectChild }:
 
       <div>
         <h2 className="text-lg font-semibold mb-4 text-foreground">Anak Anda</h2>
-        {isLoading ? (
+        {error ? (
+          <ErrorState message={error} onRetry={onRetry} />
+        ) : isLoading ? (
           <div className="space-y-3">
             {[1, 2].map((i) => <div key={i} className="bg-card rounded-xl h-28 animate-pulse shadow-sm" />)}
           </div>

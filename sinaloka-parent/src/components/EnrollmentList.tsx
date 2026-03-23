@@ -1,11 +1,22 @@
 import React from 'react';
 import type { EnrollmentRecord } from '../types';
+import { ErrorState } from './ErrorState';
 
 const DAY_LABELS: Record<string, string> = {
   Monday: 'Sen', Tuesday: 'Sel', Wednesday: 'Rab', Thursday: 'Kam', Friday: 'Jum', Saturday: 'Sab', Sunday: 'Min',
 };
 
-export function EnrollmentList({ data }: { data: EnrollmentRecord[] }) {
+interface EnrollmentListProps {
+  data: EnrollmentRecord[];
+  error?: string | null;
+  onRetry?: () => void;
+}
+
+export function EnrollmentList({ data, error, onRetry }: EnrollmentListProps) {
+  if (error) {
+    return <ErrorState message={error} onRetry={onRetry} />;
+  }
+
   if (data.length === 0) {
     return (
       <div className="bg-muted border border-dashed border-border rounded-xl p-8 text-center">

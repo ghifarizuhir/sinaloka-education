@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import type { PaymentRecord } from '../types';
 import { cn } from '../lib/utils';
 import { checkoutPayment } from '../api/client';
+import { ErrorState } from './ErrorState';
 
 const STATUS_COLORS: Record<string, string> = {
   PAID: 'bg-success-muted text-success',
@@ -18,16 +20,15 @@ const STATUS_LABELS: Record<string, string> = {
 
 interface PaymentListProps {
   data: PaymentRecord[];
+  error?: string | null;
+  onRetry?: () => void;
 }
 
-export function PaymentList({ data }: PaymentListProps) {
+export function PaymentList({ data, error, onRetry }: PaymentListProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
-
-  const [error, setError] = useState<string | null>(null);
 
   const handleBayar = async (payment: PaymentRecord) => {
     setLoadingId(payment.id);
-    setError(null);
     // Open window synchronously (direct user gesture) to avoid popup blocker
     const newWindow = window.open('', '_blank');
     try {
@@ -43,11 +44,15 @@ export function PaymentList({ data }: PaymentListProps) {
         newWindow.close();
       }
       const message = (err as any)?.response?.data?.message || 'Gagal memproses pembayaran. Coba lagi.';
-      setError(message);
+      toast.error(message);
     } finally {
       setLoadingId(null);
     }
   };
+
+  if (error) {
+    return <ErrorState message={error} onRetry={onRetry} />;
+  }
 
   if (data.length === 0) {
     return (
@@ -59,11 +64,6 @@ export function PaymentList({ data }: PaymentListProps) {
 
   return (
     <div className="space-y-3">
-      {error && (
-        <div className="bg-destructive-muted border border-destructive/20 rounded-lg p-3 text-destructive text-sm">
-          {error}
-        </div>
-      )}
       {data.map((payment) => {
         const canPay =
           payment.status === 'PENDING' || payment.status === 'OVERDUE';

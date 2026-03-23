@@ -4,8 +4,8 @@
   "description": "Sinaloka parent app for monitoring student progress",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#a855f7",
+  "background_color": "#fdfcfa",
+  "theme_color": "#0d9488",
   "icons": [
     {
       "src": "/icon-192.png",

@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import type { AttendanceRecord, AttendanceSummary } from '../types';
+import { ErrorState } from './ErrorState';
 
 const STATUS_CONFIG = {
   PRESENT: { icon: CheckCircle2, color: 'text-success', label: 'Hadir' },
@@ -9,7 +10,18 @@ const STATUS_CONFIG = {
   LATE: { icon: Clock, color: 'text-warning', label: 'Telat' },
 };
 
-export function AttendanceList({ data, summary }: { data: AttendanceRecord[]; summary: AttendanceSummary | null }) {
+interface AttendanceListProps {
+  data: AttendanceRecord[];
+  summary: AttendanceSummary | null;
+  error?: string | null;
+  onRetry?: () => void;
+}
+
+export function AttendanceList({ data, summary, error, onRetry }: AttendanceListProps) {
+  if (error) {
+    return <ErrorState message={error} onRetry={onRetry} />;
+  }
+
   return (
     <div className="space-y-4">
       {summary && (

@@ -26,7 +26,7 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
     attendance, attendanceSummary, sessions, payments, enrollments,
     isLoading, activeTab, setActiveTab,
     fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments,
-    lastFetchedAt, refresh,
+    lastFetchedAt, refresh, errors,
   } = useChildDetail(child.id, initialTab);
 
   const [pullDistance, setPullDistance] = useState(0);
@@ -138,10 +138,10 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
         </div>
       ) : (
         <>
-          {activeTab === 'attendance' && <AttendanceList data={attendance} summary={attendanceSummary} />}
-          {activeTab === 'sessions' && <SessionList data={sessions} />}
-          {activeTab === 'payments' && <PaymentList data={payments} />}
-          {activeTab === 'enrollments' && <EnrollmentList data={enrollments} />}
+          {activeTab === 'attendance' && <AttendanceList data={attendance} summary={attendanceSummary} error={errors.attendance} onRetry={fetchAttendance} />}
+          {activeTab === 'sessions' && <SessionList data={sessions} error={errors.sessions} onRetry={fetchSessions} />}
+          {activeTab === 'payments' && <PaymentList data={payments} error={errors.payments} onRetry={fetchPayments} />}
+          {activeTab === 'enrollments' && <EnrollmentList data={enrollments} error={errors.enrollments} onRetry={fetchEnrollments} />}
         </>
       )}
     </div>

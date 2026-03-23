@@ -3,6 +3,7 @@ import { Calendar, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import type { SessionRecord } from '../types';
 import { cn } from '../lib/utils';
+import { ErrorState } from './ErrorState';
 
 const STATUS_COLORS: Record<string, string> = {
   SCHEDULED: 'bg-info-muted text-info',
@@ -10,7 +11,23 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-destructive-muted text-destructive',
 };
 
-export function SessionList({ data }: { data: SessionRecord[] }) {
+const STATUS_LABELS: Record<string, string> = {
+  SCHEDULED: 'Dijadwalkan',
+  COMPLETED: 'Selesai',
+  CANCELLED: 'Dibatalkan',
+};
+
+interface SessionListProps {
+  data: SessionRecord[];
+  error?: string | null;
+  onRetry?: () => void;
+}
+
+export function SessionList({ data, error, onRetry }: SessionListProps) {
+  if (error) {
+    return <ErrorState message={error} onRetry={onRetry} />;
+  }
+
   if (data.length === 0) {
     return (
       <div className="bg-muted border border-dashed border-border rounded-xl p-8 text-center">
@@ -29,7 +46,7 @@ export function SessionList({ data }: { data: SessionRecord[] }) {
               <p className="text-xs text-muted-foreground">{format(new Date(session.date), 'dd MMM yyyy')} · {session.start_time}–{session.end_time}</p>
             </div>
             <span className={cn("text-[10px] font-bold uppercase px-2 py-1 rounded-full", STATUS_COLORS[session.status] ?? 'bg-muted text-muted-foreground')}>
-              {session.status}
+              {STATUS_LABELS[session.status] ?? session.status}
             </span>
           </div>
           {session.topic_covered && (

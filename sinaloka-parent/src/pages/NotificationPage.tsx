@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell, CheckCheck, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { useNotifications } from '../hooks/useNotifications';
 import { cn } from '../lib/utils';
 
@@ -39,7 +40,14 @@ export function NotificationPage({ onNavigateToChild }: NotificationPageProps) {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Notifikasi</h1>
         {notifications.some((n) => !n.read_at) && (
           <button
-            onClick={markAllAsRead}
+            onClick={async () => {
+              try {
+                await markAllAsRead();
+                toast.success('Semua notifikasi ditandai dibaca');
+              } catch {
+                toast.error('Gagal menandai notifikasi');
+              }
+            }}
             className="flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary/80"
           >
             <CheckCheck className="w-4 h-4" />
