@@ -171,7 +171,12 @@ export default function RegisterPage() {
                   tabIndex={0}
                   className="cursor-pointer hover:border-primary transition-colors"
                   onClick={() => selectRole('student')}
-                  onKeyDown={(e) => e.key === 'Enter' && selectRole('student')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      selectRole('student');
+                    }
+                  }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -192,7 +197,12 @@ export default function RegisterPage() {
                   tabIndex={0}
                   className="cursor-pointer hover:border-primary transition-colors"
                   onClick={() => selectRole('tutor')}
-                  onKeyDown={(e) => e.key === 'Enter' && selectRole('tutor')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      selectRole('tutor');
+                    }
+                  }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
