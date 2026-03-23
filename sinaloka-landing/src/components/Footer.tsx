@@ -5,12 +5,13 @@ export function Footer() {
   const columns = [
     { title: "Produk", links: FOOTER_LINKS.produk },
     { title: "Kontak", links: FOOTER_LINKS.kontak },
+    { title: "Legal", links: FOOTER_LINKS.legal },
   ];
 
   return (
     <footer className="bg-[#FAFAFA] border-t border-[#E5E5E5] py-16">
       <div className="max-w-6xl mx-auto px-6 lg:px-10">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5">
               <SinalokaLogo size={28} />

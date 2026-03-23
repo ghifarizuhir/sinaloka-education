@@ -136,6 +136,10 @@ export const FOOTER_LINKS = {
   kontak: [
     { label: "WhatsApp", href: WHATSAPP_URL },
   ],
+  legal: [
+    { label: "Kebijakan Privasi", href: "/privacy" },
+    { label: "Syarat & Ketentuan", href: "/terms" },
+  ],
 } as const;
 
 export const SOCIAL_LINKS = [
