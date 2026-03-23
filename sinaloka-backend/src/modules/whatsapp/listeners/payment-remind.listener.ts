@@ -18,9 +18,7 @@ export class PaymentRemindListener {
         payload.institutionId,
         payload.paymentId,
       );
-      this.logger.log(
-        `Payment reminder sent for payment ${payload.paymentId}`,
-      );
+      this.logger.log(`Payment reminder sent for payment ${payload.paymentId}`);
     } catch (error) {
       this.logger.error(
         `Failed to send payment reminder for ${payload.paymentId}: ${error.message}`,

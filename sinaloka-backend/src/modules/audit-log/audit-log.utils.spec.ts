@@ -9,13 +9,19 @@ import { buildSummary } from './audit-log.summary.js';
 describe('AuditLog Utils', () => {
   describe('redactSensitiveFields', () => {
     it('should redact password fields', () => {
-      const result = redactSensitiveFields({ name: 'Budi', password_hash: 'abc123' });
+      const result = redactSensitiveFields({
+        name: 'Budi',
+        password_hash: 'abc123',
+      });
       expect(result.name).toBe('Budi');
       expect(result.password_hash).toBe('[REDACTED]');
     });
 
     it('should redact token fields', () => {
-      const result = redactSensitiveFields({ email: 'a@b.com', refresh_token: 'xyz' });
+      const result = redactSensitiveFields({
+        email: 'a@b.com',
+        refresh_token: 'xyz',
+      });
       expect(result.refresh_token).toBe('[REDACTED]');
     });
   });
@@ -56,7 +62,13 @@ describe('AuditLog Utils', () => {
 
   describe('buildSummary', () => {
     it('should use before-state identifier', () => {
-      const result = buildSummary('UPDATE', 'student', { name: 'Budi' }, null, 'abc');
+      const result = buildSummary(
+        'UPDATE',
+        'student',
+        { name: 'Budi' },
+        null,
+        'abc',
+      );
       expect(result).toBe('Updated student Budi');
     });
 
@@ -66,7 +78,13 @@ describe('AuditLog Utils', () => {
     });
 
     it('should use request body for create', () => {
-      const result = buildSummary('CREATE', 'student', null, { name: 'Budi' }, null);
+      const result = buildSummary(
+        'CREATE',
+        'student',
+        null,
+        { name: 'Budi' },
+        null,
+      );
       expect(result).toBe('Created student Budi');
     });
   });

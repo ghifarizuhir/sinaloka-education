@@ -30,20 +30,33 @@ describe('NotificationService', () => {
   describe('findAll', () => {
     it('should filter only user-targeted notifications for PARENT role', async () => {
       prisma.$transaction.mockResolvedValue([[], 0]);
-      await service.findAll('inst-1', 'user-1', { page: 1, limit: 20 }, 'PARENT');
+      await service.findAll(
+        'inst-1',
+        'user-1',
+        { page: 1, limit: 20 },
+        'PARENT',
+      );
       expect(prisma.$transaction).toHaveBeenCalled();
     });
 
     it('should include broadcast notifications for ADMIN role', async () => {
       prisma.$transaction.mockResolvedValue([[], 0]);
-      await service.findAll('inst-1', 'user-1', { page: 1, limit: 20 }, 'ADMIN');
+      await service.findAll(
+        'inst-1',
+        'user-1',
+        { page: 1, limit: 20 },
+        'ADMIN',
+      );
       expect(prisma.$transaction).toHaveBeenCalled();
     });
   });
 
   describe('markAsRead', () => {
     it('should enforce ownership for PARENT role', async () => {
-      prisma.notification.update.mockResolvedValue({ id: 'n1', read_at: new Date() });
+      prisma.notification.update.mockResolvedValue({
+        id: 'n1',
+        read_at: new Date(),
+      });
       await service.markAsRead('n1', 'inst-1', 'user-1', 'PARENT');
 
       const whereArg = prisma.notification.update.mock.calls[0][0].where;

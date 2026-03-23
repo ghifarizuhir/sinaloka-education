@@ -1,4 +1,10 @@
-import { Controller, Get, Param, Query, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  NotFoundException,
+} from '@nestjs/common';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
@@ -17,21 +23,25 @@ export class AuditLogController {
 
   @Get()
   findAll(
-    @CurrentUser() user: { userId: string; role: string; institutionId: string | null },
+    @CurrentUser()
+    user: { userId: string; role: string; institutionId: string | null },
     @InstitutionId() institutionId: string,
     @Query(new ZodValidationPipe(AuditLogQuerySchema)) query: AuditLogQueryDto,
   ) {
-    const scopedInstitutionId = user.role === 'SUPER_ADMIN' ? null : institutionId;
+    const scopedInstitutionId =
+      user.role === 'SUPER_ADMIN' ? null : institutionId;
     return this.auditLogService.findAll(scopedInstitutionId, query);
   }
 
   @Get(':id')
   async findOne(
     @Param('id') id: string,
-    @CurrentUser() user: { userId: string; role: string; institutionId: string | null },
+    @CurrentUser()
+    user: { userId: string; role: string; institutionId: string | null },
     @InstitutionId() institutionId: string,
   ) {
-    const scopedInstitutionId = user.role === 'SUPER_ADMIN' ? null : institutionId;
+    const scopedInstitutionId =
+      user.role === 'SUPER_ADMIN' ? null : institutionId;
     const log = await this.auditLogService.findOne(id, scopedInstitutionId);
     if (!log) throw new NotFoundException('Audit log not found');
     return log;

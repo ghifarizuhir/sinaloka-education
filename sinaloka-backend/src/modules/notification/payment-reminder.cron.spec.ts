@@ -75,7 +75,10 @@ describe('PaymentReminderCron', () => {
       },
     ]);
     prisma.notification.findFirst.mockResolvedValue(null);
-    notificationService.create.mockResolvedValue({ id: 'notif-1', type: 'payment.reminder' });
+    notificationService.create.mockResolvedValue({
+      id: 'notif-1',
+      type: 'payment.reminder',
+    });
 
     await cron.sendPaymentReminders();
 
@@ -140,7 +143,10 @@ describe('PaymentReminderCron', () => {
       },
     ]);
     prisma.notification.findFirst.mockResolvedValue(null);
-    notificationService.create.mockResolvedValue({ id: 'notif-1', type: 'payment.reminder' });
+    notificationService.create.mockResolvedValue({
+      id: 'notif-1',
+      type: 'payment.reminder',
+    });
 
     await cron.sendPaymentReminders();
     expect(notificationService.create).toHaveBeenCalledTimes(2);

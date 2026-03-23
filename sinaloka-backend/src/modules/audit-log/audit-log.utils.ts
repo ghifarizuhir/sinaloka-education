@@ -42,7 +42,7 @@ export function computeDiff(
   ]);
 
   const commonKeys = [...allKeys].filter(
-    key => key in redactedBefore && key in redactedAfter
+    (key) => key in redactedBefore && key in redactedAfter,
   );
 
   for (const key of commonKeys) {

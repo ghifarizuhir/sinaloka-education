@@ -17,7 +17,12 @@ import { PaymentReminderCron } from './payment-reminder.cron.js';
     }),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, NotificationListener, NotificationGateway, PaymentReminderCron],
+  providers: [
+    NotificationService,
+    NotificationListener,
+    NotificationGateway,
+    PaymentReminderCron,
+  ],
   exports: [NotificationService],
 })
 export class NotificationModule {}

@@ -40,7 +40,12 @@ export class NotificationController {
     @CurrentUser() user: JwtPayload,
     @Query() dto: ListNotificationsDto,
   ) {
-    return this.notificationService.findAll(institutionId, user.userId, dto, user.role);
+    return this.notificationService.findAll(
+      institutionId,
+      user.userId,
+      dto,
+      user.role,
+    );
   }
 
   @Get('unread-count')
@@ -49,7 +54,11 @@ export class NotificationController {
     @InstitutionId() institutionId: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.notificationService.getUnreadCount(institutionId, user.userId, user.role);
+    return this.notificationService.getUnreadCount(
+      institutionId,
+      user.userId,
+      user.role,
+    );
   }
 
   @NoAuditLog()
@@ -77,7 +86,11 @@ export class NotificationController {
       throw new UnauthorizedException('Institution context required');
     }
 
-    if (payload.role !== 'ADMIN' && payload.role !== 'SUPER_ADMIN' && payload.role !== 'PARENT') {
+    if (
+      payload.role !== 'ADMIN' &&
+      payload.role !== 'SUPER_ADMIN' &&
+      payload.role !== 'PARENT'
+    ) {
       throw new UnauthorizedException('Insufficient role');
     }
 
@@ -110,7 +123,11 @@ export class NotificationController {
     @InstitutionId() institutionId: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.notificationService.markAllAsRead(institutionId, user.userId, user.role);
+    return this.notificationService.markAllAsRead(
+      institutionId,
+      user.userId,
+      user.role,
+    );
   }
 
   @Patch(':id/read')
@@ -120,6 +137,11 @@ export class NotificationController {
     @InstitutionId() institutionId: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.notificationService.markAsRead(id, institutionId, user.userId, user.role);
+    return this.notificationService.markAsRead(
+      id,
+      institutionId,
+      user.userId,
+      user.role,
+    );
   }
 }

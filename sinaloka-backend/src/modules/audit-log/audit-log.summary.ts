@@ -33,16 +33,20 @@ export function buildSummary(
   if (source) {
     for (const field of identifierFields) {
       if (source[field] && typeof source[field] === 'string') {
-        identifier = source[field] as string;
+        identifier = source[field];
         break;
       }
     }
   }
 
   const actionVerb =
-    action === 'CREATE' ? 'Created' :
-    action === 'UPDATE' ? 'Updated' :
-    action === 'DELETE' ? 'Deleted' : action;
+    action === 'CREATE'
+      ? 'Created'
+      : action === 'UPDATE'
+        ? 'Updated'
+        : action === 'DELETE'
+          ? 'Deleted'
+          : action;
 
   return `${actionVerb} ${resourceType} ${identifier}`;
 }

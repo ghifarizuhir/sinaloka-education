@@ -312,12 +312,10 @@ export class InvoiceService {
     // Total
     doc.font('Helvetica-Bold');
     doc.text(labels.total, 300, doc.y);
-    doc.text(
-      formatAmount(finalAmount),
-      400,
-      doc.y - doc.currentLineHeight(),
-      { align: 'right', width: 145 },
-    );
+    doc.text(formatAmount(finalAmount), 400, doc.y - doc.currentLineHeight(), {
+      align: 'right',
+      width: 145,
+    });
     doc.font('Helvetica');
     doc.moveDown();
 
