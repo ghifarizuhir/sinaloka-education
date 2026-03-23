@@ -599,10 +599,15 @@ export class SessionService {
       );
     }
 
+    // Use end-of-day so enrollments created on the session date are included
+    const sessionDateEnd = new Date(session.date);
+    sessionDateEnd.setHours(23, 59, 59, 999);
+
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
         class_id: session.class_id,
         status: 'ACTIVE',
+        enrolled_at: { lte: sessionDateEnd },
       },
       include: {
         student: {
@@ -645,11 +650,16 @@ export class SessionService {
       throw new NotFoundException(`Session with id ${sessionId} not found`);
     }
 
+    // Use end-of-day so enrollments created on the session date are included
+    const sessionDateEnd = new Date(session.date);
+    sessionDateEnd.setHours(23, 59, 59, 999);
+
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
         institution_id: institutionId,
         class_id: session.class_id,
         status: 'ACTIVE',
+        enrolled_at: { lte: sessionDateEnd },
       },
       include: {
         student: {
