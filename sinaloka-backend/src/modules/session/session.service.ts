@@ -55,6 +55,19 @@ export class SessionService {
     },
   };
 
+  private buildSnapshotData(classRecord: any) {
+    return {
+      snapshot_tutor_id: classRecord.tutor_id ?? null,
+      snapshot_tutor_name: classRecord.tutor?.user?.name ?? null,
+      snapshot_subject_name: classRecord.subject?.name ?? null,
+      snapshot_class_name: classRecord.name ?? null,
+      snapshot_class_fee: classRecord.fee ?? null,
+      snapshot_class_room: classRecord.room ?? null,
+      snapshot_tutor_fee_mode: classRecord.tutor_fee_mode ?? null,
+      snapshot_tutor_fee_per_student: classRecord.tutor_fee_per_student ?? null,
+    };
+  }
+
   private flattenSession(session: any) {
     return {
       ...session,
@@ -239,16 +252,16 @@ export class SessionService {
     if (dto.status === 'COMPLETED') {
       const sessionClass = await this.prisma.class.findUnique({
         where: { id: existing.class?.id ?? '' },
-        select: {
-          tutor_fee: true,
-          tutor_fee_mode: true,
-          tutor_fee_per_student: true,
-          tutor_id: true,
-          name: true,
+        include: {
+          subject: { select: { name: true } },
+          tutor: { include: { user: { select: { name: true } } } },
         },
       });
-      if (sessionClass?.tutor_fee) {
-        data.tutor_fee_amount = sessionClass.tutor_fee;
+      if (sessionClass) {
+        if (sessionClass.tutor_fee) {
+          data.tutor_fee_amount = sessionClass.tutor_fee;
+        }
+        Object.assign(data, this.buildSnapshotData(sessionClass));
       }
 
       const session = await this.prisma.session.update({
@@ -721,15 +734,14 @@ export class SessionService {
     // Copy tutor fee from class
     const classForFee = await this.prisma.class.findUnique({
       where: { id: session.class_id },
-      select: {
-        tutor_fee: true,
-        tutor_fee_mode: true,
-        tutor_fee_per_student: true,
-        name: true,
+      include: {
+        subject: { select: { name: true } },
+        tutor: { include: { user: { select: { name: true } } } },
       },
     });
 
     const tutorFee = Number(classForFee?.tutor_fee ?? 0);
+    const snapshotData = classForFee ? this.buildSnapshotData(classForFee) : {};
 
     const updated = await this.prisma.session.update({
       where: { id: sessionId },
@@ -738,6 +750,7 @@ export class SessionService {
         topic_covered: dto.topic_covered,
         session_summary: dto.session_summary ?? null,
         ...(tutorFee > 0 ? { tutor_fee_amount: classForFee!.tutor_fee } : {}),
+        ...snapshotData,
       },
       include: this.sessionInclude,
     });
