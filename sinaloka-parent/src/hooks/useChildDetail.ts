@@ -18,6 +18,7 @@ export function useChildDetail(studentId: string | null, initialTab?: 'attendanc
   const [enrollments, setEnrollments] = useState<EnrollmentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'attendance' | 'sessions' | 'payments' | 'enrollments'>(initialTab ?? 'attendance');
+  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
 
   const fetchAttendance = useCallback(async () => {
     if (!studentId) return;
@@ -26,6 +27,7 @@ export function useChildDetail(studentId: string | null, initialTab?: 'attendanc
       const res = await api.get(`/api/parent/children/${studentId}/attendance`, { params: { limit: 50 } });
       setAttendance(res.data.data.map(mapAttendance));
       setAttendanceSummary(res.data.summary);
+      setLastFetchedAt(new Date());
     } catch { /* silently fail */ }
     finally { setIsLoading(false); }
   }, [studentId]);
@@ -36,6 +38,7 @@ export function useChildDetail(studentId: string | null, initialTab?: 'attendanc
     try {
       const res = await api.get(`/api/parent/children/${studentId}/sessions`, { params: { limit: 50 } });
       setSessions(res.data.data.map(mapSession));
+      setLastFetchedAt(new Date());
     } catch { /* silently fail */ }
     finally { setIsLoading(false); }
   }, [studentId]);
@@ -47,6 +50,7 @@ export function useChildDetail(studentId: string | null, initialTab?: 'attendanc
       const res = await api.get(`/api/parent/children/${studentId}/payments`, { params: { limit: 50 } });
       const gatewayConfigured = res.data.gateway_configured ?? false;
       setPayments(res.data.data.map((p: any) => ({ ...mapPayment(p), gateway_configured: gatewayConfigured })));
+      setLastFetchedAt(new Date());
     } catch { /* silently fail */ }
     finally { setIsLoading(false); }
   }, [studentId]);
@@ -57,13 +61,24 @@ export function useChildDetail(studentId: string | null, initialTab?: 'attendanc
     try {
       const res = await api.get(`/api/parent/children/${studentId}/enrollments`);
       setEnrollments(res.data.map(mapEnrollment));
+      setLastFetchedAt(new Date());
     } catch { /* silently fail */ }
     finally { setIsLoading(false); }
   }, [studentId]);
+
+  const refresh = useCallback(async () => {
+    switch (activeTab) {
+      case 'attendance': await fetchAttendance(); break;
+      case 'sessions': await fetchSessions(); break;
+      case 'payments': await fetchPayments(); break;
+      case 'enrollments': await fetchEnrollments(); break;
+    }
+  }, [activeTab, fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments]);
 
   return {
     attendance, attendanceSummary, sessions, payments, enrollments,
     isLoading, activeTab, setActiveTab,
     fetchAttendance, fetchSessions, fetchPayments, fetchEnrollments,
+    lastFetchedAt, refresh,
   };
 }
