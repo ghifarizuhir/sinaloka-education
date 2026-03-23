@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { UserPlus, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { PasswordInput } from '../components/PasswordInput';
+import { SinalokaLogo } from '../components/SinalokaLogo';
 
 export function RegisterPage({ inviteToken, onSwitchToLogin }: { inviteToken: string; onSwitchToLogin: () => void }) {
   const { register } = useAuth();
@@ -25,7 +26,10 @@ export function RegisterPage({ inviteToken, onSwitchToLogin }: { inviteToken: st
     <div className="min-h-screen bg-zinc-950 text-white font-sans flex items-center justify-center selection:bg-lime-400 selection:text-black">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-sm mx-6">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Sinaloka</h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <SinalokaLogo size={40} />
+            <h1 className="text-3xl font-bold tracking-tight">Sinaloka</h1>
+          </div>
           <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Daftar Akun Orang Tua</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
