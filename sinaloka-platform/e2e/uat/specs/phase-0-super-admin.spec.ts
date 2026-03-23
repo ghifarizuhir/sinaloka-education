@@ -69,7 +69,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
 
     // Intercept the POST response to capture institution ID
     const responsePromise = pg.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/institutions') && r.request().method() === 'POST',
+      (r) => r.url().includes('/api/admin/institutions') && r.request().method() === 'POST',
     );
     await instPage.submitCreate();
     const response = await responsePromise;
@@ -104,7 +104,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     });
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/institutions') && r.request().method() === 'POST',
+      (r) => r.url().includes('/api/admin/institutions') && r.request().method() === 'POST',
     );
     await instPage.submitCreate();
     const response = await responsePromise;
@@ -196,7 +196,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     await nameInput.fill(INSTITUTION_NAME + ' Updated');
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/institutions') && r.request().method() === 'PATCH',
+      (r) => r.url().includes('/api/admin/institutions') && r.request().method() === 'PATCH',
     );
     await page.getByRole('button', { name: /save/i }).click();
     await responsePromise;
@@ -241,7 +241,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     await instPage.openDetail(INSTITUTION_NAME);
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/institutions') && r.request().method() === 'PATCH',
+      (r) => r.url().includes('/api/admin/institutions') && r.request().method() === 'PATCH',
     );
     await instPage.overridePlan('BUSINESS');
     await responsePromise;
@@ -302,7 +302,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     });
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/users') && r.request().method() === 'POST',
+      (r) => r.url().includes('/api/admin/users') && r.request().method() === 'POST',
     );
     await usersPage.submitCreate();
     await responsePromise;
@@ -326,7 +326,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     });
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/users') && r.request().method() === 'POST',
+      (r) => r.url().includes('/api/admin/users') && r.request().method() === 'POST',
     );
     await usersPage.submitCreate();
     const response = await responsePromise;
@@ -376,7 +376,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     await usersPage.toggleActive();
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/users') && r.request().method() === 'PATCH',
+      (r) => r.url().includes('/api/admin/users') && r.request().method() === 'PATCH',
     );
     await usersPage.submitEdit();
     await responsePromise;
@@ -460,7 +460,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     });
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/subscriptions') && r.request().method() === 'PATCH',
+      (r) => r.url().includes('/api/admin/subscriptions') && r.request().method() === 'PATCH',
     );
     await subsPage.submitOverride();
     await responsePromise;
@@ -529,7 +529,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
 
     const responsePromise = page.waitForResponse(
       (r) =>
-        r.url().includes('/api/super-admin/') &&
+        r.url().includes('/api/admin/') &&
         (r.request().method() === 'PATCH' || r.request().method() === 'POST'),
     );
     await approveBtn.click();
@@ -665,7 +665,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
 
     const responsePromise = page.waitForResponse(
       (r) =>
-        r.url().includes('/api/super-admin/upgrade-request') &&
+        r.url().includes('/api/admin/plan/upgrade-request') &&
         (r.request().method() === 'PATCH' || r.request().method() === 'POST'),
     );
     await upgPage.approve('UAT approval test');
@@ -701,7 +701,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
 
     const responsePromise = page.waitForResponse(
       (r) =>
-        r.url().includes('/api/super-admin/upgrade-request') &&
+        r.url().includes('/api/admin/plan/upgrade-request') &&
         (r.request().method() === 'PATCH' || r.request().method() === 'POST'),
     );
     await upgPage.reject('UAT rejection — not eligible at this time');
@@ -764,7 +764,7 @@ test.describe.serial('Phase 0: Super Admin Setup', () => {
     }
 
     const responsePromise = page.waitForResponse(
-      (r) => r.url().includes('/api/super-admin/institutions') && r.request().method() === 'PATCH',
+      (r) => r.url().includes('/api/admin/institutions') && r.request().method() === 'PATCH',
     );
     await deactivateBtn.click();
 
