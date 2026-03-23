@@ -74,14 +74,22 @@ export class SessionService {
       class: session.class
         ? {
             ...session.class,
-            subject: session.class.subject?.name ?? null,
-            fee: Number(session.class.fee),
-            tutor: session.class.tutor
+            subject: session.snapshot_subject_name ?? session.class.subject?.name ?? null,
+            name: session.snapshot_class_name ?? session.class.name,
+            fee: Number(session.snapshot_class_fee ?? session.class.fee),
+            room: session.snapshot_class_room ?? session.class.room ?? null,
+            tutor_fee_mode: session.snapshot_tutor_fee_mode ?? session.class.tutor_fee_mode,
+            tutor: session.snapshot_tutor_id
               ? {
-                  id: session.class.tutor.id,
-                  name: session.class.tutor.user.name,
+                  id: session.snapshot_tutor_id,
+                  name: session.snapshot_tutor_name ?? session.class.tutor?.user?.name ?? null,
                 }
-              : null,
+              : session.class.tutor
+                ? {
+                    id: session.class.tutor.id,
+                    name: session.class.tutor.user.name,
+                  }
+                : null,
           }
         : null,
     };
@@ -184,6 +192,7 @@ export class SessionService {
       include: {
         class: {
           include: {
+            subject: { select: { name: true } },
             tutor: {
               include: {
                 user: { select: { id: true, name: true, email: true } },
@@ -209,14 +218,23 @@ export class SessionService {
       class: session.class
         ? {
             ...session.class,
-            fee: Number(session.class.fee),
-            tutor: session.class.tutor
+            subject: session.snapshot_subject_name ?? session.class.subject?.name ?? null,
+            name: session.snapshot_class_name ?? session.class.name,
+            fee: Number(session.snapshot_class_fee ?? session.class.fee),
+            room: session.snapshot_class_room ?? session.class.room ?? null,
+            tutor: session.snapshot_tutor_id
               ? {
-                  id: session.class.tutor.id,
-                  name: session.class.tutor.user.name,
-                  email: session.class.tutor.user.email,
+                  id: session.snapshot_tutor_id,
+                  name: session.snapshot_tutor_name ?? session.class.tutor?.user?.name ?? null,
+                  email: session.class.tutor?.user?.email ?? null,
                 }
-              : null,
+              : session.class.tutor
+                ? {
+                    id: session.class.tutor.id,
+                    name: session.class.tutor.user.name,
+                    email: session.class.tutor.user.email,
+                  }
+                : null,
           }
         : null,
       attendances: session.attendances.map((a) => ({
