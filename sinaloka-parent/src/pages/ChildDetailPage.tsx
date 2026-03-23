@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useChildDetail } from '../hooks/useChildDetail';
 import { AttendanceList } from '../components/AttendanceList';
@@ -7,6 +8,7 @@ import { PaymentList } from '../components/PaymentList';
 import { EnrollmentList } from '../components/EnrollmentList';
 import type { ChildSummary } from '../types';
 import { cn } from '../lib/utils';
+import { getInitials, getAvatarColor } from '../lib/avatar';
 
 interface ChildDetailPageProps {
   child: ChildSummary;
@@ -32,35 +34,66 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
   const isPulling = useRef(false);
+  const isSwiping = useRef(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isSwiping.current = false;
+
     if (window.scrollY === 0 && !isLoading && !isRefreshing) {
-      touchStartY.current = e.touches[0].clientY;
       isPulling.current = true;
     }
   }, [isLoading, isRefreshing]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling.current) return;
-    const diff = e.touches[0].clientY - touchStartY.current;
-    if (diff > 0) {
-      setPullDistance(Math.min(diff * 0.5, 80));
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+
+    // Pull-to-refresh (vertical)
+    if (isPulling.current && !isSwiping.current && dy > 0 && Math.abs(dy) > Math.abs(dx)) {
+      setPullDistance(Math.min(dy * 0.5, 80));
+      return;
+    }
+
+    // Horizontal swipe detection
+    if (!isSwiping.current && Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      isSwiping.current = true;
+      isPulling.current = false;
+      setPullDistance(0);
     }
   }, []);
 
-  const handleTouchEnd = useCallback(async () => {
-    if (!isPulling.current) return;
-    isPulling.current = false;
-    if (pullDistance > 40) {
-      setIsRefreshing(true);
-      setPullDistance(0);
-      await refresh();
-      setIsRefreshing(false);
-    } else {
-      setPullDistance(0);
+  const handleTouchEnd = useCallback(async (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+
+    // Swipe gesture
+    if (isSwiping.current && Math.abs(dx) > 50) {
+      const currentIndex = TABS.findIndex((t) => t.id === activeTab);
+      if (dx < 0 && currentIndex < TABS.length - 1) {
+        setActiveTab(TABS[currentIndex + 1].id);
+      } else if (dx > 0 && currentIndex > 0) {
+        setActiveTab(TABS[currentIndex - 1].id);
+      }
     }
-  }, [pullDistance, refresh]);
+
+    // Pull-to-refresh
+    if (isPulling.current) {
+      isPulling.current = false;
+      if (pullDistance > 40) {
+        setIsRefreshing(true);
+        setPullDistance(0);
+        await refresh();
+        setIsRefreshing(false);
+      } else {
+        setPullDistance(0);
+      }
+    }
+
+    isSwiping.current = false;
+  }, [pullDistance, refresh, activeTab, setActiveTab]);
 
   const [minutesAgo, setMinutesAgo] = useState(0);
 
@@ -96,19 +129,33 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
         <ArrowLeft className="w-4 h-4" /> Kembali
       </button>
 
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-foreground">{child.name}</h1>
-        <p className="text-muted-foreground text-xs">Kelas {child.grade} · {child.enrollment_count} mata pelajaran</p>
+      {/* Header with avatar */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className={cn("w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0", getAvatarColor(child.name))}>
+          {getInitials(child.name)}
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-foreground">{child.name}</h1>
+          <p className="text-muted-foreground text-xs">Kelas {child.grade} · {child.enrollment_count} mata pelajaran</p>
+        </div>
       </div>
 
+      {/* Tabs with animated indicator */}
       <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
         {TABS.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all",
-              activeTab === tab.id ? "bg-primary text-primary-foreground shadow-sm" : "bg-card border border-border text-muted-foreground"
-            )}>
-            {tab.label}
+            className="relative px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-colors"
+          >
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="child-tab-indicator"
+                className="absolute inset-0 bg-primary rounded-full shadow-sm"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className={cn("relative z-10", activeTab === tab.id ? "text-primary-foreground" : "text-muted-foreground")}>
+              {tab.label}
+            </span>
           </button>
         ))}
       </div>
@@ -134,15 +181,23 @@ export function ChildDetailPage({ child, onBack, initialTab }: ChildDetailPagePr
 
       {isLoading && !isRefreshing ? (
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="bg-card rounded-lg h-16 animate-pulse shadow-sm" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="bg-card rounded-lg h-16 skeleton-shimmer shadow-sm" />)}
         </div>
       ) : (
-        <>
-          {activeTab === 'attendance' && <AttendanceList data={attendance} summary={attendanceSummary} error={errors.attendance} onRetry={fetchAttendance} />}
-          {activeTab === 'sessions' && <SessionList data={sessions} error={errors.sessions} onRetry={fetchSessions} />}
-          {activeTab === 'payments' && <PaymentList data={payments} error={errors.payments} onRetry={fetchPayments} />}
-          {activeTab === 'enrollments' && <EnrollmentList data={enrollments} error={errors.enrollments} onRetry={fetchEnrollments} />}
-        </>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            {activeTab === 'attendance' && <AttendanceList data={attendance} summary={attendanceSummary} error={errors.attendance} onRetry={fetchAttendance} />}
+            {activeTab === 'sessions' && <SessionList data={sessions} error={errors.sessions} onRetry={fetchSessions} />}
+            {activeTab === 'payments' && <PaymentList data={payments} error={errors.payments} onRetry={fetchPayments} />}
+            {activeTab === 'enrollments' && <EnrollmentList data={enrollments} error={errors.enrollments} onRetry={fetchEnrollments} />}
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );

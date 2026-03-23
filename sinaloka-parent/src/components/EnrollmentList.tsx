@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion } from 'motion/react';
+import { BookOpen } from 'lucide-react';
 import type { EnrollmentRecord } from '../types';
 import { ErrorState } from './ErrorState';
 
@@ -19,16 +21,26 @@ export function EnrollmentList({ data, error, onRetry }: EnrollmentListProps) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-muted border border-dashed border-border rounded-xl p-8 text-center">
-        <p className="text-muted-foreground text-sm">Belum ada pendaftaran aktif.</p>
+      <div className="flex flex-col items-center py-12 text-muted-foreground">
+        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-3">
+          <BookOpen className="w-7 h-7 opacity-40" />
+        </div>
+        <p className="text-sm font-medium text-foreground/70">Belum terdaftar di kelas</p>
+        <p className="text-xs mt-1">Hubungi institusi untuk pendaftaran</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {data.map((enrollment) => (
-        <div key={enrollment.id} className="bg-card border border-border rounded-lg p-4 shadow-sm">
+      {data.map((enrollment, index) => (
+        <motion.div
+          key={enrollment.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: Math.min(index * 0.04, 0.3), duration: 0.25 }}
+          className="bg-card border border-border rounded-lg p-4 shadow-sm"
+        >
           <div className="flex justify-between items-start mb-2">
             <div>
               <p className="text-sm font-medium text-foreground">{enrollment.class.subject}</p>
@@ -44,7 +56,7 @@ export function EnrollmentList({ data, error, onRetry }: EnrollmentListProps) {
             ))}
           </div>
           <p className="text-xs text-muted-foreground">Tutor: {enrollment.class.tutor.user.name}</p>
-        </div>
+        </motion.div>
       ))}
     </div>
   );

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { format } from 'date-fns';
+import { id as localeId } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { Receipt } from 'lucide-react';
 import type { PaymentRecord } from '../types';
 import { cn } from '../lib/utils';
 import { checkoutPayment } from '../api/client';
@@ -29,14 +32,12 @@ export function PaymentList({ data, error, onRetry }: PaymentListProps) {
 
   const handleBayar = async (payment: PaymentRecord) => {
     setLoadingId(payment.id);
-    // Open window synchronously (direct user gesture) to avoid popup blocker
     const newWindow = window.open('', '_blank');
     try {
       const result = await checkoutPayment(payment.id);
       if (newWindow && !newWindow.closed) {
         newWindow.location.href = result.redirect_url;
       } else {
-        // Fallback if popup blocked or user closed the blank tab
         window.location.href = result.redirect_url;
       }
     } catch (err: unknown) {
@@ -56,23 +57,33 @@ export function PaymentList({ data, error, onRetry }: PaymentListProps) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-muted border border-dashed border-border rounded-xl p-8 text-center">
-        <p className="text-muted-foreground text-sm">Belum ada data pembayaran.</p>
+      <div className="flex flex-col items-center py-12 text-muted-foreground">
+        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-3">
+          <Receipt className="w-7 h-7 opacity-40" />
+        </div>
+        <p className="text-sm font-medium text-foreground/70">Tidak ada tagihan</p>
+        <p className="text-xs mt-1">Semua pembayaran sudah lunas</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {data.map((payment) => {
+      {data.map((payment, index) => {
         const canPay =
           payment.status === 'PENDING' || payment.status === 'OVERDUE';
 
         return (
-          <div key={payment.id} className="bg-card border border-border rounded-lg p-4 flex items-center gap-3 shadow-sm">
+          <motion.div
+            key={payment.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: Math.min(index * 0.04, 0.3), duration: 0.25 }}
+            className="bg-card border border-border rounded-lg p-4 flex items-center gap-3 shadow-sm"
+          >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{payment.enrollment.class.subject}</p>
-              <p className="text-xs text-muted-foreground">Jatuh tempo: {format(new Date(payment.due_date), 'dd MMM yyyy')}</p>
+              <p className="text-xs text-muted-foreground">Jatuh tempo: {format(new Date(payment.due_date), 'dd MMM yyyy', { locale: localeId })}</p>
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
               <p className="text-sm font-bold text-foreground">Rp {payment.amount.toLocaleString('id-ID')}</p>
@@ -88,7 +99,7 @@ export function PaymentList({ data, error, onRetry }: PaymentListProps) {
                 </button>
               )}
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>

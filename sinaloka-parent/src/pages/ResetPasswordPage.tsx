@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 import api from '../api/client';
 import { PasswordInput } from '../components/PasswordInput';
+import { PasswordStrength } from '../components/PasswordStrength';
 
 export function ResetPasswordPage({ token, onBack }: { token: string; onBack: () => void }) {
   const [validating, setValidating] = useState(true);
@@ -134,6 +135,7 @@ export function ResetPasswordPage({ token, onBack }: { token: string; onBack: ()
               required
               placeholder="Minimal 8 karakter"
             />
+            <PasswordStrength password={password} />
           </div>
 
           <div className="space-y-2">

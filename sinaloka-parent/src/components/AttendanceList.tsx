@@ -1,6 +1,8 @@
 import React from 'react';
-import { CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { motion } from 'motion/react';
+import { CheckCircle2, XCircle, Clock, CalendarOff } from 'lucide-react';
 import { format } from 'date-fns';
+import { id as localeId } from 'date-fns/locale';
 import type { AttendanceRecord, AttendanceSummary } from '../types';
 import { ErrorState } from './ErrorState';
 
@@ -41,25 +43,35 @@ export function AttendanceList({ data, summary, error, onRetry }: AttendanceList
         </div>
       )}
       {data.length === 0 ? (
-        <div className="bg-muted border border-dashed border-border rounded-xl p-8 text-center">
-          <p className="text-muted-foreground text-sm">Belum ada data kehadiran.</p>
+        <div className="flex flex-col items-center py-12 text-muted-foreground">
+          <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-3">
+            <CalendarOff className="w-7 h-7 opacity-40" />
+          </div>
+          <p className="text-sm font-medium text-foreground/70">Belum ada data kehadiran</p>
+          <p className="text-xs mt-1">Data akan muncul setelah sesi pertama</p>
         </div>
       ) : (
-        data.map((record) => {
+        data.map((record, index) => {
           const config = STATUS_CONFIG[record.status];
           const Icon = config.icon;
           return (
-            <div key={record.id} className="bg-card border border-border rounded-lg p-4 flex items-center gap-3 shadow-sm">
+            <motion.div
+              key={record.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(index * 0.04, 0.3), duration: 0.25 }}
+              className="bg-card border border-border rounded-lg p-4 flex items-center gap-3 shadow-sm"
+            >
               <Icon className={`w-5 h-5 ${config.color}`} />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">{record.session.class.subject}</p>
-                <p className="text-xs text-muted-foreground">{format(new Date(record.session.date), 'dd MMM yyyy')} · {record.session.start_time}</p>
+                <p className="text-xs text-muted-foreground">{format(new Date(record.session.date), 'dd MMM yyyy', { locale: localeId })} · {record.session.start_time}</p>
               </div>
               <div className="text-right">
                 <span className={`text-xs font-semibold ${config.color}`}>{config.label}</span>
                 {record.homework_done && <p className="text-[10px] text-success">PR ✓</p>}
               </div>
-            </div>
+            </motion.div>
           );
         })
       )}

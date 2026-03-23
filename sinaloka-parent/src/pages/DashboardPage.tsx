@@ -139,11 +139,13 @@ export function DashboardPage({ firstName, children, isLoading, error, onRetry, 
           <ErrorState message={error} onRetry={onRetry} />
         ) : isLoading ? (
           <div className="space-y-3">
-            {[1, 2].map((i) => <div key={i} className="bg-card rounded-xl h-28 animate-pulse shadow-sm" />)}
+            {[1, 2].map((i) => <div key={i} className="bg-card rounded-xl h-28 skeleton-shimmer shadow-sm" />)}
           </div>
         ) : children.length > 0 ? (
           children.map((child, index) => (
-            <ChildCard key={child.id} child={child} onSelect={onSelectChild} index={index} />
+            <React.Fragment key={child.id}>
+              <ChildCard child={child} onSelect={onSelectChild} index={index} />
+            </React.Fragment>
           ))
         ) : (
           <div className="bg-muted border border-dashed border-border rounded-xl p-8 text-center">
