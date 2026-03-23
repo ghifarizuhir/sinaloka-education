@@ -8,6 +8,7 @@ import {
   Skeleton,
   Modal,
   StatCard,
+  DatePicker,
 } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import {
@@ -146,11 +147,9 @@ function OverrideModal({ subscription, onClose }: OverrideModalProps) {
             <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
               {t('subscription.expiresAt', 'Expires At')}
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={expiresAt}
-              onChange={(e) => setExpiresAt(e.target.value)}
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 transition"
+              onChange={setExpiresAt}
             />
           </div>
 

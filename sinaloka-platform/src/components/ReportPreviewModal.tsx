@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, FileText, Loader2 } from 'lucide-react';
-import { Modal, Button, Label, Input, Skeleton } from './UI';
+import { Modal, Button, Label, Input, Skeleton, DatePicker } from './UI';
 import { cn } from '../lib/utils';
 import { useAttendanceReport, useFinanceReport, useStudentProgressReport } from '@/src/hooks/useReports';
 import { useClasses } from '@/src/hooks/useClasses';
@@ -134,18 +134,16 @@ export default function ReportPreviewModal({ isOpen, onClose }: ReportPreviewMod
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>{t('report.dateFrom')} {activeTab !== 'student_progress' && <span className="text-rose-500">*</span>}</Label>
-            <Input
-              type="date"
+            <DatePicker
               value={dateFrom}
-              onChange={(e) => { setDateFrom(e.target.value); setGenerateEnabled(false); }}
+              onChange={(val) => { setDateFrom(val); setGenerateEnabled(false); }}
             />
           </div>
           <div className="space-y-1.5">
             <Label>{t('report.dateTo')} {activeTab !== 'student_progress' && <span className="text-rose-500">*</span>}</Label>
-            <Input
-              type="date"
+            <DatePicker
               value={dateTo}
-              onChange={(e) => { setDateTo(e.target.value); setGenerateEnabled(false); }}
+              onChange={(val) => { setDateTo(val); setGenerateEnabled(false); }}
             />
           </div>
 

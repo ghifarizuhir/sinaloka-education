@@ -9,6 +9,7 @@ import {
   Input,
   Label,
   Select,
+  TimePicker,
 } from '../../components/UI';
 import { cn } from '../../lib/utils';
 import { ScheduleWeekPreview } from '../../components/ScheduleWeekPreview';
@@ -207,19 +208,9 @@ export const ClassFormModal = ({
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 w-20">
                   {schedule.day.slice(0, 3)}
                 </span>
-                <input
-                  type="time"
-                  value={schedule.start_time}
-                  onChange={(e) => setFormSchedules(prev => prev.map(s => s.day === schedule.day ? { ...s, start_time: e.target.value } : s))}
-                  className="h-8 px-2 text-sm border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 dark:text-zinc-100"
-                />
+                <TimePicker value={schedule.start_time} onChange={(time) => setFormSchedules(prev => prev.map(s => s.day === schedule.day ? { ...s, start_time: time } : s))} className="w-28 h-8" minuteStep={15} />
                 <span className="text-zinc-400 text-sm">&ndash;</span>
-                <input
-                  type="time"
-                  value={schedule.end_time}
-                  onChange={(e) => setFormSchedules(prev => prev.map(s => s.day === schedule.day ? { ...s, end_time: e.target.value } : s))}
-                  className="h-8 px-2 text-sm border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-950 dark:text-zinc-100"
-                />
+                <TimePicker value={schedule.end_time} onChange={(time) => setFormSchedules(prev => prev.map(s => s.day === schedule.day ? { ...s, end_time: time } : s))} className="w-28 h-8" minuteStep={15} />
                 <button
                   type="button"
                   onClick={() => setFormSchedules(prev => prev.filter(s => s.day !== schedule.day))}

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Modal, Button, Label, Input, Select } from '../../components/UI';
-import { TIME_SLOTS } from './useSchedulesPage';
+import { Modal, Button, Label, Select, DatePicker, TimePicker } from '../../components/UI';
 import { useUpdateSession } from '@/src/hooks/useSessions';
 
 interface EditSessionProps {
@@ -61,27 +60,17 @@ export const EditSessionModal: React.FC<EditSessionModalProps> = ({ session, isO
       <div className="space-y-4">
         <div className="space-y-1.5">
           <Label>{t('schedules.form.date', { defaultValue: 'Date' })}</Label>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DatePicker value={date} onChange={setDate} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>{t('schedules.form.startTime', { defaultValue: 'Start Time' })}</Label>
-            <Select
-              value={startTime}
-              onChange={setStartTime}
-              className="w-full"
-              options={TIME_SLOTS.map((slot) => ({ value: slot, label: slot }))}
-            />
+            <TimePicker value={startTime} onChange={setStartTime} />
           </div>
           <div className="space-y-1.5">
             <Label>{t('schedules.form.endTime', { defaultValue: 'End Time' })}</Label>
-            <Select
-              value={endTime}
-              onChange={setEndTime}
-              className="w-full"
-              options={TIME_SLOTS.map((slot) => ({ value: slot, label: slot }))}
-            />
+            <TimePicker value={endTime} onChange={setEndTime} />
           </div>
         </div>
 

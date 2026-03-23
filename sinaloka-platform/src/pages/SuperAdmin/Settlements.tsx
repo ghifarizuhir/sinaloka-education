@@ -9,6 +9,7 @@ import {
   Modal,
   StatCard,
   Checkbox,
+  DatePicker,
 } from '../../components/UI';
 import { cn, formatDate } from '../../lib/utils';
 import {
@@ -103,11 +104,9 @@ function TransferModal({ settlement, onClose }: TransferModalProps) {
             <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
               Tanggal Transfer <span className="text-red-500">*</span>
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={transferredAt}
-              onChange={(e) => setTransferredAt(e.target.value)}
-              className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 transition"
+              onChange={setTransferredAt}
             />
           </div>
 
@@ -197,11 +196,9 @@ function BatchTransferModal({ selectedIds, onClose }: BatchTransferModalProps) {
           <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
             Tanggal Transfer <span className="text-red-500">*</span>
           </label>
-          <input
-            type="date"
+          <DatePicker
             value={transferredAt}
-            onChange={(e) => setTransferredAt(e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 transition"
+            onChange={setTransferredAt}
           />
         </div>
 

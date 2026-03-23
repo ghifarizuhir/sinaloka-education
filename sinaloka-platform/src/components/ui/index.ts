@@ -26,3 +26,8 @@ export { StatCard } from './stat-card';
 export { DataTable } from './data-table';
 export { Pagination } from './pagination';
 export { ConfirmChangesModal, type FieldChange } from './confirm-changes-modal';
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './popover';
+export { Calendar } from './calendar';
+export { DatePicker } from './date-picker';
+export { DateRangePicker } from './date-range-picker';
+export { TimePicker } from './time-picker';

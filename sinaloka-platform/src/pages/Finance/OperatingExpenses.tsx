@@ -6,7 +6,7 @@ import {
   RefreshCcw, TrendingDown, AlertCircle, CheckCircle2,
   FileText, ExternalLink, Upload
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton, ConfirmDialog, PageHeader, Select } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Switch, Drawer, Skeleton, ConfirmDialog, PageHeader, Select, DatePicker } from '../../components/UI';
 import { cn, formatDate, formatCurrency } from '../../lib/utils';
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense, useExportExpenses } from '@/src/hooks/useExpenses';
 import { useBillingSettings } from '@/src/hooks/useSettings';
@@ -449,10 +449,9 @@ export const OperatingExpenses = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>{t('expenses.form.date')}</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={formDate}
-                  onChange={(e) => setFormDate(e.target.value)}
+                  onChange={setFormDate}
                 />
               </div>
               <div className="space-y-1.5">
@@ -512,10 +511,9 @@ export const OperatingExpenses = () => {
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[10px] text-zinc-400 uppercase tracking-widest">{t('expenses.form.recurrenceEndDate') || 'End Date (optional)'}</Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={recurringEndDate}
-                      onChange={(e) => setRecurringEndDate(e.target.value)}
+                      onChange={setRecurringEndDate}
                     />
                   </div>
                 </div>

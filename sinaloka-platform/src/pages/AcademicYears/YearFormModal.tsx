@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Input, Label, Button } from '../../components/ui';
+import { Modal, Input, Label, Button, DatePicker } from '../../components/ui';
 import { Spinner } from '../../components/ui/spinner';
 
 export function YearFormModal({
@@ -46,21 +46,11 @@ export function YearFormModal({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="year-start">Tanggal Mulai</Label>
-            <Input
-              id="year-start"
-              type="date"
-              value={startDate}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)}
-            />
+            <DatePicker value={startDate} onChange={setStartDate} />
           </div>
           <div>
             <Label htmlFor="year-end">Tanggal Selesai</Label>
-            <Input
-              id="year-end"
-              type="date"
-              value={endDate}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)}
-            />
+            <DatePicker value={endDate} onChange={setEndDate} />
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-2">

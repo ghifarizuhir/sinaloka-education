@@ -7,7 +7,7 @@ import {
   MoreVertical, CheckCircle2, Clock, Trash2, Mail,
   FileText, FileDown, Search, Link, Copy, Check
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton, ConfirmDialog, PageHeader, Select, Pagination } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Checkbox, Drawer, Skeleton, ConfirmDialog, PageHeader, Select, Pagination, DatePicker } from '../../components/UI';
 import { cn, formatDate, formatCurrency, openFile } from '../../lib/utils';
 import { usePayments, useUpdatePayment, useDeletePayment, useGenerateInvoice, useOverdueSummary } from '@/src/hooks/usePayments';
 import { useQueryClient } from '@tanstack/react-query';
@@ -431,7 +431,7 @@ export const StudentPayments = () => {
               <div className="p-6 space-y-4">
                 <div className="space-y-1.5">
                   <Label>{t('payments.form.date')}</Label>
-                  <Input type="date" value={batchDate} onChange={(e) => setBatchDate(e.target.value)} />
+                  <DatePicker value={batchDate} onChange={setBatchDate} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t('payments.form.method')}</Label>
@@ -534,7 +534,7 @@ export const StudentPayments = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label>{t('payments.form.date')}</Label>
-                      <Input type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+                      <DatePicker value={paymentDate} onChange={setPaymentDate} />
                     </div>
                     <div className="space-y-1.5">
                       <Label>{t('payments.form.method')}</Label>

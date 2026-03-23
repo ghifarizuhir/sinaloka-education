@@ -1,6 +1,5 @@
 import React from 'react';
-import { Modal, Button, Label, Input, Select } from '../../components/UI';
-import { TIME_SLOTS } from './useSchedulesPage';
+import { Modal, Button, Label, Select, DatePicker, TimePicker } from '../../components/UI';
 import type { TFunction } from 'i18next';
 
 interface ClassOption {
@@ -64,28 +63,18 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>{t('schedules.form.date')}</Label>
-            <Input type="date" value={selectedDate} onChange={(e) => onSelectedDateChange(e.target.value)} />
+            <DatePicker value={selectedDate} onChange={onSelectedDateChange} />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>{t('schedules.form.startTime')}</Label>
-            <Select
-              value={startTime}
-              onChange={onStartTimeChange}
-              className="w-full"
-              options={TIME_SLOTS.map(slot => ({ value: slot, label: slot }))}
-            />
+            <TimePicker value={startTime} onChange={onStartTimeChange} />
           </div>
           <div className="space-y-1.5">
             <Label>{t('schedules.form.endTime')}</Label>
-            <Select
-              value={endTime}
-              onChange={onEndTimeChange}
-              className="w-full"
-              options={TIME_SLOTS.map(slot => ({ value: slot, label: slot }))}
-            />
+            <TimePicker value={endTime} onChange={onEndTimeChange} />
           </div>
         </div>
 

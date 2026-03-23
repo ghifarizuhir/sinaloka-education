@@ -7,7 +7,7 @@ import {
   Download, ExternalLink, Search, Filter, MoreVertical,
   ArrowLeft, BadgeCheck, X, AlertTriangle
 } from 'lucide-react';
-import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog, PageHeader, Select } from '../../components/UI';
+import { Card, Button, Badge, Input, Label, Checkbox, Skeleton, ConfirmDialog, PageHeader, Select, DatePicker } from '../../components/UI';
 import { cn, formatCurrency, formatDate, openFile } from '../../lib/utils';
 import { usePayouts, useCreatePayout, useUpdatePayout, useDeletePayout, useCalculatePayout, useGenerateSalaries } from '@/src/hooks/usePayouts';
 import { useTutors } from '@/src/hooks/useTutors';
@@ -634,11 +634,11 @@ export const TutorPayouts = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>{t('payouts.periodStart')}</Label>
-                  <Input type="date" value={formPeriodStart} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPeriodStart(e.target.value)} />
+                  <DatePicker value={formPeriodStart} onChange={setFormPeriodStart} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t('payouts.periodEnd')}</Label>
-                  <Input type="date" value={formPeriodEnd} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPeriodEnd(e.target.value)} />
+                  <DatePicker value={formPeriodEnd} onChange={setFormPeriodEnd} />
                 </div>
               </div>
               <Button
@@ -688,10 +688,9 @@ export const TutorPayouts = () => {
               </div>
               <div className="space-y-1.5">
                 <Label>{t('payouts.form.date')}</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
+                  onChange={setNewDate}
                 />
               </div>
               <div className="space-y-1.5">
