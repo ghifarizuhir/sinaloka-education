@@ -88,7 +88,7 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-2">
-        <GraduationCap className="w-6 h-6 text-zinc-400" />
+        <GraduationCap className="w-6 h-6 text-[#0f766e]" />
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
           Pengaturan Akademik
         </h2>
@@ -117,7 +117,7 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
                   className={cn(
                     'px-4 py-2 rounded-full text-xs font-semibold border transition-all',
                     isActive
-                      ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900'
+                      ? 'border-[#0f766e] bg-[#0f766e] text-white'
                       : 'border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400',
                   )}
                 >
@@ -237,7 +237,7 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="px-6 py-2.5 rounded-lg font-medium text-sm bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+            className="px-6 py-2.5 rounded-lg font-medium text-sm bg-[#0f766e] text-white hover:bg-[#0a5951] transition-colors disabled:opacity-50"
           >
             {saveMutation.isPending ? 'Menyimpan...' : 'Lanjut'}
           </button>

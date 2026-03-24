@@ -32,7 +32,7 @@ export function BillingStep({ selected, onSelect, onBack, onComplete, isPending 
   return (
     <div>
       <div className="flex items-center gap-3 mb-2">
-        <Receipt className="w-6 h-6 text-zinc-400" />
+        <Receipt className="w-6 h-6 text-[#0f766e]" />
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
           Pilih Mode Tagihan
         </h2>
@@ -54,13 +54,13 @@ export function BillingStep({ selected, onSelect, onBack, onComplete, isPending 
                 'relative p-6 rounded-xl border-2 text-left transition-all',
                 'hover:border-zinc-400 dark:hover:border-zinc-500',
                 isSelected
-                  ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-900'
+                  ? 'border-[#0f766e] bg-teal-50 dark:bg-teal-900/10'
                   : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50',
               )}
             >
               {isSelected && (
-                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-white dark:text-zinc-900" />
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[#0f766e] flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
                 </div>
               )}
               <Icon className="w-8 h-8 text-zinc-700 dark:text-zinc-300 mb-3" />
@@ -105,7 +105,7 @@ export function BillingStep({ selected, onSelect, onBack, onComplete, isPending 
           className={cn(
             'px-6 py-2.5 rounded-lg font-medium text-sm transition-colors',
             selected
-              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200'
+              ? 'bg-[#0f766e] text-white hover:bg-[#0a5951]'
               : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed',
           )}
         >
