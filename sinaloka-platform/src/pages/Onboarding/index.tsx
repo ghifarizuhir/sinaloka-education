@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Receipt, CalendarDays, ArrowRight, Check } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 import { onboardingService } from '@/src/services/onboarding.service';
 import { cn } from '@/src/lib/utils';
+import { useAuth } from '@/src/hooks/useAuth';
 
 type BillingMode = 'PER_SESSION' | 'MONTHLY_FIXED';
 
@@ -33,7 +35,20 @@ const BILLING_OPTIONS = [
 ] as const;
 
 export default function Onboarding() {
+  const { isAuthenticated, isLoading } = useAuth();
   const [selected, setSelected] = useState<BillingMode | null>(null);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   const setBillingMutation = useMutation({
     mutationFn: async () => {

@@ -42,9 +42,7 @@ export class InvoiceGeneratorService {
       });
       if (!session) return;
 
-      const sessionDateStr = new Date(session.date)
-        .toISOString()
-        .split('T')[0];
+      const sessionDateStr = new Date(session.date).toISOString().split('T')[0];
 
       const enrollment = await this.prisma.enrollment.findFirst({
         where: {
@@ -157,6 +155,8 @@ export class InvoiceGeneratorService {
       const now = new Date(params.enrolledAt);
       const billingPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
+      // Mid-month enrollment charges the full monthly fee (not pro-rated).
+      // This is standard practice for Indonesian bimbel.
       const classRecord = await this.prisma.class.findFirst({
         where: { id: params.classId, institution_id: params.institutionId },
         select: { fee: true },

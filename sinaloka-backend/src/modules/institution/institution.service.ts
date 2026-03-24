@@ -5,6 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import type { BillingMode } from '../../../generated/prisma/client.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import {
   PaginationDto,
@@ -155,12 +156,14 @@ export class InstitutionService {
     );
   }
 
-  async overrideBillingMode(id: string, billingMode: string) {
-    const institution = await this.prisma.institution.findUnique({ where: { id } });
+  async overrideBillingMode(id: string, billingMode: BillingMode) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id },
+    });
     if (!institution) throw new NotFoundException('Institution not found');
     return this.prisma.institution.update({
       where: { id },
-      data: { billing_mode: billingMode as any },
+      data: { billing_mode: billingMode },
       select: { id: true, name: true, billing_mode: true },
     });
   }
