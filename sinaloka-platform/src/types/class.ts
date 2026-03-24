@@ -16,7 +16,6 @@ export interface Class {
   subject: { id: string; name: string };
   capacity: number;
   fee: number;
-  package_fee: number | null;
   tutor_fee: number;
   tutor_fee_mode: 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY';
   tutor_fee_per_student: number | null;
@@ -39,7 +38,6 @@ export interface CreateClassDto {
   subject_id: string;
   capacity: number;
   fee: number;
-  package_fee?: number | null;
   tutor_fee: number;
   tutor_fee_mode?: 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY';
   tutor_fee_per_student?: number | null;

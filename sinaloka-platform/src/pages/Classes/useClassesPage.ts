@@ -10,7 +10,8 @@ import {
 } from '@/src/hooks/useClasses';
 import { useSubjects, useSubjectTutors } from '@/src/hooks/useSubjects';
 import { useAcademicYears } from '@/src/hooks/useAcademicYears';
-import { useBillingSettings, useAcademicSettings } from '@/src/hooks/useSettings';
+import { useAcademicSettings } from '@/src/hooks/useSettings';
+import { useAuth } from '@/src/hooks/useAuth';
 import { useGenerateSessions } from '@/src/hooks/useSessions';
 import { useFormErrors } from '@/src/hooks/useFormErrors';
 import { mapBackendErrors } from '@/src/lib/form-errors';
@@ -37,6 +38,7 @@ export function getSubjectColor(name: string): string {
 
 export function useClassesPage() {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [showModal, setShowModal] = useState(false);
@@ -60,7 +62,6 @@ export function useClassesPage() {
   const [formTutorId, setFormTutorId] = useState('');
   const [formCapacity, setFormCapacity] = useState('25');
   const [formFee, setFormFee] = useState('500000');
-  const [formPackageFee, setFormPackageFee] = useState('');
   const [formTutorFee, setFormTutorFee] = useState('');
   const [formTutorFeeMode, setFormTutorFeeMode] = useState<'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY'>('FIXED_PER_SESSION');
   const [formTutorFeePerStudent, setFormTutorFeePerStudent] = useState('');
@@ -76,9 +77,8 @@ export function useClassesPage() {
   const { data: subjectsList } = useSubjects();
   const { data: academicYears } = useAcademicYears();
   const { data: subjectTutors } = useSubjectTutors(formSubjectId || null);
-  const { data: billingSettings } = useBillingSettings();
   const { data: academicSettings } = useAcademicSettings();
-  const billingMode = billingSettings?.billing_mode ?? 'manual';
+  const billingMode = user?.institution?.billing_mode ?? 'PER_SESSION';
   const availableRooms = (academicSettings?.rooms ?? []).filter(r => r.status === 'Available');
   const createClass = useCreateClass();
   const updateClass = useUpdateClass();
@@ -135,7 +135,6 @@ export function useClassesPage() {
     setFormTutorId('');
     setFormCapacity('25');
     setFormFee('500000');
-    setFormPackageFee('');
     setFormTutorFee('');
     setFormTutorFeeMode('FIXED_PER_SESSION');
     setFormTutorFeePerStudent('');
@@ -156,7 +155,6 @@ export function useClassesPage() {
     setFormFee(String(cls.fee));
     setFormSchedules(cls.schedules?.map(s => ({ day: s.day as ScheduleDay, start_time: s.start_time, end_time: s.end_time })) ?? []);
     setFormRoom(cls.room ?? '');
-    setFormPackageFee(cls.package_fee ? String(cls.package_fee) : '');
     setFormTutorFee(String(cls.tutor_fee ?? 0));
     setFormTutorFeeMode(cls.tutor_fee_mode ?? 'FIXED_PER_SESSION');
     setFormTutorFeePerStudent(cls.tutor_fee_per_student ? String(cls.tutor_fee_per_student) : '');
@@ -217,7 +215,6 @@ export function useClassesPage() {
       fee: Number(formFee),
       schedules: formSchedules.map(s => ({ day: s.day, start_time: s.start_time, end_time: s.end_time })),
       room: formRoom || undefined,
-      package_fee: formPackageFee ? Number(formPackageFee) : null,
       tutor_fee: Number(formTutorFee),
       tutor_fee_mode: formTutorFeeMode,
       tutor_fee_per_student: formTutorFeeMode === 'PER_STUDENT_ATTENDANCE' ? Number(formTutorFeePerStudent) : null,
@@ -357,8 +354,6 @@ export function useClassesPage() {
     setFormCapacity,
     formFee,
     setFormFee,
-    formPackageFee,
-    setFormPackageFee,
     formTutorFee,
     setFormTutorFee,
     formTutorFeeMode,

@@ -56,7 +56,6 @@ export const useSettingsPage = () => {
   const { data: billingSettings, isLoading: isLoadingBilling } = useBillingSettings();
   const updateBilling = useUpdateBillingSettings();
 
-  const [formBillingMode, setFormBillingMode] = useState('manual');
   const [formCurrency, setFormCurrency] = useState('IDR');
   const [formInvoicePrefix, setFormInvoicePrefix] = useState('INV-');
   const [formLatePaymentAutoLock, setFormLatePaymentAutoLock] = useState(false);
@@ -71,7 +70,6 @@ export const useSettingsPage = () => {
 
   useEffect(() => {
     if (billingSettings) {
-      setFormBillingMode(billingSettings.billing_mode);
       setFormCurrency(billingSettings.currency);
       setFormInvoicePrefix(billingSettings.invoice_prefix);
       setFormLatePaymentAutoLock(billingSettings.late_payment_auto_lock);
@@ -83,7 +81,6 @@ export const useSettingsPage = () => {
 
   const handleSaveBilling = () => {
     updateBilling.mutate({
-      billing_mode: formBillingMode,
       currency: formCurrency,
       invoice_prefix: formInvoicePrefix,
       late_payment_auto_lock: formLatePaymentAutoLock,
@@ -309,8 +306,6 @@ export const useSettingsPage = () => {
     handleSaveGeneral,
     isLoadingBilling,
     updateBilling,
-    formBillingMode,
-    setFormBillingMode,
     formCurrency,
     setFormCurrency,
     formInvoicePrefix,

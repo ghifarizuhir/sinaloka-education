@@ -29,5 +29,7 @@ export interface User {
     logo_url: string | null;
     timezone: string;
     default_language: string;
+    billing_mode: 'PER_SESSION' | 'MONTHLY_FIXED' | null;
+    onboarding_completed: boolean;
   } | null;
 }

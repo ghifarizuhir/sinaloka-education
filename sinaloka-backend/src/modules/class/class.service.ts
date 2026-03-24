@@ -15,6 +15,16 @@ export class ClassService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(institutionId: string, dto: CreateClassDto) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { billing_mode: true },
+    });
+    if (!institution?.billing_mode) {
+      throw new BadRequestException(
+        'Billing mode must be configured before creating classes. Complete onboarding first.',
+      );
+    }
+
     const tutor = await this.prisma.tutor.findFirst({
       where: { id: dto.tutor_id, institution_id: institutionId },
     });
@@ -56,7 +66,6 @@ export class ClassService {
           subject_id: dto.subject_id,
           capacity: dto.capacity,
           fee: dto.fee,
-          package_fee: dto.package_fee ?? null,
           tutor_fee: dto.tutor_fee,
           tutor_fee_mode: dto.tutor_fee_mode ?? 'FIXED_PER_SESSION',
           tutor_fee_per_student: dto.tutor_fee_per_student ?? null,
@@ -87,8 +96,6 @@ export class ClassService {
       return {
         ...result,
         fee: Number(record.fee),
-        package_fee:
-          record.package_fee != null ? Number(record.package_fee) : null,
         tutor_fee: Number(record.tutor_fee),
         tutor_fee_mode: record.tutor_fee_mode,
         tutor_fee_per_student:
@@ -171,7 +178,6 @@ export class ClassService {
       data: data.map(({ _count, ...c }) => ({
         ...c,
         fee: Number(c.fee),
-        package_fee: c.package_fee != null ? Number(c.package_fee) : null,
         tutor_fee: c.tutor_fee != null ? Number(c.tutor_fee) : null,
         tutor_fee_mode: c.tutor_fee_mode,
         tutor_fee_per_student:
@@ -213,10 +219,6 @@ export class ClassService {
     return {
       ...classRecord,
       fee: Number(classRecord.fee),
-      package_fee:
-        classRecord.package_fee != null
-          ? Number(classRecord.package_fee)
-          : null,
       tutor_fee:
         classRecord.tutor_fee != null ? Number(classRecord.tutor_fee) : null,
       tutor_fee_mode: classRecord.tutor_fee_mode,
@@ -289,7 +291,6 @@ export class ClassService {
       capacity,
       fee,
       room,
-      package_fee,
       tutor_fee,
       tutor_fee_mode,
       tutor_fee_per_student,
@@ -319,7 +320,6 @@ export class ClassService {
           ...(capacity !== undefined && { capacity }),
           ...(fee !== undefined && { fee }),
           ...(room !== undefined && { room }),
-          ...(package_fee !== undefined && { package_fee }),
           ...(tutor_fee !== undefined && { tutor_fee }),
           ...(tutor_fee_mode !== undefined && { tutor_fee_mode }),
           ...(tutor_fee_per_student !== undefined && { tutor_fee_per_student }),
@@ -336,8 +336,6 @@ export class ClassService {
       return {
         ...record,
         fee: Number(record.fee),
-        package_fee:
-          record.package_fee != null ? Number(record.package_fee) : null,
         tutor_fee: Number(record.tutor_fee),
         tutor_fee_mode: record.tutor_fee_mode,
         tutor_fee_per_student:

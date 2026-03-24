@@ -249,6 +249,8 @@ export class AuthService {
             logo_url: true,
             timezone: true,
             default_language: true,
+            billing_mode: true,
+            onboarding_completed: true,
           },
         },
       },

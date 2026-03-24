@@ -45,6 +45,11 @@ enum TutorFeeMode {
   MONTHLY_SALARY
 }
 
+enum BillingMode {
+  PER_SESSION
+  MONTHLY_FIXED
+}
+
 enum SessionStatus {
   SCHEDULED
   COMPLETED
@@ -160,6 +165,8 @@ model Institution {
   settings         Json?
   timezone         String   @default("Asia/Jakarta")
   default_language String   @default("id")
+  billing_mode          BillingMode?
+  onboarding_completed  Boolean  @default(false)
   plan_type              PlanType  @default(STARTER)
   plan_limit_reached_at  DateTime?
   plan_changed_at        DateTime?
@@ -505,7 +512,6 @@ model Class {
   subject             Subject  @relation(fields: [subject_id], references: [id])
   capacity            Int
   fee                 Decimal
-  package_fee         Decimal?
   tutor_fee           Decimal      @default(0)
   tutor_fee_mode      TutorFeeMode @default(FIXED_PER_SESSION)
   tutor_fee_per_student Decimal?
@@ -628,6 +634,7 @@ model Payment {
   status          PaymentStatus @default(PENDING)
   method          PaymentMethod?
   notes           String?
+  billing_period  String?
   invoice_number              String?
   invoice_url                 String?
   midtrans_transaction_id     String?
@@ -642,6 +649,7 @@ model Payment {
   enrollment      Enrollment  @relation(fields: [enrollment_id], references: [id])
   settlement      Settlement?
 
+  @@unique([enrollment_id, billing_period])
   @@map("payments")
 }
 

@@ -17,6 +17,7 @@ export interface Institution {
   default_language: string;
   is_active: boolean;
   plan_type: 'STARTER' | 'GROWTH' | 'BUSINESS';
+  billing_mode: 'PER_SESSION' | 'MONTHLY_FIXED' | null;
   created_at: string;
   updated_at: string;
   users?: InstitutionAdmin[];

@@ -48,6 +48,7 @@ import SubscriptionManagement from './pages/SuperAdmin/SubscriptionManagement';
 import Settlements from './pages/SuperAdmin/Settlements';
 
 const RegisterPage = React.lazy(() => import('./pages/Register'));
+const Onboarding = React.lazy(() => import('./pages/Onboarding'));
 
 function InstitutionGate({ children }: { children: React.ReactNode }) {
   const { isLoading, error } = useInstitution();
@@ -93,6 +94,15 @@ export default function App() {
                 </div>
               }>
                 <RegisterPage />
+              </React.Suspense>
+            } />
+            <Route path="/onboarding" element={
+              <React.Suspense fallback={
+                <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
+                </div>
+              }>
+                <Onboarding />
               </React.Suspense>
             } />
             <Route path="/super" element={<SuperAdminRoute />}>

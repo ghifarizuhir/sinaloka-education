@@ -324,7 +324,6 @@ export class AcademicYearService {
             tutor_id: sourceClass.tutor_id,
             capacity: sourceClass.capacity,
             fee: sourceClass.fee,
-            package_fee: sourceClass.package_fee,
             tutor_fee: sourceClass.tutor_fee,
             tutor_fee_mode: sourceClass.tutor_fee_mode,
             tutor_fee_per_student: sourceClass.tutor_fee_per_student,

@@ -20,7 +20,8 @@ import { InvoiceGeneratorService } from '../payment/invoice-generator.service.js
 describe('EnrollmentService', () => {
   let service: EnrollmentService;
   let invoiceGenerator: {
-    generatePackagePayment: jest.Mock;
+    generatePerSessionPayment: jest.Mock;
+    generateMidMonthEnrollmentPayment: jest.Mock;
   };
   let prisma: {
     enrollment: {
@@ -124,7 +125,8 @@ describe('EnrollmentService', () => {
 
   beforeEach(async () => {
     invoiceGenerator = {
-      generatePackagePayment: jest.fn().mockResolvedValue(undefined),
+      generatePerSessionPayment: jest.fn().mockResolvedValue(undefined),
+      generateMidMonthEnrollmentPayment: jest.fn().mockResolvedValue(undefined),
     };
     prisma = {
       enrollment: {

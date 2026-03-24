@@ -34,8 +34,6 @@ interface ClassFormModalProps {
   setFormCapacity: (val: string) => void;
   formFee: string;
   setFormFee: (val: string) => void;
-  formPackageFee: string;
-  setFormPackageFee: (val: string) => void;
   formTutorFee: string;
   setFormTutorFee: (val: string) => void;
   formTutorFeeMode: 'FIXED_PER_SESSION' | 'PER_STUDENT_ATTENDANCE' | 'MONTHLY_SALARY';
@@ -80,8 +78,6 @@ export const ClassFormModal = ({
   setFormCapacity,
   formFee,
   setFormFee,
-  formPackageFee,
-  setFormPackageFee,
   formTutorFee,
   setFormTutorFee,
   formTutorFeeMode,
@@ -109,6 +105,11 @@ export const ClassFormModal = ({
   errors,
   clearError,
 }: ClassFormModalProps) => {
+  const feeLabel = billingMode === 'PER_SESSION' ? 'Tarif per sesi' : 'Biaya bulanan';
+  const feeHelper = billingMode === 'PER_SESSION'
+    ? 'Siswa ditagih nominal ini setiap hadir di sesi kelas'
+    : 'Siswa ditagih nominal ini setiap awal bulan';
+
   const roomOptions = availableRooms.map(r => ({
     value: r.name,
     label: `${r.name} (${r.type}${r.capacity ? `, ${r.capacity} seats` : ', unlimited'})`,
@@ -236,13 +237,7 @@ export const ClassFormModal = ({
             <FieldError field="capacity" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="fee">
-              {billingMode === 'subscription'
-                ? t('classes.form.monthlyFee')
-                : billingMode === 'manual'
-                  ? t('classes.form.baseFee')
-                  : t('classes.form.feePerSession')}
-            </Label>
+            <Label htmlFor="fee">{feeLabel}</Label>
             <Input
               id="fee"
               type="number"
@@ -250,21 +245,11 @@ export const ClassFormModal = ({
               value={formFee}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setFormFee(e.target.value); clearError('fee'); }}
             />
+            <p className="text-xs text-zinc-500">{feeHelper}</p>
             <FieldError field="fee" />
           </div>
         </div>
 
-        {billingMode === 'package' && (
-          <div className="space-y-1.5">
-            <Label>{t('classes.form.packageFee')}</Label>
-            <Input
-              type="number"
-              placeholder="700000"
-              value={formPackageFee}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormPackageFee(e.target.value)}
-            />
-          </div>
-        )}
         <div className="space-y-1.5">
           <Label>{t('classes.form.tutorFeeMode')}</Label>
           <Select

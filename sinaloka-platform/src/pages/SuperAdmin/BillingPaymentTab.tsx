@@ -1,36 +1,31 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { CreditCard, Wallet, Save, CheckCircle2 } from 'lucide-react';
+import { CreditCard, Wallet, Save } from 'lucide-react';
 import { Card, Button, Input, Label, Switch, Skeleton, ConfirmChangesModal } from '../../components/UI';
 import type { FieldChange } from '../../components/UI';
 import { cn } from '../../lib/utils';
 import { collectChanges, detectScalarChange } from '../../lib/change-detection';
 import api from '@/src/lib/api';
 import type { BillingSettings } from '@/src/types/settings';
+import type { Institution } from '@/src/types/institution';
 
 interface BillingPaymentTabProps {
   institutionId: string;
 }
 
-type BillingMode = 'manual' | 'per_session' | 'package' | 'subscription';
-
-const BILLING_MODES: { key: BillingMode; label: string; description: string }[] = [
-  { key: 'manual', label: 'Manual', description: 'Tagihan dibuat dan dikelola secara manual' },
-  { key: 'per_session', label: 'Per Sesi', description: 'Tagihan dihitung per sesi belajar' },
-  { key: 'package', label: 'Paket', description: 'Tagihan berdasarkan paket yang dipilih' },
-  { key: 'subscription', label: 'Langganan', description: 'Tagihan berulang secara berkala' },
-];
-
 export default function BillingPaymentTab({ institutionId }: BillingPaymentTabProps) {
   const queryClient = useQueryClient();
 
   // Form state — Billing
-  const [formBillingMode, setFormBillingMode] = useState<BillingMode>('per_session');
   const [formCurrency, setFormCurrency] = useState('IDR');
   const [formInvoicePrefix, setFormInvoicePrefix] = useState('INV');
   const [formLatePaymentAutoLock, setFormLatePaymentAutoLock] = useState(false);
   const [formLatePaymentThreshold, setFormLatePaymentThreshold] = useState(7);
+
+  // Override billing mode state
+  const [showOverride, setShowOverride] = useState(false);
+  const [overrideMode, setOverrideMode] = useState<'PER_SESSION' | 'MONTHLY_FIXED'>('PER_SESSION');
 
   // Confirm modal state
   const [showConfirm, setShowConfirm] = useState(false);
@@ -38,6 +33,15 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
 
   // Initial state refs for change detection
   const initialBillingRef = useRef<Record<string, string> | null>(null);
+
+  // Fetch institution to get billing_mode
+  const { data: institution } = useQuery({
+    queryKey: ['institutions', institutionId],
+    queryFn: () =>
+      api.get<Institution>(`/api/admin/institutions/${institutionId}`).then((r) => r.data),
+  });
+
+  const billingMode = institution?.billing_mode;
 
   // Fetch billing settings
   const { data: billing, isLoading: isLoadingBilling } = useQuery({
@@ -53,10 +57,6 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
   // Sync fetched billing data into form state
   useEffect(() => {
     if (!billing) return;
-    const mode = billing.billing_mode;
-    if (mode === 'manual' || mode === 'per_session' || mode === 'package' || mode === 'subscription') {
-      setFormBillingMode(mode);
-    }
 
     setFormCurrency(billing.currency ?? 'IDR');
     setFormInvoicePrefix(billing.invoice_prefix ?? 'INV');
@@ -64,7 +64,6 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
     setFormLatePaymentThreshold(billing.late_payment_threshold ?? 7);
     // Capture initial state after sync
     initialBillingRef.current = {
-      billing_mode: mode,
       currency: billing.currency ?? 'IDR',
       invoice_prefix: billing.invoice_prefix ?? 'INV',
       late_payment: billing.late_payment_auto_lock
@@ -77,7 +76,6 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
   const saveMutation = useMutation({
     mutationFn: async () => {
       const billingPayload = {
-        billing_mode: formBillingMode,
         currency: formCurrency,
         invoice_prefix: formInvoicePrefix,
         late_payment_auto_lock: formLatePaymentAutoLock,
@@ -95,9 +93,21 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
     onError: () => toast.error('Gagal menyimpan pengaturan'),
   });
 
+  // Override billing mode mutation
+  const overrideMutation = useMutation({
+    mutationFn: (mode: string) =>
+      api.patch(`/api/admin/institutions/${institutionId}/billing-mode`, { billing_mode: mode }),
+    onSuccess: () => {
+      toast.success('Billing mode updated');
+      queryClient.invalidateQueries({ queryKey: ['institutions', institutionId] });
+      queryClient.invalidateQueries({ queryKey: ['institutions'] });
+      setShowOverride(false);
+    },
+    onError: () => toast.error('Gagal mengubah billing mode'),
+  });
+
   const handleSaveClick = () => {
     const changes = collectChanges(
-      initialBillingRef.current ? detectScalarChange('Billing Mode', initialBillingRef.current.billing_mode, formBillingMode) : null,
       initialBillingRef.current ? detectScalarChange('Currency', initialBillingRef.current.currency, formCurrency) : null,
       initialBillingRef.current ? detectScalarChange('Invoice Prefix', initialBillingRef.current.invoice_prefix, formInvoicePrefix) : null,
       initialBillingRef.current ? detectScalarChange(
@@ -116,7 +126,6 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
 
   const handleConfirm = () => {
     initialBillingRef.current = {
-      billing_mode: formBillingMode,
       currency: formCurrency,
       invoice_prefix: formInvoicePrefix,
       late_payment: formLatePaymentAutoLock
@@ -144,42 +153,64 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Billing Mode */}
-            <div className="space-y-2">
-              <Label>Mode Tagihan</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {BILLING_MODES.map((mode) => (
-                  <button
-                    key={mode.key}
-                    type="button"
-                    onClick={() => setFormBillingMode(mode.key)}
-                    className={cn(
-                      'relative flex flex-col gap-1 rounded-xl border p-4 text-left transition-all',
-                      formBillingMode === mode.key
-                        ? 'border-zinc-800 bg-zinc-800 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900'
-                        : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600'
-                    )}
-                  >
-                    {formBillingMode === mode.key && (
-                      <CheckCircle2
-                        size={16}
-                        className="absolute right-3 top-3 shrink-0"
-                      />
-                    )}
-                    <span className="text-sm font-semibold">{mode.label}</span>
-                    <span
+            {/* Billing Mode — read-only with override */}
+            <div className="space-y-3">
+              <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-500">Mode Billing</p>
+                <p className="text-lg font-semibold dark:text-zinc-100">
+                  {billingMode === 'PER_SESSION' ? 'Per Sesi' :
+                   billingMode === 'MONTHLY_FIXED' ? 'Bulanan Tetap' :
+                   'Belum diatur'}
+                </p>
+              </div>
+
+              {!showOverride ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setOverrideMode(billingMode === 'MONTHLY_FIXED' ? 'PER_SESSION' : 'MONTHLY_FIXED');
+                    setShowOverride(true);
+                  }}
+                >
+                  Override Billing Mode
+                </Button>
+              ) : (
+                <div className="p-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 space-y-3">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                    Override billing mode untuk institusi ini. Perubahan ini bersifat permanen.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={overrideMode}
+                      onChange={(e) => setOverrideMode(e.target.value as 'PER_SESSION' | 'MONTHLY_FIXED')}
                       className={cn(
-                        'text-xs',
-                        formBillingMode === mode.key
-                          ? 'text-zinc-300 dark:text-zinc-600'
-                          : 'text-zinc-500'
+                        'flex h-9 rounded-lg border border-zinc-200 bg-white px-3 py-1 text-sm',
+                        'text-zinc-900 shadow-sm transition-colors',
+                        'focus:outline-none focus:ring-2 focus:ring-zinc-400',
+                        'dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100'
                       )}
                     >
-                      {mode.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
+                      <option value="PER_SESSION">Per Sesi</option>
+                      <option value="MONTHLY_FIXED">Bulanan Tetap</option>
+                    </select>
+                    <Button
+                      size="sm"
+                      onClick={() => overrideMutation.mutate(overrideMode)}
+                      disabled={overrideMutation.isPending || overrideMode === billingMode}
+                    >
+                      {overrideMutation.isPending ? 'Menyimpan...' : 'Terapkan'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowOverride(false)}
+                    >
+                      Batal
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Currency */}

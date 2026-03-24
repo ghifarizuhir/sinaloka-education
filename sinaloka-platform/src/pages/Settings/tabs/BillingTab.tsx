@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { collectChanges, detectArrayChange } from '../../../lib/change-detection';
 import { toast } from 'sonner';
+import { useAuth } from '../../../hooks/useAuth';
 import type { SettingsPageState } from '../useSettingsPage';
 
 type BillingTabProps = Pick<SettingsPageState,
@@ -18,7 +19,9 @@ type BillingTabProps = Pick<SettingsPageState,
   'formBankAccounts' | 'showAddBankForm' | 'setShowAddBankForm' |
   'newBankName' | 'setNewBankName' | 'newBankAccount' | 'setNewBankAccount' |
   'newBankHolder' | 'setNewBankHolder' |
-  'handleAddBankAccount' | 'handleRemoveBankAccount'
+  'handleAddBankAccount' | 'handleRemoveBankAccount' |
+  'formLatePaymentAutoLock' | 'setFormLatePaymentAutoLock' |
+  'formLatePaymentThreshold' | 'setFormLatePaymentThreshold'
 >;
 
 export const BillingTab = ({
@@ -29,7 +32,11 @@ export const BillingTab = ({
   newBankName, setNewBankName, newBankAccount, setNewBankAccount,
   newBankHolder, setNewBankHolder,
   handleAddBankAccount, handleRemoveBankAccount,
+  formLatePaymentAutoLock, setFormLatePaymentAutoLock,
+  formLatePaymentThreshold, setFormLatePaymentThreshold,
 }: BillingTabProps) => {
+  const { user } = useAuth();
+  const billingMode = user?.institution?.billing_mode;
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<FieldChange[]>([]);
   const initialRef = useRef<{ categories: string[]; bankAccounts: string[] } | null>(null);
@@ -70,6 +77,19 @@ export const BillingTab = ({
 
   return (
     <div className="space-y-6">
+      {/* Billing Mode — read-only */}
+      <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Mode Billing</p>
+            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              {billingMode === 'PER_SESSION' ? 'Per Sesi' : billingMode === 'MONTHLY_FIXED' ? 'Bulanan Tetap' : 'Belum diatur'}
+            </p>
+          </div>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">Ditetapkan saat setup awal</span>
+        </div>
+      </div>
+
       <Card>
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold dark:text-zinc-100 flex items-center gap-2">
@@ -159,6 +179,23 @@ export const BillingTab = ({
             )}
           </>
         )}
+      </Card>
+
+      {/* Late Payment Settings */}
+      <Card>
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Keterlambatan Pembayaran</h3>
+          <label className="flex items-center gap-3">
+            <input type="checkbox" checked={formLatePaymentAutoLock} onChange={(e) => setFormLatePaymentAutoLock(e.target.checked)} className="rounded border-zinc-300 dark:border-zinc-600" />
+            <span className="text-sm text-zinc-600 dark:text-zinc-400">Otomatis kunci akses siswa jika pembayaran terlambat</span>
+          </label>
+          {formLatePaymentAutoLock && (
+            <div>
+              <label className="text-sm text-zinc-600 dark:text-zinc-400">Jumlah tagihan terlambat sebelum dikunci</label>
+              <input type="number" min={1} value={formLatePaymentThreshold} onChange={(e) => setFormLatePaymentThreshold(Number(e.target.value))} className="mt-1 w-24 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm" />
+            </div>
+          )}
+        </div>
       </Card>
 
       <div className="flex justify-end">
