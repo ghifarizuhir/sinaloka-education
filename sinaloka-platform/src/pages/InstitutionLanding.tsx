@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CalendarCheck, BookOpen, Bell } from 'lucide-react';
@@ -6,37 +5,8 @@ import { motion } from 'motion/react';
 import { useInstitution } from '@/src/contexts/InstitutionContext';
 import { useAuth } from '@/src/hooks/useAuth';
 import { SinalokaLogo } from '@/src/components/SinalokaLogo';
+import { TealBrandBackground } from '@/src/components/BrandDecorations';
 import { Button } from '@/src/components/UI';
-
-/* ─── Decorative star (matches login page motif) ─── */
-function Star({ className, style }: { className?: string; style?: CSSProperties }) {
-  return (
-    <svg className={className} style={style} viewBox="0 0 20 20" fill="currentColor">
-      <polygon points="10,0 13,7 20,7 14,12 16,20 10,15 4,20 6,12 0,7 7,7" />
-    </svg>
-  );
-}
-
-/* ─── Stacked-book decoration ─── */
-function BookStack({ className, barCount = 3 }: { className?: string; barCount?: number }) {
-  return (
-    <div className={className}>
-      {Array.from({ length: barCount }).map((_, i) => (
-        <div
-          key={i}
-          className="bg-white rounded-md"
-          style={{
-            width: `${110 - i * 14}px`,
-            height: '8px',
-            marginLeft: `${i * 8}px`,
-            marginBottom: i < barCount - 1 ? '5px' : 0,
-            opacity: 0.55 - i * 0.12,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 const FEATURE_ICONS = [CalendarCheck, BookOpen, Bell];
 const FEATURE_KEYS = ['welcome.feature1', 'welcome.feature2', 'welcome.feature3'] as const;
@@ -55,63 +25,7 @@ export function InstitutionLanding() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center select-none">
-      {/* ── Sinaloka teal gradient background ── */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a5951] via-[#0f766e] to-[#14b8a6]" />
-      <div
-        className="absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
-      <div
-        className="absolute inset-0"
-        style={{
-          background: [
-            'radial-gradient(ellipse at 20% 80%, rgba(245,158,11,0.12) 0%, transparent 50%)',
-            'radial-gradient(ellipse at 80% 15%, rgba(20,184,166,0.22) 0%, transparent 50%)',
-          ].join(', '),
-        }}
-      />
-
-      {/* ── Floating decorations ── */}
-      <Star
-        className="absolute top-[10%] right-[15%] w-5 h-5 text-amber-300/20"
-        style={{ animation: 'login-float 6s ease-in-out infinite' }}
-      />
-      <Star
-        className="absolute top-[30%] left-[8%] w-3 h-3 text-amber-200/15"
-        style={{ animation: 'login-float 7s ease-in-out 1.5s infinite' }}
-      />
-      <Star
-        className="absolute bottom-[18%] right-[22%] w-4 h-4 text-amber-300/15"
-        style={{ animation: 'login-float 5.5s ease-in-out 0.8s infinite' }}
-      />
-      <Star
-        className="absolute bottom-[40%] left-[18%] w-2.5 h-2.5 text-white/8"
-        style={{ animation: 'login-float 6.5s ease-in-out 2.5s infinite' }}
-      />
-      <div
-        className="absolute top-[6%] left-[4%] rotate-12"
-        style={{ animation: 'login-float-slow 9s ease-in-out infinite', '--login-rotate': '12deg' } as CSSProperties}
-      >
-        <BookStack className="opacity-[0.06]" barCount={2} />
-      </div>
-      <div
-        className="absolute bottom-[5%] right-[6%] -rotate-6"
-        style={{ animation: 'login-float-slow 8s ease-in-out 1s infinite', '--login-rotate': '-6deg' } as CSSProperties}
-      >
-        <BookStack className="opacity-[0.07]" />
-      </div>
-
-      {/* Shimmer line */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-px"
-        style={{
-          background: 'linear-gradient(90deg, transparent, rgba(253,230,138,0.25), transparent)',
-          animation: 'login-shimmer 4s ease-in-out infinite',
-        }}
-      />
+      <TealBrandBackground />
 
       {/* ══════════════════════════════════
           MAIN CONTENT
