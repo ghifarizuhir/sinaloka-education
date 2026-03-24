@@ -119,6 +119,10 @@ export const SettingsPage = () => {
           setNewBankHolder={state.setNewBankHolder}
           handleAddBankAccount={state.handleAddBankAccount}
           handleRemoveBankAccount={state.handleRemoveBankAccount}
+          formLatePaymentAutoLock={state.formLatePaymentAutoLock}
+          setFormLatePaymentAutoLock={state.setFormLatePaymentAutoLock}
+          formLatePaymentThreshold={state.formLatePaymentThreshold}
+          setFormLatePaymentThreshold={state.setFormLatePaymentThreshold}
         />
       )}
 
