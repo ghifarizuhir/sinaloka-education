@@ -123,7 +123,15 @@
     "defaultError": "Invalid email or password. Please try again.",
     "forgotPassword": "Forgot password?",
     "forgotPasswordInfo": "Contact your system administrator to reset your password.",
-    "copyright": "© {{year}} Sinaloka. All rights reserved."
+    "copyright": "© {{year}} Sinaloka. All rights reserved.",
+    "welcome": "Welcome",
+    "dashboardLogin": "Sign in to dashboard",
+    "tagline": "A tutoring management platform that simplifies operations for institutions, tutors, and parents.",
+    "feature1": "Manage schedules & tutoring sessions",
+    "feature2": "Monitor student progress",
+    "feature3": "Secure, multi-tenant, & integrated",
+    "trustText": "Trusted by educational institutions across Indonesia",
+    "poweredBy": "Powered by Sinaloka"
   },
 
   "dashboard": {

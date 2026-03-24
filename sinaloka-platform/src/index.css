@@ -307,3 +307,10 @@
   50% { opacity: 0.25; }
   100% { opacity: 0.15; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *[style*="login-float"],
+  *[style*="login-shimmer"] {
+    animation: none !important;
+  }
+}

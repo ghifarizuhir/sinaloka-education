@@ -123,7 +123,15 @@
     "defaultError": "Email atau kata sandi salah. Silakan coba lagi.",
     "forgotPassword": "Lupa kata sandi?",
     "forgotPasswordInfo": "Hubungi administrator sistem Anda untuk mereset kata sandi.",
-    "copyright": "© {{year}} Sinaloka. Hak cipta dilindungi."
+    "copyright": "© {{year}} Sinaloka. Hak cipta dilindungi.",
+    "welcome": "Selamat Datang",
+    "dashboardLogin": "Masuk ke dashboard",
+    "tagline": "Platform manajemen bimbingan belajar yang memudahkan institusi, tutor, dan orang tua.",
+    "feature1": "Kelola jadwal & sesi bimbingan",
+    "feature2": "Pantau perkembangan siswa",
+    "feature3": "Aman, multi-tenant, & terintegrasi",
+    "trustText": "Dipercaya oleh institusi pendidikan di seluruh Indonesia",
+    "poweredBy": "Powered by Sinaloka"
   },
 
   "dashboard": {

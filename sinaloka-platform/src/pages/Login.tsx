@@ -40,11 +40,8 @@ function BookStack({ className, barCount = 3 }: { className?: string; barCount?:
   );
 }
 
-const FEATURES = [
-  { icon: BookOpen, label: 'Kelola jadwal & sesi bimbingan' },
-  { icon: Users, label: 'Pantau perkembangan siswa' },
-  { icon: ShieldCheck, label: 'Aman, multi-tenant, & terintegrasi' },
-];
+const FEATURE_ICONS = [BookOpen, Users, ShieldCheck];
+const FEATURE_KEYS = ['login.feature1', 'login.feature2', 'login.feature3'] as const;
 
 export function Login() {
   const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
@@ -225,25 +222,28 @@ export function Login() {
                 Sinaloka
               </h2>
               <p className="text-teal-100/70 text-lg text-center max-w-md leading-relaxed mb-12">
-                Platform manajemen bimbingan belajar yang memudahkan institusi, tutor, dan orang tua.
+                {t('login.tagline')}
               </p>
 
               {/* Feature highlights */}
               <div className="space-y-4 w-full max-w-xs">
-                {FEATURES.map((f, i) => (
-                  <motion.div
-                    key={i}
-                    className="flex items-center gap-3.5"
-                    initial={{ opacity: 0, x: -16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + i * 0.12, duration: 0.4 }}
-                  >
-                    <div className="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center shrink-0">
-                      <f.icon size={18} className="text-amber-300/90" />
-                    </div>
-                    <span className="text-sm text-white/80">{f.label}</span>
-                  </motion.div>
-                ))}
+                {FEATURE_KEYS.map((key, i) => {
+                  const Icon = FEATURE_ICONS[i];
+                  return (
+                    <motion.div
+                      key={key}
+                      className="flex items-center gap-3.5"
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + i * 0.12, duration: 0.4 }}
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center shrink-0">
+                        <Icon size={18} className="text-amber-300/90" />
+                      </div>
+                      <span className="text-sm text-white/80">{t(key)}</span>
+                    </motion.div>
+                  );
+                })}
               </div>
             </>
           )}
@@ -252,8 +252,8 @@ export function Login() {
         {/* Bottom trust text */}
         <p className="absolute bottom-5 left-0 right-0 text-center text-[11px] text-white/20 tracking-wide">
           {institution
-            ? 'Powered by Sinaloka'
-            : 'Dipercaya oleh institusi pendidikan di seluruh Indonesia'}
+            ? t('login.poweredBy')
+            : t('login.trustText')}
         </p>
       </div>
 
@@ -297,7 +297,7 @@ export function Login() {
                     {institution.name}
                   </h1>
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                    Masuk ke dashboard
+                    {t('login.dashboardLogin')}
                   </p>
                 </>
               ) : (
@@ -316,10 +316,10 @@ export function Login() {
             {/* Desktop: text-only header (logo lives in brand panel) */}
             <div className="hidden lg:flex lg:flex-col lg:items-center">
               <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                {institution ? institution.name : 'Selamat Datang'}
+                {institution ? institution.name : t('login.welcome')}
               </h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                {institution ? 'Masuk ke dashboard' : t('login.subtitle')}
+                {institution ? t('login.dashboardLogin') : t('login.subtitle')}
               </p>
             </div>
           </div>
