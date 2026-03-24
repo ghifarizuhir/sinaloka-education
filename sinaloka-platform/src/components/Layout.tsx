@@ -47,10 +47,14 @@ export const Layout = () => {
   const { mustChangePassword } = auth;
 
   useEffect(() => {
-    if (mustChangePassword && !location.pathname.startsWith('/settings')) {
+    if (
+      mustChangePassword &&
+      !location.pathname.startsWith('/settings') &&
+      auth.user?.institution?.onboarding_completed !== false
+    ) {
       navigate('/settings?tab=security');
     }
-  }, [mustChangePassword, location.pathname, navigate]);
+  }, [mustChangePassword, location.pathname, navigate, auth.user?.institution?.onboarding_completed]);
 
   const handleLogout = async () => {
     await auth.logout();

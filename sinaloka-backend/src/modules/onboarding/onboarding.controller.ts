@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { OnboardingService } from './onboarding.service.js';
 import { SetBillingModeSchema } from './onboarding.dto.js';
@@ -26,7 +27,10 @@ export class OnboardingController {
   }
 
   @Post('complete')
-  complete(@InstitutionId() institutionId: string) {
-    return this.onboardingService.complete(institutionId);
+  complete(
+    @InstitutionId() institutionId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.onboardingService.complete(institutionId, userId);
   }
 }
