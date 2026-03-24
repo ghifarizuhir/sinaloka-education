@@ -8,6 +8,7 @@ import { InvoiceGeneratorService } from './invoice-generator.service.js';
 import { InvoiceService } from './invoice.service.js';
 import { MidtransService } from './midtrans.service.js';
 import { PaymentGatewayService } from './payment-gateway.service.js';
+import { MonthlyPaymentCron } from './monthly-payment.cron.js';
 
 @Module({
   imports: [SettingsModule, forwardRef(() => SubscriptionModule)],
@@ -18,6 +19,7 @@ import { PaymentGatewayService } from './payment-gateway.service.js';
     InvoiceService,
     MidtransService,
     PaymentGatewayService,
+    MonthlyPaymentCron,
   ],
   exports: [
     PaymentService,
