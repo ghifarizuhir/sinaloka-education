@@ -291,3 +291,26 @@
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+
+@keyframes login-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes login-float-slow {
+  0%, 100% { transform: translateY(0) rotate(var(--login-rotate, 0deg)); }
+  50% { transform: translateY(-7px) rotate(var(--login-rotate, 0deg)); }
+}
+
+@keyframes login-shimmer {
+  0% { opacity: 0.15; }
+  50% { opacity: 0.25; }
+  100% { opacity: 0.15; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *[style*="login-float"],
+  *[style*="login-shimmer"] {
+    animation: none !important;
+  }
+}
