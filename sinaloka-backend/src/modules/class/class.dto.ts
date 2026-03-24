@@ -43,7 +43,6 @@ export const CreateClassSchema = z
         { message: 'Duplicate schedule days are not allowed' },
       ),
     room: z.string().max(100).optional().nullable(),
-    package_fee: z.number().min(0).optional().nullable(),
     tutor_fee: z.number().min(0),
     tutor_fee_mode: TutorFeeMode.default('FIXED_PER_SESSION'),
     tutor_fee_per_student: z.number().min(0).optional().nullable(),
@@ -76,7 +75,6 @@ export const UpdateClassSchema = z.object({
     })
     .optional(),
   room: z.string().max(100).optional().nullable(),
-  package_fee: z.number().min(0).optional().nullable(),
   tutor_fee: z.number().min(0).optional(),
   tutor_fee_mode: TutorFeeMode.optional(),
   tutor_fee_per_student: z.number().min(0).optional().nullable(),

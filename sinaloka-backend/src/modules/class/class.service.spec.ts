@@ -47,7 +47,6 @@ describe('ClassService', () => {
     subject: { id: 'subject-1', name: 'Mathematics', institution_id: 'inst-1' },
     capacity: 30,
     fee: '500000',
-    package_fee: '700000',
     tutor_fee: '200000',
     tutor_fee_mode: 'FIXED_PER_SESSION',
     tutor_fee_per_student: null,
@@ -173,7 +172,6 @@ describe('ClassService', () => {
       });
 
       expect(result.fee).toBe(500000);
-      expect(result.package_fee).toBe(700000);
       expect(result.tutor_fee).toBe(200000);
       expect(prisma.class.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -184,7 +182,7 @@ describe('ClassService', () => {
       );
     });
 
-    it('should pass package_fee and tutor_fee to prisma create', async () => {
+    it('should pass tutor_fee to prisma create', async () => {
       prisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-1',
         institution_id: 'inst-1',
@@ -209,7 +207,6 @@ describe('ClassService', () => {
         subject_id: 'subject-1',
         capacity: 30,
         fee: 500000,
-        package_fee: 700000,
         tutor_fee: 200000,
         schedules: [
           { day: 'Monday', start_time: '14:00', end_time: '15:30' },
@@ -220,7 +217,6 @@ describe('ClassService', () => {
       expect(prisma.class.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            package_fee: 700000,
             tutor_fee: 200000,
           }),
         }),
@@ -282,7 +278,6 @@ describe('ClassService', () => {
 
       expect(result.data).toHaveLength(1);
       expect(result.data[0].fee).toBe(500000);
-      expect(result.data[0].package_fee).toBe(700000);
       expect(result.data[0].tutor_fee).toBe(200000);
       expect(result.data[0].tutor).toEqual({ id: 'tutor-1', name: 'John Doe' });
       expect(result.data[0].enrolled_count).toBe(5);
@@ -367,7 +362,6 @@ describe('ClassService', () => {
       prisma.class.findFirst.mockResolvedValue(mockClassWithRelations);
       const result = await service.findOne('inst-1', 'class-1');
       expect(result.fee).toBe(500000);
-      expect(result.package_fee).toBe(700000);
       expect(result.tutor_fee).toBe(200000);
       expect(result.tutor).toEqual({
         id: 'tutor-1',
@@ -407,7 +401,6 @@ describe('ClassService', () => {
       });
       expect(result.name).toBe('Updated Math');
       expect(result.fee).toBe(500000);
-      expect(result.package_fee).toBe(700000);
       expect(result.tutor_fee).toBe(200000);
     });
     it('should throw NotFoundException if class not found', async () => {

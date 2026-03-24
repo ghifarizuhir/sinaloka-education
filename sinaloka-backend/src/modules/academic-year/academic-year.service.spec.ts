@@ -358,7 +358,6 @@ describe('AcademicYearService', () => {
       tutor_id: 'tutor-1',
       capacity: 30,
       fee: '500000',
-      package_fee: '700000',
       tutor_fee: '200000',
       tutor_fee_mode: 'FIXED_PER_SESSION',
       tutor_fee_per_student: null,
