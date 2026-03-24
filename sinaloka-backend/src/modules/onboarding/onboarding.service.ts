@@ -34,17 +34,27 @@ export class OnboardingService {
     });
   }
 
-  async complete(institutionId: string) {
+  async complete(institutionId: string, userId: string) {
     const institution = await this.prisma.institution.findUnique({
       where: { id: institutionId },
       select: { billing_mode: true },
     });
     if (!institution) throw new NotFoundException('Institution not found');
     if (!institution.billing_mode) throw new BadRequestException('Billing mode must be set before completing onboarding.');
-    return this.prisma.institution.update({
-      where: { id: institutionId },
-      data: { onboarding_completed: true },
-      select: { onboarding_completed: true },
-    });
+
+    const [updatedInstitution] = await this.prisma.$transaction([
+      this.prisma.institution.update({
+        where: { id: institutionId },
+        data: { onboarding_completed: true },
+        select: { onboarding_completed: true },
+      }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { must_change_password: false },
+        select: { id: true },
+      }),
+    ]);
+
+    return updatedInstitution;
   }
 }
