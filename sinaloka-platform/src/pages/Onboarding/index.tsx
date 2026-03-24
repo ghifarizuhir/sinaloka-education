@@ -1,42 +1,44 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { Receipt, CalendarDays, ArrowRight, Check } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Check } from 'lucide-react';
 import { onboardingService } from '@/src/services/onboarding.service';
-import { cn } from '@/src/lib/utils';
 import { useAuth } from '@/src/hooks/useAuth';
+import { cn } from '@/src/lib/utils';
+import { PasswordStep } from './steps/PasswordStep';
+import { ProfileStep } from './steps/ProfileStep';
+import { AcademicStep } from './steps/AcademicStep';
+import { BillingStep } from './steps/BillingStep';
 
 type BillingMode = 'PER_SESSION' | 'MONTHLY_FIXED';
 
-const BILLING_OPTIONS = [
-  {
-    value: 'PER_SESSION' as BillingMode,
-    icon: Receipt,
-    title: 'Per Sesi',
-    description: 'Siswa ditagih setiap kali hadir di sesi kelas',
-    details: [
-      'Cocok untuk les privat dan bimbel fleksibel',
-      'Tagihan otomatis dibuat saat absensi dicatat',
-      'Nominal diatur per kelas',
-    ],
-  },
-  {
-    value: 'MONTHLY_FIXED' as BillingMode,
-    icon: CalendarDays,
-    title: 'Bulanan Tetap',
-    description: 'Siswa bayar biaya tetap per bulan',
-    details: [
-      'Cocok untuk bimbel reguler dan program intensif',
-      'Tagihan otomatis dibuat setiap awal bulan',
-      'Nominal diatur per kelas',
-    ],
-  },
-] as const;
+const STEPS = [
+  { label: 'Password', number: 1 },
+  { label: 'Profil', number: 2 },
+  { label: 'Akademik', number: 3 },
+  { label: 'Billing', number: 4 },
+];
 
 export default function Onboarding() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [selected, setSelected] = useState<BillingMode | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [billingMode, setBillingMode] = useState<BillingMode | null>(null);
+
+  const completeMutation = useMutation({
+    mutationFn: async () => {
+      if (!billingMode) return;
+      await onboardingService.setBillingMode(billingMode);
+      await onboardingService.complete();
+    },
+    onSuccess: () => {
+      toast.success('Setup selesai! Selamat datang.');
+      window.location.href = '/';
+    },
+    onError: () => {
+      toast.error('Gagal menyelesaikan setup. Silakan coba lagi.');
+    },
+  });
 
   if (isLoading) {
     return (
@@ -50,94 +52,73 @@ export default function Onboarding() {
     return <Navigate to="/login" replace />;
   }
 
-  const setBillingMutation = useMutation({
-    mutationFn: async () => {
-      if (!selected) return;
-      await onboardingService.setBillingMode(selected);
-      await onboardingService.complete();
-    },
-    onSuccess: () => {
-      toast.success('Setup selesai!');
-      window.location.href = '/';
-    },
-    onError: () => {
-      toast.error('Gagal menyimpan. Silakan coba lagi.');
-    },
-  });
+  const goNext = () => setCurrentStep((s) => Math.min(s + 1, 4));
+  const goBack = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Selamat datang!
-          </h1>
-          <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-            Bagaimana cara kamu menagih siswa?
-          </p>
+        {/* Progress Bar */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          {STEPS.map((step, i) => (
+            <div key={step.number} className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div
+                  className={cn(
+                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors',
+                    currentStep > step.number
+                      ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                      : currentStep === step.number
+                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                        : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500',
+                  )}
+                >
+                  {currentStep > step.number ? <Check size={14} /> : step.number}
+                </div>
+                <span
+                  className={cn(
+                    'text-[10px] mt-1 font-medium',
+                    currentStep >= step.number
+                      ? 'text-zinc-900 dark:text-zinc-100'
+                      : 'text-zinc-400 dark:text-zinc-500',
+                  )}
+                >
+                  {step.label}
+                </span>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div
+                  className={cn(
+                    'w-12 h-0.5 mx-2 mb-4',
+                    currentStep > step.number
+                      ? 'bg-zinc-900 dark:bg-zinc-100'
+                      : 'bg-zinc-200 dark:bg-zinc-800',
+                  )}
+                />
+              )}
+            </div>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {BILLING_OPTIONS.map((option) => {
-            const Icon = option.icon;
-            const isSelected = selected === option.value;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setSelected(option.value)}
-                className={cn(
-                  'relative p-6 rounded-xl border-2 text-left transition-all',
-                  'hover:border-zinc-400 dark:hover:border-zinc-500',
-                  isSelected
-                    ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-900'
-                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50',
-                )}
-              >
-                {isSelected && (
-                  <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
-                    <Check className="w-3 h-3 text-white dark:text-zinc-900" />
-                  </div>
-                )}
-                <Icon className="w-8 h-8 text-zinc-700 dark:text-zinc-300 mb-3" />
-                <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                  {option.title}
-                </h3>
-                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  {option.description}
-                </p>
-                <ul className="mt-3 space-y-1">
-                  {option.details.map((detail) => (
-                    <li key={detail} className="text-xs text-zinc-400 dark:text-zinc-500 flex items-start gap-1.5">
-                      <span className="mt-0.5 w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              </button>
-            );
-          })}
+        {/* Step Content */}
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-8">
+          {currentStep === 1 && <PasswordStep onNext={goNext} />}
+          {currentStep === 2 && <ProfileStep onNext={goNext} onBack={goBack} onSkip={goNext} />}
+          {currentStep === 3 && <AcademicStep onNext={goNext} onBack={goBack} onSkip={goNext} />}
+          {currentStep === 4 && (
+            <BillingStep
+              selected={billingMode}
+              onSelect={setBillingMode}
+              onBack={goBack}
+              onComplete={() => completeMutation.mutate()}
+              isPending={completeMutation.isPending}
+            />
+          )}
         </div>
 
-        <div className="mt-8 flex justify-center">
-          <button
-            type="button"
-            disabled={!selected || setBillingMutation.isPending}
-            onClick={() => setBillingMutation.mutate()}
-            className={cn(
-              'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-sm transition-colors',
-              selected
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200'
-                : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed',
-            )}
-          >
-            {setBillingMutation.isPending ? 'Menyimpan...' : 'Lanjutkan'}
-            {!setBillingMutation.isPending && <ArrowRight className="w-4 h-4" />}
-          </button>
-        </div>
-
-        <p className="mt-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
-          Mode billing tidak dapat diubah setelah dipilih. Hubungi support jika perlu mengubah.
+        {/* Step indicator text */}
+        <p className="text-center text-xs text-zinc-400 dark:text-zinc-500 mt-4">
+          Langkah {currentStep} dari {STEPS.length}
         </p>
       </div>
     </div>
