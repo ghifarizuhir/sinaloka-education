@@ -306,6 +306,11 @@ export default function RegisterPage() {
             {/* ── Role Select ── */}
             {pageState === 'role-select' && regInfo && (
               <div>
+                <div className="mb-6 text-center">
+                  <h2 className="text-xl font-bold text-foreground mb-1">Pilih jenis pendaftaran</h2>
+                  <p className="text-sm text-muted-foreground">Silakan pilih peran Anda untuk melanjutkan.</p>
+                </div>
+
                 <div className="space-y-3">
                   {regInfo.student_enabled && (
                     <Card

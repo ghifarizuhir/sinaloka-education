@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
