@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { z } from 'zod';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
@@ -61,6 +62,17 @@ export class InstitutionController {
     dto: UpdateInstitutionDto,
   ) {
     return this.institutionService.update(id, dto);
+  }
+
+  @Patch(':id/billing-mode')
+  async overrideBillingMode(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(z.object({
+      billing_mode: z.enum(['PER_SESSION', 'MONTHLY_FIXED']),
+    })))
+    dto: { billing_mode: 'PER_SESSION' | 'MONTHLY_FIXED' },
+  ) {
+    return this.institutionService.overrideBillingMode(id, dto.billing_mode);
   }
 
   @Delete(':id')

@@ -155,6 +155,16 @@ export class InstitutionService {
     );
   }
 
+  async overrideBillingMode(id: string, billingMode: string) {
+    const institution = await this.prisma.institution.findUnique({ where: { id } });
+    if (!institution) throw new NotFoundException('Institution not found');
+    return this.prisma.institution.update({
+      where: { id },
+      data: { billing_mode: billingMode as any },
+      select: { id: true, name: true, billing_mode: true },
+    });
+  }
+
   // Public endpoint — no tenantId scoping needed (pre-authentication discovery).
   // settings is selected to extract registration_enabled; the full blob is never returned.
   async findBySlugPublic(slug: string): Promise<{
