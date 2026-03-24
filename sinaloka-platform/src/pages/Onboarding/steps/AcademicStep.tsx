@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { GraduationCap, X, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { settingsService } from '@/src/services/settings.service';
-import { useCreateSubject, useDeleteSubject, useSubjects } from '@/src/hooks/useSubjects';
+import api from '@/src/lib/api';
 import { cn } from '@/src/lib/utils';
 
 interface AcademicStepProps {
@@ -26,11 +26,8 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
   const [workingDays, setWorkingDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
   const [rooms, setRooms] = useState<{ id: string; name: string }[]>([]);
   const [newRoom, setNewRoom] = useState('');
+  const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
   const [newSubject, setNewSubject] = useState('');
-
-  const { data: subjects = [] } = useSubjects();
-  const createSubject = useCreateSubject();
-  const deleteSubject = useDeleteSubject();
 
   const toggleDay = (day: number) => {
     setWorkingDays((prev) =>
@@ -54,15 +51,17 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
     const name = newSubject.trim();
     if (!name) return;
     if (subjects.some((s) => s.name.toLowerCase() === name.toLowerCase())) return;
-    createSubject.mutate(name, {
-      onSuccess: () => setNewSubject(''),
-      onError: () => toast.error('Gagal menambah mata pelajaran'),
-    });
+    setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name }]);
+    setNewSubject('');
+  };
+
+  const removeSubject = (id: string) => {
+    setSubjects((prev) => prev.filter((s) => s.id !== id));
   };
 
   const saveMutation = useMutation({
-    mutationFn: () =>
-      settingsService.updateAcademic({
+    mutationFn: async () => {
+      await settingsService.updateAcademic({
         working_days: workingDays,
         rooms: rooms.map((r) => ({
           id: r.id,
@@ -71,7 +70,12 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
           capacity: null,
           status: 'Available' as const,
         })),
-      }),
+      });
+      // Create subjects sequentially via CRUD API
+      for (const subject of subjects) {
+        await api.post('/api/admin/subjects', { name: subject.name });
+      }
+    },
     onSuccess: () => {
       toast.success('Pengaturan akademik disimpan');
       onNext();
@@ -186,8 +190,7 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
             <button
               type="button"
               onClick={addSubject}
-              disabled={createSubject.isPending}
-              className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+              className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <Plus size={16} />
             </button>
@@ -202,9 +205,8 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
                   {subject.name}
                   <button
                     type="button"
-                    onClick={() => deleteSubject.mutate(subject.id)}
-                    disabled={deleteSubject.isPending}
-                    className="text-zinc-400 hover:text-zinc-600 disabled:opacity-50"
+                    onClick={() => removeSubject(subject.id)}
+                    className="text-zinc-400 hover:text-zinc-600"
                   >
                     <X size={12} />
                   </button>
