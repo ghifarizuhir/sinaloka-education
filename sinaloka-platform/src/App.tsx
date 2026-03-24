@@ -49,6 +49,7 @@ import Settlements from './pages/SuperAdmin/Settlements';
 
 const RegisterPage = React.lazy(() => import('./pages/Register'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding'));
+const ChangePassword = React.lazy(() => import('./pages/ChangePassword'));
 
 function InstitutionGate({ children }: { children: React.ReactNode }) {
   const { isLoading, error } = useInstitution();
@@ -94,6 +95,15 @@ export default function App() {
                 </div>
               }>
                 <RegisterPage />
+              </React.Suspense>
+            } />
+            <Route path="/change-password" element={
+              <React.Suspense fallback={
+                <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-[#0f766e]/30 border-t-[#0f766e] rounded-full animate-spin" />
+                </div>
+              }>
+                <ChangePassword />
               </React.Suspense>
             } />
             <Route path="/onboarding" element={
