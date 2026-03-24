@@ -39,7 +39,7 @@ export function ProfileStep({ onNext, onBack, onSkip }: ProfileStepProps) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-2">
-        <Building2 className="w-6 h-6 text-zinc-400" />
+        <Building2 className="w-6 h-6 text-[#0f766e]" />
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
           Lengkapi Profil Institusi
         </h2>
@@ -120,7 +120,7 @@ export function ProfileStep({ onNext, onBack, onSkip }: ProfileStepProps) {
             className={cn(
               'px-6 py-2.5 rounded-lg font-medium text-sm transition-colors',
               hasData
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200'
+                ? 'bg-[#0f766e] text-white hover:bg-[#0a5951]'
                 : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed',
             )}
           >
