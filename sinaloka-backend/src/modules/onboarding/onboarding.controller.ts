@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UsePipes } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { Role } from '../../../generated/prisma/client.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { InstitutionId } from '../../common/decorators/institution-id.decorator.js';
@@ -18,8 +18,10 @@ export class OnboardingController {
   }
 
   @Post('billing-mode')
-  @UsePipes(new ZodValidationPipe(SetBillingModeSchema))
-  setBillingMode(@InstitutionId() institutionId: string, @Body() dto: SetBillingModeDto) {
+  setBillingMode(
+    @InstitutionId() institutionId: string,
+    @Body(new ZodValidationPipe(SetBillingModeSchema)) dto: SetBillingModeDto,
+  ) {
     return this.onboardingService.setBillingMode(institutionId, dto);
   }
 
