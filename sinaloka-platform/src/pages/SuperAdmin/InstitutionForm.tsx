@@ -78,6 +78,10 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
           toast.error(t('superAdmin.form.adminRequired'));
           return;
         }
+        if (adminPassword.length < 8 || !/[A-Z]/.test(adminPassword) || !/[0-9]/.test(adminPassword)) {
+          toast.error('Password minimal 8 karakter, mengandung huruf besar dan angka');
+          return;
+        }
         await createInstitution.mutateAsync({
           name: name.trim(),
           address: address.trim() || null,
