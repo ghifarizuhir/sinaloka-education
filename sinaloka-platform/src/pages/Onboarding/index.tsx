@@ -23,6 +23,7 @@ const STEPS = [
 export default function Onboarding() {
   const { isAuthenticated, isLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  const [passwordCompleted, setPasswordCompleted] = useState(false);
   const [billingMode, setBillingMode] = useState<BillingMode | null>(null);
 
   const completeMutation = useMutation({
@@ -53,7 +54,12 @@ export default function Onboarding() {
   }
 
   const goNext = () => setCurrentStep((s) => Math.min(s + 1, 4));
-  const goBack = () => setCurrentStep((s) => Math.max(s - 1, 1));
+  // Prevent going back to step 1 after password is changed (irreversible)
+  const goBack = () => setCurrentStep((s) => Math.max(s - 1, passwordCompleted ? 2 : 1));
+  const handlePasswordDone = () => {
+    setPasswordCompleted(true);
+    goNext();
+  };
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
@@ -102,7 +108,7 @@ export default function Onboarding() {
 
         {/* Step Content */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-8">
-          {currentStep === 1 && <PasswordStep onNext={goNext} />}
+          {currentStep === 1 && <PasswordStep onNext={handlePasswordDone} />}
           {currentStep === 2 && <ProfileStep onNext={goNext} onBack={goBack} onSkip={goNext} />}
           {currentStep === 3 && <AcademicStep onNext={goNext} onBack={goBack} onSkip={goNext} />}
           {currentStep === 4 && (
