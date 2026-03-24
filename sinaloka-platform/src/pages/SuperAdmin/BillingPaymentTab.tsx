@@ -53,10 +53,6 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
   // Sync fetched billing data into form state
   useEffect(() => {
     if (!billing) return;
-    const mode = billing.billing_mode;
-    if (mode === 'manual' || mode === 'per_session' || mode === 'package' || mode === 'subscription') {
-      setFormBillingMode(mode);
-    }
 
     setFormCurrency(billing.currency ?? 'IDR');
     setFormInvoicePrefix(billing.invoice_prefix ?? 'INV');
@@ -64,20 +60,19 @@ export default function BillingPaymentTab({ institutionId }: BillingPaymentTabPr
     setFormLatePaymentThreshold(billing.late_payment_threshold ?? 7);
     // Capture initial state after sync
     initialBillingRef.current = {
-      billing_mode: mode,
+      billing_mode: formBillingMode,
       currency: billing.currency ?? 'IDR',
       invoice_prefix: billing.invoice_prefix ?? 'INV',
       late_payment: billing.late_payment_auto_lock
         ? `Aktif (${billing.late_payment_threshold} hari)`
         : 'Nonaktif',
     };
-  }, [billing]);
+  }, [billing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save mutation — billing only
   const saveMutation = useMutation({
     mutationFn: async () => {
       const billingPayload = {
-        billing_mode: formBillingMode,
         currency: formCurrency,
         invoice_prefix: formInvoicePrefix,
         late_payment_auto_lock: formLatePaymentAutoLock,

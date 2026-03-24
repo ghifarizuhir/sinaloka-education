@@ -144,8 +144,6 @@ export const Classes = () => {
         setFormCapacity={state.setFormCapacity}
         formFee={state.formFee}
         setFormFee={state.setFormFee}
-        formPackageFee={state.formPackageFee}
-        setFormPackageFee={state.setFormPackageFee}
         formTutorFee={state.formTutorFee}
         setFormTutorFee={state.setFormTutorFee}
         formTutorFeeMode={state.formTutorFeeMode}
