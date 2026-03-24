@@ -134,6 +134,16 @@
     "poweredBy": "Powered by Sinaloka"
   },
 
+  "welcome": {
+    "greeting": "Welcome to",
+    "loginButton": "Sign in",
+    "registerButton": "Register",
+    "feature1": "Integrated schedule & attendance",
+    "feature2": "Real-time progress reports",
+    "feature3": "Parent notifications & updates",
+    "poweredBy": "Powered by Sinaloka"
+  },
+
   "dashboard": {
     "greeting": "Morning Coffee",
     "subtitle": "Here's what's happening at Sinaloka Platform today.",
