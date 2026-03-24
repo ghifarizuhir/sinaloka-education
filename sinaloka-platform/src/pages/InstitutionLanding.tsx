@@ -117,9 +117,8 @@ export function InstitutionLanding() {
           {institution.registration_enabled && (
             <Button
               size="lg"
-              variant="outline"
               onClick={() => navigate('/register')}
-              className="border-white/40 text-white hover:bg-white/10 sm:min-w-[140px] justify-center"
+              className="bg-white text-[#0f766e] hover:bg-white/90 shadow-lg shadow-black/10 font-semibold sm:min-w-[140px] justify-center"
             >
               {t('welcome.registerButton')}
             </Button>
