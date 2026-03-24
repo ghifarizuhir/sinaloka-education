@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
@@ -67,25 +68,36 @@ export const Select: React.FC<SelectProps> = ({
     }
   }, [isOpen, updatePosition, value, flat]);
 
-  // Close on outside click, scroll, or resize
+  // Close on outside click or resize; reposition on scroll
   useEffect(() => {
     if (!isOpen) return;
-    const close = () => setIsOpen(false);
     const handleClickOutside = (e: MouseEvent) => {
       if (!triggerRef.current?.contains(e.target as Node) &&
           !menuRef.current?.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
+    const handleScroll = (e: Event) => {
+      // If scrolling inside the dropdown menu itself, don't reposition
+      if (menuRef.current?.contains(e.target as Node)) return;
+      // Close if trigger scrolled out of viewport
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect || rect.bottom < 0 || rect.top > window.innerHeight) {
+        setIsOpen(false);
+        return;
+      }
+      updatePosition();
+    };
+    const handleResize = () => setIsOpen(false);
     document.addEventListener('mousedown', handleClickOutside);
-    window.addEventListener('scroll', close, true);
-    window.addEventListener('resize', close);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', close, true);
-      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   // Scroll highlighted item into view
   useEffect(() => {
@@ -227,16 +239,17 @@ export const Select: React.FC<SelectProps> = ({
         />
       </button>
 
-      <AnimatePresence>
-        {isOpen && menuPos && (
-          <motion.div
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && menuPos && (
+            <motion.div
               ref={menuRef}
               role="listbox"
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
-              className="fixed z-50 overflow-y-auto overflow-x-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl py-1"
+              className="fixed z-[9999] overflow-y-auto overflow-x-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl py-1"
               style={{
                 top: menuPos.top,
                 left: menuPos.left,
@@ -247,8 +260,10 @@ export const Select: React.FC<SelectProps> = ({
             >
               {renderOptions()}
             </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </>
   );
 };
