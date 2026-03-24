@@ -134,6 +134,16 @@
     "poweredBy": "Powered by Sinaloka"
   },
 
+  "welcome": {
+    "greeting": "Selamat Datang di",
+    "loginButton": "Masuk",
+    "registerButton": "Daftar",
+    "feature1": "Jadwal & kehadiran terintegrasi",
+    "feature2": "Laporan perkembangan real-time",
+    "feature3": "Notifikasi & info untuk orang tua",
+    "poweredBy": "Powered by Sinaloka"
+  },
+
   "dashboard": {
     "greeting": "Selamat Pagi",
     "subtitle": "Berikut yang terjadi di Sinaloka Platform hari ini.",
