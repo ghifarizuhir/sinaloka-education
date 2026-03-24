@@ -42,6 +42,7 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module.js';
 import { AuditLogInterceptor } from './modules/audit-log/audit-log.interceptor.js';
 import { HealthController } from './health.controller.js';
 import { AcademicYearModule } from './modules/academic-year/academic-year.module.js';
+import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -78,6 +79,7 @@ import { AcademicYearModule } from './modules/academic-year/academic-year.module
     NotificationModule,
     AuditLogModule,
     AcademicYearModule,
+    OnboardingModule,
   ],
   providers: [
     {
