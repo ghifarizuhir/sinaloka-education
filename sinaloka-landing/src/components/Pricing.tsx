@@ -74,7 +74,7 @@ const features: Record<string, Feature[]> = {
     { text: "3 admin", icon: "check" },
     { text: "Semua fitur Starter", icon: "check", bold: true },
     { text: "WA auto-reminder harian", icon: "check", highlight: true },
-    { text: "4 mode billing fleksibel", icon: "check", highlight: true },
+    { text: "Billing per sesi & bulanan", icon: "check", highlight: true },
     { text: "Pengeluaran berulang otomatis", icon: "check", highlight: true },
     { text: "Laporan PDF (absensi, keuangan)", icon: "check", highlight: true },
     { text: "CSV export lengkap", icon: "check", highlight: true },
