@@ -80,6 +80,12 @@ export const Select: React.FC<SelectProps> = ({
     const handleScroll = (e: Event) => {
       // If scrolling inside the dropdown menu itself, don't reposition
       if (menuRef.current?.contains(e.target as Node)) return;
+      // Close if trigger scrolled out of viewport
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect || rect.bottom < 0 || rect.top > window.innerHeight) {
+        setIsOpen(false);
+        return;
+      }
       updatePosition();
     };
     const handleResize = () => setIsOpen(false);
