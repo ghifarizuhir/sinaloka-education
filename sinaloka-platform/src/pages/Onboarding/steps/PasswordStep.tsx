@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 import { toast } from 'sonner';
