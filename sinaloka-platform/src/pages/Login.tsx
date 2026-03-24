@@ -80,7 +80,7 @@ export function Login() {
                   className="w-20 h-20 rounded-2xl mb-6 shadow-2xl object-cover ring-2 ring-white/20"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-2xl text-white text-3xl font-bold ring-2 ring-white/20 bg-white/15 backdrop-blur-sm">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-2xl text-white text-3xl font-bold ring-2 ring-white/20 bg-white/20 backdrop-blur-sm">
                   {institution.name.charAt(0).toUpperCase()}
                 </div>
               )}

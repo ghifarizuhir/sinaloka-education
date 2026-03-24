@@ -33,7 +33,7 @@ export function InstitutionLanding() {
       <div className="relative z-10 flex flex-col items-center w-full max-w-lg px-6 py-12">
         {/* Greeting */}
         <motion.p
-          className="text-teal-200/50 text-sm tracking-widest uppercase mb-6"
+          className="text-teal-100/65 text-sm tracking-widest uppercase mb-6"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -54,7 +54,7 @@ export function InstitutionLanding() {
               className="w-24 h-24 rounded-2xl mb-5 shadow-2xl object-cover ring-2 ring-white/15"
             />
           ) : (
-            <div className="w-24 h-24 rounded-2xl flex items-center justify-center mb-5 shadow-2xl text-white text-4xl font-bold ring-2 ring-white/15 bg-white/15 backdrop-blur-sm">
+            <div className="w-24 h-24 rounded-2xl flex items-center justify-center mb-5 shadow-2xl text-white text-4xl font-bold ring-2 ring-white/20 bg-white/20 backdrop-blur-sm">
               {institution.name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -93,8 +93,8 @@ export function InstitutionLanding() {
             const Icon = FEATURE_ICONS[i];
             return (
               <div key={key} className="flex items-center gap-2">
-                <Icon size={15} className="text-amber-300/70" />
-                <span className="text-sm text-white/55">{t(key)}</span>
+                <Icon size={15} className="text-amber-300/80" />
+                <span className="text-sm text-white/70">{t(key)}</span>
               </div>
             );
           })}
@@ -119,7 +119,7 @@ export function InstitutionLanding() {
               size="lg"
               variant="outline"
               onClick={() => navigate('/register')}
-              className="border-white/25 text-white hover:bg-white/10 sm:min-w-[140px] justify-center"
+              className="border-white/40 text-white hover:bg-white/10 sm:min-w-[140px] justify-center"
             >
               {t('welcome.registerButton')}
             </Button>
