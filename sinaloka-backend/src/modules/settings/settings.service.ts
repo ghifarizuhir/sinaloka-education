@@ -15,7 +15,6 @@ const REGISTRATION_DEFAULTS = {
 };
 
 const BILLING_DEFAULTS = {
-  billing_mode: 'manual' as const,
   currency: 'IDR',
   invoice_prefix: 'INV-',
   late_payment_auto_lock: false,

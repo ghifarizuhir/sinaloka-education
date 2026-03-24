@@ -22,9 +22,6 @@ export type UpdateGeneralSettingsDto = z.infer<
 >;
 
 export const UpdateBillingSettingsSchema = z.object({
-  billing_mode: z
-    .enum(['manual', 'per_session', 'package', 'subscription'])
-    .optional(),
   currency: z.enum(['IDR', 'USD']).optional(),
   invoice_prefix: z.string().min(1).max(20).optional(),
   late_payment_auto_lock: z.boolean().optional(),

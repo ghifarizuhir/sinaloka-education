@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { SettingsService } from '../settings/settings.service.js';
 
 interface PerSessionPaymentParams {
   institutionId: string;
@@ -9,7 +8,11 @@ interface PerSessionPaymentParams {
   classId: string;
 }
 
-interface PackagePaymentParams {
+interface MonthlyPaymentParams {
+  institutionId: string;
+}
+
+interface MidMonthEnrollmentParams {
   institutionId: string;
   studentId: string;
   enrollmentId: string;
@@ -21,30 +24,28 @@ interface PackagePaymentParams {
 export class InvoiceGeneratorService {
   private readonly logger = new Logger(InvoiceGeneratorService.name);
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly settingsService: SettingsService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async generatePerSessionPayment(
     params: PerSessionPaymentParams,
   ): Promise<void> {
     try {
-      const billing = await this.settingsService.getBilling(
-        params.institutionId,
-      );
-      if (billing.billing_mode !== 'per_session') return;
+      const institution = await this.prisma.institution.findUnique({
+        where: { id: params.institutionId },
+        select: { billing_mode: true },
+      });
+      if (institution?.billing_mode !== 'PER_SESSION') return;
 
-      // Look up the session to get the date
       const session = await this.prisma.session.findFirst({
         where: { id: params.sessionId, institution_id: params.institutionId },
         select: { date: true },
       });
       if (!session) return;
 
-      const sessionDateStr = new Date(session.date).toISOString().split('T')[0];
+      const sessionDateStr = new Date(session.date)
+        .toISOString()
+        .split('T')[0];
 
-      // Look up enrollment for this student + class
       const enrollment = await this.prisma.enrollment.findFirst({
         where: {
           student_id: params.studentId,
@@ -54,7 +55,9 @@ export class InvoiceGeneratorService {
       });
       if (!enrollment) return;
 
-      // Duplicate check: payment already exists for this enrollment + session date
+      // Per-session uses notes-based dedup (billing_period is null).
+      // @@unique([enrollment_id, billing_period]) does NOT protect when billing_period is NULL.
+      // This is intentional — per-session dedup uses notes; monthly uses billing_period.
       const existing = await this.prisma.payment.findFirst({
         where: {
           enrollment_id: enrollment.id,
@@ -63,7 +66,6 @@ export class InvoiceGeneratorService {
       });
       if (existing) return;
 
-      // Get class fee
       const classRecord = await this.prisma.class.findFirst({
         where: { id: params.classId, institution_id: params.institutionId },
         select: { fee: true },
@@ -83,68 +85,25 @@ export class InvoiceGeneratorService {
       });
 
       this.logger.log(
-        `Auto-payment created for student ${params.studentId}, session ${sessionDateStr}`,
+        `Per-session payment created: student=${params.studentId}, session=${sessionDateStr}`,
       );
     } catch (error) {
       this.logger.error(`Failed to generate per-session payment: ${error}`);
     }
   }
 
-  async generatePackagePayment(params: PackagePaymentParams): Promise<void> {
-    try {
-      const billing = await this.settingsService.getBilling(
-        params.institutionId,
-      );
-      if (billing.billing_mode !== 'package') return;
-
-      // Duplicate check
-      const existing = await this.prisma.payment.findFirst({
-        where: {
-          enrollment_id: params.enrollmentId,
-          notes: { startsWith: 'Auto: Package' },
-        },
-      });
-      if (existing) return;
-
-      // Get class fee
-      const classRecord = await this.prisma.class.findFirst({
-        where: { id: params.classId, institution_id: params.institutionId },
-        select: { fee: true, package_fee: true },
-      });
-      if (!classRecord) return;
-
-      const amount = classRecord.package_fee ?? classRecord.fee;
-      const dueDate = new Date(params.enrolledAt);
-      dueDate.setDate(dueDate.getDate() + 7);
-
-      await this.prisma.payment.create({
-        data: {
-          institution_id: params.institutionId,
-          student_id: params.studentId,
-          enrollment_id: params.enrollmentId,
-          amount,
-          due_date: dueDate,
-          status: 'PENDING',
-          notes: 'Auto: Package enrollment',
-        },
-      });
-
-      this.logger.log(
-        `Auto-package payment created for enrollment ${params.enrollmentId}`,
-      );
-    } catch (error) {
-      this.logger.error(`Failed to generate package payment: ${error}`);
-    }
-  }
-
-  async generateSubscriptionPayments(params: {
-    institutionId: string;
-  }): Promise<{ created: number }> {
-    const billing = await this.settingsService.getBilling(params.institutionId);
-    if (billing.billing_mode !== 'subscription') return { created: 0 };
+  async generateMonthlyPayments(
+    params: MonthlyPaymentParams,
+  ): Promise<{ created: number }> {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: params.institutionId },
+      select: { billing_mode: true },
+    });
+    if (institution?.billing_mode !== 'MONTHLY_FIXED') return { created: 0 };
 
     const now = new Date();
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const billingPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const dueDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
@@ -157,35 +116,77 @@ export class InvoiceGeneratorService {
     let created = 0;
 
     for (const enrollment of enrollments) {
-      const existing = await this.prisma.payment.findFirst({
-        where: {
-          enrollment_id: enrollment.id,
-          notes: { startsWith: `Auto: Subscription ${monthKey}` },
-        },
-      });
-      if (existing) continue;
+      try {
+        await this.prisma.payment.create({
+          data: {
+            institution_id: params.institutionId,
+            student_id: enrollment.student_id,
+            enrollment_id: enrollment.id,
+            amount: enrollment.class.fee,
+            due_date: dueDate,
+            billing_period: billingPeriod,
+            status: 'PENDING',
+            notes: `Auto: Monthly ${billingPeriod}`,
+          },
+        });
+        created++;
+      } catch (error: any) {
+        if (error?.code === 'P2002') continue;
+        this.logger.error(
+          `Failed to create monthly payment for enrollment ${enrollment.id}: ${error}`,
+        );
+      }
+    }
 
-      const dueDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    this.logger.log(
+      `Monthly payments for ${params.institutionId}: ${created} created for ${billingPeriod}`,
+    );
+    return { created };
+  }
+
+  async generateMidMonthEnrollmentPayment(
+    params: MidMonthEnrollmentParams,
+  ): Promise<void> {
+    try {
+      const institution = await this.prisma.institution.findUnique({
+        where: { id: params.institutionId },
+        select: { billing_mode: true },
+      });
+      if (institution?.billing_mode !== 'MONTHLY_FIXED') return;
+
+      const now = new Date(params.enrolledAt);
+      const billingPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      const classRecord = await this.prisma.class.findFirst({
+        where: { id: params.classId, institution_id: params.institutionId },
+        select: { fee: true },
+      });
+      if (!classRecord) return;
+
+      const dueDate = new Date(params.enrolledAt);
+      dueDate.setDate(dueDate.getDate() + 7);
 
       await this.prisma.payment.create({
         data: {
           institution_id: params.institutionId,
-          student_id: enrollment.student_id,
-          enrollment_id: enrollment.id,
-          amount: enrollment.class.fee,
+          student_id: params.studentId,
+          enrollment_id: params.enrollmentId,
+          amount: classRecord.fee,
           due_date: dueDate,
+          billing_period: billingPeriod,
           status: 'PENDING',
-          notes: `Auto: Subscription ${monthKey}`,
+          notes: `Auto: Monthly ${billingPeriod} (mid-month enrollment)`,
         },
       });
 
-      created++;
+      this.logger.log(
+        `Mid-month enrollment payment created: enrollment=${params.enrollmentId}`,
+      );
+    } catch (error: any) {
+      if (error?.code === 'P2002') return;
+      this.logger.error(
+        `Failed to generate mid-month enrollment payment: ${error}`,
+      );
     }
-
-    this.logger.log(
-      `Subscription payments generated for ${params.institutionId}: ${created} created for ${monthKey}`,
-    );
-
-    return { created };
   }
 }

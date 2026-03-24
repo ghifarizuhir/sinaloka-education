@@ -63,9 +63,9 @@ export class PaymentController {
     return this.paymentService.batchRecord(institutionId, dto);
   }
 
-  @Post('generate-subscriptions')
-  generateSubscriptions(@InstitutionId() institutionId: string) {
-    return this.invoiceGeneratorService.generateSubscriptionPayments({
+  @Post('generate-monthly')
+  generateMonthly(@InstitutionId() institutionId: string) {
+    return this.invoiceGeneratorService.generateMonthlyPayments({
       institutionId,
     });
   }

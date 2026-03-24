@@ -94,7 +94,7 @@ describe('SettingsService', () => {
     it('should preserve billing settings when updating academic', async () => {
       prisma.institution.findUnique.mockResolvedValue({
         settings: {
-          billing: { billing_mode: 'manual' },
+          billing: { invoice_prefix: 'TEST-' },
           academic: { rooms: [] },
         },
       });
@@ -106,7 +106,7 @@ describe('SettingsService', () => {
         where: { id: 'inst-1' },
         data: {
           settings: {
-            billing: { billing_mode: 'manual' },
+            billing: { invoice_prefix: 'TEST-' },
             academic: { rooms: [], working_days: [1, 2, 3, 4, 5] },
           },
         },

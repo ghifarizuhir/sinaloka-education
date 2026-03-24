@@ -140,13 +140,13 @@ export class EnrollmentService {
       },
     });
 
-    // Auto-generate package payment
-    await this.invoiceGenerator.generatePackagePayment({
+    // Auto-generate mid-month enrollment payment
+    await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
       institutionId,
       studentId: dto.student_id,
       enrollmentId: enrollment.id,
       classId: dto.class_id,
-      enrolledAt: enrollment.enrolled_at,
+      enrolledAt: new Date(),
     });
 
     return enrollment;
@@ -409,13 +409,13 @@ export class EnrollmentService {
           },
         });
 
-        // 7. Generate package payment
-        await this.invoiceGenerator.generatePackagePayment({
+        // 7. Generate mid-month enrollment payment
+        await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
           institutionId,
           studentId: student_id,
           enrollmentId: enrollment.id,
           classId: class_id,
-          enrolledAt: enrollment.enrolled_at,
+          enrolledAt: new Date(),
         });
 
         created++;
