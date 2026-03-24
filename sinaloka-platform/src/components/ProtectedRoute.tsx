@@ -33,5 +33,9 @@ export function ProtectedRoute() {
     return <Navigate to="/super/institutions" replace />;
   }
 
+  if (user?.role === 'ADMIN' && user?.institution && !user.institution.onboarding_completed) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   return <Outlet />;
 }
