@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { SinalokaLogo } from '@/src/components/SinalokaLogo';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Settings,
@@ -188,9 +189,7 @@ export function Sidebar({
 
       {/* Logo */}
       <div className={cn("px-6 pt-6 pb-4 flex items-center gap-3", minimized && "px-4 justify-center")}>
-        <div className="w-9 h-9 bg-gradient-to-br from-primary to-info rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-          <div className="w-4 h-4 bg-white/90 rounded-sm rotate-45" />
-        </div>
+        <SinalokaLogo size={36} className="shrink-0 shadow-lg shadow-primary/20" />
         {!minimized && (
           <motion.span
             initial={{ opacity: 0, x: -8 }}

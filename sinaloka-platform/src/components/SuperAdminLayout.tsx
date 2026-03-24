@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SinalokaLogo } from '@/src/components/SinalokaLogo';
 import {
   Building2,
   Users,
@@ -94,9 +95,7 @@ export default function SuperAdminLayout() {
       )}>
         <div className="sidebar-gradient-line h-[2px] w-full shrink-0" />
         <div className={cn("p-8 flex items-center gap-3", isSidebarMinimized && "px-6")}>
-          <div className="w-9 h-9 bg-gradient-to-br from-zinc-800 to-zinc-600 dark:from-zinc-200 dark:to-zinc-400 rounded-xl flex items-center justify-center shrink-0 shadow-lg">
-            <div className="w-4 h-4 bg-white dark:bg-zinc-900 rounded-sm rotate-45" />
-          </div>
+          <SinalokaLogo size={36} className="shrink-0 shadow-lg" />
           {!isSidebarMinimized && (
             <div className="flex flex-col">
               <span className="font-bold text-xl tracking-tight dark:text-zinc-100 leading-tight">Sinaloka</span>

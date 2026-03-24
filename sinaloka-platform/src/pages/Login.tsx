@@ -3,6 +3,7 @@ import { useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
+import { SinalokaLogo } from '@/src/components/SinalokaLogo';
 import { useInstitution } from '@/src/contexts/InstitutionContext';
 import { sanitizeBrandColor } from '@/src/lib/subdomain';
 import { Card, Button, Input, Label, PasswordInput } from '@/src/components/UI';
@@ -88,9 +89,7 @@ export function Login() {
             </>
           ) : (
             <>
-              <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-                <div className="w-6 h-6 bg-white dark:bg-zinc-900 rounded-sm rotate-45" />
-              </div>
+              <SinalokaLogo size={48} className="mb-4 shadow-lg" />
               <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                 {t('login.title')}
               </h1>
