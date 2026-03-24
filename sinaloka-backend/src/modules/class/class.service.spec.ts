@@ -22,6 +22,9 @@ describe('ClassService', () => {
       update: jest.Mock;
       delete: jest.Mock;
     };
+    institution: {
+      findUnique: jest.Mock;
+    };
     tutor: {
       findFirst: jest.Mock;
     };
@@ -113,6 +116,9 @@ describe('ClassService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      institution: {
+        findUnique: jest.fn(),
+      },
       tutor: {
         findFirst: jest.fn(),
       },
@@ -138,6 +144,7 @@ describe('ClassService', () => {
 
   describe('create', () => {
     it('should create a class with institution scoping and numeric fee', async () => {
+      prisma.institution.findUnique.mockResolvedValue({ billing_mode: 'PER_SESSION' });
       prisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-1',
         institution_id: 'inst-1',
@@ -183,6 +190,7 @@ describe('ClassService', () => {
     });
 
     it('should pass tutor_fee to prisma create', async () => {
+      prisma.institution.findUnique.mockResolvedValue({ billing_mode: 'PER_SESSION' });
       prisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-1',
         institution_id: 'inst-1',
@@ -224,6 +232,7 @@ describe('ClassService', () => {
     });
 
     it('should throw NotFoundException when tutor not found', async () => {
+      prisma.institution.findUnique.mockResolvedValue({ billing_mode: 'PER_SESSION' });
       prisma.tutor.findFirst.mockResolvedValue(null);
 
       await expect(
@@ -242,6 +251,7 @@ describe('ClassService', () => {
     });
 
     it('should throw BadRequestException when tutor is not verified', async () => {
+      prisma.institution.findUnique.mockResolvedValue({ billing_mode: 'PER_SESSION' });
       prisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-1',
         institution_id: 'inst-1',

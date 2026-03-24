@@ -15,6 +15,16 @@ export class ClassService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(institutionId: string, dto: CreateClassDto) {
+    const institution = await this.prisma.institution.findUnique({
+      where: { id: institutionId },
+      select: { billing_mode: true },
+    });
+    if (!institution?.billing_mode) {
+      throw new BadRequestException(
+        'Billing mode must be configured before creating classes. Complete onboarding first.',
+      );
+    }
+
     const tutor = await this.prisma.tutor.findFirst({
       where: { id: dto.tutor_id, institution_id: institutionId },
     });
