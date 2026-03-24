@@ -24,7 +24,6 @@ export interface BankAccount {
 }
 
 export interface BillingSettings {
-  billing_mode: 'manual' | 'per_session' | 'package' | 'subscription';
   currency: string;
   invoice_prefix: string;
   late_payment_auto_lock: boolean;
@@ -34,7 +33,6 @@ export interface BillingSettings {
 }
 
 export interface UpdateBillingSettingsDto {
-  billing_mode?: string;
   currency?: string;
   invoice_prefix?: string;
   late_payment_auto_lock?: boolean;
