@@ -113,6 +113,11 @@
     }
   },
 
+  "changePassword": {
+    "title": "Change Password",
+    "success": "Password changed successfully. Please log in again."
+  },
+
   "login": {
     "title": "Sinaloka",
     "subtitle": "Sign in to your account",

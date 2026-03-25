@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/src/hooks/useAuth';
 import { useInstitution } from '@/src/contexts/InstitutionContext';
 import { SinalokaLogo } from '@/src/components/SinalokaLogo';
@@ -8,6 +9,7 @@ import { Star } from '@/src/components/BrandDecorations';
 import { PasswordStep } from './Onboarding/steps/PasswordStep';
 
 export default function ChangePassword() {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading, user, logout, mustChangePassword } = useAuth();
   const { institution } = useInstitution();
 
@@ -31,7 +33,7 @@ export default function ChangePassword() {
   }
 
   const handlePasswordChanged = async () => {
-    toast.success('Password berhasil diubah. Silakan login kembali.');
+    toast.success(t('changePassword.success'));
     await logout();
   };
 
@@ -84,7 +86,7 @@ export default function ChangePassword() {
               <SinalokaLogo size={48} className="mb-3 shadow-xl" />
             )}
             <h1 className="text-xl font-bold text-white tracking-tight">{brandName}</h1>
-            <p className="text-sm text-teal-100/60 mt-0.5">Ganti Password</p>
+            <p className="text-sm text-teal-100/60 mt-0.5">{t('changePassword.title')}</p>
           </motion.div>
         </div>
 

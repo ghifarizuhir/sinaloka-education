@@ -113,6 +113,11 @@
     }
   },
 
+  "changePassword": {
+    "title": "Ganti Password",
+    "success": "Password berhasil diubah. Silakan login kembali."
+  },
+
   "login": {
     "title": "Sinaloka",
     "subtitle": "Masuk ke akun Anda",

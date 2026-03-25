@@ -30,6 +30,7 @@ function SemesterRow({
   onArchive,
   onRollOver,
 }: {
+  key?: React.Key;
   semester: Semester;
   onEdit: () => void;
   onDelete: () => void;
@@ -104,6 +105,7 @@ export function AcademicYearCard({
   onArchiveSemester,
   onRollOver,
 }: {
+  key?: React.Key;
   year: AcademicYear;
   isExpanded: boolean;
   onToggle: () => void;
