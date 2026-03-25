@@ -104,6 +104,7 @@ export class TutorService {
 
     const where: Record<string, unknown> = {
       institution_id: institutionId,
+      user: { is_active: true },
     };
 
     if (subject_id) {
@@ -116,6 +117,7 @@ export class TutorService {
 
     if (search) {
       where.user = {
+        is_active: true,
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
           { email: { contains: search, mode: 'insensitive' } },
@@ -242,9 +244,16 @@ export class TutorService {
   }
 
   async delete(institutionId: string, id: string) {
-    const existing = await this.findOne(institutionId, id);
-
     await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.tutor.findFirst({
+        where: { id, institution_id: institutionId },
+        select: { id: true, user_id: true },
+      });
+
+      if (!existing) {
+        throw new NotFoundException(`Tutor with ID "${id}" not found`);
+      }
+
       await tx.tutor.delete({ where: { id } });
       await tx.refreshToken.deleteMany({
         where: { user_id: existing.user_id },
@@ -266,7 +275,7 @@ export class TutorService {
       const tutorsBelowLimit =
         planConfig.maxTutors === null ||
         (await this.prisma.tutor.count({
-          where: { institution_id: institutionId },
+          where: { institution_id: institutionId, user: { is_active: true } },
         })) < planConfig.maxTutors;
 
       const studentsBelowLimit =
@@ -364,7 +373,7 @@ export class TutorService {
 
   async bulkDelete(institutionId: string, ids: string[]) {
     const tutors = await this.prisma.tutor.findMany({
-      where: { id: { in: ids }, institution_id: institutionId },
+      where: { id: { in: ids }, institution_id: institutionId, user: { is_active: true } },
       select: { id: true, user_id: true },
     });
 
@@ -397,7 +406,7 @@ export class TutorService {
       const tutorsBelowLimit =
         planConfig.maxTutors === null ||
         (await this.prisma.tutor.count({
-          where: { institution_id: institutionId },
+          where: { institution_id: institutionId, user: { is_active: true } },
         })) < planConfig.maxTutors;
 
       const studentsBelowLimit =

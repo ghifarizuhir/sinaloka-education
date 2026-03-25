@@ -26,13 +26,13 @@ export const StudentDetail = () => {
   const handleInviteParent = async (s: Student) => {
     try {
       if (!s.parent_email) {
-        toast.error(t('students.drawer.inviteError'));
+        toast.error(t('students.toast.inviteError'));
         return;
       }
       await inviteParent.mutateAsync({ email: s.parent_email, student_ids: [s.id] });
-      toast.success(t('students.drawer.inviteSent'));
+      toast.success(t('students.toast.inviteSent'));
     } catch {
-      toast.error(t('students.drawer.inviteError'));
+      toast.error(t('students.toast.inviteError'));
     }
   };
 
