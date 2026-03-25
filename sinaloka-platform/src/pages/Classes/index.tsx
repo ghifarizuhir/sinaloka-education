@@ -108,6 +108,7 @@ export const Classes = () => {
         <ClassTable
           t={state.t}
           i18n={state.i18n}
+          billingMode={state.billingMode}
           isLoading={state.isLoading}
           filteredClasses={state.filteredClasses}
           activeActionMenu={state.activeActionMenu}

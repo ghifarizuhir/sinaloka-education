@@ -22,6 +22,7 @@ import type { Class } from '@/src/types/class';
 interface ClassTableProps {
   t: (key: string, opts?: Record<string, unknown>) => string;
   i18n: { language: string };
+  billingMode: string;
   isLoading: boolean;
   filteredClasses: Class[];
   activeActionMenu: string | null;
@@ -38,6 +39,7 @@ interface ClassTableProps {
 export const ClassTable = ({
   t,
   i18n,
+  billingMode,
   isLoading,
   filteredClasses,
   activeActionMenu,
@@ -122,7 +124,7 @@ export const ClassTable = ({
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="text-sm font-bold dark:text-zinc-200">{formatCurrency(cls.fee, i18n.language)}</span>
-                        <span className="text-[10px] text-zinc-400 font-medium">{t('common.perSession')}</span>
+                        <span className="text-[10px] text-zinc-400 font-medium">{billingMode === 'PER_SESSION' ? t('classes.drawer.perSession') : t('classes.drawer.perMonth')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
