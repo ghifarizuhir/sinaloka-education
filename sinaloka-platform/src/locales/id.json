@@ -86,7 +86,9 @@
     "settings": "Pengaturan",
     "messaging": "Perpesanan",
     "whatsapp": "WhatsApp",
-    "registrations": "Registrasi"
+    "registrations": "Registrasi",
+    "academicYears": "Tahun Ajaran",
+    "auditLog": "Log Audit"
   },
 
   "layout": {

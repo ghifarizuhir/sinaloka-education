@@ -86,7 +86,9 @@
     "settings": "Settings",
     "messaging": "Messaging",
     "whatsapp": "WhatsApp",
-    "registrations": "Registrations"
+    "registrations": "Registrations",
+    "academicYears": "Academic Years",
+    "auditLog": "Audit Log"
   },
 
   "layout": {
