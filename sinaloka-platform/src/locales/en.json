@@ -545,6 +545,7 @@
       "fee": "Fee",
       "room": "Room",
       "perSession": "per session",
+      "perMonth": "per month",
       "noRoom": "No room assigned",
       "tutor": "Tutor",
       "schedule": "Schedule",
