@@ -86,7 +86,9 @@
     "settings": "Pengaturan",
     "messaging": "Perpesanan",
     "whatsapp": "WhatsApp",
-    "registrations": "Registrasi"
+    "registrations": "Registrasi",
+    "academicYears": "Tahun Ajaran",
+    "auditLog": "Log Audit"
   },
 
   "layout": {
@@ -543,6 +545,7 @@
       "fee": "Biaya",
       "room": "Ruangan",
       "perSession": "per sesi",
+      "perMonth": "per bulan",
       "noRoom": "Belum ada ruangan",
       "tutor": "Tutor",
       "schedule": "Jadwal",

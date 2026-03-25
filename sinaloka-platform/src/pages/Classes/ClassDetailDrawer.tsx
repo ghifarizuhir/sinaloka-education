@@ -24,6 +24,7 @@ interface ClassDetailDrawerProps {
     data: any;
     isLoading: boolean;
   };
+  billingMode: 'PER_SESSION' | 'MONTHLY_FIXED';
   openEditModal: (cls: Class) => void;
   handleDeleteClass: (cls: Class) => void;
   setShowGenerateModal: (show: boolean) => void;
@@ -36,6 +37,7 @@ export const ClassDetailDrawer = ({
   setSelectedClassId,
   selectedClass,
   classDetail,
+  billingMode,
   openEditModal,
   handleDeleteClass,
   setShowGenerateModal,
@@ -79,7 +81,7 @@ export const ClassDetailDrawer = ({
             <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 text-center">
               <p className="text-[10px] text-zinc-400 uppercase font-bold">{t('classes.drawer.fee')}</p>
               <p className="text-lg font-bold dark:text-zinc-100">{formatCurrency(Number(selectedClass.fee), i18n.language)}</p>
-              <p className="text-[10px] text-zinc-400">{t('classes.drawer.perSession')}</p>
+              <p className="text-[10px] text-zinc-400">{billingMode === 'PER_SESSION' ? t('classes.drawer.perSession') : t('classes.drawer.perMonth')}</p>
             </div>
             <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 text-center">
               <p className="text-[10px] text-zinc-400 uppercase font-bold">{t('classes.drawer.room')}</p>

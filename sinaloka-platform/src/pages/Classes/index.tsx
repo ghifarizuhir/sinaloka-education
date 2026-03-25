@@ -191,6 +191,7 @@ export const Classes = () => {
         setSelectedClassId={state.setSelectedClassId}
         selectedClass={state.selectedClass}
         classDetail={state.classDetail}
+        billingMode={state.billingMode}
         openEditModal={state.openEditModal}
         handleDeleteClass={state.handleDeleteClass}
         setShowGenerateModal={state.setShowGenerateModal}

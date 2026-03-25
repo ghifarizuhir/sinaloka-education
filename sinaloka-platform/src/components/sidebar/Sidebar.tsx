@@ -211,7 +211,7 @@ export function Sidebar({
           <SidebarItem icon={Users} label={t('nav.students')} href="/students" active={location.pathname === '/students'} minimized={minimized} />
           <SidebarItem icon={GraduationCap} label={t('nav.tutors')} href="/tutors" active={location.pathname === '/tutors'} minimized={minimized} />
           <SidebarItem icon={BookOpen} label={t('nav.classes')} href="/classes" active={location.pathname === '/classes'} minimized={minimized} />
-          <SidebarItem icon={CalendarRange} label="Tahun Ajaran" href="/academic-years" active={location.pathname === '/academic-years'} minimized={minimized} />
+          <SidebarItem icon={CalendarRange} label={t('nav.academicYears')} href="/academic-years" active={location.pathname === '/academic-years'} minimized={minimized} />
         </SidebarSection>
 
         <SidebarSection label={t('nav.operations')} minimized={minimized} itemCount={4}>
@@ -230,7 +230,7 @@ export function Sidebar({
 
         <SidebarSection label={t('nav.system')} minimized={minimized}>
           <SidebarItem icon={Settings} label={t('nav.settings')} href="/settings" active={location.pathname === '/settings'} minimized={minimized} />
-          <SidebarItem icon={ClipboardList} label="Audit Log" href="/audit-logs" active={location.pathname === '/audit-logs'} minimized={minimized} />
+          <SidebarItem icon={ClipboardList} label={t('nav.auditLog')} href="/audit-logs" active={location.pathname === '/audit-logs'} minimized={minimized} />
         </SidebarSection>
       </nav>
 
