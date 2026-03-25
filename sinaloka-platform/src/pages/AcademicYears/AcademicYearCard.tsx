@@ -14,6 +14,7 @@ import {
 import { Card, Badge, Button, DropdownMenu } from '../../components/ui';
 import { cn } from '../../lib/utils';
 import type { AcademicYear, Semester } from '@/src/types/academic-year';
+import type { TFunction } from 'i18next';
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('id-ID', {
@@ -29,6 +30,7 @@ function SemesterRow({
   onDelete,
   onArchive,
   onRollOver,
+  t,
 }: {
   key?: React.Key;
   semester: Semester;
@@ -36,6 +38,7 @@ function SemesterRow({
   onDelete: () => void;
   onArchive: () => void;
   onRollOver: () => void;
+  t: TFunction;
 }) {
   const classCount = semester._count?.classes ?? 0;
   const canDelete = classCount === 0;
@@ -56,7 +59,7 @@ function SemesterRow({
 
       <div className="flex items-center gap-3 shrink-0">
         <Badge variant={semester.status === 'ACTIVE' ? 'success' : 'default'}>
-          {semester.status === 'ACTIVE' ? 'Aktif' : 'Arsip'}
+          {semester.status === 'ACTIVE' ? t('common.active') : t('common.archived')}
         </Badge>
         <span className="text-xs text-muted-foreground flex items-center gap-1">
           <BookOpen size={12} />
@@ -66,21 +69,21 @@ function SemesterRow({
         <DropdownMenu
           trigger={<MoreVertical size={16} />}
           items={[
-            { label: 'Edit', icon: Pencil, onClick: onEdit },
+            { label: t('common.edit'), icon: Pencil, onClick: onEdit },
             {
-              label: 'Roll-over Kelas',
+              label: t('academicYears.rollOver'),
               icon: Copy,
               onClick: onRollOver,
             },
             { separator: true },
             {
-              label: 'Arsipkan',
+              label: t('academicYears.archive'),
               icon: Archive,
               onClick: onArchive,
               disabled: semester.status === 'ARCHIVED',
             },
             {
-              label: 'Hapus',
+              label: t('common.delete'),
               icon: Trash2,
               onClick: onDelete,
               variant: 'danger' as const,
@@ -104,6 +107,7 @@ export function AcademicYearCard({
   onDeleteSemester,
   onArchiveSemester,
   onRollOver,
+  t,
 }: {
   key?: React.Key;
   year: AcademicYear;
@@ -116,6 +120,7 @@ export function AcademicYearCard({
   onDeleteSemester: (semester: Semester) => void;
   onArchiveSemester: (semester: Semester) => void;
   onRollOver: (semester: Semester) => void;
+  t: TFunction;
 }) {
   const canDeleteYear = year.semesters.length === 0;
 
@@ -137,13 +142,13 @@ export function AcademicYearCard({
             <div className="flex items-center gap-2">
               <h3 className="text-base font-bold truncate">{year.name}</h3>
               <Badge variant={year.status === 'ACTIVE' ? 'success' : 'default'}>
-                {year.status === 'ACTIVE' ? 'Aktif' : 'Arsip'}
+                {year.status === 'ACTIVE' ? t('common.active') : t('common.archived')}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
               {formatDate(year.start_date)} — {formatDate(year.end_date)}
               <span className="mx-1.5">&middot;</span>
-              {year.semesters.length} semester
+              {t('academicYears.semesterCount', { count: year.semesters.length })}
             </p>
           </div>
         </div>
@@ -155,10 +160,10 @@ export function AcademicYearCard({
           <DropdownMenu
             trigger={<MoreVertical size={16} />}
             items={[
-              { label: 'Edit', icon: Pencil, onClick: onEditYear },
+              { label: t('common.edit'), icon: Pencil, onClick: onEditYear },
               { separator: true },
               {
-                label: 'Hapus',
+                label: t('common.delete'),
                 icon: Trash2,
                 onClick: onDeleteYear,
                 variant: 'danger' as const,
@@ -182,7 +187,7 @@ export function AcademicYearCard({
             <div className="border-t border-border">
               {year.semesters.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-6">
-                  Belum ada semester
+                  {t('academicYears.noSemesters')}
                 </p>
               ) : (
                 <div className="divide-y divide-border">
@@ -194,6 +199,7 @@ export function AcademicYearCard({
                       onDelete={() => onDeleteSemester(sem)}
                       onArchive={() => onArchiveSemester(sem)}
                       onRollOver={() => onRollOver(sem)}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -206,7 +212,7 @@ export function AcademicYearCard({
                   className="w-full"
                 >
                   <Plus size={14} />
-                  Tambah Semester
+                  {t('academicYears.addSemester')}
                 </Button>
               </div>
             </div>

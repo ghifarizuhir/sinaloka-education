@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Button, Label, Checkbox } from '../../components/ui';
 import { Spinner } from '../../components/ui/spinner';
 import type { Semester, SemesterDetail } from '@/src/types/academic-year';
+import type { TFunction } from 'i18next';
 
 export function RollOverModal({
   isOpen,
@@ -15,6 +16,7 @@ export function RollOverModal({
   toggleClass,
   onSubmit,
   isSubmitting,
+  t,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -27,6 +29,7 @@ export function RollOverModal({
   toggleClass: (id: string) => void;
   onSubmit: () => void;
   isSubmitting: boolean;
+  t: TFunction;
 }) {
   // Exclude the target semester from source options
   const sourceOptions = allSemesters.filter(
@@ -37,12 +40,12 @@ export function RollOverModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Roll-over Kelas"
+      title={t('academicYears.rollOver')}
       className="max-w-xl"
     >
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Salin kelas dari semester lain ke{' '}
+          {t('academicYears.rollOverDescription')}{' '}
           <span className="font-semibold text-foreground">
             {targetSemester?.name}
           </span>
@@ -50,14 +53,14 @@ export function RollOverModal({
         </p>
 
         <div>
-          <Label htmlFor="roll-source">Semester Sumber</Label>
+          <Label htmlFor="roll-source">{t('academicYears.sourceSemester')}</Label>
           <select
             id="roll-source"
             value={sourceId}
             onChange={(e) => setSourceId(e.target.value)}
             className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="">Pilih semester sumber...</option>
+            <option value="">{t('academicYears.sourceSemesterPlaceholder')}</option>
             {sourceOptions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.yearName} — {s.name}
@@ -68,10 +71,10 @@ export function RollOverModal({
 
         {sourceId && sourceSemesterDetail && (
           <div>
-            <Label>Kelas yang akan disalin</Label>
+            <Label>{t('academicYears.classesToCopy')}</Label>
             {sourceSemesterDetail.classes.length === 0 ? (
               <p className="text-sm text-muted-foreground py-2">
-                Tidak ada kelas di semester sumber.
+                {t('academicYears.noClassesInSource')}
               </p>
             ) : (
               <div className="max-h-60 overflow-y-auto border border-border rounded-xl divide-y divide-border">
@@ -98,22 +101,22 @@ export function RollOverModal({
             )}
             <p className="text-xs text-muted-foreground mt-1">
               {selectedClassIds.length === 0
-                ? 'Semua kelas akan disalin'
-                : `${selectedClassIds.length} kelas dipilih`}
+                ? t('academicYears.allClassesCopied')
+                : t('academicYears.classesSelected', { count: selectedClassIds.length })}
             </p>
           </div>
         )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
-            Batal
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={onSubmit}
             disabled={isSubmitting || !sourceId}
           >
             {isSubmitting && <Spinner size="sm" />}
-            Roll-over
+            {t('academicYears.rollOver')}
           </Button>
         </div>
       </div>

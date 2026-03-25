@@ -15,16 +15,17 @@ import { RollOverModal } from './RollOverModal';
 
 export const AcademicYears = () => {
   const state = useAcademicYearsPage();
+  const { t } = state;
 
   return (
     <div className="space-y-6 pb-20">
       <PageHeader
-        title="Tahun Ajaran"
-        subtitle="Kelola tahun ajaran dan semester untuk mengorganisir kelas"
+        title={t('academicYears.title')}
+        subtitle={t('academicYears.subtitle')}
         actions={
           <Button onClick={state.openAddYear}>
             <Plus size={18} />
-            Tambah Tahun Ajaran
+            {t('academicYears.addYear')}
           </Button>
         }
       />
@@ -39,12 +40,12 @@ export const AcademicYears = () => {
       ) : state.academicYears.length === 0 ? (
         <EmptyState
           icon={CalendarRange}
-          title="Belum ada tahun ajaran"
-          description="Tambahkan tahun ajaran pertama untuk mulai mengorganisir kelas"
+          title={t('academicYears.emptyTitle')}
+          description={t('academicYears.emptyDescription')}
           action={
             <Button onClick={state.openAddYear}>
               <Plus size={18} />
-              Tambah Tahun Ajaran
+              {t('academicYears.addYear')}
             </Button>
           }
         />
@@ -63,6 +64,7 @@ export const AcademicYears = () => {
               onDeleteSemester={(sem) => state.openDeleteSemester(sem)}
               onArchiveSemester={(sem) => state.openArchiveSemester(sem)}
               onRollOver={(sem) => state.openRollOver(year.id, sem)}
+              t={t}
             />
           ))}
         </div>
@@ -81,6 +83,7 @@ export const AcademicYears = () => {
         setEndDate={state.setYearEndDate}
         onSubmit={state.handleSubmitYear}
         isSubmitting={state.isYearSubmitting}
+        t={t}
       />
 
       {/* Semester Form Modal */}
@@ -96,6 +99,7 @@ export const AcademicYears = () => {
         setEndDate={state.setSemesterEndDate}
         onSubmit={state.handleSubmitSemester}
         isSubmitting={state.isSemesterSubmitting}
+        t={t}
       />
 
       {/* Delete Year Confirm */}
@@ -103,14 +107,14 @@ export const AcademicYears = () => {
         isOpen={state.modal.type === 'delete-year'}
         onClose={state.closeModal}
         onConfirm={state.handleDeleteYear}
-        title="Hapus Tahun Ajaran"
+        title={t('academicYears.deleteYear')}
         description={
           state.modal.type === 'delete-year'
-            ? `Apakah Anda yakin ingin menghapus tahun ajaran "${state.modal.year.name}"? Tindakan ini tidak dapat dibatalkan.`
+            ? t('academicYears.deleteYearConfirm', { name: state.modal.year.name })
             : ''
         }
-        confirmLabel="Hapus"
-        cancelLabel="Batal"
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         isLoading={state.isYearDeleting}
       />
@@ -120,14 +124,14 @@ export const AcademicYears = () => {
         isOpen={state.modal.type === 'delete-semester'}
         onClose={state.closeModal}
         onConfirm={state.handleDeleteSemester}
-        title="Hapus Semester"
+        title={t('academicYears.deleteSemester')}
         description={
           state.modal.type === 'delete-semester'
-            ? `Apakah Anda yakin ingin menghapus semester "${state.modal.semester.name}"? Tindakan ini tidak dapat dibatalkan.`
+            ? t('academicYears.deleteSemesterConfirm', { name: state.modal.semester.name })
             : ''
         }
-        confirmLabel="Hapus"
-        cancelLabel="Batal"
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         isLoading={state.isSemesterDeleting}
       />
@@ -137,14 +141,14 @@ export const AcademicYears = () => {
         isOpen={state.modal.type === 'archive-semester'}
         onClose={state.closeModal}
         onConfirm={state.handleArchiveSemester}
-        title="Arsipkan Semester"
+        title={t('academicYears.archiveSemester')}
         description={
           state.modal.type === 'archive-semester'
-            ? `Apakah Anda yakin ingin mengarsipkan semester "${state.modal.semester.name}"? Semua kelas dalam semester ini juga akan diarsipkan.`
+            ? t('academicYears.archiveSemesterConfirm', { name: state.modal.semester.name })
             : ''
         }
-        confirmLabel="Arsipkan"
-        cancelLabel="Batal"
+        confirmLabel={t('academicYears.archive')}
+        cancelLabel={t('common.cancel')}
         variant="default"
         isLoading={state.isSemesterArchiving}
       />
@@ -164,6 +168,7 @@ export const AcademicYears = () => {
         toggleClass={state.toggleRollOverClass}
         onSubmit={state.handleRollOver}
         isSubmitting={state.isRollingOver}
+        t={t}
       />
     </div>
   );
