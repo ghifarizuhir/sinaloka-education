@@ -73,7 +73,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
 
-      - run: npm run test:e2e:smoke
+      - run: npm run test:e2e
         env:
           VITE_API_URL: http://localhost:5000
 
