@@ -19,7 +19,10 @@ capture/
 sinaloka-platform/e2e/uat/state/uat-state.json
 sinaloka-platform/e2e/uat/state/token-cache.json
 
-# Docs (local only, except superpowers)
-docs/
+# Docs (local only, except superpowers and daily-review)
+docs/*
 !docs/superpowers/
+!docs/superpowers/**
+!docs/daily-review/
+!docs/daily-review/**
 .worktrees/
