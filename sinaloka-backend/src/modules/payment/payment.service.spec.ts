@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { SettingsService } from '../settings/settings.service.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotFoundException } from '@nestjs/common';
 
 describe('PaymentService', () => {
@@ -12,9 +14,25 @@ describe('PaymentService', () => {
       findMany: jest.fn(),
       findFirst: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       delete: jest.fn(),
       count: jest.fn(),
+      groupBy: jest.fn(),
     },
+    enrollment: {
+      update: jest.fn(),
+    },
+    student: {
+      findMany: jest.fn(),
+    },
+  };
+
+  const mockSettingsService = {
+    getBilling: jest.fn(),
+  };
+
+  const mockEventEmitter = {
+    emit: jest.fn(),
   };
 
   const institutionId = 'inst-uuid-1';
@@ -24,6 +42,8 @@ describe('PaymentService', () => {
       providers: [
         PaymentService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: SettingsService, useValue: mockSettingsService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -53,6 +73,7 @@ describe('PaymentService', () => {
 
   describe('findAll', () => {
     it('should list payments with pagination', async () => {
+      mockPrisma.payment.updateMany.mockResolvedValue({ count: 0 });
       mockPrisma.payment.findMany.mockResolvedValue([]);
       mockPrisma.payment.count.mockResolvedValue(0);
 
@@ -63,10 +84,14 @@ describe('PaymentService', () => {
         sort_order: 'desc',
       });
 
-      expect(result).toEqual({ data: [], total: 0, page: 1, limit: 20 });
+      expect(result.data).toEqual([]);
+      expect(result.meta.total).toBe(0);
+      expect(result.meta.page).toBe(1);
+      expect(result.meta.limit).toBe(20);
     });
 
     it('should filter by status', async () => {
+      mockPrisma.payment.updateMany.mockResolvedValue({ count: 0 });
       mockPrisma.payment.findMany.mockResolvedValue([]);
       mockPrisma.payment.count.mockResolvedValue(0);
 
@@ -86,6 +111,7 @@ describe('PaymentService', () => {
     });
 
     it('should filter by student_id', async () => {
+      mockPrisma.payment.updateMany.mockResolvedValue({ count: 0 });
       mockPrisma.payment.findMany.mockResolvedValue([]);
       mockPrisma.payment.count.mockResolvedValue(0);
 
