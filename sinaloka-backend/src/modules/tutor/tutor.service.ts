@@ -244,21 +244,28 @@ export class TutorService {
   }
 
   async delete(institutionId: string, id: string) {
+    const existing = await this.findOne(institutionId, id);
+
+    const timestamp = Date.now();
+
     await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.tutor.findFirst({
-        where: { id, institution_id: institutionId },
-        select: { id: true, user_id: true },
+      const user = await tx.user.findUnique({
+        where: { id: existing.user_id },
+        select: { email: true },
       });
 
-      if (!existing) {
-        throw new NotFoundException(`Tutor with ID "${id}" not found`);
-      }
-
-      await tx.tutor.delete({ where: { id } });
+      // Invalidate all refresh tokens
       await tx.refreshToken.deleteMany({
         where: { user_id: existing.user_id },
       });
-      await tx.user.delete({ where: { id: existing.user_id } });
+      // Soft-delete: deactivate user and free email for reuse
+      await tx.user.update({
+        where: { id: existing.user_id },
+        data: {
+          is_active: false,
+          email: `deleted_${timestamp}_${user!.email}`,
+        },
+      });
     });
 
     // Reset plan grace period if count drops below limit
@@ -381,16 +388,27 @@ export class TutorService {
       return { deleted: 0 };
     }
 
-    const tutorIds = tutors.map((t) => t.id);
     const userIds = tutors.map((t) => t.user_id);
 
+    const timestamp = Date.now();
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, email: true },
+    });
+
     await this.prisma.$transaction(async (tx) => {
-      await tx.tutorSubject.deleteMany({
-        where: { tutor_id: { in: tutorIds } },
-      });
-      await tx.tutor.deleteMany({ where: { id: { in: tutorIds } } });
+      // Invalidate all refresh tokens
       await tx.refreshToken.deleteMany({ where: { user_id: { in: userIds } } });
-      await tx.user.deleteMany({ where: { id: { in: userIds } } });
+      // Soft-delete: deactivate users and free emails for reuse
+      for (const user of users) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            is_active: false,
+            email: `deleted_${timestamp}_${user.email}`,
+          },
+        });
+      }
     });
 
     // Reset plan grace period if count drops below limit (same pattern as single delete)
