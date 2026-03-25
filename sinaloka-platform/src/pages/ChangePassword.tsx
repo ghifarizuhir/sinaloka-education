@@ -8,7 +8,7 @@ import { Star } from '@/src/components/BrandDecorations';
 import { PasswordStep } from './Onboarding/steps/PasswordStep';
 
 export default function ChangePassword() {
-  const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const { isAuthenticated, isLoading, user, logout, mustChangePassword } = useAuth();
   const { institution } = useInstitution();
 
   const brandName = institution?.name || user?.institution?.name || 'Sinaloka';
@@ -26,9 +26,13 @@ export default function ChangePassword() {
     return <Navigate to="/login" replace />;
   }
 
+  if (!mustChangePassword) {
+    return <Navigate to="/" replace />;
+  }
+
   const handlePasswordChanged = async () => {
-    await logout();
     toast.success('Password berhasil diubah. Silakan login kembali.');
+    await logout();
   };
 
   return (
