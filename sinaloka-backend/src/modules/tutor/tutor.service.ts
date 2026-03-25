@@ -104,6 +104,7 @@ export class TutorService {
 
     const where: Record<string, unknown> = {
       institution_id: institutionId,
+      user: { is_active: true },
     };
 
     if (subject_id) {
@@ -116,6 +117,7 @@ export class TutorService {
 
     if (search) {
       where.user = {
+        is_active: true,
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
           { email: { contains: search, mode: 'insensitive' } },
@@ -160,7 +162,7 @@ export class TutorService {
 
   async findOne(institutionId: string, id: string) {
     const tutor = await this.prisma.tutor.findFirst({
-      where: { id, institution_id: institutionId },
+      where: { id, institution_id: institutionId, user: { is_active: true } },
       include: {
         tutor_subjects: { include: { subject: true } },
         user: {
@@ -244,12 +246,25 @@ export class TutorService {
   async delete(institutionId: string, id: string) {
     const existing = await this.findOne(institutionId, id);
 
+    const timestamp = Date.now();
+    const user = await this.prisma.user.findUnique({
+      where: { id: existing.user_id },
+      select: { email: true },
+    });
+
     await this.prisma.$transaction(async (tx) => {
-      await tx.tutor.delete({ where: { id } });
+      // Invalidate all refresh tokens
       await tx.refreshToken.deleteMany({
         where: { user_id: existing.user_id },
       });
-      await tx.user.delete({ where: { id: existing.user_id } });
+      // Soft-delete: deactivate user and free email for reuse
+      await tx.user.update({
+        where: { id: existing.user_id },
+        data: {
+          is_active: false,
+          email: `deleted_${timestamp}_${user!.email}`,
+        },
+      });
     });
 
     // Reset plan grace period if count drops below limit
@@ -266,7 +281,7 @@ export class TutorService {
       const tutorsBelowLimit =
         planConfig.maxTutors === null ||
         (await this.prisma.tutor.count({
-          where: { institution_id: institutionId },
+          where: { institution_id: institutionId, user: { is_active: true } },
         })) < planConfig.maxTutors;
 
       const studentsBelowLimit =
@@ -372,16 +387,27 @@ export class TutorService {
       return { deleted: 0 };
     }
 
-    const tutorIds = tutors.map((t) => t.id);
     const userIds = tutors.map((t) => t.user_id);
 
+    const timestamp = Date.now();
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, email: true },
+    });
+
     await this.prisma.$transaction(async (tx) => {
-      await tx.tutorSubject.deleteMany({
-        where: { tutor_id: { in: tutorIds } },
-      });
-      await tx.tutor.deleteMany({ where: { id: { in: tutorIds } } });
+      // Invalidate all refresh tokens
       await tx.refreshToken.deleteMany({ where: { user_id: { in: userIds } } });
-      await tx.user.deleteMany({ where: { id: { in: userIds } } });
+      // Soft-delete: deactivate users and free emails for reuse
+      for (const user of users) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            is_active: false,
+            email: `deleted_${timestamp}_${user.email}`,
+          },
+        });
+      }
     });
 
     // Reset plan grace period if count drops below limit (same pattern as single delete)
@@ -397,7 +423,7 @@ export class TutorService {
       const tutorsBelowLimit =
         planConfig.maxTutors === null ||
         (await this.prisma.tutor.count({
-          where: { institution_id: institutionId },
+          where: { institution_id: institutionId, user: { is_active: true } },
         })) < planConfig.maxTutors;
 
       const studentsBelowLimit =
