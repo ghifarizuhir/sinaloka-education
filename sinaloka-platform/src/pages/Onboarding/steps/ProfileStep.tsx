@@ -8,7 +8,7 @@ import { cn } from '@/src/lib/utils';
 
 interface ProfileStepProps {
   onNext: () => void;
-  onBack: () => void;
+  onBack?: () => void;
   onSkip: () => void;
 }
 
@@ -98,13 +98,15 @@ export function ProfileStep({ onNext, onBack, onSkip }: ProfileStepProps) {
 
         {/* Navigation */}
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-          >
-            Kembali
-          </button>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            >
+              Kembali
+            </button>
+          )}
           <div className="flex-1" />
           <button
             type="button"

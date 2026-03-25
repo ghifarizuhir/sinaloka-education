@@ -10,7 +10,6 @@ import { useInstitution } from '@/src/contexts/InstitutionContext';
 import { SinalokaLogo } from '@/src/components/SinalokaLogo';
 import { Star } from '@/src/components/BrandDecorations';
 import { cn } from '@/src/lib/utils';
-import { PasswordStep } from './steps/PasswordStep';
 import { ProfileStep } from './steps/ProfileStep';
 import { AcademicStep } from './steps/AcademicStep';
 import { BillingStep } from './steps/BillingStep';
@@ -18,17 +17,15 @@ import { BillingStep } from './steps/BillingStep';
 type BillingMode = 'PER_SESSION' | 'MONTHLY_FIXED';
 
 const STEPS = [
-  { label: 'Password', number: 1 },
-  { label: 'Profil', number: 2 },
-  { label: 'Akademik', number: 3 },
-  { label: 'Billing', number: 4 },
+  { label: 'Profil', number: 1 },
+  { label: 'Akademik', number: 2 },
+  { label: 'Billing', number: 3 },
 ];
 
 export default function Onboarding() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const { institution } = useInstitution();
   const [currentStep, setCurrentStep] = useState(1);
-  const [passwordCompleted, setPasswordCompleted] = useState(false);
   const [billingMode, setBillingMode] = useState<BillingMode | null>(null);
 
   // Brand display: prefer InstitutionContext (has logo), fall back to user's institution
@@ -62,13 +59,8 @@ export default function Onboarding() {
     return <Navigate to="/login" replace />;
   }
 
-  const goNext = () => setCurrentStep((s) => Math.min(s + 1, 4));
-  // Prevent going back to step 1 after password is changed (irreversible)
-  const goBack = () => setCurrentStep((s) => Math.max(s - 1, passwordCompleted ? 2 : 1));
-  const handlePasswordDone = () => {
-    setPasswordCompleted(true);
-    goNext();
-  };
+  const goNext = () => setCurrentStep((s) => Math.min(s + 1, 3));
+  const goBack = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col">
@@ -203,10 +195,9 @@ export default function Onboarding() {
           transition={{ duration: 0.3 }}
         >
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 shadow-sm">
-            {currentStep === 1 && <PasswordStep onNext={handlePasswordDone} />}
-            {currentStep === 2 && <ProfileStep onNext={goNext} onBack={goBack} onSkip={goNext} />}
-            {currentStep === 3 && <AcademicStep onNext={goNext} onBack={goBack} onSkip={goNext} />}
-            {currentStep === 4 && (
+            {currentStep === 1 && <ProfileStep onNext={goNext} onSkip={goNext} />}
+            {currentStep === 2 && <AcademicStep onNext={goNext} onBack={goBack} onSkip={goNext} />}
+            {currentStep === 3 && (
               <BillingStep
                 selected={billingMode}
                 onSelect={setBillingMode}

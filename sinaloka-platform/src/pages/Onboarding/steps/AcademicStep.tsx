@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { settingsService } from '@/src/services/settings.service';
 import api from '@/src/lib/api';
 import { cn } from '@/src/lib/utils';
+import { generateUUID } from '@/src/lib/uuid';
 
 interface AcademicStepProps {
   onNext: () => void;
@@ -39,7 +40,7 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
     const name = newRoom.trim();
     if (!name) return;
     if (rooms.some((r) => r.name.toLowerCase() === name.toLowerCase())) return;
-    setRooms((prev) => [...prev, { id: Math.random().toString(36).substring(2), name }]);
+    setRooms((prev) => [...prev, { id: generateUUID(), name }]);
     setNewRoom('');
   };
 
@@ -51,7 +52,7 @@ export function AcademicStep({ onNext, onBack, onSkip }: AcademicStepProps) {
     const name = newSubject.trim();
     if (!name) return;
     if (subjects.some((s) => s.name.toLowerCase() === name.toLowerCase())) return;
-    setSubjects((prev) => [...prev, { id: Math.random().toString(36).substring(2), name }]);
+    setSubjects((prev) => [...prev, { id: generateUUID(), name }]);
     setNewSubject('');
   };
 

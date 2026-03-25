@@ -4,7 +4,7 @@ import { useInstitution } from '@/src/contexts/InstitutionContext';
 import { Skeleton } from '@/src/components/UI';
 
 export function ProtectedRoute() {
-  const { user, isAuthenticated, isLoading, isImpersonating } = useAuth();
+  const { user, isAuthenticated, isLoading, isImpersonating, mustChangePassword } = useAuth();
   const { slug } = useInstitution();
   const location = useLocation();
 
@@ -31,6 +31,11 @@ export function ProtectedRoute() {
 
   if (user?.role === 'SUPER_ADMIN' && !isImpersonating) {
     return <Navigate to="/super/institutions" replace />;
+  }
+
+  // Force password change before anything else (separate from onboarding wizard)
+  if (mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
   }
 
   if (user?.role === 'ADMIN' && user?.institution && !user.institution.onboarding_completed) {
