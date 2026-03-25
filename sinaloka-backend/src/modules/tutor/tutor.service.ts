@@ -162,7 +162,7 @@ export class TutorService {
 
   async findOne(institutionId: string, id: string) {
     const tutor = await this.prisma.tutor.findFirst({
-      where: { id, institution_id: institutionId },
+      where: { id, institution_id: institutionId, user: { is_active: true } },
       include: {
         tutor_subjects: { include: { subject: true } },
         user: {

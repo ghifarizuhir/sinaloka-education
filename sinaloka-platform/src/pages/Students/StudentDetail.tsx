@@ -30,7 +30,7 @@ export const StudentDetail = () => {
         return;
       }
       await inviteParent.mutateAsync({ email: s.parent_email, student_ids: [s.id] });
-      toast.success(t('students.toast.inviteSent'));
+      toast.success(t('students.toast.inviteSent', { email: s.parent_email }));
     } catch {
       toast.error(t('students.toast.inviteError'));
     }
