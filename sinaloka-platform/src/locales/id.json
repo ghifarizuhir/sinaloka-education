@@ -543,6 +543,7 @@
       "fee": "Biaya",
       "room": "Ruangan",
       "perSession": "per sesi",
+      "perMonth": "per bulan",
       "noRoom": "Belum ada ruangan",
       "tutor": "Tutor",
       "schedule": "Jadwal",
