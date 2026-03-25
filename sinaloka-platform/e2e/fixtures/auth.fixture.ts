@@ -17,6 +17,7 @@ export const TEST_USER = {
     logo_url: null,
     timezone: 'Asia/Jakarta',
     default_language: 'id',
+    onboarding_completed: true,
   },
 };
 
