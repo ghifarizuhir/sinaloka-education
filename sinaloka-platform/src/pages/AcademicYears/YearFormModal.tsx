@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, Input, Label, Button, DatePicker } from '../../components/ui';
 import { Spinner } from '../../components/ui/spinner';
+import type { TFunction } from 'i18next';
 
 export function YearFormModal({
   isOpen,
@@ -14,6 +15,7 @@ export function YearFormModal({
   setEndDate,
   onSubmit,
   isSubmitting,
+  t,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -26,40 +28,41 @@ export function YearFormModal({
   setEndDate: (v: string) => void;
   onSubmit: () => void;
   isSubmitting: boolean;
+  t: TFunction;
 }) {
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={editing ? 'Edit Tahun Ajaran' : 'Tambah Tahun Ajaran'}
+      title={editing ? t('academicYears.editYear') : t('academicYears.addYear')}
     >
       <div className="space-y-4">
         <div>
-          <Label htmlFor="year-name">Nama</Label>
+          <Label htmlFor="year-name">{t('academicYears.name')}</Label>
           <Input
             id="year-name"
             value={name}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-            placeholder="Contoh: 2024/2025"
+            placeholder={t('academicYears.yearNamePlaceholder')}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="year-start">Tanggal Mulai</Label>
+            <Label htmlFor="year-start">{t('academicYears.startDate')}</Label>
             <DatePicker value={startDate} onChange={setStartDate} />
           </div>
           <div>
-            <Label htmlFor="year-end">Tanggal Selesai</Label>
+            <Label htmlFor="year-end">{t('academicYears.endDate')}</Label>
             <DatePicker value={endDate} onChange={setEndDate} />
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
-            Batal
+            {t('common.cancel')}
           </Button>
           <Button onClick={onSubmit} disabled={isSubmitting}>
             {isSubmitting && <Spinner size="sm" />}
-            {editing ? 'Simpan' : 'Tambah'}
+            {editing ? t('common.save') : t('academicYears.add')}
           </Button>
         </div>
       </div>

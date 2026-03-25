@@ -141,7 +141,7 @@ export class StudentService {
       const tutorsBelowLimit =
         planConfig.maxTutors === null ||
         (await this.prisma.tutor.count({
-          where: { institution_id: institutionId },
+          where: { institution_id: institutionId, user: { is_active: true } },
         })) < planConfig.maxTutors;
 
       if (studentsBelowLimit && tutorsBelowLimit) {

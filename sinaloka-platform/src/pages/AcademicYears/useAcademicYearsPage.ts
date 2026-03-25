@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useAcademicYears,
@@ -28,6 +29,8 @@ type ModalState =
   | { type: 'roll-over'; targetSemester: Semester; yearId: string };
 
 export function useAcademicYearsPage() {
+  const { t } = useTranslation();
+
   // Data queries
   const { data: academicYears = [], isLoading } = useAcademicYears();
 
@@ -110,11 +113,11 @@ export function useAcademicYearsPage() {
 
   const handleSubmitYear = () => {
     if (!yearName.trim() || !yearStartDate || !yearEndDate) {
-      toast.error('Semua field wajib diisi');
+      toast.error(t('academicYears.toast.allFieldsRequired'));
       return;
     }
     if (yearEndDate <= yearStartDate) {
-      toast.error('Tanggal selesai harus setelah tanggal mulai');
+      toast.error(t('academicYears.toast.endDateAfterStart'));
       return;
     }
 
@@ -129,19 +132,19 @@ export function useAcademicYearsPage() {
         { id: modal.editing.id, data },
         {
           onSuccess: () => {
-            toast.success('Tahun ajaran berhasil diperbarui');
+            toast.success(t('academicYears.toast.yearUpdated'));
             closeModal();
           },
-          onError: () => toast.error('Gagal memperbarui tahun ajaran'),
+          onError: () => toast.error(t('academicYears.toast.yearUpdateFailed')),
         }
       );
     } else {
       createYear.mutate(data, {
         onSuccess: () => {
-          toast.success('Tahun ajaran berhasil ditambahkan');
+          toast.success(t('academicYears.toast.yearCreated'));
           closeModal();
         },
-        onError: () => toast.error('Gagal menambahkan tahun ajaran'),
+        onError: () => toast.error(t('academicYears.toast.yearCreateFailed')),
       });
     }
   };
@@ -150,10 +153,10 @@ export function useAcademicYearsPage() {
     if (modal.type !== 'delete-year') return;
     deleteYear.mutate(modal.year.id, {
       onSuccess: () => {
-        toast.success('Tahun ajaran berhasil dihapus');
+        toast.success(t('academicYears.toast.yearDeleted'));
         closeModal();
       },
-      onError: () => toast.error('Gagal menghapus tahun ajaran'),
+      onError: () => toast.error(t('academicYears.toast.yearDeleteFailed')),
     });
   };
 
@@ -185,11 +188,11 @@ export function useAcademicYearsPage() {
 
   const handleSubmitSemester = () => {
     if (!semesterName.trim() || !semesterStartDate || !semesterEndDate) {
-      toast.error('Semua field wajib diisi');
+      toast.error(t('academicYears.toast.allFieldsRequired'));
       return;
     }
     if (semesterEndDate <= semesterStartDate) {
-      toast.error('Tanggal selesai harus setelah tanggal mulai');
+      toast.error(t('academicYears.toast.endDateAfterStart'));
       return;
     }
 
@@ -206,10 +209,10 @@ export function useAcademicYearsPage() {
         { id: modal.editing.id, data },
         {
           onSuccess: () => {
-            toast.success('Semester berhasil diperbarui');
+            toast.success(t('academicYears.toast.semesterUpdated'));
             closeModal();
           },
-          onError: () => toast.error('Gagal memperbarui semester'),
+          onError: () => toast.error(t('academicYears.toast.semesterUpdateFailed')),
         }
       );
     } else {
@@ -217,10 +220,10 @@ export function useAcademicYearsPage() {
         { yearId: modal.yearId, data },
         {
           onSuccess: () => {
-            toast.success('Semester berhasil ditambahkan');
+            toast.success(t('academicYears.toast.semesterCreated'));
             closeModal();
           },
-          onError: () => toast.error('Gagal menambahkan semester'),
+          onError: () => toast.error(t('academicYears.toast.semesterCreateFailed')),
         }
       );
     }
@@ -230,10 +233,10 @@ export function useAcademicYearsPage() {
     if (modal.type !== 'delete-semester') return;
     deleteSemester.mutate(modal.semester.id, {
       onSuccess: () => {
-        toast.success('Semester berhasil dihapus');
+        toast.success(t('academicYears.toast.semesterDeleted'));
         closeModal();
       },
-      onError: () => toast.error('Gagal menghapus semester'),
+      onError: () => toast.error(t('academicYears.toast.semesterDeleteFailed')),
     });
   };
 
@@ -241,10 +244,10 @@ export function useAcademicYearsPage() {
     if (modal.type !== 'archive-semester') return;
     archiveSemester.mutate(modal.semester.id, {
       onSuccess: () => {
-        toast.success('Semester berhasil diarsipkan');
+        toast.success(t('academicYears.toast.semesterArchived'));
         closeModal();
       },
-      onError: () => toast.error('Gagal mengarsipkan semester'),
+      onError: () => toast.error(t('academicYears.toast.semesterArchiveFailed')),
     });
   };
 
@@ -261,11 +264,14 @@ export function useAcademicYearsPage() {
       {
         onSuccess: (result) => {
           toast.success(
-            `Roll-over selesai: ${result.created_count} kelas dibuat, ${result.skipped_count} dilewati`
+            t('academicYears.toast.rollOverSuccess', {
+              created: result.created_count,
+              skipped: result.skipped_count,
+            })
           );
           closeModal();
         },
-        onError: () => toast.error('Gagal melakukan roll-over'),
+        onError: () => toast.error(t('academicYears.toast.rollOverFailed')),
       }
     );
   };
@@ -287,6 +293,7 @@ export function useAcademicYearsPage() {
     isLoading,
     allSemesters,
     sourceSemesterDetail,
+    t,
 
     // UI state
     expandedYearId,

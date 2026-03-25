@@ -247,12 +247,13 @@ export class TutorService {
     const existing = await this.findOne(institutionId, id);
 
     const timestamp = Date.now();
-    const user = await this.prisma.user.findUnique({
-      where: { id: existing.user_id },
-      select: { email: true },
-    });
 
     await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: existing.user_id },
+        select: { email: true },
+      });
+
       // Invalidate all refresh tokens
       await tx.refreshToken.deleteMany({
         where: { user_id: existing.user_id },
@@ -379,7 +380,7 @@ export class TutorService {
 
   async bulkDelete(institutionId: string, ids: string[]) {
     const tutors = await this.prisma.tutor.findMany({
-      where: { id: { in: ids }, institution_id: institutionId },
+      where: { id: { in: ids }, institution_id: institutionId, user: { is_active: true } },
       select: { id: true, user_id: true },
     });
 
