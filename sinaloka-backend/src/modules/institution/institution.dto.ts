@@ -1,5 +1,20 @@
 import { z } from 'zod';
 
+export const SLUG_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+
+export const RESERVED_SLUGS = [
+  'platform',
+  'parent',
+  'tutors',
+  'api',
+  'www',
+  'mail',
+  'ftp',
+  'admin',
+  'app',
+  'dashboard',
+] as const;
+
 export const CreateInstitutionSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
   address: z.string().max(500).optional().nullable(),
@@ -22,6 +37,15 @@ export type CreateInstitutionDto = z.infer<typeof CreateInstitutionSchema>;
 
 export const UpdateInstitutionSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255).optional(),
+  slug: z
+    .string()
+    .min(3, 'Slug must be at least 3 characters')
+    .max(63, 'Slug must be at most 63 characters')
+    .regex(SLUG_REGEX, 'Slug must be lowercase alphanumeric with hyphens, cannot start or end with hyphen')
+    .refine((val) => !RESERVED_SLUGS.includes(val as any), {
+      message: 'This slug is reserved and cannot be used',
+    })
+    .optional(),
   address: z.string().max(500).optional().nullable(),
   phone: z.string().max(50).optional().nullable(),
   email: z.string().email('Invalid email address').optional().nullable(),

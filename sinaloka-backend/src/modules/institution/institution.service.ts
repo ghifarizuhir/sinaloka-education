@@ -15,23 +15,11 @@ import {
 import {
   CreateInstitutionDto,
   UpdateInstitutionDto,
+  RESERVED_SLUGS,
 } from './institution.dto.js';
 
 @Injectable()
 export class InstitutionService {
-  private static readonly RESERVED_SLUGS = [
-    'platform',
-    'parent',
-    'tutors',
-    'api',
-    'www',
-    'mail',
-    'ftp',
-    'admin',
-    'app',
-    'dashboard',
-  ];
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: PaginationDto): Promise<PaginatedResponse<any>> {
@@ -237,7 +225,7 @@ export class InstitutionService {
       );
     }
 
-    if (InstitutionService.RESERVED_SLUGS.includes(baseSlug)) {
+    if (RESERVED_SLUGS.includes(baseSlug as any)) {
       throw new BadRequestException(
         `Institution name "${name}" generates a reserved slug "${baseSlug}". Please choose a different name.`,
       );
