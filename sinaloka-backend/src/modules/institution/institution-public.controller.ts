@@ -4,6 +4,7 @@ import {
   RateLimitGuard,
   RateLimit,
 } from '../../common/guards/rate-limit.guard.js';
+import { ParseSlugPipe } from '../../common/pipes/parse-slug.pipe.js';
 import { InstitutionService } from './institution.service.js';
 
 @Controller('institutions/public')
@@ -14,7 +15,7 @@ export class InstitutionPublicController {
 
   @Get(':slug')
   @RateLimit(30, 60 * 1000)
-  async getBySlug(@Param('slug') slug: string) {
+  async getBySlug(@Param('slug', ParseSlugPipe) slug: string) {
     return this.institutionService.findBySlugPublic(slug);
   }
 }

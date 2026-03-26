@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
+import { ParseSlugPipe } from '../../common/pipes/parse-slug.pipe.js';
 import {
   RateLimitGuard,
   RateLimit,
@@ -22,14 +23,14 @@ export class RegisterController {
   constructor(private readonly registrationService: RegistrationService) {}
 
   @Get(':slug')
-  async getInstitutionInfo(@Param('slug') slug: string) {
+  async getInstitutionInfo(@Param('slug', ParseSlugPipe) slug: string) {
     return this.registrationService.getInstitutionInfo(slug);
   }
 
   @Post(':slug/student')
   @RateLimit(5, 60 * 60 * 1000)
   async registerStudent(
-    @Param('slug') slug: string,
+    @Param('slug', ParseSlugPipe) slug: string,
     @Body(new ZodValidationPipe(StudentRegistrationSchema))
     dto: StudentRegistrationDto,
   ) {
@@ -39,7 +40,7 @@ export class RegisterController {
   @Post(':slug/tutor')
   @RateLimit(5, 60 * 60 * 1000)
   async registerTutor(
-    @Param('slug') slug: string,
+    @Param('slug', ParseSlugPipe) slug: string,
     @Body(new ZodValidationPipe(TutorRegistrationSchema))
     dto: TutorRegistrationDto,
   ) {
