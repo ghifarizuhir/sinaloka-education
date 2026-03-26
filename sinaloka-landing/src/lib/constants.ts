@@ -14,6 +14,21 @@ import {
 export const BASE_URL = "https://sinaloka.com";
 
 export const WHATSAPP_NUMBER = "6285121094946";
+
+export const ORGANIZATION_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Sinaloka",
+  "url": "https://sinaloka.com",
+  "logo": "https://sinaloka.com/favicon.svg",
+  "description": "Platform manajemen bimbingan belajar untuk mengelola siswa, tutor, jadwal, dan pembayaran.",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "sales",
+    "url": `https://wa.me/6285121094946`,
+    "availableLanguage": "Indonesian",
+  },
+} as const;
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Halo%2C%20saya%20tertarik%20dengan%20Sinaloka%20untuk%20bimbel%20saya`;
 
 export const NAV_LINKS = [

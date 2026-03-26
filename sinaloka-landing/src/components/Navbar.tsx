@@ -25,7 +25,7 @@ export function Navbar() {
           : "bg-transparent"
       )}
     >
-    <nav aria-label="Navigasi utama">
+      <nav aria-label="Navigasi utama">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <a
           href="#"
@@ -123,7 +123,7 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+      </nav>
     </header>
   );
 }

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { WHATSAPP_URL } from "../lib/constants";
+import { WHATSAPP_URL, ORGANIZATION_SCHEMA } from "../lib/constants";
 import { PageMeta } from "../components/shared/PageMeta";
 
 export default function PrivacyPolicyPage() {
@@ -12,20 +12,7 @@ export default function PrivacyPolicyPage() {
       />
 
       {/* Structured Data: Organization */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Sinaloka",
-        "url": "https://sinaloka.com",
-        "logo": "https://sinaloka.com/favicon.svg",
-        "description": "Platform manajemen bimbingan belajar untuk mengelola siswa, tutor, jadwal, dan pembayaran.",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "sales",
-          "url": "https://wa.me/6285121094946",
-          "availableLanguage": "Indonesian",
-        },
-      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_SCHEMA) }} />
 
       {/* Structured Data: BreadcrumbList */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({

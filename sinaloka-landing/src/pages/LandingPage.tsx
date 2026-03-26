@@ -12,7 +12,7 @@ import { FinalCTA } from "../components/FinalCTA";
 import { Footer } from "../components/Footer";
 import { FloatingWhatsApp } from "../components/FloatingWhatsApp";
 import { PageMeta } from "../components/shared/PageMeta";
-import { FAQ_ITEMS } from "../lib/constants";
+import { FAQ_ITEMS, ORGANIZATION_SCHEMA } from "../lib/constants";
 
 export default function LandingPage() {
   return (
@@ -24,20 +24,7 @@ export default function LandingPage() {
       />
 
       {/* Structured Data: Organization */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Sinaloka",
-        "url": "https://sinaloka.com",
-        "logo": "https://sinaloka.com/favicon.svg",
-        "description": "Platform manajemen bimbingan belajar untuk mengelola siswa, tutor, jadwal, dan pembayaran.",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "sales",
-          "url": "https://wa.me/6285121094946",
-          "availableLanguage": "Indonesian",
-        },
-      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_SCHEMA) }} />
 
       {/* Structured Data: WebSite */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
