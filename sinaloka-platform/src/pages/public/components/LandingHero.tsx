@@ -86,14 +86,6 @@ export function LandingHero({ data }: LandingHeroProps) {
             {ctaText}
           </Button>
         )}
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={() => navigate('/login')}
-          className="font-semibold sm:min-w-[160px] justify-center border-zinc-700 text-zinc-100 hover:bg-zinc-800 hover:text-zinc-100"
-        >
-          {t('landingPage.login')}
-        </Button>
       </motion.div>
     </section>
   );

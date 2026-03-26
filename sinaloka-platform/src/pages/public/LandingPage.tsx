@@ -1,7 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useInstitution } from '@/src/contexts/InstitutionContext';
-import { useAuth } from '@/src/hooks/useAuth';
 import { institutionPublicService } from '@/src/services/institutionPublic.service';
 import { Skeleton } from '@/src/components/UI';
 import { LandingHero } from './components/LandingHero';
@@ -16,7 +15,6 @@ import { WhatsAppFAB } from './components/WhatsAppFAB';
 
 export function LandingPage() {
   const { institution, slug } = useInstitution();
-  const { isAuthenticated } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ['landing', slug],
@@ -24,7 +22,6 @@ export function LandingPage() {
     enabled: !!slug && !!institution?.landing_enabled,
   });
 
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
   if (!institution?.landing_enabled) return <Navigate to="/login" replace />;
 
   if (isLoading || !data) {
