@@ -232,7 +232,14 @@ export class InstitutionService {
       .trim()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    if (!baseSlug) {
+      throw new BadRequestException(
+        `Institution name "${name}" cannot be converted to a valid slug. Please use a name with alphanumeric characters.`,
+      );
+    }
 
     if (InstitutionService.RESERVED_SLUGS.includes(baseSlug)) {
       throw new BadRequestException(

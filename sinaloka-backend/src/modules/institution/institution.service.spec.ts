@@ -190,6 +190,27 @@ describe('InstitutionService', () => {
 
       expect(result.slug).toBe('test-institution-2');
     });
+
+    it('should reject name that produces empty slug', async () => {
+      await expect(
+        service.create({ name: '!!!@@@###' }),
+      ).rejects.toThrow('cannot be converted to a valid slug');
+    });
+
+    it('should strip leading and trailing hyphens from generated slug', async () => {
+      prisma.institution.findUnique.mockResolvedValue(null); // slug not taken
+      prisma.institution.create.mockResolvedValue({
+        ...mockInstitution,
+        name: '-Test School-',
+        slug: 'test-school',
+      });
+
+      await service.create({ name: '-Test School-' });
+
+      expect(prisma.institution.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ slug: 'test-school' }),
+      });
+    });
   });
 
   describe('update', () => {
