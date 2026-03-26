@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPatterns = ["sinaloka-backend/**"]
 
 [deploy]
 healthcheckPath = "/api/health"
