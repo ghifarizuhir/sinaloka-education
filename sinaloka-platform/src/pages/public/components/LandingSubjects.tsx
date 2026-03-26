@@ -9,20 +9,23 @@ const fadeInUp = {
 
 interface LandingSubjectsProps {
   subjects: { id: string; name: string }[];
+  brandColor: string | null;
 }
 
-export function LandingSubjects({ subjects }: LandingSubjectsProps) {
+export function LandingSubjects({ subjects, brandColor }: LandingSubjectsProps) {
   const { t } = useTranslation();
 
   if (subjects.length === 0) return null;
 
+  const color = brandColor ?? '#14b8a6';
+
   return (
-    <section className="px-6 py-16 border-b border-zinc-800">
+    <section className="px-6 py-16" style={{ backgroundColor: '#F9FAFB' }}>
       <div className="max-w-2xl mx-auto">
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-2xl font-bold text-zinc-100 text-center mb-10"
+          className="text-2xl font-bold text-gray-900 text-center mb-10"
         >
           {t('landingPage.subjects')}
         </motion.h2>
@@ -34,7 +37,16 @@ export function LandingSubjects({ subjects }: LandingSubjectsProps) {
           {subjects.map((subject) => (
             <span
               key={subject.id}
-              className="px-4 py-2 rounded-full text-sm text-zinc-300 border border-zinc-700 bg-zinc-900"
+              className="px-4 py-2 rounded-full text-sm text-gray-700 font-medium bg-white transition-colors cursor-default"
+              style={{
+                border: `2px solid ${color}33`,
+              }}
+              onMouseOver={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = `${color}1a`;
+              }}
+              onMouseOut={(e) => {
+                (e.currentTarget as HTMLElement).style.backgroundColor = '#fff';
+              }}
             >
               {subject.name}
             </span>

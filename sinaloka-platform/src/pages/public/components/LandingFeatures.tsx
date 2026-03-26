@@ -22,46 +22,45 @@ export function LandingFeatures({ features, brandColor }: LandingFeaturesProps) 
   const color = brandColor ?? '#14b8a6';
 
   return (
-    <section className="px-6 py-16 border-b border-zinc-800">
+    <section className="px-6 py-16">
       <div className="max-w-2xl mx-auto">
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-2xl font-bold text-zinc-100 text-center mb-10"
+          className="text-2xl font-bold text-gray-900 text-center mb-10"
         >
           {t('landingPage.features')}
         </motion.h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {features.map((feature) => {
+          {features.map((feature, i) => {
             const Icon = (icons as Record<string, LucideIcon>)[feature.icon];
             return (
               <motion.div
                 key={feature.id}
                 {...fadeInUp}
-                transition={{ duration: 0.5 }}
-                className="rounded-xl bg-zinc-900 border border-zinc-800 p-6"
+                transition={{ delay: i * 0.08, duration: 0.5 }}
+                className="rounded-xl p-6"
+                style={{
+                  backgroundColor: `${color}0d`,
+                  borderLeft: `4px solid ${color}`,
+                }}
               >
                 <div className="flex items-start gap-4">
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: `${color}22` }}
+                    style={{ backgroundColor: `${color}26` }}
                   >
                     {Icon ? (
                       <Icon size={20} style={{ color }} />
                     ) : (
-                      <span
-                        className="text-sm font-bold"
-                        style={{ color }}
-                      >
-                        ?
-                      </span>
+                      <span className="text-sm font-bold" style={{ color }}>?</span>
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-zinc-100 mb-1">
+                    <h3 className="font-semibold text-gray-900 mb-1">
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed">
+                    <p className="text-sm text-gray-600 leading-relaxed">
                       {feature.description}
                     </p>
                   </div>
