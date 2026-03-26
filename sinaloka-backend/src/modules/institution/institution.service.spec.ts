@@ -236,23 +236,23 @@ describe('InstitutionService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should regenerate slug when name changes', async () => {
-      // findOne call returns existing institution
-      prisma.institution.findUnique
-        .mockResolvedValueOnce(mockInstitution) // findOne check
-        .mockResolvedValueOnce(null); // slug uniqueness check
+    it('should NOT regenerate slug when name changes', async () => {
+      prisma.institution.findUnique.mockResolvedValue(mockInstitution); // findOne check
       prisma.institution.update.mockResolvedValue({
         ...mockInstitution,
         name: 'Updated Name',
-        slug: 'updated-name',
+        slug: 'test-institution', // slug stays the same
       });
 
-      const result = await service.update('inst-1', { name: 'Updated Name' });
+      await service.update('inst-1', { name: 'Updated Name' });
 
       expect(prisma.institution.update).toHaveBeenCalledWith({
         where: { id: 'inst-1' },
-        data: expect.objectContaining({ slug: 'updated-name' }),
+        data: { name: 'Updated Name' },
       });
+      // Verify slug was NOT included in the update data
+      const updateCall = prisma.institution.update.mock.calls[0][0];
+      expect(updateCall.data).not.toHaveProperty('slug');
     });
   });
 

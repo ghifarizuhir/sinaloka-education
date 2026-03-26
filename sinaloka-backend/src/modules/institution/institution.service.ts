@@ -140,10 +140,6 @@ export class InstitutionService {
 
     const data: Record<string, unknown> = { ...dto };
 
-    if (dto.name) {
-      data.slug = await this.generateUniqueSlug(dto.name, id);
-    }
-
     return this.prisma.institution.update({
       where: { id },
       data,
