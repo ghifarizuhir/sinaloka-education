@@ -136,7 +136,6 @@ export function LandingContact({ data }: LandingContactProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"
-                  style={{}}
                   onMouseOver={(e) => {
                     const el = e.currentTarget as HTMLElement;
                     el.style.backgroundColor = brandColor;

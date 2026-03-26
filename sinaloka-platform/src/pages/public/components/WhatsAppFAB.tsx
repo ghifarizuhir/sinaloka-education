@@ -19,9 +19,10 @@ export function WhatsAppFAB({ number }: WhatsAppFABProps) {
 
   if (!number) return null;
 
-  const normalized = number.startsWith('0')
-    ? `62${number.slice(1)}`
-    : number;
+  const digits = number.replace(/\D/g, '');
+  const normalized = digits.startsWith('0')
+    ? `62${digits.slice(1)}`
+    : digits;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">

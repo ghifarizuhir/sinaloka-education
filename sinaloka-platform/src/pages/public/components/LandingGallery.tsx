@@ -37,9 +37,7 @@ export function LandingGallery({ images }: LandingGalleryProps) {
             'grid gap-3',
             sorted.length === 1
               ? 'grid-cols-1'
-              : sorted.length === 2
-                ? 'grid-cols-2 sm:grid-cols-3'
-                : 'grid-cols-2 sm:grid-cols-3'
+              : 'grid-cols-2 sm:grid-cols-3'
           )}
         >
           {sorted.map((image, i) => (
@@ -63,11 +61,11 @@ function GalleryItem({
   isFirst,
   isSingle,
 }: {
+  key?: React.Key;
   image: GalleryImage;
   index: number;
   isFirst: boolean;
   isSingle: boolean;
-  key?: React.Key;
 }) {
   const [hovered, setHovered] = useState(false);
 
