@@ -24,23 +24,36 @@ export function LandingFooterCTA({ data }: LandingFooterCTAProps) {
 
   return (
     <section
-      className="px-6 py-20"
-      style={{
-        background: `linear-gradient(to bottom, ${brandColor}11, ${brandColor}22)`,
-      }}
+      className="relative px-6 py-20 overflow-hidden"
+      style={{ backgroundColor: brandColor }}
     >
-      <div className="max-w-2xl mx-auto text-center">
+      {/* Geometric decorative circles */}
+      <div
+        className="absolute -top-8 -left-8 w-[160px] h-[160px] rounded-full border-[3px] pointer-events-none"
+        style={{ borderColor: 'rgba(255,255,255,0.12)' }}
+      />
+      <div
+        className="absolute -bottom-12 -right-12 w-[200px] h-[200px] rounded-full border-[3px] pointer-events-none"
+        style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+      />
+      <div
+        className="absolute top-1/2 -right-6 w-[100px] h-[100px] rounded-full border-[3px] pointer-events-none"
+        style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+      />
+
+      <div className="relative z-10 max-w-2xl mx-auto text-center">
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-3xl font-bold text-zinc-100 mb-3"
+          className="text-3xl font-bold text-white mb-3"
         >
           {t('landingPage.ready')}
         </motion.h2>
         <motion.p
           {...fadeInUp}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="text-zinc-400 mb-8"
+          className="mb-8"
+          style={{ color: 'rgba(255,255,255,0.7)' }}
         >
           {t('landingPage.readyDesc')}
         </motion.p>
@@ -53,8 +66,8 @@ export function LandingFooterCTA({ data }: LandingFooterCTAProps) {
             <Button
               size="lg"
               onClick={() => navigate('/register')}
-              className="font-semibold sm:min-w-[180px] justify-center"
-              style={{ backgroundColor: brandColor, color: '#fff' }}
+              className="font-bold sm:min-w-[180px] justify-center px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              style={{ backgroundColor: '#fff', color: brandColor }}
             >
               {ctaText}
             </Button>
@@ -68,7 +81,7 @@ export function LandingFooterCTA({ data }: LandingFooterCTAProps) {
           className="mt-16 flex items-center justify-center gap-1.5"
         >
           <SinalokaLogo size={14} />
-          <span className="text-xs text-zinc-600">
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {t('landingPage.poweredBy')}
           </span>
         </motion.div>
