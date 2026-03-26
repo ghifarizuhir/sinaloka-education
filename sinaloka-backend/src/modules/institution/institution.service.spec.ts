@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -112,6 +116,12 @@ describe('InstitutionService', () => {
       expect(result).toEqual(mockInstitution);
       expect(prisma.institution.findUnique).toHaveBeenCalledWith({
         where: { id: 'inst-1' },
+        include: {
+          users: {
+            where: { role: 'ADMIN' },
+            select: { id: true, name: true, email: true },
+          },
+        },
       });
     });
 
@@ -226,23 +236,9 @@ describe('InstitutionService', () => {
   });
 
   describe('remove', () => {
-    it('should delete an institution', async () => {
-      prisma.institution.findUnique.mockResolvedValue(mockInstitution);
-      prisma.institution.delete.mockResolvedValue(mockInstitution);
-
-      const result = await service.remove('inst-1');
-
-      expect(result).toEqual(mockInstitution);
-      expect(prisma.institution.delete).toHaveBeenCalledWith({
-        where: { id: 'inst-1' },
-      });
-    });
-
-    it('should throw NotFoundException if not found', async () => {
-      prisma.institution.findUnique.mockResolvedValue(null);
-
-      await expect(service.remove('nonexistent')).rejects.toThrow(
-        NotFoundException,
+    it('should throw ForbiddenException (deletion not supported)', async () => {
+      await expect(service.remove('inst-1')).rejects.toThrow(
+        ForbiddenException,
       );
     });
   });

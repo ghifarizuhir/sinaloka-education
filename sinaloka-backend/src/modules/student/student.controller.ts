@@ -93,7 +93,8 @@ export class StudentController {
   async getStudentAttendance(
     @InstitutionId() institutionId: string,
     @Param('id') id: string,
-    @Query(new ZodValidationPipe(StudentAttendanceQuerySchema)) query: StudentAttendanceQueryDto,
+    @Query(new ZodValidationPipe(StudentAttendanceQuerySchema))
+    query: StudentAttendanceQueryDto,
   ) {
     // Verify student exists and belongs to tenant
     await this.studentService.findOne(institutionId, id);

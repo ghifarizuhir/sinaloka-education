@@ -10,6 +10,7 @@ import { AuthModule } from '../auth/auth.module.js';
 import { StudentModule } from './student.module.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 describe('StudentController (integration)', () => {
   let app: INestApplication;
@@ -22,6 +23,7 @@ describe('StudentController (integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         PrismaModule,
         AuthModule,
         StudentModule,

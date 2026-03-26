@@ -380,7 +380,11 @@ export class TutorService {
 
   async bulkDelete(institutionId: string, ids: string[]) {
     const tutors = await this.prisma.tutor.findMany({
-      where: { id: { in: ids }, institution_id: institutionId, user: { is_active: true } },
+      where: {
+        id: { in: ids },
+        institution_id: institutionId,
+        user: { is_active: true },
+      },
       select: { id: true, user_id: true },
     });
 

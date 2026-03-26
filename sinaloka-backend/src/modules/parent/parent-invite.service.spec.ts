@@ -11,6 +11,8 @@ jest.mock('bcrypt', () => ({
 
 import { ParentInviteService } from './parent-invite.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { EmailService } from '../email/email.service.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('ParentInviteService', () => {
   let service: ParentInviteService;
@@ -18,7 +20,13 @@ describe('ParentInviteService', () => {
 
   beforeEach(async () => {
     prisma = {
-      student: { findMany: jest.fn(), count: jest.fn() },
+      student: {
+        findMany: jest.fn().mockResolvedValue([{ name: 'Student' }]),
+        count: jest.fn(),
+      },
+      institution: {
+        findUnique: jest.fn().mockResolvedValue({ name: 'Test Institution' }),
+      },
       parentInvite: {
         create: jest.fn(),
         findUnique: jest.fn(),
@@ -34,6 +42,11 @@ describe('ParentInviteService', () => {
       providers: [
         ParentInviteService,
         { provide: PrismaService, useValue: prisma },
+        {
+          provide: EmailService,
+          useValue: { sendParentInvitation: jest.fn() },
+        },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
       ],
     }).compile();
 

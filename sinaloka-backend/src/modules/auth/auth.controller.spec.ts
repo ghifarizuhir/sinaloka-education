@@ -8,6 +8,7 @@ import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { AuthModule } from './auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 describe('AuthController (integration)', () => {
   let app: INestApplication;
@@ -19,6 +20,7 @@ describe('AuthController (integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         PrismaModule,
         AuthModule,
       ],

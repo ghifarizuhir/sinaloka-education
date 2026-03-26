@@ -9,6 +9,7 @@ jest.mock('../../common/prisma/prisma.service', () => {
 
 import { SettingsService } from './settings.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { ConfigService } from '@nestjs/config';
 
 describe('SettingsService', () => {
   let service: SettingsService;
@@ -31,6 +32,7 @@ describe('SettingsService', () => {
       providers: [
         SettingsService,
         { provide: PrismaService, useValue: prisma },
+        { provide: ConfigService, useValue: { get: jest.fn() } },
       ],
     }).compile();
 

@@ -163,7 +163,13 @@ export class ClassService {
           subject: true,
           tutor: { include: { user: { select: { id: true, name: true } } } },
           schedules: true,
-          semester: { select: { id: true, name: true, academic_year: { select: { id: true, name: true } } } },
+          semester: {
+            select: {
+              id: true,
+              name: true,
+              academic_year: { select: { id: true, name: true } },
+            },
+          },
           _count: {
             select: {
               enrollments: { where: { status: { in: ['ACTIVE', 'TRIAL'] } } },

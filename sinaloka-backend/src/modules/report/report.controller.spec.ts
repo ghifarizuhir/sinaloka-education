@@ -11,6 +11,7 @@ import { ReportModule } from './report.module.js';
 import { ReportService } from './report.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 describe('ReportController (integration)', () => {
   let app: INestApplication;
@@ -25,6 +26,7 @@ describe('ReportController (integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         PrismaModule,
         AuthModule,
         ReportModule,

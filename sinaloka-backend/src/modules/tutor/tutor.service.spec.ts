@@ -31,8 +31,19 @@ describe('TutorService', () => {
       update: jest.Mock;
       delete: jest.Mock;
     };
+    tutorSubject: {
+      deleteMany: jest.Mock;
+      createMany: jest.Mock;
+    };
     refreshToken: {
       deleteMany: jest.Mock;
+    };
+    institution: {
+      findUnique: jest.Mock;
+      update: jest.Mock;
+    };
+    student: {
+      count: jest.Mock;
     };
     $transaction: jest.Mock;
   };
@@ -78,8 +89,19 @@ describe('TutorService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      tutorSubject: {
+        deleteMany: jest.fn(),
+        createMany: jest.fn(),
+      },
       refreshToken: {
         deleteMany: jest.fn(),
+      },
+      institution: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        update: jest.fn(),
+      },
+      student: {
+        count: jest.fn().mockResolvedValue(0),
       },
       $transaction: jest.fn(),
     };
@@ -97,7 +119,13 @@ describe('TutorService', () => {
       prisma.$transaction.mockImplementation(async (fn: Function) => {
         const tx = {
           user: { create: jest.fn().mockResolvedValue(mockUser) },
-          tutor: { create: jest.fn().mockResolvedValue(mockTutor) },
+          tutor: {
+            create: jest.fn().mockResolvedValue(mockTutor),
+            findFirst: jest.fn().mockResolvedValue(mockTutor),
+          },
+          tutorSubject: {
+            createMany: jest.fn().mockResolvedValue({ count: 0 }),
+          },
         };
         return fn(tx);
       });
@@ -149,21 +177,23 @@ describe('TutorService', () => {
       );
     });
 
-    it('should filter by subject', async () => {
+    it('should filter by subject_id', async () => {
       prisma.tutor.findMany.mockResolvedValue([mockTutor]);
       prisma.tutor.count.mockResolvedValue(1);
 
       await service.findAll('inst-1', {
         page: 1,
         limit: 20,
-        subject: 'Math',
+        subject_id: 'subject-1',
         sort_by: 'created_at',
         sort_order: 'desc',
       });
 
       expect(prisma.tutor.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ subjects: { has: 'Math' } }),
+          where: expect.objectContaining({
+            tutor_subjects: { some: { subject_id: 'subject-1' } },
+          }),
         }),
       );
     });
@@ -196,7 +226,11 @@ describe('TutorService', () => {
       expect(result).toEqual(mockTutor);
       expect(prisma.tutor.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'tutor-1', institution_id: 'inst-1' },
+          where: {
+            id: 'tutor-1',
+            institution_id: 'inst-1',
+            user: { is_active: true },
+          },
         }),
       );
     });
@@ -215,17 +249,17 @@ describe('TutorService', () => {
       prisma.tutor.findFirst.mockResolvedValue(mockTutor);
       prisma.tutor.update.mockResolvedValue({
         ...mockTutor,
-        subjects: ['Math', 'Physics', 'Chemistry'],
+        experience_years: 5,
       });
 
       const result = await service.update('inst-1', 'tutor-1', {
-        subjects: ['Math', 'Physics', 'Chemistry'],
+        experience_years: 5,
       });
 
-      expect(result.subjects).toContain('Chemistry');
+      expect(result.experience_years).toBe(5);
       expect(prisma.tutor.update).toHaveBeenCalledWith({
         where: { id: 'tutor-1' },
-        data: { subjects: ['Math', 'Physics', 'Chemistry'] },
+        data: { experience_years: 5 },
         include: expect.any(Object),
       });
     });
@@ -250,24 +284,29 @@ describe('TutorService', () => {
       prisma.tutor.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.update('inst-1', 'nonexistent', { subjects: ['Math'] }),
+        service.update('inst-1', 'nonexistent', { experience_years: 5 }),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('delete', () => {
-    it('should delete tutor and user in a transaction', async () => {
+    it('should soft-delete tutor and user in a transaction', async () => {
       prisma.tutor.findFirst.mockResolvedValue(mockTutor);
       prisma.$transaction.mockImplementation(async (fn: Function) => {
         const tx = {
-          tutor: { delete: jest.fn().mockResolvedValue(mockTutor) },
+          user: {
+            findUnique: jest
+              .fn()
+              .mockResolvedValue({ email: 'tutor@test.com' }),
+            update: jest.fn().mockResolvedValue(mockUser),
+          },
           refreshToken: {
             deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
           },
-          user: { delete: jest.fn().mockResolvedValue(mockUser) },
         };
         return fn(tx);
       });
+      prisma.institution.findUnique.mockResolvedValue(null);
 
       await service.delete('inst-1', 'tutor-1');
 

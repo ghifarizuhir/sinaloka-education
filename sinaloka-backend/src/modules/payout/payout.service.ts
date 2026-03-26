@@ -119,7 +119,10 @@ export class PayoutService {
               institution_id: institutionId,
               OR: [
                 { snapshot_tutor_id: payout.tutor_id },
-                { snapshot_tutor_id: null, class: { tutor_id: payout.tutor_id } },
+                {
+                  snapshot_tutor_id: null,
+                  class: { tutor_id: payout.tutor_id },
+                },
               ],
               status: 'COMPLETED',
               tutor_fee_amount: { not: null },

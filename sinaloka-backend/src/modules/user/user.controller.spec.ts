@@ -10,6 +10,7 @@ import { AuthModule } from '../auth/auth.module.js';
 import { UserModule } from './user.module.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 describe('UserController (integration)', () => {
   let app: INestApplication;
@@ -26,6 +27,7 @@ describe('UserController (integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         PrismaModule,
         AuthModule,
         UserModule,
