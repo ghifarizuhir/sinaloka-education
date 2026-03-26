@@ -291,7 +291,7 @@ export class InstitutionService {
           where: { institution_id: institution.id, status: 'ACTIVE' },
         }),
         this.prisma.tutor.count({
-          where: { institution_id: institution.id },
+          where: { institution_id: institution.id, user: { is_active: true } },
         }),
         this.prisma.subject.findMany({
           where: { institution_id: institution.id },

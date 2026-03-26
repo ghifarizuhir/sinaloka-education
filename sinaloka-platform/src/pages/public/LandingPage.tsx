@@ -21,7 +21,7 @@ export function LandingPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['landing', slug],
     queryFn: () => institutionPublicService.getLanding(slug!),
-    enabled: !!slug,
+    enabled: !!slug && !!institution?.landing_enabled,
   });
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;

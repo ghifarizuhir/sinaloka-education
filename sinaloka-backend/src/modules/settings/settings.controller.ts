@@ -152,6 +152,8 @@ export class SettingsController {
       keyPrefix,
     );
     await this.settingsService.addGalleryImage(institutionId, { id, url });
+    const slug = await this.settingsService.getInstitutionSlug(institutionId);
+    this.institutionService.invalidateLandingCache(slug);
     return { id, url };
   }
 
@@ -166,5 +168,7 @@ export class SettingsController {
     );
     const key = `institutions/${institutionId}/gallery/${imageId}.webp`;
     await this.r2UploadService.deleteImage(key);
+    const slug = await this.settingsService.getInstitutionSlug(institutionId);
+    this.institutionService.invalidateLandingCache(slug);
   }
 }

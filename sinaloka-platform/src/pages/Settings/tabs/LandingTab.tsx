@@ -222,14 +222,14 @@ export const LandingTab = () => {
             <p className="text-xs text-zinc-400">{t('settings.landing.whatsappHint')}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {(['instagram', 'tiktok', 'facebook', 'youtube'] as const).map((platform) => (
+            {(['instagram', 'tiktok', 'facebook', 'youtube', 'website'] as const).map((platform) => (
               <div key={platform}>
                 <label className="text-xs text-zinc-500 mb-1 block capitalize">{platform}</label>
                 <input
                   type="text"
                   value={social[platform] ?? ''}
                   onChange={(e) => setSocial({ ...social, [platform]: e.target.value })}
-                  placeholder={platform === 'instagram' || platform === 'tiktok' ? '@username' : 'URL'}
+                  placeholder={platform === 'instagram' || platform === 'tiktok' ? '@username' : 'https://...'}
                   className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
                 />
               </div>
