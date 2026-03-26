@@ -21,6 +21,7 @@
     "prisma:generate": "prisma generate && node -e \"require('fs').writeFileSync('generated/prisma/package.json', JSON.stringify({name:'@generated/prisma',type:'module',main:'./client.js',types:'./client.ts'}, null, 2))\""
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1017.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
@@ -43,6 +44,7 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.9.3",
     "rxjs": "^7.8.1",
+    "sharp": "^0.34.5",
     "uuid": "^13.0.0",
     "zod": "^4.3.6"
   },
@@ -61,6 +63,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/pdfkit": "^0.17.5",
     "@types/pg": "^8.18.0",
+    "@types/sharp": "^0.31.1",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",
     "eslint": "^9.18.0",

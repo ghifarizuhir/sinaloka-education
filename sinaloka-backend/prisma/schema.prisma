@@ -162,6 +162,15 @@ model Institution {
   description          String?
   brand_color          String?
   background_image_url String?
+  // Landing Page
+  landing_enabled       Boolean  @default(false)
+  landing_tagline       String?  @db.VarChar(200)
+  landing_about         String?  @db.Text
+  landing_cta_text      String?  @db.VarChar(50)
+  whatsapp_number       String?  @db.VarChar(20)
+  landing_features      Json?    @db.JsonB
+  gallery_images        Json?    @db.JsonB
+  social_links          Json?    @db.JsonB
   settings         Json?
   timezone         String   @default("Asia/Jakarta")
   default_language String   @default("id")
