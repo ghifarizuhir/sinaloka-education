@@ -9,6 +9,8 @@ import { useAuth } from '@/src/hooks/useAuth';
 import { useLandingSettings, useUpdateLandingSettings } from '@/src/hooks/useSettings';
 import { FeatureRepeater } from './components/FeatureRepeater';
 import { GalleryUploader } from './components/GalleryUploader';
+import { SectionNav } from './components/SectionNav';
+import { SectionIllustration } from './components/SectionIllustration';
 import type { LandingFeature, GalleryImage, SocialLinks } from '@/src/types/landing';
 
 export const LandingTab = () => {
@@ -102,145 +104,165 @@ export const LandingTab = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Status */}
-      <Card>
-        <div className="flex items-center gap-2 mb-4">
-          <Globe size={20} className="text-zinc-400" />
-          <h3 className="text-lg font-bold dark:text-zinc-100">{t('settings.landing.title')}</h3>
-        </div>
-        <p className="text-sm text-zinc-500 mb-4">{t('settings.landing.description')}</p>
-
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm font-medium dark:text-zinc-200">{t('settings.landing.enabled')}</p>
-            <p className="text-xs text-zinc-400">{t('settings.landing.enabledHint')}</p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={settings?.landing_enabled ?? false}
-            onClick={() => handleToggle(!settings?.landing_enabled)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              settings?.landing_enabled ? 'bg-primary' : 'bg-zinc-300 dark:bg-zinc-600'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                settings?.landing_enabled ? 'translate-x-5' : ''
-              }`}
-            />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2 p-2.5 bg-zinc-50 dark:bg-zinc-800 rounded-md text-sm">
-          <span className="text-zinc-500 truncate flex-1">{landingUrl}</span>
-          <button type="button" onClick={handleCopyUrl} className="text-primary hover:underline text-xs">
-            <Copy size={14} />
-          </button>
-          <a
-            href={landingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`text-primary text-xs ${!settings?.landing_enabled ? 'pointer-events-none opacity-40' : ''}`}
-          >
-            <ExternalLink size={14} />
-          </a>
-        </div>
-      </Card>
-
-      {/* Hero Content */}
-      <Card>
-        <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">Hero</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs text-zinc-500 mb-1 block">{t('settings.landing.tagline')}</label>
-            <input
-              type="text"
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-              placeholder={t('settings.landing.taglinePlaceholder')}
-              maxLength={200}
-              className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
-            />
-            <p className="text-xs text-zinc-400 text-right">{tagline.length}/200</p>
-          </div>
-          <div>
-            <label className="text-xs text-zinc-500 mb-1 block">{t('settings.landing.ctaText')}</label>
-            <input
-              type="text"
-              value={ctaText}
-              onChange={(e) => setCtaText(e.target.value)}
-              placeholder={t('settings.landing.ctaDefault')}
-              maxLength={50}
-              className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
-            />
-          </div>
-        </div>
-      </Card>
-
-      {/* About */}
-      <Card>
-        <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.about')}</h3>
-        <textarea
-          value={about}
-          onChange={(e) => setAbout(e.target.value)}
-          placeholder={t('settings.landing.aboutPlaceholder')}
-          maxLength={2000}
-          rows={4}
-          className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md resize-none"
+    <div>
+      <div className="flex gap-6">
+        {/* Sidebar nav */}
+        <SectionNav
+          tagline={tagline}
+          about={about}
+          features={features}
+          gallery={{ length: gallery.length }}
+          whatsapp={whatsapp}
+          social={social}
         />
-        <p className="text-xs text-zinc-400 text-right">{about.length}/2000</p>
-      </Card>
 
-      {/* Features */}
-      <Card>
-        <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.features')}</h3>
-        <FeatureRepeater features={features} onChange={setFeatures} />
-      </Card>
+        {/* Content */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {/* Status */}
+          <Card id="landing-status">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe size={20} className="text-zinc-400" />
+              <h3 className="text-lg font-bold dark:text-zinc-100">{t('settings.landing.title')}</h3>
+            </div>
+            <p className="text-sm text-zinc-500 mb-4">{t('settings.landing.description')}</p>
 
-      {/* Gallery */}
-      <Card>
-        <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.gallery')}</h3>
-        <GalleryUploader images={gallery} onChange={setGallery} />
-      </Card>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm font-medium dark:text-zinc-200">{t('settings.landing.enabled')}</p>
+                <p className="text-xs text-zinc-400">{t('settings.landing.enabledHint')}</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings?.landing_enabled ?? false}
+                onClick={() => handleToggle(!settings?.landing_enabled)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  settings?.landing_enabled ? 'bg-primary' : 'bg-zinc-300 dark:bg-zinc-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                    settings?.landing_enabled ? 'translate-x-5' : ''
+                  }`}
+                />
+              </button>
+            </div>
 
-      {/* Contact & Social */}
-      <Card>
-        <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.socialLinks')}</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs text-zinc-500 mb-1 block">{t('settings.landing.whatsapp')}</label>
-            <input
-              type="text"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="08xxxxxxxxxx"
-              maxLength={20}
-              className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
-            />
-            <p className="text-xs text-zinc-400">{t('settings.landing.whatsappHint')}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {(['instagram', 'tiktok', 'facebook', 'youtube', 'website'] as const).map((platform) => (
-              <div key={platform}>
-                <label className="text-xs text-zinc-500 mb-1 block capitalize">{platform}</label>
+            <div className="flex items-center gap-2 p-2.5 bg-zinc-50 dark:bg-zinc-800 rounded-md text-sm">
+              <span className="text-zinc-500 truncate flex-1">{landingUrl}</span>
+              <button type="button" onClick={handleCopyUrl} className="text-primary hover:underline text-xs">
+                <Copy size={14} />
+              </button>
+              <a
+                href={landingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`text-primary text-xs ${!settings?.landing_enabled ? 'pointer-events-none opacity-40' : ''}`}
+              >
+                <ExternalLink size={14} />
+              </a>
+            </div>
+          </Card>
+
+          {/* Hero Content */}
+          <Card id="landing-hero">
+            <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">Hero</h3>
+            <SectionIllustration sectionKey="hero" />
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-zinc-500 mb-1 block">{t('settings.landing.tagline')}</label>
                 <input
                   type="text"
-                  value={social[platform] ?? ''}
-                  onChange={(e) => setSocial({ ...social, [platform]: e.target.value })}
-                  placeholder={platform === 'instagram' || platform === 'tiktok' ? '@username' : 'https://...'}
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                  placeholder={t('settings.landing.taglinePlaceholder')}
+                  maxLength={200}
+                  className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
+                />
+                <p className="text-xs text-zinc-400 text-right">{tagline.length}/200</p>
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 mb-1 block">{t('settings.landing.ctaText')}</label>
+                <input
+                  type="text"
+                  value={ctaText}
+                  onChange={(e) => setCtaText(e.target.value)}
+                  placeholder={t('settings.landing.ctaDefault')}
+                  maxLength={50}
                   className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
                 />
               </div>
-            ))}
+            </div>
+          </Card>
+
+          {/* About */}
+          <Card id="landing-about">
+            <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.about')}</h3>
+            <SectionIllustration sectionKey="about" />
+            <textarea
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
+              placeholder={t('settings.landing.aboutPlaceholder')}
+              maxLength={2000}
+              rows={4}
+              className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md resize-none"
+            />
+            <p className="text-xs text-zinc-400 text-right">{about.length}/2000</p>
+          </Card>
+
+          {/* Features */}
+          <Card id="landing-features">
+            <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.features')}</h3>
+            <SectionIllustration sectionKey="features" />
+            <FeatureRepeater features={features} onChange={setFeatures} />
+          </Card>
+
+          {/* Gallery */}
+          <Card id="landing-gallery">
+            <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.gallery')}</h3>
+            <SectionIllustration sectionKey="gallery" />
+            <GalleryUploader images={gallery} onChange={setGallery} />
+          </Card>
+
+          {/* Contact & Social */}
+          <Card id="landing-contact">
+            <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.socialLinks')}</h3>
+            <SectionIllustration sectionKey="contact" />
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-zinc-500 mb-1 block">{t('settings.landing.whatsapp')}</label>
+                <input
+                  type="text"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="08xxxxxxxxxx"
+                  maxLength={20}
+                  className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
+                />
+                <p className="text-xs text-zinc-400">{t('settings.landing.whatsappHint')}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {(['instagram', 'tiktok', 'facebook', 'youtube', 'website'] as const).map((platform) => (
+                  <div key={platform}>
+                    <label className="text-xs text-zinc-500 mb-1 block capitalize">{platform}</label>
+                    <input
+                      type="text"
+                      value={social[platform] ?? ''}
+                      onChange={(e) => setSocial({ ...social, [platform]: e.target.value })}
+                      placeholder={platform === 'instagram' || platform === 'tiktok' ? '@username' : 'https://...'}
+                      className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* Save button */}
+          <div className="flex justify-end">
+            <Button onClick={handleSave}>{t('common.save')}</Button>
           </div>
         </div>
-      </Card>
-
-      {/* Save button */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave}>{t('common.save')}</Button>
       </div>
 
       <ConfirmChangesModal
