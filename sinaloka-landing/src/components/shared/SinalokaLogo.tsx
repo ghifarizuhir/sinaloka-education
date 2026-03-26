@@ -5,6 +5,7 @@ export function SinalokaLogo({ size = 32, className }: { size?: number; classNam
       height={size}
       viewBox="0 0 512 512"
       className={className}
+      role="img"
       aria-label="Sinaloka logo"
     >
       <defs>

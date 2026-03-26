@@ -17,8 +17,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav
-      aria-label="Navigasi utama"
+    <header
       className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-300",
         scrolled
@@ -26,6 +25,7 @@ export function Navbar() {
           : "bg-transparent"
       )}
     >
+    <nav aria-label="Navigasi utama">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <a
           href="#"
@@ -84,6 +84,7 @@ export function Navbar() {
           )}
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Menu"
+          aria-expanded={mobileOpen}
         >
           {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -123,5 +124,6 @@ export function Navbar() {
         )}
       </AnimatePresence>
     </nav>
+    </header>
   );
 }

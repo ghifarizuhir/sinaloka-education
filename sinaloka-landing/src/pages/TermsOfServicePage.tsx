@@ -1,16 +1,43 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { WHATSAPP_URL } from "../lib/constants";
+import { PageMeta } from "../components/shared/PageMeta";
 
 export default function TermsOfServicePage() {
-  useEffect(() => {
-    document.title = "Syarat & Ketentuan — Sinaloka";
-  }, []);
-
   return (
     <div className="min-h-screen bg-white font-[Plus_Jakarta_Sans,sans-serif]">
+      <PageMeta
+        title="Syarat & Ketentuan — Sinaloka"
+        description="Syarat dan ketentuan penggunaan Sinaloka, platform manajemen lembaga bimbingan belajar berbasis SaaS di Indonesia."
+        canonicalPath="/terms"
+      />
+
+      {/* Structured Data: Organization */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sinaloka",
+        "url": "https://sinaloka.com",
+        "logo": "https://sinaloka.com/favicon.svg",
+        "description": "Platform manajemen bimbingan belajar untuk mengelola siswa, tutor, jadwal, dan pembayaran.",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "sales",
+          "url": "https://wa.me/6285121094946",
+          "availableLanguage": "Indonesian",
+        },
+      }) }} />
+
+      {/* Structured Data: BreadcrumbList */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Beranda", "item": "https://sinaloka.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Syarat & Ketentuan", "item": "https://sinaloka.com/terms" },
+        ],
+      }) }} />
+
       <div className="max-w-3xl mx-auto px-6 py-12">
-        {/* Back link */}
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-800 transition-colors mb-10"

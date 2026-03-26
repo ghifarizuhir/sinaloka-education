@@ -1,14 +1,42 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { WHATSAPP_URL } from "../lib/constants";
+import { PageMeta } from "../components/shared/PageMeta";
 
 export default function PrivacyPolicyPage() {
-  useEffect(() => {
-    document.title = "Kebijakan Privasi — Sinaloka";
-  }, []);
-
   return (
     <div className="min-h-screen bg-white font-[Plus_Jakarta_Sans,sans-serif] text-zinc-800">
+      <PageMeta
+        title="Kebijakan Privasi — Sinaloka"
+        description="Kebijakan privasi Sinaloka: bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi data pengguna platform manajemen bimbel."
+        canonicalPath="/privacy"
+      />
+
+      {/* Structured Data: Organization */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sinaloka",
+        "url": "https://sinaloka.com",
+        "logo": "https://sinaloka.com/favicon.svg",
+        "description": "Platform manajemen bimbingan belajar untuk mengelola siswa, tutor, jadwal, dan pembayaran.",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "sales",
+          "url": "https://wa.me/6285121094946",
+          "availableLanguage": "Indonesian",
+        },
+      }) }} />
+
+      {/* Structured Data: BreadcrumbList */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Beranda", "item": "https://sinaloka.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Kebijakan Privasi", "item": "https://sinaloka.com/privacy" },
+        ],
+      }) }} />
+
       <div className="mx-auto max-w-3xl px-6 py-12">
         <Link
           to="/"
