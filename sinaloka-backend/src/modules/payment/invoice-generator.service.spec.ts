@@ -90,23 +90,6 @@ describe('InvoiceGeneratorService', () => {
 
       await service.generatePerSessionPayment(params);
 
-      expect(mockPrisma.payment.findFirst).not.toHaveBeenCalled();
-    });
-
-    it('should return early when duplicate payment already exists', async () => {
-      mockPrisma.institution.findUnique.mockResolvedValue({
-        billing_mode: 'PER_SESSION',
-      });
-      mockPrisma.session.findFirst.mockResolvedValue({
-        date: new Date('2026-03-15'),
-      });
-      mockPrisma.enrollment.findFirst.mockResolvedValue({ id: enrollmentId });
-      mockPrisma.payment.findFirst.mockResolvedValue({
-        id: 'existing-payment',
-      });
-
-      await service.generatePerSessionPayment(params);
-
       expect(mockPrisma.class.findFirst).not.toHaveBeenCalled();
     });
 
@@ -118,7 +101,6 @@ describe('InvoiceGeneratorService', () => {
         date: new Date('2026-03-15'),
       });
       mockPrisma.enrollment.findFirst.mockResolvedValue({ id: enrollmentId });
-      mockPrisma.payment.findFirst.mockResolvedValue(null);
       mockPrisma.class.findFirst.mockResolvedValue(null);
 
       await service.generatePerSessionPayment(params);
@@ -126,7 +108,7 @@ describe('InvoiceGeneratorService', () => {
       expect(mockPrisma.payment.create).not.toHaveBeenCalled();
     });
 
-    it('should create a PENDING payment with correct data on happy path', async () => {
+    it('should create a PENDING payment with billing_period for dedup', async () => {
       const sessionDate = new Date('2026-03-15');
       const fee = 150000;
 
@@ -135,7 +117,6 @@ describe('InvoiceGeneratorService', () => {
       });
       mockPrisma.session.findFirst.mockResolvedValue({ date: sessionDate });
       mockPrisma.enrollment.findFirst.mockResolvedValue({ id: enrollmentId });
-      mockPrisma.payment.findFirst.mockResolvedValue(null);
       mockPrisma.class.findFirst.mockResolvedValue({ fee });
       mockPrisma.payment.create.mockResolvedValue({ id: 'new-payment' });
 
@@ -148,13 +129,30 @@ describe('InvoiceGeneratorService', () => {
           enrollment_id: enrollmentId,
           amount: fee,
           due_date: sessionDate,
+          billing_period: `session-${sessionId}`,
           status: 'PENDING',
           notes: 'Auto: Session 2026-03-15',
         },
       });
     });
 
-    it('should swallow errors and resolve when prisma throws', async () => {
+    it('should silently return on P2002 duplicate (constraint-based dedup)', async () => {
+      mockPrisma.institution.findUnique.mockResolvedValue({
+        billing_mode: 'PER_SESSION',
+      });
+      mockPrisma.session.findFirst.mockResolvedValue({
+        date: new Date('2026-03-15'),
+      });
+      mockPrisma.enrollment.findFirst.mockResolvedValue({ id: enrollmentId });
+      mockPrisma.class.findFirst.mockResolvedValue({ fee: 150000 });
+      mockPrisma.payment.create.mockRejectedValue({ code: 'P2002' });
+
+      await expect(
+        service.generatePerSessionPayment(params),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should swallow non-P2002 errors and resolve', async () => {
       mockPrisma.institution.findUnique.mockRejectedValue(
         new Error('DB connection lost'),
       );

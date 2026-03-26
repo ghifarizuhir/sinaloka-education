@@ -53,23 +53,14 @@ export class InvoiceGeneratorService {
       });
       if (!enrollment) return;
 
-      // Per-session uses notes-based dedup (billing_period is null).
-      // @@unique([enrollment_id, billing_period]) does NOT protect when billing_period is NULL.
-      // This is intentional — per-session dedup uses notes; monthly uses billing_period.
-      const existing = await this.prisma.payment.findFirst({
-        where: {
-          enrollment_id: enrollment.id,
-          notes: { contains: `Auto: Session ${sessionDateStr}` },
-        },
-      });
-      if (existing) return;
-
       const classRecord = await this.prisma.class.findFirst({
         where: { id: params.classId, institution_id: params.institutionId },
         select: { fee: true },
       });
       if (!classRecord) return;
 
+      // Dedup via @@unique([enrollment_id, billing_period]) constraint.
+      // billing_period = "session-{sessionId}" ensures uniqueness per session.
       await this.prisma.payment.create({
         data: {
           institution_id: params.institutionId,
@@ -77,6 +68,7 @@ export class InvoiceGeneratorService {
           enrollment_id: enrollment.id,
           amount: classRecord.fee,
           due_date: session.date,
+          billing_period: `session-${params.sessionId}`,
           status: 'PENDING',
           notes: `Auto: Session ${sessionDateStr}`,
         },
@@ -85,7 +77,8 @@ export class InvoiceGeneratorService {
       this.logger.log(
         `Per-session payment created: student=${params.studentId}, session=${sessionDateStr}`,
       );
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'P2002') return; // Duplicate — already created
       this.logger.error(`Failed to generate per-session payment: ${error}`);
     }
   }
