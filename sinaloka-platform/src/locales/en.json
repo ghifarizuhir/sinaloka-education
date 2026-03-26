@@ -1439,6 +1439,8 @@
       "saveFailed": "Failed to save settings",
       "uploadFailed": "Failed to upload image",
       "deleteFailed": "Failed to delete image",
+      "unsavedChanges": "You have unsaved changes",
+      "sections": "Sections",
       "hints": {
         "hero": "The main banner at the top of your landing page. Visitors see this first.",
         "about": "Your institution description displayed in the middle of the page.",
