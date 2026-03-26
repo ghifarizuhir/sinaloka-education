@@ -96,3 +96,41 @@ export const UpdateRegistrationSettingsSchema = z.object({
 export type UpdateRegistrationSettingsDto = z.infer<
   typeof UpdateRegistrationSettingsSchema
 >;
+
+// ─── Landing Page ───────────────────────────────────────
+
+const LandingFeatureSchema = z.object({
+  id: z.string().uuid(),
+  icon: z.string().min(1).max(30),
+  title: z.string().min(1).max(50),
+  description: z.string().min(1).max(120),
+});
+
+const GalleryImageSchema = z.object({
+  id: z.string().uuid(),
+  url: z.string().url(),
+  caption: z.string().max(100).optional(),
+  order: z.number().int().min(0).max(5),
+});
+
+const SocialLinksSchema = z.object({
+  instagram: z.string().max(200).optional(),
+  tiktok: z.string().max(200).optional(),
+  facebook: z.string().max(200).optional(),
+  youtube: z.string().max(200).optional(),
+  website: z.string().url().max(200).optional(),
+});
+
+export const UpdateLandingSettingsSchema = z.object({
+  landing_enabled: z.boolean().optional(),
+  landing_tagline: z.string().max(200).optional().nullable(),
+  landing_about: z.string().max(2000).optional().nullable(),
+  landing_cta_text: z.string().max(50).optional().nullable(),
+  whatsapp_number: z.string().max(20).optional().nullable(),
+  landing_features: z.array(LandingFeatureSchema).max(4).optional().nullable(),
+  gallery_images: z.array(GalleryImageSchema).max(6).optional().nullable(),
+  social_links: SocialLinksSchema.optional().nullable(),
+});
+export type UpdateLandingSettingsDto = z.infer<
+  typeof UpdateLandingSettingsSchema
+>;
