@@ -230,16 +230,15 @@ export class AuditLogInterceptor implements NestInterceptor {
       const modelName = RESOURCE_TO_MODEL[resourceType];
       if (!modelName) return null;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const delegate = (this.prisma as unknown as Record<string, any>)[
         modelName
       ];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       if (!delegate?.findFirst) return null;
 
       // Use findFirst with both id and institution_id for tenant isolation
       // Models without institution_id will simply ignore the extra filter
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
       return await delegate.findFirst({
         where: {
           id: resourceId,

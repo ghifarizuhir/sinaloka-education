@@ -34,13 +34,24 @@ describe('PayoutService', () => {
   describe('create', () => {
     it('should create a payout', async () => {
       const dto = { tutor_id: 't1', amount: 500, date: new Date() } as any;
-      mockPrisma.payout.create.mockResolvedValue({ id: 'po1', ...dto });
+      mockPrisma.payout.create.mockResolvedValue({
+        id: 'po1',
+        ...dto,
+        institution_id: institutionId,
+        tutor: {
+          id: 't1',
+          bank_name: 'BCA',
+          bank_account_number: '123',
+          user: { name: 'Tutor One' },
+        },
+      });
 
       const result = await service.create(institutionId, dto);
 
       expect(result.id).toBe('po1');
       expect(mockPrisma.payout.create).toHaveBeenCalledWith({
         data: { ...dto, institution_id: institutionId },
+        include: { tutor: { include: { user: { select: { name: true } } } } },
       });
     });
   });
@@ -57,7 +68,10 @@ describe('PayoutService', () => {
         sort_order: 'desc',
       });
 
-      expect(result).toEqual({ data: [], total: 0, page: 1, limit: 20 });
+      expect(result.data).toEqual([]);
+      expect(result.meta.total).toBe(0);
+      expect(result.meta.page).toBe(1);
+      expect(result.meta.limit).toBe(20);
     });
 
     it('should filter by tutor_id', async () => {
@@ -101,7 +115,16 @@ describe('PayoutService', () => {
 
   describe('findOne', () => {
     it('should return a payout by id', async () => {
-      const payout = { id: 'po1', institution_id: institutionId };
+      const payout = {
+        id: 'po1',
+        institution_id: institutionId,
+        tutor: {
+          id: 't1',
+          bank_name: 'BCA',
+          bank_account_number: '123',
+          user: { name: 'Tutor One' },
+        },
+      };
       mockPrisma.payout.findFirst.mockResolvedValue(payout);
 
       const result = await service.findOne(institutionId, 'po1');
@@ -123,8 +146,23 @@ describe('PayoutService', () => {
       mockPrisma.payout.findFirst.mockResolvedValue({
         id: 'po1',
         institution_id: institutionId,
+        tutor: {
+          id: 't1',
+          bank_name: 'BCA',
+          bank_account_number: '123',
+          user: { name: 'Tutor One' },
+        },
       });
-      mockPrisma.payout.update.mockResolvedValue({ id: 'po1', status: 'PAID' });
+      mockPrisma.payout.update.mockResolvedValue({
+        id: 'po1',
+        status: 'PAID',
+        tutor: {
+          id: 't1',
+          bank_name: 'BCA',
+          bank_account_number: '123',
+          user: { name: 'Tutor One' },
+        },
+      });
 
       const result = await service.update(institutionId, 'po1', {
         status: 'PAID',
@@ -139,6 +177,12 @@ describe('PayoutService', () => {
       mockPrisma.payout.findFirst.mockResolvedValue({
         id: 'po1',
         institution_id: institutionId,
+        tutor: {
+          id: 't1',
+          bank_name: 'BCA',
+          bank_account_number: '123',
+          user: { name: 'Tutor One' },
+        },
       });
       mockPrisma.payout.delete.mockResolvedValue({ id: 'po1' });
 
@@ -161,6 +205,7 @@ describe('PayoutService', () => {
       });
 
       expect(result.data).toEqual([]);
+      expect(result.meta.total).toBe(0);
       expect(mockPrisma.payout.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { institution_id: institutionId, tutor_id: 't1' },

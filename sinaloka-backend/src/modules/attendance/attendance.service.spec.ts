@@ -28,6 +28,9 @@ describe('AttendanceService', () => {
     tutor: {
       findFirst: jest.fn(),
     },
+    user: {
+      findUnique: jest.fn().mockResolvedValue({ name: 'Tutor Name' }),
+    },
     $transaction: jest.fn((fn: any) => fn(mockPrisma)),
   };
 
@@ -225,6 +228,13 @@ describe('AttendanceService', () => {
         id: 'att-1',
         institution_id: institutionId,
         status: 'PRESENT',
+        student_id: 'student-1',
+        session_id: 'session-uuid-1',
+        session: {
+          status: 'SCHEDULED',
+          date: new Date('2099-05-01'),
+          class_id: 'class-1',
+        },
       };
       mockPrisma.attendance.findUnique.mockResolvedValue(existing);
 
@@ -332,14 +342,57 @@ describe('AttendanceService', () => {
 
     it('should return summary and records for a student', async () => {
       const mockRecords = [
-        { id: 'att-1', status: 'PRESENT', student_id: studentId, session: { id: 's1', date: '2026-03-20', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', snapshot_class_name: null, class: { id: 'c1', name: 'Math' } } },
-        { id: 'att-2', status: 'ABSENT', student_id: studentId, session: { id: 's2', date: '2026-03-18', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', snapshot_class_name: 'Old Math', class: { id: 'c1', name: 'Math' } } },
-        { id: 'att-3', status: 'LATE', student_id: studentId, session: { id: 's3', date: '2026-03-15', start_time: '10:00', end_time: '11:00', status: 'COMPLETED', snapshot_class_name: null, class: { id: 'c1', name: 'Math' } } },
+        {
+          id: 'att-1',
+          status: 'PRESENT',
+          student_id: studentId,
+          session: {
+            id: 's1',
+            date: '2026-03-20',
+            start_time: '10:00',
+            end_time: '11:00',
+            status: 'COMPLETED',
+            snapshot_class_name: null,
+            class: { id: 'c1', name: 'Math' },
+          },
+        },
+        {
+          id: 'att-2',
+          status: 'ABSENT',
+          student_id: studentId,
+          session: {
+            id: 's2',
+            date: '2026-03-18',
+            start_time: '10:00',
+            end_time: '11:00',
+            status: 'COMPLETED',
+            snapshot_class_name: 'Old Math',
+            class: { id: 'c1', name: 'Math' },
+          },
+        },
+        {
+          id: 'att-3',
+          status: 'LATE',
+          student_id: studentId,
+          session: {
+            id: 's3',
+            date: '2026-03-15',
+            start_time: '10:00',
+            end_time: '11:00',
+            status: 'COMPLETED',
+            snapshot_class_name: null,
+            class: { id: 'c1', name: 'Math' },
+          },
+        },
       ];
 
       mockPrisma.attendance.findMany.mockResolvedValue(mockRecords);
 
-      const result = await service.findByStudent(institutionId, studentId, query);
+      const result = await service.findByStudent(
+        institutionId,
+        studentId,
+        query,
+      );
 
       expect(result.summary).toEqual({
         total_sessions: 3,
@@ -377,7 +430,11 @@ describe('AttendanceService', () => {
     it('should return zero rate when no records exist', async () => {
       mockPrisma.attendance.findMany.mockResolvedValue([]);
 
-      const result = await service.findByStudent(institutionId, studentId, query);
+      const result = await service.findByStudent(
+        institutionId,
+        studentId,
+        query,
+      );
 
       expect(result.summary).toEqual({
         total_sessions: 0,

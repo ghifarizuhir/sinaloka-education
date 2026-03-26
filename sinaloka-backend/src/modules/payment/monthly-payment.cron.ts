@@ -12,7 +12,7 @@ export class MonthlyPaymentCron {
     private readonly invoiceGenerator: InvoiceGeneratorService,
   ) {}
 
-  @Cron('0 0 1 * *')
+  @Cron('0 0 1 * *', { timeZone: 'Asia/Jakarta' })
   async generateMonthlyPayments() {
     this.logger.log('Starting monthly payment generation...');
     const institutions = await this.prisma.institution.findMany({
@@ -22,13 +22,21 @@ export class MonthlyPaymentCron {
     let totalCreated = 0;
     for (const institution of institutions) {
       try {
-        const result = await this.invoiceGenerator.generateMonthlyPayments({ institutionId: institution.id });
+        const result = await this.invoiceGenerator.generateMonthlyPayments({
+          institutionId: institution.id,
+        });
         totalCreated += result.created;
-        this.logger.log(`${institution.name}: ${result.created} payments created`);
+        this.logger.log(
+          `${institution.name}: ${result.created} payments created`,
+        );
       } catch (error) {
-        this.logger.error(`Failed for ${institution.name} (${institution.id}): ${error}`);
+        this.logger.error(
+          `Failed for ${institution.name} (${institution.id}): ${error}`,
+        );
       }
     }
-    this.logger.log(`Monthly payment generation complete. Total: ${totalCreated} payments across ${institutions.length} institutions.`);
+    this.logger.log(
+      `Monthly payment generation complete. Total: ${totalCreated} payments across ${institutions.length} institutions.`,
+    );
   }
 }

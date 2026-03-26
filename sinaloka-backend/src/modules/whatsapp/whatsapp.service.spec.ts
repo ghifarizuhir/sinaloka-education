@@ -10,6 +10,9 @@ jest.mock('../../common/prisma/prisma.service', () => {
 
 import { WhatsappService } from './whatsapp.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { PaymentGatewayService } from '../payment/payment-gateway.service.js';
+
+const mockPaymentGatewayService = { getOrCreateCheckoutUrl: jest.fn() };
 
 describe('WhatsappService', () => {
   let service: WhatsappService;
@@ -52,6 +55,7 @@ describe('WhatsappService', () => {
           provide: ConfigService,
           useValue: { get: (key: string) => configValues[key] },
         },
+        { provide: PaymentGatewayService, useValue: mockPaymentGatewayService },
       ],
     }).compile();
 
@@ -77,6 +81,10 @@ describe('WhatsappService', () => {
           {
             provide: ConfigService,
             useValue: { get: (key: string) => emptyConfig[key] },
+          },
+          {
+            provide: PaymentGatewayService,
+            useValue: mockPaymentGatewayService,
           },
         ],
       }).compile();

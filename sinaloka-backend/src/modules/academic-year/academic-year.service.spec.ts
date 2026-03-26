@@ -286,7 +286,9 @@ describe('AcademicYearService', () => {
       await expect(
         service.createSemester(tenantId, 'year-1', dto),
       ).rejects.toThrow(
-        new ConflictException('Semester name already exists in this academic year'),
+        new ConflictException(
+          'Semester name already exists in this academic year',
+        ),
       );
       expect(prisma.semester.create).not.toHaveBeenCalled();
     });
@@ -301,10 +303,16 @@ describe('AcademicYearService', () => {
         academic_year: mockYear,
       };
       prisma.semester.findFirst.mockResolvedValue(semesterWithYear);
-      prisma.semester.update.mockResolvedValue({ ...mockSemester, status: 'ARCHIVED' });
+      prisma.semester.update.mockResolvedValue({
+        ...mockSemester,
+        status: 'ARCHIVED',
+      });
       prisma.class.updateMany.mockResolvedValue({ count: 0 });
       prisma.semester.count.mockResolvedValue(0); // no remaining active semesters
-      prisma.academicYear.update.mockResolvedValue({ ...mockYear, status: 'ARCHIVED' });
+      prisma.academicYear.update.mockResolvedValue({
+        ...mockYear,
+        status: 'ARCHIVED',
+      });
 
       const result = await service.archiveSemester(tenantId, 'sem-1');
 
@@ -321,7 +329,10 @@ describe('AcademicYearService', () => {
         academic_year: mockYear,
       };
       prisma.semester.findFirst.mockResolvedValue(semesterWithYear);
-      prisma.semester.update.mockResolvedValue({ ...mockSemester, status: 'ARCHIVED' });
+      prisma.semester.update.mockResolvedValue({
+        ...mockSemester,
+        status: 'ARCHIVED',
+      });
       prisma.class.updateMany.mockResolvedValue({ count: 0 });
       prisma.semester.count.mockResolvedValue(1); // 1 active semester remains
 
@@ -455,7 +466,9 @@ describe('AcademicYearService', () => {
       const dto = { source_semester_id: 'sem-1' };
 
       await expect(service.rollOver(tenantId, 'sem-2', dto)).rejects.toThrow(
-        new BadRequestException('No classes found in source semester to roll over'),
+        new BadRequestException(
+          'No classes found in source semester to roll over',
+        ),
       );
       expect(prisma.class.create).not.toHaveBeenCalled();
     });

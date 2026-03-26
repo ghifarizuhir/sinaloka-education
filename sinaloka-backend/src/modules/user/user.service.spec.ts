@@ -149,12 +149,11 @@ describe('UserService', () => {
         email: 'new@test.com',
       });
 
-      const result = await service.create({
+      const result = await service.create('inst-1', {
         name: 'New User',
         email: 'new@test.com',
         password: 'password123',
         role: 'ADMIN',
-        institution_id: 'inst-1',
       });
 
       expect(prisma.user.create).toHaveBeenCalledWith(
@@ -162,6 +161,7 @@ describe('UserService', () => {
           data: expect.objectContaining({
             password_hash: '$2b$10$hashed',
             email: 'new@test.com',
+            institution_id: 'inst-1',
           }),
         }),
       );
@@ -171,7 +171,7 @@ describe('UserService', () => {
       prisma.user.findUnique.mockResolvedValue(mockUser); // email taken
 
       await expect(
-        service.create({
+        service.create('inst-1', {
           name: 'New User',
           email: 'test@test.com',
           password: 'password123',

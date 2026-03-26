@@ -8,6 +8,7 @@ jest.mock('../../common/prisma/prisma.service', () => {
 
 import { StudentService } from './student.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('StudentService CSV', () => {
   let service: StudentService;
@@ -37,7 +38,11 @@ describe('StudentService CSV', () => {
     };
 
     const mod: TestingModule = await Test.createTestingModule({
-      providers: [StudentService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        StudentService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+      ],
     }).compile();
     service = mod.get(StudentService);
     jest.clearAllMocks();
@@ -46,7 +51,7 @@ describe('StudentService CSV', () => {
   describe('importFromCsv', () => {
     it('creates valid rows and returns errors for invalid ones', async () => {
       const csv =
-        'name,grade,email\nAlice,Grade 5,alice@test.com\n,Grade 5,bad\nBob,Grade 6,';
+        'name,grade,email,parent_name,parent_phone\nAlice,Grade 5,alice@test.com,Mrs Alice,081234567890\n,Grade 5,bad,Mrs Bad,081234567891\nBob,Grade 6,,Mrs Bob,081234567892';
       const buf = Buffer.from(csv);
       prisma.student.createMany.mockResolvedValue({ count: 2 });
       const result = await service.importFromCsv(buf, 'inst-1');
@@ -56,7 +61,7 @@ describe('StudentService CSV', () => {
     });
 
     it('returns all errors when CSV is entirely invalid', async () => {
-      const csv = 'name,grade\n,\n,';
+      const csv = 'name,grade,parent_name,parent_phone\n,,,\n,,,';
       const buf = Buffer.from(csv);
       const result = await service.importFromCsv(buf, 'inst-1');
       expect(result.created).toBe(0);
@@ -64,7 +69,7 @@ describe('StudentService CSV', () => {
     });
 
     it('handles empty CSV with only headers', async () => {
-      const csv = 'name,grade,email';
+      const csv = 'name,grade,email,parent_name,parent_phone';
       const buf = Buffer.from(csv);
       const result = await service.importFromCsv(buf, 'inst-1');
       expect(result.created).toBe(0);
@@ -72,7 +77,8 @@ describe('StudentService CSV', () => {
     });
 
     it('sets institution_id on all valid records', async () => {
-      const csv = 'name,grade\nAlice,Grade 5';
+      const csv =
+        'name,grade,parent_name,parent_phone\nAlice,Grade 5,Mrs Alice,081234567890';
       const buf = Buffer.from(csv);
       prisma.student.createMany.mockResolvedValue({ count: 1 });
       await service.importFromCsv(buf, 'inst-xyz');

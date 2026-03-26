@@ -10,6 +10,7 @@ import { AuthModule } from '../auth/auth.module.js';
 import { ExpenseModule } from './expense.module.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 describe('ExpenseController (integration)', () => {
   let app: INestApplication;
@@ -24,6 +25,7 @@ describe('ExpenseController (integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         PrismaModule,
         AuthModule,
         ExpenseModule,

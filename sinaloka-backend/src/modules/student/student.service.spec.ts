@@ -9,6 +9,7 @@ jest.mock('../../common/prisma/prisma.service', () => {
 
 import { StudentService } from './student.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('StudentService', () => {
   let service: StudentService;
@@ -49,10 +50,24 @@ describe('StudentService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
-    };
+      institution: {
+        findUnique: jest.fn().mockResolvedValue({
+          plan_type: 'FREE',
+          plan_limit_reached_at: null,
+        }),
+        update: jest.fn(),
+      },
+      tutor: {
+        count: jest.fn().mockResolvedValue(0),
+      },
+    } as any;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [StudentService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        StudentService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+      ],
     }).compile();
 
     service = module.get<StudentService>(StudentService);

@@ -40,7 +40,8 @@ export class AcademicYearController {
   @Post()
   async createYear(
     @InstitutionId() institutionId: string,
-    @Body(new ZodValidationPipe(CreateAcademicYearSchema)) dto: CreateAcademicYearDto,
+    @Body(new ZodValidationPipe(CreateAcademicYearSchema))
+    dto: CreateAcademicYearDto,
   ) {
     return this.service.createYear(institutionId, dto);
   }
@@ -48,7 +49,8 @@ export class AcademicYearController {
   @Get()
   async findAllYears(
     @InstitutionId() institutionId: string,
-    @Query(new ZodValidationPipe(AcademicYearQuerySchema)) query: AcademicYearQueryDto,
+    @Query(new ZodValidationPipe(AcademicYearQuerySchema))
+    query: AcademicYearQueryDto,
   ) {
     return this.service.findAllYears(institutionId, query);
   }
@@ -65,7 +67,8 @@ export class AcademicYearController {
   async updateYear(
     @InstitutionId() institutionId: string,
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(UpdateAcademicYearSchema)) dto: UpdateAcademicYearDto,
+    @Body(new ZodValidationPipe(UpdateAcademicYearSchema))
+    dto: UpdateAcademicYearDto,
   ) {
     return this.service.updateYear(institutionId, id, dto);
   }

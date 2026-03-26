@@ -40,6 +40,9 @@ describe('ReportService', () => {
     student: {
       findFirstOrThrow: jest.fn().mockResolvedValue({ id: 's1', name: 'Ali' }),
     },
+    institution: {
+      findUnique: jest.fn().mockResolvedValue({ default_language: 'id' }),
+    },
   };
 
   const instId = 'inst-uuid';

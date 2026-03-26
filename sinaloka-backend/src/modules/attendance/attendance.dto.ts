@@ -42,4 +42,6 @@ export const StudentAttendanceQuerySchema = z.object({
   date_from: z.coerce.date(),
   date_to: z.coerce.date(),
 });
-export type StudentAttendanceQueryDto = z.infer<typeof StudentAttendanceQuerySchema>;
+export type StudentAttendanceQueryDto = z.infer<
+  typeof StudentAttendanceQuerySchema
+>;

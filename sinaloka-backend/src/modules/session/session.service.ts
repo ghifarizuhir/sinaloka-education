@@ -74,15 +74,22 @@ export class SessionService {
       class: session.class
         ? {
             ...session.class,
-            subject: session.snapshot_subject_name ?? session.class.subject?.name ?? null,
+            subject:
+              session.snapshot_subject_name ??
+              session.class.subject?.name ??
+              null,
             name: session.snapshot_class_name ?? session.class.name,
             fee: Number(session.snapshot_class_fee ?? session.class.fee),
             room: session.snapshot_class_room ?? session.class.room ?? null,
-            tutor_fee_mode: session.snapshot_tutor_fee_mode ?? session.class.tutor_fee_mode,
+            tutor_fee_mode:
+              session.snapshot_tutor_fee_mode ?? session.class.tutor_fee_mode,
             tutor: session.snapshot_tutor_id
               ? {
                   id: session.snapshot_tutor_id,
-                  name: session.snapshot_tutor_name ?? session.class.tutor?.user?.name ?? null,
+                  name:
+                    session.snapshot_tutor_name ??
+                    session.class.tutor?.user?.name ??
+                    null,
                 }
               : session.class.tutor
                 ? {
@@ -218,15 +225,22 @@ export class SessionService {
       class: session.class
         ? {
             ...session.class,
-            subject: session.snapshot_subject_name ?? session.class.subject?.name ?? null,
+            subject:
+              session.snapshot_subject_name ??
+              session.class.subject?.name ??
+              null,
             name: session.snapshot_class_name ?? session.class.name,
             fee: Number(session.snapshot_class_fee ?? session.class.fee),
             room: session.snapshot_class_room ?? session.class.room ?? null,
-            tutor_fee_mode: session.snapshot_tutor_fee_mode ?? session.class.tutor_fee_mode,
+            tutor_fee_mode:
+              session.snapshot_tutor_fee_mode ?? session.class.tutor_fee_mode,
             tutor: session.snapshot_tutor_id
               ? {
                   id: session.snapshot_tutor_id,
-                  name: session.snapshot_tutor_name ?? session.class.tutor?.user?.name ?? null,
+                  name:
+                    session.snapshot_tutor_name ??
+                    session.class.tutor?.user?.name ??
+                    null,
                   email: session.class.tutor?.user?.email ?? null,
                 }
               : session.class.tutor

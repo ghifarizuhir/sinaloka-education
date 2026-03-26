@@ -14,6 +14,7 @@ describe('ExpenseService', () => {
       update: jest.fn(),
       delete: jest.fn(),
       count: jest.fn(),
+      aggregate: jest.fn(),
     },
   };
 
@@ -49,6 +50,9 @@ describe('ExpenseService', () => {
     it('should list expenses with pagination', async () => {
       mockPrisma.expense.findMany.mockResolvedValue([]);
       mockPrisma.expense.count.mockResolvedValue(0);
+      mockPrisma.expense.aggregate.mockResolvedValue({
+        _sum: { amount: null },
+      });
 
       const result = await service.findAll(institutionId, {
         page: 1,
@@ -57,12 +61,19 @@ describe('ExpenseService', () => {
         sort_order: 'desc',
       });
 
-      expect(result).toEqual({ data: [], total: 0, page: 1, limit: 20 });
+      expect(result.data).toEqual([]);
+      expect(result.meta.total).toBe(0);
+      expect(result.meta.page).toBe(1);
+      expect(result.meta.limit).toBe(20);
+      expect(result.meta.total_amount).toBe(0);
     });
 
     it('should filter by category', async () => {
       mockPrisma.expense.findMany.mockResolvedValue([]);
       mockPrisma.expense.count.mockResolvedValue(0);
+      mockPrisma.expense.aggregate.mockResolvedValue({
+        _sum: { amount: null },
+      });
 
       await service.findAll(institutionId, {
         page: 1,
@@ -82,6 +93,9 @@ describe('ExpenseService', () => {
     it('should filter by date range', async () => {
       mockPrisma.expense.findMany.mockResolvedValue([]);
       mockPrisma.expense.count.mockResolvedValue(0);
+      mockPrisma.expense.aggregate.mockResolvedValue({
+        _sum: { amount: null },
+      });
 
       const date_from = new Date('2026-01-01');
       const date_to = new Date('2026-12-31');

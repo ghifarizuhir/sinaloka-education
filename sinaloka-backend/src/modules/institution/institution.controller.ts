@@ -67,9 +67,13 @@ export class InstitutionController {
   @Patch(':id/billing-mode')
   async overrideBillingMode(
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(z.object({
-      billing_mode: z.enum(['PER_SESSION', 'MONTHLY_FIXED']),
-    })))
+    @Body(
+      new ZodValidationPipe(
+        z.object({
+          billing_mode: z.enum(['PER_SESSION', 'MONTHLY_FIXED']),
+        }),
+      ),
+    )
     dto: { billing_mode: 'PER_SESSION' | 'MONTHLY_FIXED' },
   ) {
     return this.institutionService.overrideBillingMode(id, dto.billing_mode);

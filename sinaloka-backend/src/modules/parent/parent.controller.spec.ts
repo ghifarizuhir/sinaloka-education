@@ -11,6 +11,7 @@ import { ParentModule } from './parent.module.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { TenantInterceptor } from '../../common/interceptors/tenant.interceptor.js';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 describe('Parent (integration)', () => {
   let app: INestApplication;
@@ -23,6 +24,7 @@ describe('Parent (integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        EventEmitterModule.forRoot(),
         PrismaModule,
         AuthModule,
         ParentModule,

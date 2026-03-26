@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SessionService } from './session.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { PayoutService } from '../payout/payout.service.js';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   NotFoundException,
   BadRequestException,
@@ -40,6 +41,7 @@ describe('SessionService', () => {
   const expectedSessionInclude = {
     class: {
       include: {
+        subject: true,
         tutor: { include: { user: { select: { id: true, name: true } } } },
       },
     },
@@ -51,6 +53,7 @@ describe('SessionService', () => {
         SessionService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: PayoutService, useValue: mockPayoutService },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
       ],
     }).compile();
 
@@ -274,6 +277,7 @@ describe('SessionService', () => {
         include: {
           class: {
             include: {
+              subject: { select: { name: true } },
               tutor: {
                 include: {
                   user: { select: { id: true, name: true, email: true } },
@@ -827,7 +831,9 @@ describe('SessionService', () => {
         id: 'session-1',
         institution_id: institutionId,
         status: 'SCHEDULED',
+        date: new Date('2026-04-01'),
         class: {
+          name: 'Math A',
           tutor_id: 'tutor-uuid-1',
           fee: 100000n,
           tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
@@ -840,7 +846,12 @@ describe('SessionService', () => {
         user_id: userId,
       });
 
-      const cancelledSession = { ...session, status: 'CANCELLED' };
+      const cancelledSession = {
+        ...session,
+        status: 'CANCELLED',
+        date: new Date('2026-04-01'),
+        class: { ...session.class },
+      };
       mockPrisma.session.update.mockResolvedValue(cancelledSession);
 
       const result = await service.cancelSession(userId, 'session-1');
