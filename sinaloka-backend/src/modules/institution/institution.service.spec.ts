@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
@@ -253,6 +254,68 @@ describe('InstitutionService', () => {
       // Verify slug was NOT included in the update data
       const updateCall = prisma.institution.update.mock.calls[0][0];
       expect(updateCall.data).not.toHaveProperty('slug');
+    });
+  });
+
+  describe('update — explicit slug edit', () => {
+    it('should allow explicit slug update', async () => {
+      prisma.institution.findUnique
+        .mockResolvedValueOnce(mockInstitution) // findOne check
+        .mockResolvedValueOnce(null); // slug uniqueness check
+      prisma.institution.update.mockResolvedValue({
+        ...mockInstitution,
+        slug: 'new-slug',
+      });
+
+      await service.update('inst-1', { slug: 'new-slug' });
+
+      expect(prisma.institution.update).toHaveBeenCalledWith({
+        where: { id: 'inst-1' },
+        data: expect.objectContaining({ slug: 'new-slug' }),
+      });
+    });
+
+    it('should reject slug that is already taken', async () => {
+      prisma.institution.findUnique
+        .mockResolvedValueOnce(mockInstitution) // findOne check
+        .mockResolvedValueOnce({ id: 'other-inst', slug: 'taken-slug' }); // slug taken
+
+      await expect(
+        service.update('inst-1', { slug: 'taken-slug' }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should reject reserved slug on explicit update', async () => {
+      prisma.institution.findUnique.mockResolvedValue(mockInstitution); // findOne check
+
+      await expect(
+        service.update('inst-1', { slug: 'platform' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should no-op when slug is same as current', async () => {
+      prisma.institution.findUnique.mockResolvedValue(mockInstitution); // findOne returns institution with slug 'test-institution'
+      prisma.institution.update.mockResolvedValue(mockInstitution);
+
+      await service.update('inst-1', { slug: 'test-institution' });
+
+      // slug should not be in the update data since it's unchanged
+      const updateCall = prisma.institution.update.mock.calls[0][0];
+      expect(updateCall.data).not.toHaveProperty('slug');
+    });
+
+    it('should handle Prisma P2002 unique constraint violation gracefully', async () => {
+      prisma.institution.findUnique
+        .mockResolvedValueOnce(mockInstitution) // findOne check
+        .mockResolvedValueOnce(null); // slug appears free
+      // But update fails due to race condition
+      const prismaError = new Error('Unique constraint failed');
+      (prismaError as any).code = 'P2002';
+      prisma.institution.update.mockRejectedValue(prismaError);
+
+      await expect(
+        service.update('inst-1', { slug: 'race-condition-slug' }),
+      ).rejects.toThrow(ConflictException);
     });
   });
 

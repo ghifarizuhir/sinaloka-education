@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import type { BillingMode } from '../../../generated/prisma/client.js';
@@ -124,14 +125,49 @@ export class InstitutionService {
   }
 
   async update(id: string, dto: UpdateInstitutionDto) {
-    await this.findOne(id); // throws NotFoundException if not found
+    const institution = await this.findOne(id); // throws NotFoundException if not found
 
     const data: Record<string, unknown> = { ...dto };
 
-    return this.prisma.institution.update({
-      where: { id },
-      data,
-    });
+    if (dto.slug !== undefined) {
+      // No-op if slug is unchanged
+      if (dto.slug === institution.slug) {
+        delete data.slug;
+      } else {
+        // Check reserved slugs (defense-in-depth, DTO also validates)
+        if (RESERVED_SLUGS.includes(dto.slug as any)) {
+          throw new BadRequestException(
+            `Slug "${dto.slug}" is reserved and cannot be used.`,
+          );
+        }
+
+        // Check uniqueness
+        const existing = await this.prisma.institution.findUnique({
+          where: { slug: dto.slug },
+        });
+        if (existing && existing.id !== id) {
+          throw new ConflictException(
+            `Slug "${dto.slug}" is already in use.`,
+          );
+        }
+
+        data.slug = dto.slug;
+      }
+    }
+
+    try {
+      return await this.prisma.institution.update({
+        where: { id },
+        data,
+      });
+    } catch (error: any) {
+      if (error?.code === 'P2002') {
+        throw new ConflictException(
+          'Slug is already in use (concurrent update detected).',
+        );
+      }
+      throw error;
+    }
   }
 
   async remove(id: string) {
