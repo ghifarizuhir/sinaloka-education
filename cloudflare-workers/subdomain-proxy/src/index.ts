@@ -30,7 +30,7 @@ const SUBDOMAIN_ORIGINS: Record<string, string> = {
 
 // Subdomains that are NOT frontend apps — let Cloudflare handle them directly
 // api → Railway backend, www/mail/ftp → other services
-const PASSTHROUGH_SUBDOMAINS = new Set(['api', 'www', 'mail', 'ftp']);
+const PASSTHROUGH_SUBDOMAINS = new Set(['api', 'www', 'mail', 'ftp', 'cdn']);
 
 // Institution subdomains are proxied to the platform Pages project
 const DEFAULT_ORIGIN = 'https://sinaloka-platform.pages.dev';
