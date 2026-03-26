@@ -1434,6 +1434,7 @@
       "name": "Nama",
       "namePlaceholder": "contoh: Sinaloka Academy",
       "slug": "Slug",
+      "slugWarning": "Mengubah slug akan mengubah URL subdomain menjadi {{url}}",
       "email": "Email",
       "emailPlaceholder": "info@academy.com",
       "phone": "Telepon",

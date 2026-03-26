@@ -24,6 +24,7 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
 
   // Institution fields
   const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -42,6 +43,7 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
   useEffect(() => {
     if (institution) {
       setName(institution.name);
+      setSlug(institution.slug);
       setAddress(institution.address ?? '');
       setPhone(institution.phone ?? '');
       setEmail(institution.email ?? '');
@@ -61,16 +63,20 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
 
     try {
       if (isEdit) {
-        await updateInstitution.mutateAsync({
-          id: institution!.id,
-          data: {
+        const updateData: Record<string, unknown> = {
             name: name.trim(),
             address: address.trim() || null,
             phone: phone.trim() || null,
             email: email.trim() || null,
             timezone,
             default_language: defaultLanguage,
-          },
+        };
+        if (slug !== institution!.slug) {
+          updateData.slug = slug;
+        }
+        await updateInstitution.mutateAsync({
+          id: institution!.id,
+          data: updateData,
         });
         toast.success(t('superAdmin.toast.updated'));
       } else {
@@ -158,10 +164,19 @@ export function InstitutionForm({ institution }: InstitutionFormProps) {
 
           {isEdit && (
             <div className="space-y-2">
-              <Label>{t('superAdmin.form.slug')}</Label>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 font-mono">
-                {institution?.slug}
-              </p>
+              <Label htmlFor="slug">{t('superAdmin.form.slug')}</Label>
+              <Input
+                id="slug"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                placeholder="institution-slug"
+                className="font-mono"
+              />
+              {slug !== institution?.slug && (
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  {t('superAdmin.form.slugWarning', { url: `${slug}.sinaloka.com` })}
+                </p>
+              )}
             </div>
           )}
 
