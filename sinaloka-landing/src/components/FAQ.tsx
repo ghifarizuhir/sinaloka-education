@@ -29,6 +29,7 @@ export function FAQ() {
               <div className={cn("transition-colors rounded-lg -mx-3 px-3", open === i ? "bg-accent-50/50" : "hover:bg-[#F8F8F8]")}>
                 <button
                   onClick={() => setOpen(open === i ? null : i)}
+                  aria-expanded={open === i}
                   className="w-full flex items-center justify-between py-5 text-left"
                 >
                   <span

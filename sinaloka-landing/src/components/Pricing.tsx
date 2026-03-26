@@ -9,7 +9,7 @@ import { cn } from "../lib/utils";
 
 function CheckIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5" aria-hidden="true">
       <circle cx="9" cy="9" r="9" fill="#E6FAF2" />
       <path d="M5.5 9.5L7.5 11.5L12.5 6.5" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -18,7 +18,7 @@ function CheckIcon() {
 
 function DashIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5" aria-hidden="true">
       <circle cx="9" cy="9" r="9" fill="#F3F4F6" />
       <path d="M6 9H12" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
@@ -27,7 +27,7 @@ function DashIcon() {
 
 function ClockIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5" aria-hidden="true">
       <circle cx="9" cy="9" r="9" fill="#FFF7ED" />
       <circle cx="9" cy="9" r="4" stroke="#F59E0B" strokeWidth="1.2" />
       <path d="M9 7.5V9L10 10" stroke="#F59E0B" strokeWidth="1.2" strokeLinecap="round" />
@@ -153,12 +153,12 @@ export function Pricing() {
               style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
             >
               <div className="mb-6">
-                <span
+                <h3
                   className="text-xs font-semibold tracking-widest uppercase"
                   style={{ color: "#6B7280", letterSpacing: "0.1em" }}
                 >
                   Starter
-                </span>
+                </h3>
                 <div className="flex items-baseline gap-1 mt-2">
                   <span className="text-4xl font-bold text-gray-900">Rp 199rb</span>
                   <span className="text-gray-400 text-sm">/bulan</span>
@@ -222,12 +222,12 @@ export function Pricing() {
               </div>
 
               <div className="mb-6">
-                <span
+                <h3
                   className="text-xs font-semibold tracking-widest uppercase"
                   style={{ color: "#059669", letterSpacing: "0.1em" }}
                 >
                   Growth
-                </span>
+                </h3>
                 <div className="flex items-baseline gap-1 mt-2">
                   <span className="text-4xl font-bold text-gray-900">Rp 399rb</span>
                   <span className="text-gray-400 text-sm">/bulan</span>
@@ -304,12 +304,12 @@ export function Pricing() {
 
               <div className="mb-6">
                 <div className="flex items-center gap-2">
-                  <span
+                  <h3
                     className="text-xs font-semibold tracking-widest uppercase"
                     style={{ color: "#6B7280", letterSpacing: "0.1em" }}
                   >
                     Business
-                  </span>
+                  </h3>
                   <span
                     className="px-2 py-0.5 rounded text-[10px] font-semibold"
                     style={{ background: "#FFF7ED", color: "#D97706" }}
