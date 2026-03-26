@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import type { BillingMode } from '../../../generated/prisma/client.js';
@@ -15,23 +16,11 @@ import {
 import {
   CreateInstitutionDto,
   UpdateInstitutionDto,
+  RESERVED_SLUGS,
 } from './institution.dto.js';
 
 @Injectable()
 export class InstitutionService {
-  private static readonly RESERVED_SLUGS = [
-    'platform',
-    'parent',
-    'tutors',
-    'api',
-    'www',
-    'mail',
-    'ftp',
-    'admin',
-    'app',
-    'dashboard',
-  ];
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: PaginationDto): Promise<PaginatedResponse<any>> {
@@ -136,18 +125,47 @@ export class InstitutionService {
   }
 
   async update(id: string, dto: UpdateInstitutionDto) {
-    await this.findOne(id); // throws NotFoundException if not found
+    const institution = await this.findOne(id); // throws NotFoundException if not found
 
     const data: Record<string, unknown> = { ...dto };
 
-    if (dto.name) {
-      data.slug = await this.generateUniqueSlug(dto.name, id);
+    if (dto.slug !== undefined) {
+      // No-op if slug is unchanged
+      if (dto.slug === institution.slug) {
+        delete data.slug;
+      } else {
+        // Check reserved slugs (defense-in-depth, DTO also validates)
+        if (RESERVED_SLUGS.includes(dto.slug as any)) {
+          throw new BadRequestException(
+            `Slug "${dto.slug}" is reserved and cannot be used.`,
+          );
+        }
+
+        // Check uniqueness
+        const existing = await this.prisma.institution.findUnique({
+          where: { slug: dto.slug },
+        });
+        if (existing && existing.id !== id) {
+          throw new ConflictException(`Slug "${dto.slug}" is already in use.`);
+        }
+
+        data.slug = dto.slug;
+      }
     }
 
-    return this.prisma.institution.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await this.prisma.institution.update({
+        where: { id },
+        data,
+      });
+    } catch (error: any) {
+      if (error?.code === 'P2002') {
+        throw new ConflictException(
+          'Slug is already in use (concurrent update detected).',
+        );
+      }
+      throw error;
+    }
   }
 
   async remove(id: string) {
@@ -232,9 +250,16 @@ export class InstitutionService {
       .trim()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
 
-    if (InstitutionService.RESERVED_SLUGS.includes(baseSlug)) {
+    if (!baseSlug) {
+      throw new BadRequestException(
+        `Institution name "${name}" cannot be converted to a valid slug. Please use a name with alphanumeric characters.`,
+      );
+    }
+
+    if (RESERVED_SLUGS.includes(baseSlug as any)) {
       throw new BadRequestException(
         `Institution name "${name}" generates a reserved slug "${baseSlug}". Please choose a different name.`,
       );
@@ -242,6 +267,7 @@ export class InstitutionService {
 
     let slug = baseSlug;
     let suffix = 2;
+    const maxAttempts = 100;
 
     while (true) {
       const existing = await this.prisma.institution.findUnique({
@@ -250,6 +276,12 @@ export class InstitutionService {
 
       if (!existing || (excludeId && existing.id === excludeId)) {
         return slug;
+      }
+
+      if (suffix > maxAttempts) {
+        throw new BadRequestException(
+          `Unable to generate a unique slug for "${name}". Too many similar institution names exist.`,
+        );
       }
 
       slug = `${baseSlug}-${suffix}`;
