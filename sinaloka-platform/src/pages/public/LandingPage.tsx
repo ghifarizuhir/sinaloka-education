@@ -33,7 +33,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-white text-gray-900">
       <LandingHero data={data} />
       <LandingStats stats={data.stats} brandColor={data.brand_color} />
       <LandingFeatures features={data.landing_features} brandColor={data.brand_color} />
