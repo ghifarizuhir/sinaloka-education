@@ -13,7 +13,7 @@ export default function SuperAdminRoute() {
   }
 
   if (user?.role !== 'SUPER_ADMIN') {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;

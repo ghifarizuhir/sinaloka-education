@@ -41,7 +41,7 @@ export default function InstitutionDetail() {
   const handleEnter = () => {
     if (!institution) return;
     enterInstitution(institution.id, institution.name);
-    navigate('/');
+    navigate('/dashboard');
   };
 
   if (isLoading) {

@@ -204,7 +204,7 @@ export function Sidebar({
       {/* Nav */}
       <nav className="flex-1 px-3 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-thin pb-2">
         <SidebarSection label={t('nav.general')} minimized={minimized}>
-          <SidebarItem icon={LayoutDashboard} label={t('nav.dashboard')} href="/" active={location.pathname === '/'} minimized={minimized} />
+          <SidebarItem icon={LayoutDashboard} label={t('nav.dashboard')} href="/dashboard" active={location.pathname === '/dashboard'} minimized={minimized} />
         </SidebarSection>
 
         <SidebarSection label={t('nav.academics')} minimized={minimized} itemCount={4}>

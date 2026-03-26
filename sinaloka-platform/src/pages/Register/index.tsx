@@ -64,7 +64,7 @@ export default function RegisterPage() {
           <p className="text-sm text-muted-foreground mb-6">
             Halaman ini hanya tersedia dari subdomain institusi.
           </p>
-          <Button variant="outline" onClick={() => navigate('/')}>
+          <Button variant="outline" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="size-4" />
             Kembali
           </Button>

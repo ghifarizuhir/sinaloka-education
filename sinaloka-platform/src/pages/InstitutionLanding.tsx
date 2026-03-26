@@ -18,7 +18,7 @@ export function InstitutionLanding() {
   const { t } = useTranslation();
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   if (!institution) return null;

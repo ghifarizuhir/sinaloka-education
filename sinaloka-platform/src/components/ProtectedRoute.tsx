@@ -22,7 +22,7 @@ export function ProtectedRoute() {
 
   if (!isAuthenticated) {
     // On institution subdomains, redirect to the branded landing page instead of login
-    if (slug && location.pathname === '/') {
+    if (slug && (location.pathname === '/' || location.pathname === '/dashboard')) {
       return <Navigate to="/welcome" replace />;
     }
     const currentPath = location.pathname + location.search;
