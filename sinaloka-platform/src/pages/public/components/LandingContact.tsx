@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe } from 'lucide-react';
 import type { LandingPageData } from '@/src/types/landing';
 
 const fadeInUp = {
@@ -53,11 +53,13 @@ const SOCIAL_PLATFORMS = [
   { key: 'tiktok' as const, Icon: TikTokIcon, urlPrefix: 'https://tiktok.com/@' },
   { key: 'facebook' as const, Icon: FacebookIcon, urlPrefix: 'https://facebook.com/' },
   { key: 'youtube' as const, Icon: YouTubeIcon, urlPrefix: 'https://youtube.com/@' },
+  { key: 'website' as const, Icon: Globe, urlPrefix: '' },
 ] as const;
 
 export function LandingContact({ data }: LandingContactProps) {
   const { t } = useTranslation();
 
+  const brandColor = data.brand_color ?? '#14b8a6';
   const hasContact = data.email || data.phone || data.address;
   const hasSocial = data.social_links &&
     Object.values(data.social_links).some(Boolean);
@@ -71,12 +73,12 @@ export function LandingContact({ data }: LandingContactProps) {
   ].filter((item) => item.value);
 
   return (
-    <section className="px-6 py-16 border-b border-zinc-800">
+    <section className="px-6 py-16">
       <div className="max-w-2xl mx-auto">
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-2xl font-bold text-zinc-100 text-center mb-10"
+          className="text-2xl font-bold text-gray-900 text-center mb-10"
         >
           {t('landingPage.contact')}
         </motion.h2>
@@ -90,13 +92,22 @@ export function LandingContact({ data }: LandingContactProps) {
             {contactItems.map((item) => {
               const Icon = item.icon;
               const content = (
-                <div className="flex items-center gap-3 rounded-xl bg-zinc-900 border border-zinc-800 p-4">
-                  <Icon size={18} className="text-zinc-400 shrink-0" />
-                  <span className="text-sm text-zinc-300 break-all">{item.value}</span>
+                <div
+                  className="flex items-center gap-3 rounded-xl p-4 transition-colors"
+                  style={{ backgroundColor: `${brandColor}0d` }}
+                  onMouseOver={(e) => {
+                    if (item.href) (e.currentTarget as HTMLElement).style.backgroundColor = `${brandColor}1a`;
+                  }}
+                  onMouseOut={(e) => {
+                    if (item.href) (e.currentTarget as HTMLElement).style.backgroundColor = `${brandColor}0d`;
+                  }}
+                >
+                  <Icon size={18} className="shrink-0" style={{ color: brandColor }} />
+                  <span className="text-sm text-gray-700 break-all">{item.value}</span>
                 </div>
               );
               return item.href ? (
-                <a key={item.value} href={item.href} className="hover:opacity-80 transition-opacity">
+                <a key={item.value} href={item.href} className="block">
                   {content}
                 </a>
               ) : (
@@ -115,14 +126,26 @@ export function LandingContact({ data }: LandingContactProps) {
             {SOCIAL_PLATFORMS.map(({ key, Icon, urlPrefix }) => {
               const handle = data.social_links?.[key];
               if (!handle) return null;
-              const url = handle.startsWith('http') ? handle : `${urlPrefix}${handle}`;
+              const url = key === 'website'
+                ? (handle.startsWith('http') ? handle : `https://${handle}`)
+                : (handle.startsWith('http') ? handle : `${urlPrefix}${handle}`);
               return (
                 <a
                   key={key}
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-100 hover:border-zinc-600 transition-colors"
+                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"
+                  onMouseOver={(e) => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.backgroundColor = brandColor;
+                    el.style.color = '#fff';
+                  }}
+                  onMouseOut={(e) => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.backgroundColor = '';
+                    el.style.color = '';
+                  }}
                 >
                   <Icon size={18} />
                 </a>

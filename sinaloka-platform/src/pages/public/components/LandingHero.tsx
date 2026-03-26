@@ -23,70 +23,99 @@ export function LandingHero({ data }: LandingHeroProps) {
 
   return (
     <section
-      className="relative min-h-[70vh] flex flex-col items-center justify-center px-6 py-20 overflow-hidden border-b border-zinc-800"
-      style={{
-        background: `radial-gradient(ellipse at 50% 0%, ${brandColor}22 0%, transparent 70%), linear-gradient(to bottom, ${brandColor}0a, transparent)`,
-      }}
+      className="relative min-h-[50vh] flex items-center justify-center px-6 py-20 overflow-hidden"
+      style={{ backgroundColor: brandColor }}
     >
-      {/* Logo */}
-      <motion.div
-        {...fadeInUp}
-        transition={{ duration: 0.5 }}
-        className="mb-6"
-      >
-        {data.logo_url ? (
-          <img
-            src={data.logo_url}
-            alt={data.name}
-            className="w-24 h-24 rounded-2xl object-cover shadow-2xl ring-2 ring-white/10"
-          />
-        ) : (
-          <div
-            className="w-24 h-24 rounded-2xl flex items-center justify-center shadow-2xl text-4xl font-bold ring-2 ring-white/10"
-            style={{ backgroundColor: `${brandColor}33`, color: brandColor }}
-          >
-            {data.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-      </motion.div>
+      {/* Gradient overlay for depth */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.08), transparent 40%, transparent)',
+        }}
+      />
 
-      {/* Institution name */}
-      <motion.h1
-        {...fadeInUp}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="text-4xl sm:text-5xl font-extrabold text-zinc-100 text-center tracking-tight mb-4"
-      >
-        {data.name}
-      </motion.h1>
+      {/* Geometric decorative circles */}
+      <div
+        className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full border-[3px] pointer-events-none"
+        style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+      />
+      <div
+        className="absolute top-20 -right-16 w-[120px] h-[120px] rounded-full border-[3px] pointer-events-none"
+        style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+      />
+      <div
+        className="absolute -bottom-16 -left-8 w-[160px] h-[160px] rounded-full border-[3px] pointer-events-none"
+        style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+      />
 
-      {/* Tagline */}
-      {tagline && (
-        <motion.p
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center text-center">
+        {/* Logo */}
+        <motion.div
           {...fadeInUp}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-lg text-zinc-400 text-center max-w-xl leading-relaxed mb-8"
+          transition={{ duration: 0.5 }}
+          className="mb-6"
         >
-          {tagline}
-        </motion.p>
-      )}
+          {data.logo_url ? (
+            <img
+              src={data.logo_url}
+              alt={data.name}
+              className="w-16 h-16 rounded-xl object-cover shadow-2xl ring-2 ring-white/30 backdrop-blur"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+              }}
+            />
+          ) : (
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center shadow-2xl text-2xl font-bold backdrop-blur ring-2 ring-white/30"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: '#fff',
+              }}
+            >
+              {data.name.charAt(0).toUpperCase()}
+            </div>
+          )}
+        </motion.div>
 
-      {/* CTA buttons */}
-      <motion.div
-        {...fadeInUp}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="flex flex-col sm:flex-row gap-3"
-      >
-        {data.registration_enabled && (
-          <Button
-            size="lg"
-            onClick={() => navigate('/register')}
-            className="font-semibold sm:min-w-[160px] justify-center"
-            style={{ backgroundColor: brandColor, color: '#fff' }}
+        {/* Institution name */}
+        <motion.h1
+          {...fadeInUp}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4"
+        >
+          {data.name}
+        </motion.h1>
+
+        {/* Tagline */}
+        {tagline && (
+          <motion.p
+            {...fadeInUp}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="text-lg max-w-xl leading-relaxed mb-8"
+            style={{ color: 'rgba(255,255,255,0.8)' }}
           >
-            {ctaText}
-          </Button>
+            {tagline}
+          </motion.p>
         )}
-      </motion.div>
+
+        {/* CTA */}
+        {data.registration_enabled && (
+          <motion.div
+            {...fadeInUp}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <Button
+              size="lg"
+              onClick={() => navigate('/register')}
+              className="font-bold sm:min-w-[160px] justify-center px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              style={{ backgroundColor: '#fff', color: brandColor }}
+            >
+              {ctaText}
+            </Button>
+          </motion.div>
+        )}
+      </div>
     </section>
   );
 }

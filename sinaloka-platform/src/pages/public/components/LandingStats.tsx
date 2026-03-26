@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
+import { cn } from '@/src/lib/utils';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -18,7 +19,6 @@ interface LandingStatsProps {
 
 export function LandingStats({ stats, brandColor }: LandingStatsProps) {
   const { t } = useTranslation();
-  const color = brandColor ?? '#14b8a6';
 
   const items = [
     { value: stats.active_students, label: t('landingPage.students') },
@@ -27,25 +27,32 @@ export function LandingStats({ stats, brandColor }: LandingStatsProps) {
   ];
 
   return (
-    <section className="px-6 py-16 border-b border-zinc-800">
-      <div className="max-w-2xl mx-auto grid grid-cols-3 gap-4">
-        {items.map((item) => (
-          <motion.div
+    <motion.section
+      {...fadeInUp}
+      transition={{ duration: 0.5 }}
+      className="-mt-8 relative z-10 mx-6 sm:mx-auto max-w-md"
+    >
+      <div
+        className="flex bg-white border border-gray-100 overflow-hidden"
+        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.06)', borderRadius: '0.75rem' }}
+      >
+        {items.map((item, i) => (
+          <div
             key={item.label}
-            {...fadeInUp}
-            transition={{ duration: 0.5 }}
-            className="text-center rounded-xl bg-zinc-900 border border-zinc-800 p-6"
+            className={cn(
+              'flex-1 text-center py-5 px-3',
+              i < items.length - 1 && 'border-r border-gray-100'
+            )}
           >
-            <div
-              className="text-3xl sm:text-4xl font-bold mb-1"
-              style={{ color }}
-            >
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
               {item.value}
             </div>
-            <div className="text-sm text-zinc-400">{item.label}</div>
-          </motion.div>
+            <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">
+              {item.label}
+            </div>
+          </div>
         ))}
       </div>
-    </section>
+    </motion.section>
   );
 }
