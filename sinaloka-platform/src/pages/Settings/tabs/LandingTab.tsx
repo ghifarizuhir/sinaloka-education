@@ -48,6 +48,16 @@ export const LandingTab = () => {
     if (!initialRef.current) initialRef.current = settings;
   }, [settings]);
 
+  const hasChanges = !!(
+    initialRef.current &&
+    (tagline !== (initialRef.current.landing_tagline ?? '') ||
+      about !== (initialRef.current.landing_about ?? '') ||
+      ctaText !== (initialRef.current.landing_cta_text ?? '') ||
+      whatsapp !== (initialRef.current.whatsapp_number ?? '') ||
+      JSON.stringify(features) !== JSON.stringify(initialRef.current.landing_features ?? []) ||
+      JSON.stringify(social) !== JSON.stringify(initialRef.current.social_links ?? {}))
+  );
+
   const handleToggle = (enabled: boolean) => {
     updateSettings.mutate({ landing_enabled: enabled });
   };
@@ -258,12 +268,20 @@ export const LandingTab = () => {
             </div>
           </Card>
 
-          {/* Save button */}
-          <div className="flex justify-end">
+        </div>
+      </div>
+
+      {/* Sticky save bar */}
+      {hasChanges && (
+        <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-zinc-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm">
+          <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {t('settings.landing.unsavedChanges')}
+            </p>
             <Button onClick={handleSave}>{t('common.save')}</Button>
           </div>
         </div>
-      </div>
+      )}
 
       <ConfirmChangesModal
         isOpen={showConfirm}
