@@ -47,6 +47,7 @@ export interface CreateInstitutionPayload {
 
 export interface UpdateInstitutionPayload {
   name?: string;
+  slug?: string;
   address?: string | null;
   phone?: string | null;
   email?: string | null;
