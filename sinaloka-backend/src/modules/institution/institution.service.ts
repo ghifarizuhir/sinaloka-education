@@ -146,9 +146,7 @@ export class InstitutionService {
           where: { slug: dto.slug },
         });
         if (existing && existing.id !== id) {
-          throw new ConflictException(
-            `Slug "${dto.slug}" is already in use.`,
-          );
+          throw new ConflictException(`Slug "${dto.slug}" is already in use.`);
         }
 
         data.slug = dto.slug;
@@ -269,6 +267,7 @@ export class InstitutionService {
 
     let slug = baseSlug;
     let suffix = 2;
+    const maxAttempts = 100;
 
     while (true) {
       const existing = await this.prisma.institution.findUnique({
@@ -277,6 +276,12 @@ export class InstitutionService {
 
       if (!existing || (excludeId && existing.id === excludeId)) {
         return slug;
+      }
+
+      if (suffix > maxAttempts) {
+        throw new BadRequestException(
+          `Unable to generate a unique slug for "${name}". Too many similar institution names exist.`,
+        );
       }
 
       slug = `${baseSlug}-${suffix}`;
