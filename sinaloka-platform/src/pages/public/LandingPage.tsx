@@ -38,7 +38,7 @@ export function LandingPage() {
       <LandingStats stats={data.stats} brandColor={data.brand_color} />
       <LandingFeatures features={data.landing_features} brandColor={data.brand_color} />
       <LandingSubjects subjects={data.subjects} brandColor={data.brand_color} />
-      <LandingAbout text={data.landing_about} />
+      <LandingAbout text={data.landing_about} brandColor={data.brand_color} />
       <LandingGallery images={data.gallery_images} />
       <LandingContact data={data} />
       <LandingFooterCTA data={data} />
