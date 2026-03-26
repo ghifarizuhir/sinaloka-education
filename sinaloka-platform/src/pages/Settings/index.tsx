@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { Building2, ClipboardList, CreditCard, GraduationCap, Shield, Zap } from 'lucide-react';
+import { Building2, ClipboardList, CreditCard, Globe, GraduationCap, Shield, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSettingsPage } from './useSettingsPage';
 import { GeneralTab } from './tabs/GeneralTab';
@@ -10,6 +10,7 @@ import { AcademicTab } from './tabs/AcademicTab';
 import { PlansTab } from './tabs/PlansTab';
 import { RegistrationTab } from './tabs/RegistrationTab';
 import { SecurityTab } from './tabs/SecurityTab';
+import { LandingTab } from './tabs/LandingTab';
 import { useAuth } from '../../hooks/useAuth';
 
 export const SettingsPage = () => {
@@ -39,6 +40,7 @@ export const SettingsPage = () => {
     { id: 'registration', label: t('registration.settings'), icon: ClipboardList },
     { id: 'plans', label: t('settings.tabs.plans'), icon: Zap },
     { id: 'security', label: t('settings.tabs.security'), icon: Shield },
+    { id: 'landing', label: t('settings.tabs.landing'), icon: Globe },
   ];
 
   return (
@@ -136,6 +138,10 @@ export const SettingsPage = () => {
 
       {activeTab === 'security' && (
         <SecurityTab />
+      )}
+
+      {activeTab === 'landing' && (
+        <LandingTab />
       )}
 
       {activeTab === 'academic' && (
