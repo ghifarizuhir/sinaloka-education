@@ -36,7 +36,7 @@ import { Registrations } from './pages/Registrations';
 import Notifications from './pages/Notifications';
 import { AuditLog } from './pages/AuditLog';
 import { AcademicYears } from './pages/AcademicYears';
-import { InstitutionLanding } from './pages/InstitutionLanding';
+import { LandingPage } from './pages/public/LandingPage';
 import { InstitutionNotFound } from './pages/InstitutionNotFound';
 
 // --- Super Admin Pages ---
@@ -87,7 +87,7 @@ export default function App() {
       <InstitutionGate>
         <Router>
           <Routes>
-            <Route path="/welcome" element={<InstitutionLanding />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={
               <React.Suspense fallback={
@@ -130,8 +130,7 @@ export default function App() {
             </Route>
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+<Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/students" element={<Students />} />
                 <Route path="/students/:id" element={<StudentDetail />} />
                 <Route path="/tutors" element={<Tutors />} />

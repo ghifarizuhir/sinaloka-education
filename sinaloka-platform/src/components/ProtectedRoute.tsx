@@ -22,8 +22,8 @@ export function ProtectedRoute() {
 
   if (!isAuthenticated) {
     // On institution subdomains, redirect to the branded landing page instead of login
-    if (slug && (location.pathname === '/' || location.pathname === '/dashboard')) {
-      return <Navigate to="/welcome" replace />;
+    if (slug && location.pathname === '/dashboard') {
+      return <Navigate to="/" replace />;
     }
     const currentPath = location.pathname + location.search;
     return <Navigate to={`/login?redirect=${encodeURIComponent(currentPath)}`} replace />;
