@@ -6,4 +6,5 @@ export interface InstitutionPublicData {
   brand_color: string | null;
   background_image_url: string | null;
   registration_enabled: boolean;
+  landing_enabled: boolean;
 }

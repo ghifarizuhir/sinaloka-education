@@ -1,5 +1,6 @@
 import api from '@/src/lib/api';
 import type { GeneralSettings, UpdateGeneralSettingsDto, BillingSettings, UpdateBillingSettingsDto, AcademicSettings, UpdateAcademicSettingsDto, PaymentGatewaySettings, UpdatePaymentGatewayDto } from '@/src/types/settings';
+import type { LandingSettings, UpdateLandingSettingsDto } from '@/src/types/landing';
 
 export const settingsService = {
   getGeneral: () =>
@@ -18,4 +19,17 @@ export const settingsService = {
     api.get<PaymentGatewaySettings>('/api/settings/payment-gateway').then((r) => r.data),
   updatePaymentGateway: (data: UpdatePaymentGatewayDto) =>
     api.patch<PaymentGatewaySettings>('/api/settings/payment-gateway', data).then((r) => r.data),
+  getLanding: () =>
+    api.get<LandingSettings>('/api/settings/landing').then((r) => r.data),
+  updateLanding: (data: UpdateLandingSettingsDto) =>
+    api.patch<LandingSettings>('/api/settings/landing', data).then((r) => r.data),
+  uploadGalleryImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post<{ id: string; url: string }>('/api/settings/landing/gallery', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
+  deleteGalleryImage: (imageId: string) =>
+    api.delete(`/api/settings/landing/gallery/${imageId}`),
 };

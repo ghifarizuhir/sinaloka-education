@@ -21,6 +21,9 @@ import {
 
 @Injectable()
 export class InstitutionService {
+  private landingCache = new Map<string, { data: any; expiry: number }>();
+  private readonly LANDING_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: PaginationDto): Promise<PaginatedResponse<any>> {
@@ -196,6 +199,7 @@ export class InstitutionService {
     brand_color: string | null;
     background_image_url: string | null;
     registration_enabled: boolean;
+    landing_enabled: boolean;
   }> {
     const institution = await this.prisma.institution.findFirst({
       where: { slug, is_active: true },
@@ -207,6 +211,7 @@ export class InstitutionService {
         brand_color: true,
         background_image_url: true,
         settings: true,
+        landing_enabled: true,
       },
     });
     if (!institution) {
@@ -223,6 +228,7 @@ export class InstitutionService {
       brand_color: institution.brand_color,
       background_image_url: institution.background_image_url,
       registration_enabled: registrationEnabled,
+      landing_enabled: institution.landing_enabled,
     };
   }
 
@@ -239,6 +245,97 @@ export class InstitutionService {
         }),
       ]);
     return { studentCount, tutorCount, adminCount, activeClassCount };
+  }
+
+  async findLandingBySlug(slug: string) {
+    const cached = this.landingCache.get(slug);
+    if (cached && cached.expiry > Date.now()) {
+      return cached.data;
+    }
+
+    const institution = await this.prisma.institution.findFirst({
+      where: { slug, is_active: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        logo_url: true,
+        description: true,
+        brand_color: true,
+        background_image_url: true,
+        email: true,
+        phone: true,
+        address: true,
+        settings: true,
+        landing_enabled: true,
+        landing_tagline: true,
+        landing_about: true,
+        landing_cta_text: true,
+        whatsapp_number: true,
+        landing_features: true,
+        gallery_images: true,
+        social_links: true,
+      },
+    });
+    if (!institution) {
+      throw new NotFoundException('Institution not found');
+    }
+
+    const settings = institution.settings as Record<string, any> | null;
+    const registrationEnabled =
+      settings?.registration?.student_enabled ?? false;
+
+    const [activeStudents, tutorCount, subjects] =
+      await this.prisma.$transaction([
+        this.prisma.student.count({
+          where: { institution_id: institution.id, status: 'ACTIVE' },
+        }),
+        this.prisma.tutor.count({
+          where: { institution_id: institution.id, user: { is_active: true } },
+        }),
+        this.prisma.subject.findMany({
+          where: { institution_id: institution.id },
+          select: { id: true, name: true },
+        }),
+      ]);
+
+    const data = {
+      name: institution.name,
+      slug: institution.slug,
+      logo_url: institution.logo_url,
+      description: institution.description,
+      brand_color: institution.brand_color,
+      background_image_url: institution.background_image_url,
+      email: institution.email,
+      phone: institution.phone,
+      address: institution.address,
+      registration_enabled: registrationEnabled,
+      landing_enabled: institution.landing_enabled,
+      landing_tagline: institution.landing_tagline,
+      landing_about: institution.landing_about,
+      landing_cta_text: institution.landing_cta_text,
+      whatsapp_number: institution.whatsapp_number,
+      landing_features: institution.landing_features,
+      gallery_images: institution.gallery_images,
+      social_links: institution.social_links,
+      stats: {
+        active_students: activeStudents,
+        active_tutors: tutorCount,
+        total_subjects: subjects.length,
+      },
+      subjects,
+    };
+
+    this.landingCache.set(slug, {
+      data,
+      expiry: Date.now() + this.LANDING_CACHE_TTL,
+    });
+
+    return data;
+  }
+
+  invalidateLandingCache(slug: string) {
+    this.landingCache.delete(slug);
   }
 
   private async generateUniqueSlug(

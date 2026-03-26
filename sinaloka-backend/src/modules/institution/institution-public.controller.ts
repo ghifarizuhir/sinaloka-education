@@ -18,4 +18,10 @@ export class InstitutionPublicController {
   async getBySlug(@Param('slug', ParseSlugPipe) slug: string) {
     return this.institutionService.findBySlugPublic(slug);
   }
+
+  @Get(':slug/landing')
+  @RateLimit(30, 60 * 1000)
+  async getLanding(@Param('slug', ParseSlugPipe) slug: string) {
+    return this.institutionService.findLandingBySlug(slug);
+  }
 }

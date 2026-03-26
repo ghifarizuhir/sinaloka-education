@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, GoneException } from '@nestjs/common';
+import { Injectable, NotFoundException, GoneException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import type {
@@ -7,6 +7,7 @@ import type {
   UpdateAcademicSettingsDto,
   UpdatePaymentGatewayDto,
   UpdateRegistrationSettingsDto,
+  UpdateLandingSettingsDto,
 } from './settings.dto.js';
 
 const REGISTRATION_DEFAULTS = {
@@ -42,6 +43,17 @@ const ACADEMIC_DEFAULTS = {
     { id: 'default-univ', name: 'Universitas', order: 13 },
   ],
   working_days: [1, 2, 3, 4, 5, 6] as number[], // Mon-Sat (JS day numbers)
+};
+
+const LANDING_SELECT = {
+  landing_enabled: true,
+  landing_tagline: true,
+  landing_about: true,
+  landing_cta_text: true,
+  whatsapp_number: true,
+  landing_features: true,
+  gallery_images: true,
+  social_links: true,
 };
 
 const GENERAL_SELECT = {
@@ -245,5 +257,76 @@ export class SettingsService {
       is_sandbox:
         this.configService.get<string>('MIDTRANS_IS_SANDBOX') !== 'false',
     };
+  }
+
+  // ─── Landing Page ───────────────────────────────────────
+
+  async getLandingSettings(institutionId: string) {
+    const institution = await this.prisma.institution.findUniqueOrThrow({
+      where: { id: institutionId },
+      select: LANDING_SELECT,
+    });
+    return institution;
+  }
+
+  async updateLandingSettings(
+    institutionId: string,
+    dto: UpdateLandingSettingsDto,
+  ) {
+    const updated = await this.prisma.institution.update({
+      where: { id: institutionId },
+      data: dto as any,
+      select: LANDING_SELECT,
+    });
+    return updated;
+  }
+
+  async addGalleryImage(
+    institutionId: string,
+    image: { id: string; url: string },
+  ) {
+    const inst = await this.prisma.institution.findUniqueOrThrow({
+      where: { id: institutionId },
+      select: { gallery_images: true },
+    });
+    const images = (inst.gallery_images as any[]) ?? [];
+    if (images.length >= 6) {
+      throw new BadRequestException('Maximum 6 gallery images allowed');
+    }
+    const newImage = { ...image, caption: null, order: images.length };
+    const updated = await this.prisma.institution.update({
+      where: { id: institutionId },
+      data: { gallery_images: [...images, newImage] },
+      select: { gallery_images: true },
+    });
+    return updated.gallery_images;
+  }
+
+  async removeGalleryImage(institutionId: string, imageId: string) {
+    const inst = await this.prisma.institution.findUniqueOrThrow({
+      where: { id: institutionId },
+      select: { gallery_images: true },
+    });
+    const images = (inst.gallery_images as any[]) ?? [];
+    const image = images.find((img) => img.id === imageId);
+    if (!image) {
+      throw new NotFoundException(`Gallery image ${imageId} not found`);
+    }
+    const filtered = images
+      .filter((img) => img.id !== imageId)
+      .map((img, i) => ({ ...img, order: i }));
+    await this.prisma.institution.update({
+      where: { id: institutionId },
+      data: { gallery_images: filtered },
+    });
+    return image;
+  }
+
+  async getInstitutionSlug(institutionId: string): Promise<string> {
+    const inst = await this.prisma.institution.findUniqueOrThrow({
+      where: { id: institutionId },
+      select: { slug: true },
+    });
+    return inst.slug;
   }
 }

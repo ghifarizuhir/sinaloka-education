@@ -27,6 +27,10 @@ describe('InstitutionService', () => {
       update: jest.Mock;
       delete: jest.Mock;
     };
+    student: { count: jest.Mock };
+    tutor: { count: jest.Mock };
+    subject: { findMany: jest.Mock };
+    $transaction: jest.Mock;
   };
 
   const mockInstitution = {
@@ -53,6 +57,10 @@ describe('InstitutionService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      student: { count: jest.fn() },
+      tutor: { count: jest.fn() },
+      subject: { findMany: jest.fn() },
+      $transaction: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -358,6 +366,115 @@ describe('InstitutionService', () => {
       await expect(service.findBySlugPublic('nonexistent')).rejects.toThrow(
         NotFoundException,
       );
+    });
+
+    it('should include landing_enabled in response', async () => {
+      prisma.institution.findFirst.mockResolvedValue({
+        name: 'Test',
+        slug: 'test',
+        logo_url: null,
+        description: null,
+        brand_color: null,
+        background_image_url: null,
+        settings: null,
+        landing_enabled: true,
+      });
+
+      const result = await service.findBySlugPublic('test');
+      expect(result.landing_enabled).toBe(true);
+    });
+  });
+
+  describe('findLandingBySlug', () => {
+    it('should return landing data with stats and subjects', async () => {
+      prisma.institution.findFirst.mockResolvedValue({
+        id: 'inst-1',
+        name: 'Bimbel Test',
+        slug: 'bimbel-test',
+        logo_url: null,
+        description: 'A test institution',
+        brand_color: '#6366f1',
+        background_image_url: null,
+        email: 'info@test.com',
+        phone: '08123456789',
+        address: 'Jl. Test',
+        settings: { registration: { student_enabled: true } },
+        landing_enabled: true,
+        landing_tagline: 'Learn with us',
+        landing_about: 'We are a tutoring center',
+        landing_cta_text: null,
+        whatsapp_number: '08123456789',
+        landing_features: [
+          { id: 'f1', icon: 'Users', title: 'Small class', description: 'Max 5' },
+        ],
+        gallery_images: null,
+        social_links: { instagram: '@test' },
+      });
+
+      prisma.$transaction.mockResolvedValue([
+        10,
+        3,
+        [{ id: 's1', name: 'Math' }, { id: 's2', name: 'Physics' }],
+      ]);
+
+      const result = await service.findLandingBySlug('bimbel-test');
+
+      expect(result.name).toBe('Bimbel Test');
+      expect(result.landing_enabled).toBe(true);
+      expect(result.landing_tagline).toBe('Learn with us');
+      expect(result.registration_enabled).toBe(true);
+      expect(result.stats).toEqual({
+        active_students: 10,
+        active_tutors: 3,
+        total_subjects: 2,
+      });
+      expect(result.subjects).toHaveLength(2);
+    });
+
+    it('should throw NotFoundException for unknown slug', async () => {
+      prisma.institution.findFirst.mockResolvedValue(null);
+      await expect(service.findLandingBySlug('unknown')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should return cached data on second call', async () => {
+      prisma.institution.findFirst.mockResolvedValue({
+        id: 'inst-1', name: 'Test', slug: 'test',
+        logo_url: null, description: null, brand_color: null,
+        background_image_url: null, email: null, phone: null,
+        address: null, settings: null, landing_enabled: false,
+        landing_tagline: null, landing_about: null,
+        landing_cta_text: null, whatsapp_number: null,
+        landing_features: null, gallery_images: null,
+        social_links: null,
+      });
+      prisma.$transaction.mockResolvedValue([0, 0, []]);
+
+      await service.findLandingBySlug('test');
+      await service.findLandingBySlug('test');
+
+      expect(prisma.institution.findFirst).toHaveBeenCalledTimes(1);
+    });
+
+    it('should clear cache on invalidateLandingCache', async () => {
+      prisma.institution.findFirst.mockResolvedValue({
+        id: 'inst-1', name: 'Test', slug: 'test',
+        logo_url: null, description: null, brand_color: null,
+        background_image_url: null, email: null, phone: null,
+        address: null, settings: null, landing_enabled: false,
+        landing_tagline: null, landing_about: null,
+        landing_cta_text: null, whatsapp_number: null,
+        landing_features: null, gallery_images: null,
+        social_links: null,
+      });
+      prisma.$transaction.mockResolvedValue([0, 0, []]);
+
+      await service.findLandingBySlug('test');
+      service.invalidateLandingCache('test');
+      await service.findLandingBySlug('test');
+
+      expect(prisma.institution.findFirst).toHaveBeenCalledTimes(2);
     });
   });
 });

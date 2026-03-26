@@ -251,7 +251,7 @@ export default function RegisterPage() {
                   <p className="text-sm text-muted-foreground mb-6">
                     Tautan pendaftaran ini tidak valid atau sudah tidak aktif.
                   </p>
-                  <Link to="/welcome" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+                  <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
                     <ArrowLeft className="size-4" />
                     Kembali
                   </Link>
@@ -271,7 +271,7 @@ export default function RegisterPage() {
                     Pendaftaran sedang ditutup sementara. Hubungi pihak{' '}
                     {regInfo?.name ?? 'institusi'} untuk informasi lebih lanjut.
                   </p>
-                  <Link to="/welcome" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+                  <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
                     <ArrowLeft className="size-4" />
                     Kembali
                   </Link>
@@ -366,7 +366,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="mt-6 text-center">
-                  <Link to="/welcome" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                     <ArrowLeft className="size-4" />
                     Kembali
                   </Link>
