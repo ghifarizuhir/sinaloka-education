@@ -1438,7 +1438,14 @@
       "saveSuccess": "Pengaturan landing page disimpan",
       "saveFailed": "Gagal menyimpan pengaturan",
       "uploadFailed": "Gagal mengunggah gambar",
-      "deleteFailed": "Gagal menghapus gambar"
+      "deleteFailed": "Gagal menghapus gambar",
+      "hints": {
+        "hero": "Banner utama di bagian atas landing page. Pengunjung melihat ini pertama kali.",
+        "about": "Deskripsi institusi yang tampil di tengah halaman.",
+        "features": "Keunggulan institusi ditampilkan sebagai kartu fitur.",
+        "gallery": "Galeri foto ditampilkan sebagai grid gambar.",
+        "contact": "Informasi kontak dan sosial media di bagian bawah halaman."
+      }
     }
   },
 

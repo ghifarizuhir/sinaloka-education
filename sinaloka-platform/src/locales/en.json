@@ -1438,7 +1438,14 @@
       "saveSuccess": "Landing page settings saved",
       "saveFailed": "Failed to save settings",
       "uploadFailed": "Failed to upload image",
-      "deleteFailed": "Failed to delete image"
+      "deleteFailed": "Failed to delete image",
+      "hints": {
+        "hero": "The main banner at the top of your landing page. Visitors see this first.",
+        "about": "Your institution description displayed in the middle of the page.",
+        "features": "Your institution's key strengths shown as feature cards.",
+        "gallery": "Photo gallery displayed as an image grid.",
+        "contact": "Contact info and social media links at the bottom of the page."
+      }
     }
   },
 
