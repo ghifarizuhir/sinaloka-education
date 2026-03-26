@@ -55,6 +55,7 @@ export const LandingTab = () => {
       ctaText !== (initialRef.current.landing_cta_text ?? '') ||
       whatsapp !== (initialRef.current.whatsapp_number ?? '') ||
       JSON.stringify(features) !== JSON.stringify(initialRef.current.landing_features ?? []) ||
+      JSON.stringify(gallery) !== JSON.stringify(initialRef.current.gallery_images ?? []) ||
       JSON.stringify(social) !== JSON.stringify(initialRef.current.social_links ?? {}))
   );
 

@@ -1440,6 +1440,7 @@
       "uploadFailed": "Gagal mengunggah gambar",
       "deleteFailed": "Gagal menghapus gambar",
       "unsavedChanges": "Ada perubahan yang belum disimpan",
+      "sections": "Bagian",
       "hints": {
         "hero": "Banner utama di bagian atas landing page. Pengunjung melihat ini pertama kali.",
         "about": "Deskripsi institusi yang tampil di tengah halaman.",

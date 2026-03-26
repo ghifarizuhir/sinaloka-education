@@ -74,7 +74,7 @@ export function SectionNav(props: SectionNavProps) {
       <nav className="hidden md:block w-48 shrink-0">
         <div className="sticky top-28 space-y-1">
           <p className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 px-2 font-medium">
-            Sections
+            {t('settings.landing.sections')}
           </p>
           {sections.map((section) => {
             const Icon = section.icon;
