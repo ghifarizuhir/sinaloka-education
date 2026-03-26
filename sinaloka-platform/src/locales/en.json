@@ -1261,7 +1261,8 @@
       "paymentGateway": "Payment Gateway",
       "security": "Security",
       "integrations": "Integrations",
-      "plans": "Plans & Pricing"
+      "plans": "Plans & Pricing",
+      "landing": "Landing Page"
     },
     "paymentGateway": {
       "title": "Payment Gateway",
@@ -1408,6 +1409,36 @@
       "googleCalendarDesc": "Sync tutor schedules",
       "connected": "Connected",
       "notConnected": "Not Connected"
+    },
+    "landing": {
+      "title": "Landing Page",
+      "description": "Customize your public institution page",
+      "enabled": "Enable landing page",
+      "enabledHint": "If disabled, visitors are redirected to the login page",
+      "url": "Landing Page URL",
+      "copy": "Copy URL",
+      "preview": "View Landing Page",
+      "tagline": "Headline",
+      "taglinePlaceholder": "Achieve your best with us",
+      "ctaText": "Register button text",
+      "ctaDefault": "Register Now",
+      "about": "About Us",
+      "aboutPlaceholder": "Tell about your institution...",
+      "features": "Key Features",
+      "featuresAdd": "Add feature",
+      "featuresMax": "Maximum 4 features",
+      "featureTitle": "Title",
+      "featureDescription": "Description",
+      "gallery": "Photo Gallery",
+      "galleryAdd": "Add photo",
+      "galleryMax": "Maximum 6 photos",
+      "whatsapp": "WhatsApp Number",
+      "whatsappHint": "For the WhatsApp button on landing page",
+      "socialLinks": "Social Media",
+      "saveSuccess": "Landing page settings saved",
+      "saveFailed": "Failed to save settings",
+      "uploadFailed": "Failed to upload image",
+      "deleteFailed": "Failed to delete image"
     }
   },
 
@@ -1665,5 +1696,22 @@
     "to": "To",
     "noRequests": "No upgrade requests",
     "downgradeWarning": "Current usage exceeds this plan's limits. A 7-day grace period will start."
+  },
+
+  "landingPage": {
+    "features": "Our Advantages",
+    "subjects": "Subjects",
+    "about": "About Us",
+    "gallery": "Gallery",
+    "contact": "Contact Us",
+    "ready": "Ready to join?",
+    "readyDesc": "Register your child now and start a better learning journey.",
+    "registerNow": "Register Now",
+    "login": "Login",
+    "poweredBy": "Powered by Sinaloka",
+    "students": "Active Students",
+    "tutors": "Tutors",
+    "subjectsCount": "Subjects",
+    "whatsappChat": "Chat WhatsApp"
   }
 }

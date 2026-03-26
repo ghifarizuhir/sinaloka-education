@@ -1261,7 +1261,8 @@
       "paymentGateway": "Payment Gateway",
       "security": "Keamanan",
       "integrations": "Integrasi",
-      "plans": "Paket & Harga"
+      "plans": "Paket & Harga",
+      "landing": "Landing Page"
     },
     "paymentGateway": {
       "title": "Payment Gateway",
@@ -1408,6 +1409,36 @@
       "googleCalendarDesc": "Sinkronkan jadwal tutor",
       "connected": "Terhubung",
       "notConnected": "Belum Terhubung"
+    },
+    "landing": {
+      "title": "Landing Page",
+      "description": "Kustomisasi halaman publik bimbel Anda",
+      "enabled": "Aktifkan landing page",
+      "enabledHint": "Jika dinonaktifkan, pengunjung langsung ke halaman login",
+      "url": "URL Landing Page",
+      "copy": "Salin URL",
+      "preview": "Lihat Landing Page",
+      "tagline": "Headline",
+      "taglinePlaceholder": "Raih prestasi terbaikmu bersama kami",
+      "ctaText": "Teks tombol daftar",
+      "ctaDefault": "Daftar Sekarang",
+      "about": "Tentang Kami",
+      "aboutPlaceholder": "Ceritakan tentang bimbel Anda...",
+      "features": "Keunggulan Bimbel",
+      "featuresAdd": "Tambah keunggulan",
+      "featuresMax": "Maksimal 4 keunggulan",
+      "featureTitle": "Judul",
+      "featureDescription": "Deskripsi",
+      "gallery": "Galeri Foto",
+      "galleryAdd": "Tambah foto",
+      "galleryMax": "Maksimal 6 foto",
+      "whatsapp": "Nomor WhatsApp",
+      "whatsappHint": "Untuk tombol WhatsApp di landing page",
+      "socialLinks": "Media Sosial",
+      "saveSuccess": "Pengaturan landing page disimpan",
+      "saveFailed": "Gagal menyimpan pengaturan",
+      "uploadFailed": "Gagal mengunggah gambar",
+      "deleteFailed": "Gagal menghapus gambar"
     }
   },
 
@@ -1665,5 +1696,22 @@
     "to": "Ke",
     "noRequests": "Tidak ada permintaan upgrade",
     "downgradeWarning": "Penggunaan saat ini melebihi batas paket ini. Masa tenggang 7 hari akan dimulai."
+  },
+
+  "landingPage": {
+    "features": "Keunggulan Kami",
+    "subjects": "Mata Pelajaran",
+    "about": "Tentang Kami",
+    "gallery": "Galeri",
+    "contact": "Hubungi Kami",
+    "ready": "Siap bergabung?",
+    "readyDesc": "Daftarkan anak Anda sekarang dan mulai perjalanan belajar yang lebih baik.",
+    "registerNow": "Daftar Sekarang",
+    "login": "Login",
+    "poweredBy": "Powered by Sinaloka",
+    "students": "Siswa Aktif",
+    "tutors": "Tutor",
+    "subjectsCount": "Mata Pelajaran",
+    "whatsappChat": "Chat WhatsApp"
   }
 }
