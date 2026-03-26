@@ -10,7 +10,7 @@ export const NotFound = () => {
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <h2 className="text-4xl font-bold mb-2 dark:text-zinc-100">{t('notFound.title')}</h2>
       <p className="text-zinc-500 mb-6">{t('notFound.message')}</p>
-      <Link to="/">
+      <Link to="/dashboard">
         <Button>{t('notFound.backToDashboard')}</Button>
       </Link>
     </div>

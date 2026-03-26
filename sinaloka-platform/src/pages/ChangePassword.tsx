@@ -29,7 +29,7 @@ export default function ChangePassword() {
   }
 
   if (!mustChangePassword) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handlePasswordChanged = async () => {

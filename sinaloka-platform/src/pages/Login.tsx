@@ -33,7 +33,7 @@ export function Login() {
       return <Navigate to="/super/institutions" replace />;
     }
     const redirect = searchParams.get('redirect');
-    const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/';
+    const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/dashboard';
     return <Navigate to={target} replace />;
   }
 
@@ -47,7 +47,7 @@ export function Login() {
         navigate('/super/institutions', { replace: true });
       } else {
         const redirect = searchParams.get('redirect');
-        const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/';
+        const target = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/dashboard';
         navigate(target, { replace: true });
       }
     } catch (err: unknown) {

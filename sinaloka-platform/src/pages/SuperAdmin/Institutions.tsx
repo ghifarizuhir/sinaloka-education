@@ -40,7 +40,7 @@ export default function Institutions() {
 
   const handleEnter = (id: string, name: string) => {
     enterInstitution(id, name);
-    navigate('/');
+    navigate('/dashboard');
   };
 
   return (

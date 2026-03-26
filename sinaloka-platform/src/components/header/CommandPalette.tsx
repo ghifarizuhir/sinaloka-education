@@ -27,7 +27,7 @@ export function CommandPalette() {
   const { t } = useTranslation();
 
   const pages: PageEntry[] = useMemo(() => [
-    { label: t('nav.dashboard'), href: '/', icon: LayoutDashboard, section: t('nav.general') },
+    { label: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard, section: t('nav.general') },
     { label: t('nav.students'), href: '/students', icon: Users, section: t('nav.academics') },
     { label: t('nav.tutors'), href: '/tutors', icon: GraduationCap, section: t('nav.academics') },
     { label: t('nav.classes'), href: '/classes', icon: BookOpen, section: t('nav.academics') },
