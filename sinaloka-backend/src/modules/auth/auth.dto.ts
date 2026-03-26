@@ -3,7 +3,14 @@ import { z } from 'zod';
 export const LoginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
-  slug: z.string().optional(),
+  slug: z
+    .string()
+    .max(63)
+    .regex(
+      /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/,
+      'Invalid slug format',
+    )
+    .optional(),
 });
 
 export type LoginDto = z.infer<typeof LoginSchema>;
