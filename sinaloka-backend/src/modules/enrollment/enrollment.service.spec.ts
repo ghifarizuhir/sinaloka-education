@@ -37,9 +37,11 @@ describe('EnrollmentService', () => {
     };
     student: {
       findFirst: jest.Mock;
+      findMany: jest.Mock;
     };
     class: {
       findFirst: jest.Mock;
+      findMany: jest.Mock;
     };
     $transaction: jest.Mock;
   };
@@ -146,14 +148,19 @@ describe('EnrollmentService', () => {
       },
       student: {
         findFirst: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
       },
       class: {
         findFirst: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
       },
       $transaction: jest.fn().mockImplementation(async (fn: any) => {
         return fn({
           payment: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
-          enrollment: { delete: prisma.enrollment.delete },
+          enrollment: {
+            delete: prisma.enrollment.delete,
+            create: prisma.enrollment.create,
+          },
         });
       }),
     };
