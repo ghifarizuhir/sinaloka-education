@@ -32,7 +32,7 @@ export class TutorAttendanceController {
     @Body(new ZodValidationPipe(BatchCreateAttendanceSchema))
     dto: BatchCreateAttendanceDto,
   ) {
-    return this.attendanceService.batchCreate(user.userId, dto);
+    return this.attendanceService.batchCreate(user.institutionId!, user.userId, dto);
   }
 
   @Patch(':id')
@@ -42,6 +42,6 @@ export class TutorAttendanceController {
     @Body(new ZodValidationPipe(UpdateAttendanceSchema))
     dto: UpdateAttendanceDto,
   ) {
-    return this.attendanceService.updateByTutor(user.userId, id, dto);
+    return this.attendanceService.updateByTutor(user.institutionId!, user.userId, id, dto);
   }
 }

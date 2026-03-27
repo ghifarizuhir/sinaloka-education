@@ -500,12 +500,13 @@ export class SessionService {
   }
 
   async requestReschedule(
+    institutionId: string,
     userId: string,
     sessionId: string,
     dto: RequestRescheduleDto,
   ) {
     const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
+      where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
 
@@ -514,7 +515,7 @@ export class SessionService {
     }
 
     const tutor = await this.prisma.tutor.findFirst({
-      where: { user_id: userId },
+      where: { user_id: userId, institution_id: institutionId },
     });
 
     if (!tutor || session.class.tutor_id !== tutor.id) {
@@ -528,7 +529,7 @@ export class SessionService {
     }
 
     const updated = await this.prisma.session.update({
-      where: { id: sessionId },
+      where: { id: sessionId, institution_id: institutionId },
       data: {
         status: 'RESCHEDULE_REQUESTED',
         proposed_date: dto.proposed_date,
@@ -591,9 +592,9 @@ export class SessionService {
     }
   }
 
-  async cancelSession(userId: string, sessionId: string) {
+  async cancelSession(institutionId: string, userId: string, sessionId: string) {
     const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
+      where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
 
@@ -602,7 +603,7 @@ export class SessionService {
     }
 
     const tutor = await this.prisma.tutor.findFirst({
-      where: { user_id: userId },
+      where: { user_id: userId, institution_id: institutionId },
     });
 
     if (!tutor || session.class.tutor_id !== tutor.id) {
@@ -610,7 +611,7 @@ export class SessionService {
     }
 
     const updated = await this.prisma.session.update({
-      where: { id: sessionId },
+      where: { id: sessionId, institution_id: institutionId },
       data: { status: 'CANCELLED' },
       include: this.sessionInclude,
     });
@@ -625,9 +626,9 @@ export class SessionService {
     return this.flattenSession(updated);
   }
 
-  async getSessionStudents(userId: string, sessionId: string) {
+  async getSessionStudents(institutionId: string, userId: string, sessionId: string) {
     const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
+      where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
 
@@ -636,7 +637,7 @@ export class SessionService {
     }
 
     const tutor = await this.prisma.tutor.findFirst({
-      where: { user_id: userId },
+      where: { user_id: userId, institution_id: institutionId },
     });
 
     if (!tutor || session.class.tutor_id !== tutor.id) {
@@ -651,6 +652,7 @@ export class SessionService {
 
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
+        institution_id: institutionId,
         class_id: session.class_id,
         status: 'ACTIVE',
         enrolled_at: { lte: sessionDateEnd },
@@ -667,7 +669,7 @@ export class SessionService {
     });
 
     const attendances = await this.prisma.attendance.findMany({
-      where: { session_id: sessionId },
+      where: { session_id: sessionId, institution_id: institutionId },
     });
 
     const attendanceMap = new Map(attendances.map((a) => [a.student_id, a]));
@@ -737,12 +739,13 @@ export class SessionService {
   }
 
   async completeSession(
+    institutionId: string,
     userId: string,
     sessionId: string,
     dto: CompleteSessionDto,
   ) {
     const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
+      where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
 
@@ -751,7 +754,7 @@ export class SessionService {
     }
 
     const tutor = await this.prisma.tutor.findFirst({
-      where: { user_id: userId },
+      where: { user_id: userId, institution_id: institutionId },
     });
 
     if (!tutor || session.class.tutor_id !== tutor.id) {
@@ -766,7 +769,7 @@ export class SessionService {
 
     // Copy tutor fee from class
     const classForFee = await this.prisma.class.findUnique({
-      where: { id: session.class_id },
+      where: { id: session.class_id, institution_id: institutionId },
       include: {
         subject: { select: { name: true } },
         tutor: { include: { user: { select: { name: true } } } },
@@ -777,7 +780,7 @@ export class SessionService {
     const snapshotData = classForFee ? this.buildSnapshotData(classForFee) : {};
 
     const updated = await this.prisma.session.update({
-      where: { id: sessionId },
+      where: { id: sessionId, institution_id: institutionId },
       data: {
         status: 'COMPLETED',
         topic_covered: dto.topic_covered,
