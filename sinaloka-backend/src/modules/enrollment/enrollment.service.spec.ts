@@ -592,4 +592,258 @@ describe('EnrollmentService', () => {
       );
     });
   });
+
+  describe('importFromCsv', () => {
+    const INST = 'inst-1';
+
+    // Helpers to build CSV buffers
+    const toCsv = (rows: { student_id: string; class_id: string; status?: string }[]) => {
+      const header = 'student_id,class_id,status';
+      const lines = rows.map(
+        (r) => `${r.student_id},${r.class_id},${r.status ?? 'ACTIVE'}`,
+      );
+      return Buffer.from([header, ...lines].join('\n'));
+    };
+
+    // Fixed UUIDs used across tests (must be lowercase for Zod uuid validation)
+    const STUDENT_1 = 'a1a1a1a1-1111-4111-8111-a1a1a1a1a1a1';
+    const STUDENT_2 = 'a2a2a2a2-2222-4222-8222-a2a2a2a2a2a2';
+    const CLASS_1 = 'c1c1c1c1-1111-4111-8111-c1c1c1c1c1c1';
+    const CLASS_2 = 'c2c2c2c2-2222-4222-8222-c2c2c2c2c2c2';
+
+    const classNoSchedule = (id: string, name: string) => ({
+      id,
+      institution_id: INST,
+      name,
+      schedules: [],
+    });
+
+    /** Set up the 4 bulk pre-fetch mocks used by importFromCsv Phase 1b */
+    const setupBulkMocks = ({
+      students = [{ id: STUDENT_1 }, { id: STUDENT_2 }],
+      classes = [classNoSchedule(CLASS_1, 'Class 1'), classNoSchedule(CLASS_2, 'Class 2')],
+      existingEnrollments = [] as { student_id: string; class_id: string }[],
+      activeEnrollments = [] as { student_id: string; class: { name: string; schedules: any[] } }[],
+    } = {}) => {
+      // findMany is called 4 times in parallel — use mockResolvedValueOnce in the
+      // order the calls are made: student.findMany, class.findMany,
+      // enrollment.findMany (dup check), enrollment.findMany (conflict check).
+      prisma.student.findMany.mockResolvedValue(students);
+      prisma.class.findMany.mockResolvedValue(classes);
+      // Two enrollment.findMany calls (duplicate check, then conflict check)
+      prisma.enrollment.findMany
+        .mockResolvedValueOnce(existingEnrollments)
+        .mockResolvedValueOnce(activeEnrollments);
+    };
+
+    /** Mock $transaction so it uses a fresh tx.enrollment.create mock */
+    const setupTransaction = (createResults: any[]) => {
+      let callIndex = 0;
+      prisma.$transaction.mockImplementation(async (fn: any) => {
+        const txCreate = jest.fn().mockImplementation(() => {
+          const result = createResults[callIndex];
+          callIndex++;
+          return Promise.resolve(result);
+        });
+        return fn({
+          payment: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+          enrollment: {
+            delete: prisma.enrollment.delete,
+            create: txCreate,
+          },
+        });
+      });
+    };
+
+    it('happy path: 2 valid rows → created:2, skipped:0, errors:[]', async () => {
+      const csv = toCsv([
+        { student_id: STUDENT_1, class_id: CLASS_1 },
+        { student_id: STUDENT_2, class_id: CLASS_2 },
+      ]);
+
+      setupBulkMocks();
+      setupTransaction([
+        { id: 'enroll-new-1', student_id: STUDENT_1, class_id: CLASS_1 },
+        { id: 'enroll-new-2', student_id: STUDENT_2, class_id: CLASS_2 },
+      ]);
+
+      const result = await service.importFromCsv(csv, INST);
+
+      expect(result).toEqual({ created: 2, skipped: 0, errors: [] });
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(invoiceGenerator.generateMidMonthEnrollmentPayment).toHaveBeenCalledTimes(2);
+    });
+
+    it('non-existent student: row with unknown student_id → error reported, not created', async () => {
+      const UNKNOWN_STUDENT = 'f9f9f9f9-9999-4999-8999-f9f9f9f9f9f9';
+      const csv = toCsv([{ student_id: UNKNOWN_STUDENT, class_id: CLASS_1 }]);
+
+      setupBulkMocks({
+        students: [], // student not found
+        classes: [classNoSchedule(CLASS_1, 'Class 1')],
+      });
+
+      const result = await service.importFromCsv(csv, INST);
+
+      expect(result.created).toBe(0);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toMatchObject({
+        row: 1,
+        message: expect.stringContaining(UNKNOWN_STUDENT),
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('non-existent class: row with unknown class_id → error reported, not created', async () => {
+      const UNKNOWN_CLASS = 'e9e9e9e9-9999-4999-8999-e9e9e9e9e9e9';
+      const csv = toCsv([{ student_id: STUDENT_1, class_id: UNKNOWN_CLASS }]);
+
+      setupBulkMocks({
+        students: [{ id: STUDENT_1 }],
+        classes: [], // class not found
+      });
+
+      const result = await service.importFromCsv(csv, INST);
+
+      expect(result.created).toBe(0);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toMatchObject({
+        row: 1,
+        message: expect.stringContaining(UNKNOWN_CLASS),
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('duplicate enrollment: student+class already enrolled → skipped, error reported', async () => {
+      const csv = toCsv([{ student_id: STUDENT_1, class_id: CLASS_1 }]);
+
+      setupBulkMocks({
+        students: [{ id: STUDENT_1 }],
+        classes: [classNoSchedule(CLASS_1, 'Class 1')],
+        existingEnrollments: [{ student_id: STUDENT_1, class_id: CLASS_1 }],
+      });
+
+      const result = await service.importFromCsv(csv, INST);
+
+      expect(result.created).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toMatchObject({
+        row: 1,
+        message: expect.stringContaining('already enrolled'),
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('schedule conflict: student has conflicting schedule → skipped, error reported', async () => {
+      // CLASS_1 has Mon 10:00-11:00; STUDENT_1 already enrolled in a class with Mon 10:30-11:30
+      const conflictingClass = {
+        id: CLASS_1,
+        institution_id: INST,
+        name: 'Conflict Class',
+        schedules: [{ day: 'Monday', start_time: '10:00', end_time: '11:00' }],
+      };
+      const existingActiveEnrollment = {
+        student_id: STUDENT_1,
+        class: {
+          name: 'Existing Class',
+          schedules: [{ day: 'Monday', start_time: '10:30', end_time: '11:30' }],
+        },
+      };
+
+      const csv = toCsv([{ student_id: STUDENT_1, class_id: CLASS_1 }]);
+
+      setupBulkMocks({
+        students: [{ id: STUDENT_1 }],
+        classes: [conflictingClass],
+        existingEnrollments: [],
+        activeEnrollments: [existingActiveEnrollment as any],
+      });
+
+      const result = await service.importFromCsv(csv, INST);
+
+      expect(result.created).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toMatchObject({
+        row: 1,
+        message: expect.stringContaining('conflict'),
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('invalid schema: row missing required field → error reported', async () => {
+      // CSV row with invalid UUID for student_id
+      const invalidCsv = Buffer.from(
+        'student_id,class_id,status\nnot-a-uuid,' + CLASS_1 + ',ACTIVE',
+      );
+
+      // Bulk mocks won't even be called because parsedRows will be empty
+      // but set them up defensively
+      setupBulkMocks({ students: [], classes: [], existingEnrollments: [], activeEnrollments: [] });
+
+      const result = await service.importFromCsv(invalidCsv, INST);
+
+      expect(result.created).toBe(0);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].row).toBe(1);
+    });
+
+    it('over 500 rows: buffer with 501 rows → throws BadRequestException', async () => {
+      const rows = Array.from({ length: 501 }, (_, i) => ({
+        student_id: STUDENT_1,
+        class_id: CLASS_1,
+      }));
+      const csv = toCsv(rows);
+
+      const { BadRequestException } = await import('@nestjs/common');
+      await expect(service.importFromCsv(csv, INST)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('intra-batch duplicate: same student+class appears twice in CSV → second row skipped', async () => {
+      const csv = toCsv([
+        { student_id: STUDENT_1, class_id: CLASS_1 },
+        { student_id: STUDENT_1, class_id: CLASS_1 }, // duplicate
+      ]);
+
+      setupBulkMocks({
+        students: [{ id: STUDENT_1 }],
+        classes: [classNoSchedule(CLASS_1, 'Class 1')],
+        existingEnrollments: [],
+      });
+      setupTransaction([
+        { id: 'enroll-new-1', student_id: STUDENT_1, class_id: CLASS_1 },
+      ]);
+
+      const result = await service.importFromCsv(csv, INST);
+
+      expect(result.created).toBe(1);
+      expect(result.skipped).toBe(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toMatchObject({
+        row: 2,
+        message: expect.stringContaining('already enrolled'),
+      });
+    });
+
+    it('transaction wraps all creates: $transaction is called once for all valid rows', async () => {
+      const csv = toCsv([
+        { student_id: STUDENT_1, class_id: CLASS_1 },
+        { student_id: STUDENT_2, class_id: CLASS_2 },
+      ]);
+
+      setupBulkMocks();
+      setupTransaction([
+        { id: 'enroll-new-1', student_id: STUDENT_1, class_id: CLASS_1 },
+        { id: 'enroll-new-2', student_id: STUDENT_2, class_id: CLASS_2 },
+      ]);
+
+      await service.importFromCsv(csv, INST);
+
+      // Only one $transaction call — all creates are batched inside it
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    });
+  });
 });
