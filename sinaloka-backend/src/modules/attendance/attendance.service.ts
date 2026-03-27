@@ -25,9 +25,9 @@ export class AttendanceService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async batchCreate(userId: string, dto: BatchCreateAttendanceDto) {
+  async batchCreate(institutionId: string, userId: string, dto: BatchCreateAttendanceDto) {
     const session = await this.prisma.session.findUnique({
-      where: { id: dto.session_id },
+      where: { id: dto.session_id, institution_id: institutionId },
       include: { class: true },
     });
 
@@ -39,7 +39,7 @@ export class AttendanceService {
 
     // Verify tutor owns the session
     const tutor = await this.prisma.tutor.findFirst({
-      where: { user_id: userId },
+      where: { user_id: userId, institution_id: institutionId },
     });
 
     if (!tutor || session.class.tutor_id !== tutor.id) {
@@ -166,9 +166,9 @@ export class AttendanceService {
     return result;
   }
 
-  async updateByTutor(userId: string, id: string, dto: UpdateAttendanceDto) {
+  async updateByTutor(institutionId: string, userId: string, id: string, dto: UpdateAttendanceDto) {
     const attendance = await this.prisma.attendance.findUnique({
-      where: { id },
+      where: { id, institution_id: institutionId },
       include: {
         session: {
           include: { class: true },
@@ -182,7 +182,7 @@ export class AttendanceService {
 
     // Verify tutor owns the session
     const tutor = await this.prisma.tutor.findFirst({
-      where: { user_id: userId },
+      where: { user_id: userId, institution_id: institutionId },
     });
 
     if (!tutor || attendance.session.class.tutor_id !== tutor.id) {
@@ -192,7 +192,7 @@ export class AttendanceService {
     }
 
     const result = await this.prisma.attendance.update({
-      where: { id },
+      where: { id, institution_id: institutionId },
       data: dto,
       include: { student: true },
     });

@@ -45,7 +45,7 @@ export class TutorSessionController {
     @Body(new ZodValidationPipe(RequestRescheduleSchema))
     dto: RequestRescheduleDto,
   ) {
-    return this.sessionService.requestReschedule(user.userId, id, dto);
+    return this.sessionService.requestReschedule(user.institutionId!, user.userId, id, dto);
   }
 
   @Patch(':id/cancel')
@@ -53,7 +53,7 @@ export class TutorSessionController {
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.sessionService.cancelSession(user.userId, id);
+    return this.sessionService.cancelSession(user.institutionId!, user.userId, id);
   }
 
   @Get(':id/students')
@@ -61,7 +61,7 @@ export class TutorSessionController {
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.sessionService.getSessionStudents(user.userId, id);
+    return this.sessionService.getSessionStudents(user.institutionId!, user.userId, id);
   }
 
   @Patch(':id/complete')
@@ -70,6 +70,6 @@ export class TutorSessionController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body(new ZodValidationPipe(CompleteSessionSchema)) dto: CompleteSessionDto,
   ) {
-    return this.sessionService.completeSession(user.userId, id, dto);
+    return this.sessionService.completeSession(user.institutionId!, user.userId, id, dto);
   }
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans } from 'react-i18next';
 import {
   Trash2,
 } from 'lucide-react';
@@ -44,12 +45,12 @@ export const ClassDeleteModal = ({
               </div>
               <div>
                 <p className="text-sm font-medium text-rose-900 dark:text-rose-200">{t('classes.delete.cannotUndo')}</p>
-                <p className="text-sm text-rose-700 dark:text-rose-300 mt-1" dangerouslySetInnerHTML={{ __html: t('classes.delete.permanentDelete', { name: deleteTarget.name }) }} />
+                <p className="text-sm text-rose-700 dark:text-rose-300 mt-1"><Trans i18nKey="classes.delete.permanentDelete" values={{ name: deleteTarget.name }} components={{ strong: <strong /> }} /></p>
               </div>
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="delete-confirm" dangerouslySetInnerHTML={{ __html: t('classes.delete.typeDelete') }} />
+            <Label htmlFor="delete-confirm" children={<Trans i18nKey="classes.delete.typeDelete" components={{ strong: <strong /> }} />} />
             <Input
               id="delete-confirm"
               placeholder="delete"
