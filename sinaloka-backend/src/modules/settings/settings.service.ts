@@ -47,6 +47,7 @@ const ACADEMIC_DEFAULTS = {
 
 const LANDING_SELECT = {
   landing_enabled: true,
+  landing_template: true,
   landing_tagline: true,
   landing_about: true,
   landing_cta_text: true,

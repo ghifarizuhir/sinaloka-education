@@ -123,6 +123,7 @@ const SocialLinksSchema = z.object({
 
 export const UpdateLandingSettingsSchema = z.object({
   landing_enabled: z.boolean().optional(),
+  landing_template: z.enum(['bold-geometric', 'soft-friendly', 'clean-minimal']).optional().nullable(),
   landing_tagline: z.string().max(200).optional().nullable(),
   landing_about: z.string().max(2000).optional().nullable(),
   landing_cta_text: z.string().max(50).optional().nullable(),
