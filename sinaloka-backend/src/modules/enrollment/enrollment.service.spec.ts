@@ -33,6 +33,7 @@ describe('EnrollmentService', () => {
       updateMany: jest.Mock;
       delete: jest.Mock;
       deleteMany: jest.Mock;
+      groupBy: jest.Mock;
     };
     payment: {
       deleteMany: jest.Mock;
@@ -146,6 +147,7 @@ describe('EnrollmentService', () => {
         updateMany: jest.fn(),
         delete: jest.fn(),
         deleteMany: jest.fn(),
+        groupBy: jest.fn().mockResolvedValue([]),
       },
       payment: {
         deleteMany: jest.fn(),
@@ -413,6 +415,42 @@ describe('EnrollmentService', () => {
           classId: 'class-a',
         }),
       );
+    });
+
+    it('should throw ConflictException when class is at full capacity', async () => {
+      const classWithCapacity = { ...mockClassA, capacity: 2 };
+      // First call: checkConflict (returns class with schedules)
+      // Second call: capacity check (returns class with capacity)
+      prisma.class.findFirst
+        .mockResolvedValueOnce(classWithCapacity)  // checkConflict
+        .mockResolvedValueOnce(classWithCapacity); // capacity check
+      prisma.enrollment.findMany.mockResolvedValue([]); // no schedule conflicts
+      prisma.enrollment.count.mockResolvedValue(2); // class is full
+
+      await expect(
+        service.create('inst-1', {
+          student_id: 'student-1',
+          class_id: 'class-a',
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should allow enrollment when class has remaining capacity', async () => {
+      const classWithCapacity = { ...mockClassA, capacity: 5 };
+      prisma.class.findFirst
+        .mockResolvedValueOnce(classWithCapacity)  // checkConflict
+        .mockResolvedValueOnce(classWithCapacity); // capacity check
+      prisma.enrollment.findMany.mockResolvedValue([]); // no schedule conflicts
+      prisma.enrollment.count.mockResolvedValue(3); // 3/5 capacity used
+      prisma.enrollment.findFirst.mockResolvedValue(null); // no duplicate
+      prisma.enrollment.create.mockResolvedValue(mockEnrollment);
+
+      const result = await service.create('inst-1', {
+        student_id: 'student-1',
+        class_id: 'class-a',
+      });
+
+      expect(result).toEqual(mockEnrollment);
     });
   });
 

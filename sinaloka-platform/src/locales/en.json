@@ -836,7 +836,8 @@
       "bulkStatusUpdated": "{{count}} enrollment(s) updated to {{status}}",
       "bulkStatusError": "Failed to update enrollment statuses",
       "bulkDeleted": "{{count}} enrollment(s) deleted",
-      "bulkDeleteError": "Failed to delete enrollments"
+      "bulkDeleteError": "Failed to delete enrollments",
+      "capacityFull": "Class is at full capacity"
     },
     "modal": {
       "newTitle": "Add Enrollment",

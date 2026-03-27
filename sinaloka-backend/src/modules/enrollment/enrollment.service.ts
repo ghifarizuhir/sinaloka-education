@@ -114,6 +114,26 @@ export class EnrollmentService {
       );
     }
 
+    // Check class capacity
+    const targetClass = await this.prisma.class.findFirst({
+      where: { id: dto.class_id, institution_id: institutionId },
+      select: { capacity: true, name: true },
+    });
+    if (targetClass?.capacity) {
+      const currentCount = await this.prisma.enrollment.count({
+        where: {
+          class_id: dto.class_id,
+          institution_id: institutionId,
+          status: { in: ['ACTIVE', 'TRIAL'] },
+        },
+      });
+      if (currentCount >= targetClass.capacity) {
+        throw new ConflictException(
+          `Class "${targetClass.name}" is at full capacity (${currentCount}/${targetClass.capacity})`,
+        );
+      }
+    }
+
     // Check for duplicate enrollment (student+class) scoped to institution
     const existing = await this.prisma.enrollment.findFirst({
       where: {
@@ -378,7 +398,7 @@ export class EnrollmentService {
     const studentIds = [...new Set(parsedRows.map((r) => r.student_id))];
     const classIds = [...new Set(parsedRows.map((r) => r.class_id))];
 
-    const [students, classes, existingEnrollments, activeEnrollments] =
+    const [students, classes, existingEnrollments, activeEnrollments, classEnrollmentCountsRaw] =
       await Promise.all([
         // All referenced students in this institution
         this.prisma.student.findMany({
@@ -408,6 +428,16 @@ export class EnrollmentService {
           },
           include: { class: { include: { schedules: true } } },
         }),
+        // Current enrollment counts per class for capacity check
+        this.prisma.enrollment.groupBy({
+          by: ['class_id'],
+          where: {
+            institution_id: institutionId,
+            class_id: { in: classIds },
+            status: { in: ['ACTIVE', 'TRIAL'] },
+          },
+          _count: { class_id: true },
+        }),
       ]);
 
     // --- Phase 1c: Build lookup maps ---
@@ -427,6 +457,11 @@ export class EnrollmentService {
       list.push({ className: e.class.name, schedules: e.class.schedules });
       studentEnrollmentsMap.set(e.student_id, list);
     }
+
+    // Track class enrollment counts for capacity checking (mutable — incremented per valid row)
+    const classEnrollmentCounts = new Map<string, number>(
+      classEnrollmentCountsRaw.map((c) => [c.class_id, c._count.class_id]),
+    );
 
     // Track intra-batch duplicates
     const batchDuplicateSet = new Set<string>();
@@ -495,8 +530,22 @@ export class EnrollmentService {
         continue;
       }
 
-      // Row is valid — track it for intra-batch dedup and conflict detection
+      // Capacity check
+      if (targetClass.capacity) {
+        const currentCount = classEnrollmentCounts.get(class_id) ?? 0;
+        if (currentCount >= targetClass.capacity) {
+          skipped++;
+          errors.push({
+            row: rowNum,
+            message: `Class "${targetClass.name}" is at full capacity (${currentCount}/${targetClass.capacity})`,
+          });
+          continue;
+        }
+      }
+
+      // Row is valid — track it for intra-batch dedup, conflict detection, and capacity
       batchDuplicateSet.add(pairKey);
+      classEnrollmentCounts.set(class_id, (classEnrollmentCounts.get(class_id) ?? 0) + 1);
 
       // Add this new enrollment's schedules to the student's map for subsequent rows
       const studentList = studentEnrollmentsMap.get(student_id) ?? [];
