@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ElementType } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Globe, Layout, FileText, Star, Image, Phone } from 'lucide-react';
+import { Globe, Layout, FileText, Star, Image, Phone, Palette } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import type { LandingFeature, SocialLinks } from '@/src/types/landing';
 
@@ -12,6 +12,7 @@ export interface SectionItem {
 }
 
 interface SectionNavProps {
+  template: string;
   tagline: string;
   about: string;
   features: LandingFeature[];
@@ -21,9 +22,10 @@ interface SectionNavProps {
 }
 
 function buildSections(props: SectionNavProps): SectionItem[] {
-  const { tagline, about, features, gallery, whatsapp, social } = props;
+  const { template, tagline, about, features, gallery, whatsapp, social } = props;
   return [
     { id: 'landing-status', icon: Globe, labelKey: 'settings.landing.title', isFilled: true },
+    { id: 'landing-theme', icon: Palette, labelKey: 'settings.landing.theme', isFilled: !!template },
     { id: 'landing-hero', icon: Layout, labelKey: 'settings.landing.tagline', isFilled: !!(tagline) },
     { id: 'landing-about', icon: FileText, labelKey: 'settings.landing.about', isFilled: !!(about) },
     { id: 'landing-features', icon: Star, labelKey: 'settings.landing.features', isFilled: features.length > 0 },

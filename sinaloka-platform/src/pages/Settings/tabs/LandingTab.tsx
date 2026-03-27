@@ -11,6 +11,8 @@ import { FeatureRepeater } from './components/FeatureRepeater';
 import { GalleryUploader } from './components/GalleryUploader';
 import { SectionNav } from './components/SectionNav';
 import { SectionIllustration } from './components/SectionIllustration';
+import { TemplateSelector } from './components/TemplateSelector';
+import type { TemplateId } from '@/src/pages/public/templates/template-config';
 import type { LandingFeature, GalleryImage, SocialLinks } from '@/src/types/landing';
 
 export const LandingTab = () => {
@@ -30,6 +32,7 @@ export const LandingTab = () => {
   const [features, setFeatures] = useState<LandingFeature[]>([]);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
   const [social, setSocial] = useState<SocialLinks>({});
+  const [template, setTemplate] = useState<TemplateId>('bold-geometric');
 
   // Confirm modal
   const [showConfirm, setShowConfirm] = useState(false);
@@ -45,12 +48,14 @@ export const LandingTab = () => {
     setFeatures((settings.landing_features as LandingFeature[]) ?? []);
     setGallery((settings.gallery_images as GalleryImage[]) ?? []);
     setSocial((settings.social_links as SocialLinks) ?? {});
+    setTemplate((settings.landing_template as TemplateId) ?? 'bold-geometric');
     if (!initialRef.current) initialRef.current = settings;
   }, [settings]);
 
   const hasChanges = !!(
     initialRef.current &&
-    (tagline !== (initialRef.current.landing_tagline ?? '') ||
+    (template !== ((initialRef.current.landing_template as TemplateId) ?? 'bold-geometric') ||
+      tagline !== (initialRef.current.landing_tagline ?? '') ||
       about !== (initialRef.current.landing_about ?? '') ||
       ctaText !== (initialRef.current.landing_cta_text ?? '') ||
       whatsapp !== (initialRef.current.whatsapp_number ?? '') ||
@@ -71,6 +76,7 @@ export const LandingTab = () => {
       detectScalarChange(t('settings.landing.whatsapp'), initialRef.current?.whatsapp_number ?? '', whatsapp),
     );
     if (changes.length === 0 &&
+        template === ((initialRef.current?.landing_template as TemplateId) ?? 'bold-geometric') &&
         JSON.stringify(features) === JSON.stringify(initialRef.current?.landing_features ?? []) &&
         JSON.stringify(social) === JSON.stringify(initialRef.current?.social_links ?? {})) {
       toast.info('No changes');
@@ -82,6 +88,7 @@ export const LandingTab = () => {
   const confirmSave = () => {
     updateSettings.mutate(
       {
+        landing_template: template,
         landing_tagline: tagline || null,
         landing_about: about || null,
         landing_cta_text: ctaText || null,
@@ -119,6 +126,7 @@ export const LandingTab = () => {
       <div className="flex gap-6">
         {/* Sidebar nav */}
         <SectionNav
+          template={template}
           tagline={tagline}
           about={about}
           features={features}
@@ -173,6 +181,12 @@ export const LandingTab = () => {
                 <ExternalLink size={14} />
               </a>
             </div>
+          </Card>
+
+          {/* Theme */}
+          <Card id="landing-theme">
+            <h3 className="text-sm font-semibold dark:text-zinc-200 mb-3">{t('settings.landing.theme')}</h3>
+            <TemplateSelector value={template} onChange={setTemplate} />
           </Card>
 
           {/* Hero Content */}
