@@ -10,15 +10,15 @@ export function useEnrollment(id: string) {
 }
 export function useCreateEnrollment() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: enrollmentsService.create, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+  return useMutation({ mutationFn: enrollmentsService.create, onSuccess: () => { qc.invalidateQueries({ queryKey: ['enrollments'] }); qc.invalidateQueries({ queryKey: ['enrollment-stats'] }); } });
 }
 export function useUpdateEnrollment() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: enrollmentsService.update, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+  return useMutation({ mutationFn: enrollmentsService.update, onSuccess: () => { qc.invalidateQueries({ queryKey: ['enrollments'] }); qc.invalidateQueries({ queryKey: ['enrollment-stats'] }); } });
 }
 export function useDeleteEnrollment() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: enrollmentsService.remove, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+  return useMutation({ mutationFn: enrollmentsService.remove, onSuccess: () => { qc.invalidateQueries({ queryKey: ['enrollments'] }); qc.invalidateQueries({ queryKey: ['enrollment-stats'] }); } });
 }
 export function useCheckConflict() {
   return useMutation({ mutationFn: (data: CheckConflictDto) => enrollmentsService.checkConflict(data) });
@@ -28,15 +28,15 @@ export function useExportEnrollments() {
 }
 export function useBulkUpdateEnrollment() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: enrollmentsService.bulkUpdate, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+  return useMutation({ mutationFn: enrollmentsService.bulkUpdate, onSuccess: () => { qc.invalidateQueries({ queryKey: ['enrollments'] }); qc.invalidateQueries({ queryKey: ['enrollment-stats'] }); } });
 }
 export function useBulkDeleteEnrollment() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: enrollmentsService.bulkDelete, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+  return useMutation({ mutationFn: enrollmentsService.bulkDelete, onSuccess: () => { qc.invalidateQueries({ queryKey: ['enrollments'] }); qc.invalidateQueries({ queryKey: ['enrollment-stats'] }); } });
 }
 export function useImportEnrollments() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: enrollmentsService.importCsv, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
+  return useMutation({ mutationFn: enrollmentsService.importCsv, onSuccess: () => { qc.invalidateQueries({ queryKey: ['enrollments'] }); qc.invalidateQueries({ queryKey: ['enrollment-stats'] }); } });
 }
 export function useEnrollmentStats() {
   return useQuery({
