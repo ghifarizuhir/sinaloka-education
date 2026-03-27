@@ -57,6 +57,14 @@ export const useEnrollmentsPage = () => {
   // Edit modal state
   const [editStatus, setEditStatus] = useState<EnrollmentStatus>('ACTIVE');
 
+  const resetModalState = () => {
+    setSelectedStudentIds([]);
+    setSelectedClassId('');
+    setEnrollmentType('ACTIVE');
+    setStudentSearch('');
+    setAutoInvoice(true);
+  };
+
   const { data: overdueSummary } = useOverdueSummary();
   const flaggedStudentIds = new Set(overdueSummary?.flagged_students.map(s => s.student_id) ?? []);
 
@@ -149,8 +157,7 @@ export const useEnrollmentsPage = () => {
       .then(() => {
         toast.success(t('enrollments.toast.enrolled', { count: eligibleStudentIds.length }));
         setShowModal(false);
-        setSelectedStudentIds([]);
-        setSelectedClassId('');
+        resetModalState();
       })
       .catch(() => toast.error(t('enrollments.toast.enrollError')));
   };
@@ -255,7 +262,10 @@ export const useEnrollmentsPage = () => {
     setPage,
     meta: enrollmentsQuery.data?.meta,
     showModal,
-    setShowModal,
+    setShowModal: (open: boolean) => {
+      setShowModal(open);
+      if (!open) resetModalState();
+    },
     searchQuery,
     setSearchQuery,
     filterStatus,
