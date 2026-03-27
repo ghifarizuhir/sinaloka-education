@@ -164,6 +164,7 @@ model Institution {
   background_image_url String?
   // Landing Page
   landing_enabled       Boolean  @default(false)
+  landing_template      String?  @default("bold-geometric") @db.VarChar(30)
   landing_tagline       String?  @db.VarChar(200)
   landing_about         String?  @db.Text
   landing_cta_text      String?  @db.VarChar(50)
