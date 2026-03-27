@@ -839,9 +839,8 @@ describe('EnrollmentService', () => {
       }));
       const csv = toCsv(rows);
 
-      const { BadRequestException } = await import('@nestjs/common');
       await expect(service.importFromCsv(csv, INST)).rejects.toThrow(
-        BadRequestException,
+        'CSV exceeds maximum of 500 rows',
       );
     });
 
