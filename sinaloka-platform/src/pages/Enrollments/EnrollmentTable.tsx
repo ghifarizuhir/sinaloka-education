@@ -7,7 +7,7 @@ import {
   Edit,
   CheckCircle2,
   GraduationCap,
-  UserPlus,
+  UserMinus,
   Trash2,
   AlertTriangle,
 } from 'lucide-react';
@@ -232,21 +232,20 @@ export const EnrollmentTable = ({
                               </div>
                             ),
                           },
-                          ...(enroll.status !== 'ACTIVE' ? [{
-                            label: t('enrollments.menu.setActive'),
-                            icon: CheckCircle2,
-                            onClick: () => handleStatusUpdate(enroll.id, 'ACTIVE'),
-                            className: 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
-                          }] : []),
                           ...(enroll.status === 'TRIAL' ? [{
                             label: t('enrollments.menu.convertToFull'),
                             icon: GraduationCap,
                             onClick: () => handleStatusUpdate(enroll.id, 'ACTIVE'),
                             className: 'text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20',
+                          }] : enroll.status !== 'ACTIVE' ? [{
+                            label: t('enrollments.menu.setActive'),
+                            icon: CheckCircle2,
+                            onClick: () => handleStatusUpdate(enroll.id, 'ACTIVE'),
+                            className: 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
                           }] : []),
                           ...(enroll.status !== 'DROPPED' ? [{
                             label: t('enrollments.menu.drop'),
-                            icon: UserPlus,
+                            icon: UserMinus,
                             onClick: () => handleStatusUpdate(enroll.id, 'DROPPED'),
                             className: 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20',
                           }] : []),

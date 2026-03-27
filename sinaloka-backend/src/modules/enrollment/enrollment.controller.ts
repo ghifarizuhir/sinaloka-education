@@ -28,6 +28,7 @@ import {
   CheckConflictSchema,
   BulkUpdateEnrollmentSchema,
   BulkDeleteEnrollmentSchema,
+  EnrollmentExportQuerySchema,
 } from './enrollment.dto.js';
 import type {
   CreateEnrollmentDto,
@@ -36,6 +37,7 @@ import type {
   CheckConflictDto,
   BulkUpdateEnrollmentDto,
   BulkDeleteEnrollmentDto,
+  EnrollmentExportQueryDto,
 } from './enrollment.dto.js';
 
 @Controller('admin/enrollments')
@@ -71,7 +73,8 @@ export class EnrollmentController {
 
   @Get('export')
   async exportCsv(
-    @Query() query: any,
+    @Query(new ZodValidationPipe(EnrollmentExportQuerySchema))
+    query: EnrollmentExportQueryDto,
     @InstitutionId() institutionId: string,
     @Res() res: Response,
   ) {
@@ -84,7 +87,11 @@ export class EnrollmentController {
   }
 
   @Post('import')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 1 * 1024 * 1024 }, // 1MB max
+    }),
+  )
   async importCsv(
     @UploadedFile() file: Express.Multer.File,
     @InstitutionId() institutionId: string,

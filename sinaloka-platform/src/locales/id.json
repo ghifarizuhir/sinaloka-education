@@ -859,7 +859,8 @@
       "confirmDelete": "Hapus {{count}} Pendaftaran"
     },
     "confirm": {
-      "deleteEnrollment": "Apakah Anda yakin ingin menghapus pendaftaran ini?"
+      "deleteTitle": "Hapus Pendaftaran",
+      "deleteEnrollment": "Apakah Anda yakin ingin menghapus pendaftaran ini? Tindakan ini tidak dapat dibatalkan."
     },
     "import": {
       "clickToUpload": "Klik untuk mengunggah CSV",

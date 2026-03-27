@@ -57,6 +57,16 @@ export type BulkDeleteEnrollmentDto = z.infer<
   typeof BulkDeleteEnrollmentSchema
 >;
 
+export const EnrollmentExportQuerySchema = z.object({
+  status: EnrollmentStatus.optional(),
+  payment_status: PaymentStatus.optional(),
+  student_id: z.string().uuid().optional(),
+  class_id: z.string().uuid().optional(),
+});
+export type EnrollmentExportQueryDto = z.infer<
+  typeof EnrollmentExportQuerySchema
+>;
+
 export const ImportEnrollmentRowSchema = z.object({
   student_id: z.string().uuid(),
   class_id: z.string().uuid(),

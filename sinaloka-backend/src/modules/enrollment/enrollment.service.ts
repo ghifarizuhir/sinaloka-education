@@ -19,6 +19,7 @@ import {
   CheckConflictDto,
   ImportEnrollmentRowSchema,
   BulkUpdateEnrollmentDto,
+  EnrollmentExportQueryDto,
 } from './enrollment.dto.js';
 
 @Injectable()
@@ -125,6 +126,8 @@ export class EnrollmentService {
       throw new ConflictException('Student is already enrolled in this class');
     }
 
+    const enrolledAt = dto.enrolled_at ?? new Date();
+
     const enrollment = await this.prisma.enrollment.create({
       data: {
         institution_id: institutionId,
@@ -132,7 +135,7 @@ export class EnrollmentService {
         class_id: dto.class_id,
         status: dto.status ?? 'ACTIVE',
         payment_status: dto.payment_status ?? 'NEW',
-        enrolled_at: dto.enrolled_at ?? new Date(),
+        enrolled_at: enrolledAt,
       },
       include: {
         student: { select: { id: true, name: true } },
@@ -146,7 +149,7 @@ export class EnrollmentService {
       studentId: dto.student_id,
       enrollmentId: enrollment.id,
       classId: dto.class_id,
-      enrolledAt: new Date(),
+      enrolledAt,
     });
 
     return enrollment;
@@ -252,13 +255,16 @@ export class EnrollmentService {
       throw new NotFoundException(`Enrollment with ID "${id}" not found`);
     }
 
-    return this.prisma.enrollment.delete({
-      where: { id },
+    return this.prisma.$transaction(async (tx) => {
+      await tx.payment.deleteMany({
+        where: { enrollment_id: id, institution_id: institutionId },
+      });
+      return tx.enrollment.delete({ where: { id } });
     });
   }
 
   async exportToCsv(
-    query: Record<string, any>,
+    query: EnrollmentExportQueryDto,
     institutionId: string,
   ): Promise<string> {
     const where: any = { institution_id: institutionId };
