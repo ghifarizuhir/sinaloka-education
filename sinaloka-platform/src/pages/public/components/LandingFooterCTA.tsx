@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Button } from '@/src/components/UI';
 import { SinalokaLogo } from '@/src/components/SinalokaLogo';
 import type { LandingPageData } from '@/src/types/landing';
+import type { TemplateConfig } from '../templates/template-config';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -13,31 +14,33 @@ const fadeInUp = {
 
 interface LandingFooterCTAProps {
   data: LandingPageData;
+  template: TemplateConfig;
 }
 
-export function LandingFooterCTA({ data }: LandingFooterCTAProps) {
+export function LandingFooterCTA({ data, template }: LandingFooterCTAProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const tc = template.footerCta;
 
   const brandColor = data.brand_color ?? '#14b8a6';
   const ctaText = data.landing_cta_text ?? t('landingPage.registerNow');
 
   return (
     <section
-      className="relative px-6 py-20 overflow-hidden"
+      className={tc.section}
       style={{ backgroundColor: brandColor }}
     >
       {/* Geometric decorative circles */}
       <div
-        className="absolute -top-8 -left-8 w-[160px] h-[160px] rounded-full border-[3px] pointer-events-none"
+        className={`${tc.decorativeCircle} -top-8 -left-8 w-[160px] h-[160px]`}
         style={{ borderColor: 'rgba(255,255,255,0.12)' }}
       />
       <div
-        className="absolute -bottom-12 -right-12 w-[200px] h-[200px] rounded-full border-[3px] pointer-events-none"
+        className={`${tc.decorativeCircle} -bottom-12 -right-12 w-[200px] h-[200px]`}
         style={{ borderColor: 'rgba(255,255,255,0.1)' }}
       />
       <div
-        className="absolute top-1/2 -right-6 w-[100px] h-[100px] rounded-full border-[3px] pointer-events-none"
+        className={`${tc.decorativeCircle} top-1/2 -right-6 w-[100px] h-[100px]`}
         style={{ borderColor: 'rgba(255,255,255,0.08)' }}
       />
 
@@ -45,14 +48,14 @@ export function LandingFooterCTA({ data }: LandingFooterCTAProps) {
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-3xl font-bold text-white mb-3"
+          className={tc.title}
         >
           {t('landingPage.ready')}
         </motion.h2>
         <motion.p
           {...fadeInUp}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="mb-8"
+          className={tc.subtitle}
           style={{ color: 'rgba(255,255,255,0.7)' }}
         >
           {t('landingPage.readyDesc')}
@@ -66,7 +69,7 @@ export function LandingFooterCTA({ data }: LandingFooterCTAProps) {
             <Button
               size="lg"
               onClick={() => navigate('/register')}
-              className="font-bold sm:min-w-[180px] justify-center px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              className={tc.ctaButton}
               style={{ backgroundColor: '#fff', color: brandColor }}
             >
               {ctaText}
