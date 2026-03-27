@@ -48,7 +48,8 @@ export const Enrollments = () => {
 
       {/* Stats Overview */}
       <EnrollmentStats
-        enrollments={state.enrollments}
+        stats={state.stats}
+        isLoading={state.statsLoading}
         t={state.t}
       />
 

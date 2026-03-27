@@ -26,4 +26,8 @@ export const enrollmentsService = {
     formData.append('file', file);
     return api.post('/api/admin/enrollments/import', formData).then((r) => r.data);
   },
+  getStats: async (): Promise<{ active: number; trial: number; waitlisted: number; overdue: number }> => {
+    const { data } = await api.get('/api/admin/enrollments/stats');
+    return data;
+  },
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict, useImportEnrollments, useExportEnrollments, useBulkUpdateEnrollment, useBulkDeleteEnrollment } from '@/src/hooks/useEnrollments';
+import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict, useImportEnrollments, useExportEnrollments, useBulkUpdateEnrollment, useBulkDeleteEnrollment, useEnrollmentStats } from '@/src/hooks/useEnrollments';
 import { useStudents } from '@/src/hooks/useStudents';
 import { useClasses } from '@/src/hooks/useClasses';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
@@ -69,6 +69,7 @@ export const useEnrollmentsPage = () => {
   const flaggedStudentIds = new Set(overdueSummary?.flagged_students.map(s => s.student_id) ?? []);
 
   // Queries
+  const statsQuery = useEnrollmentStats();
   const enrollmentsQuery = useEnrollments({
     page,
     limit,
@@ -315,6 +316,8 @@ export const useEnrollmentsPage = () => {
     bulkUpdate,
     bulkDelete,
     isLoading,
+    stats: statsQuery.data,
+    statsLoading: statsQuery.isLoading,
     handleEnroll,
     handleStatusUpdate,
     handleDeleteEnrollment,

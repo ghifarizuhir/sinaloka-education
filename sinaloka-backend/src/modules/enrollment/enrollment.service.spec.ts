@@ -358,6 +358,50 @@ describe('EnrollmentService', () => {
         }),
       ).rejects.toThrow(ConflictException);
     });
+
+    it('should NOT call generateMidMonthEnrollmentPayment when payment_status is NEW', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClassA);
+      prisma.enrollment.findMany.mockResolvedValue([]);
+      prisma.enrollment.findFirst.mockResolvedValue(null);
+      prisma.enrollment.create.mockResolvedValue({
+        ...mockEnrollment,
+        payment_status: 'NEW',
+      });
+
+      await service.create('inst-1', {
+        student_id: 'student-1',
+        class_id: 'class-a',
+        payment_status: 'NEW',
+      });
+
+      expect(
+        invoiceGenerator.generateMidMonthEnrollmentPayment,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should call generateMidMonthEnrollmentPayment when payment_status is PENDING', async () => {
+      const pendingEnrollment = { ...mockEnrollment, payment_status: 'PENDING' };
+      prisma.class.findFirst.mockResolvedValue(mockClassA);
+      prisma.enrollment.findMany.mockResolvedValue([]);
+      prisma.enrollment.findFirst.mockResolvedValue(null);
+      prisma.enrollment.create.mockResolvedValue(pendingEnrollment);
+
+      await service.create('inst-1', {
+        student_id: 'student-1',
+        class_id: 'class-a',
+        payment_status: 'PENDING',
+      });
+
+      expect(
+        invoiceGenerator.generateMidMonthEnrollmentPayment,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          institutionId: 'inst-1',
+          studentId: 'student-1',
+          classId: 'class-a',
+        }),
+      );
+    });
   });
 
   describe('findAll', () => {
@@ -412,6 +456,54 @@ describe('EnrollmentService', () => {
           where: expect.objectContaining({ student_id: 'student-1' }),
         }),
       );
+    });
+
+    it('should filter by student name when search param is provided', async () => {
+      prisma.enrollment.findMany.mockResolvedValue([mockEnrollment]);
+      prisma.enrollment.count.mockResolvedValue(1);
+
+      await service.findAll('inst-1', {
+        page: 1,
+        limit: 20,
+        search: 'Test',
+        sort_by: 'created_at',
+        sort_order: 'desc',
+      });
+
+      expect(prisma.enrollment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              { student: { name: { contains: 'Test', mode: 'insensitive' } } },
+            ]),
+          }),
+        }),
+      );
+      expect(prisma.enrollment.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              { student: { name: { contains: 'Test', mode: 'insensitive' } } },
+            ]),
+          }),
+        }),
+      );
+    });
+
+    it('should return empty when search matches nothing', async () => {
+      prisma.enrollment.findMany.mockResolvedValue([]);
+      prisma.enrollment.count.mockResolvedValue(0);
+
+      const result = await service.findAll('inst-1', {
+        page: 1,
+        limit: 20,
+        search: 'nonexistent-xyz',
+        sort_by: 'created_at',
+        sort_order: 'desc',
+      });
+
+      expect(result.data).toHaveLength(0);
+      expect(result.meta.total).toBe(0);
     });
   });
 
