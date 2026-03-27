@@ -143,14 +143,16 @@ export class EnrollmentService {
       },
     });
 
-    // Auto-generate mid-month enrollment payment
-    await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
-      institutionId,
-      studentId: dto.student_id,
-      enrollmentId: enrollment.id,
-      classId: dto.class_id,
-      enrolledAt,
-    });
+    // Auto-generate mid-month enrollment payment only when autoInvoice is on
+    if (dto.payment_status !== 'NEW') {
+      await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
+        institutionId,
+        studentId: dto.student_id,
+        enrollmentId: enrollment.id,
+        classId: dto.class_id,
+        enrolledAt,
+      });
+    }
 
     return enrollment;
   }
@@ -162,6 +164,7 @@ export class EnrollmentService {
     const {
       page,
       limit,
+      search,
       student_id,
       class_id,
       status,
@@ -191,6 +194,13 @@ export class EnrollmentService {
       where.payment_status = payment_status;
     }
 
+    if (search) {
+      where.OR = [
+        { student: { name: { contains: search, mode: 'insensitive' } } },
+        { class: { name: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
     const [data, total] = await Promise.all([
       this.prisma.enrollment.findMany({
         where,
@@ -209,6 +219,16 @@ export class EnrollmentService {
       data,
       meta: buildPaginationMeta(total, page, limit),
     };
+  }
+
+  async getStats(institutionId: string) {
+    const [active, trial, waitlisted, overdue] = await Promise.all([
+      this.prisma.enrollment.count({ where: { institution_id: institutionId, status: 'ACTIVE' } }),
+      this.prisma.enrollment.count({ where: { institution_id: institutionId, status: 'TRIAL' } }),
+      this.prisma.enrollment.count({ where: { institution_id: institutionId, status: 'WAITLISTED' } }),
+      this.prisma.enrollment.count({ where: { institution_id: institutionId, payment_status: 'OVERDUE' } }),
+    ]);
+    return { active, trial, waitlisted, overdue };
   }
 
   async findOne(institutionId: string, id: string) {
