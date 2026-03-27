@@ -30,7 +30,9 @@ describe('EnrollmentService', () => {
       count: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
+      updateMany: jest.Mock;
       delete: jest.Mock;
+      deleteMany: jest.Mock;
     };
     payment: {
       deleteMany: jest.Mock;
@@ -141,7 +143,9 @@ describe('EnrollmentService', () => {
         count: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
         delete: jest.fn(),
+        deleteMany: jest.fn(),
       },
       payment: {
         deleteMany: jest.fn(),
@@ -159,6 +163,7 @@ describe('EnrollmentService', () => {
           payment: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
           enrollment: {
             delete: prisma.enrollment.delete,
+            deleteMany: prisma.enrollment.deleteMany,
             create: prisma.enrollment.create,
           },
         });
@@ -844,6 +849,149 @@ describe('EnrollmentService', () => {
 
       // Only one $transaction call — all creates are batched inside it
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('bulkUpdate', () => {
+    it('should update multiple enrollments by ids', async () => {
+      const ids = ['enroll-1', 'enroll-2', 'enroll-3'];
+      prisma.enrollment.updateMany.mockResolvedValue({ count: 3 });
+
+      const result = await service.bulkUpdate('inst-1', {
+        ids,
+        status: 'DROPPED',
+      });
+
+      expect(result).toEqual({ updated: 3 });
+      expect(prisma.enrollment.updateMany).toHaveBeenCalledWith({
+        where: { id: { in: ids }, institution_id: 'inst-1' },
+        data: { status: 'DROPPED' },
+      });
+    });
+
+    it('should return 0 when no matching enrollments', async () => {
+      prisma.enrollment.updateMany.mockResolvedValue({ count: 0 });
+
+      const result = await service.bulkUpdate('inst-1', {
+        ids: ['nonexistent-1'],
+        status: 'DROPPED',
+      });
+
+      expect(result).toEqual({ updated: 0 });
+    });
+  });
+
+  describe('bulkDelete', () => {
+    it('should delete payments then enrollments in transaction', async () => {
+      const ids = ['enroll-1', 'enroll-2'];
+      const txPaymentDeleteMany = jest.fn().mockResolvedValue({ count: 2 });
+      prisma.enrollment.deleteMany.mockResolvedValue({ count: 2 });
+
+      prisma.$transaction.mockImplementation(async (fn: any) => {
+        return fn({
+          payment: { deleteMany: txPaymentDeleteMany },
+          enrollment: {
+            deleteMany: prisma.enrollment.deleteMany,
+          },
+        });
+      });
+
+      const result = await service.bulkDelete('inst-1', ids);
+
+      expect(result).toEqual({ deleted: 2 });
+      expect(txPaymentDeleteMany).toHaveBeenCalledWith({
+        where: { enrollment_id: { in: ids }, institution_id: 'inst-1' },
+      });
+      expect(prisma.enrollment.deleteMany).toHaveBeenCalledWith({
+        where: { id: { in: ids }, institution_id: 'inst-1' },
+      });
+    });
+  });
+
+  describe('exportToCsv', () => {
+    const enrolledAt = new Date('2025-01-15T00:00:00.000Z');
+
+    const mockEnrollmentForCsv = {
+      id: 'enroll-csv-1',
+      institution_id: 'inst-1',
+      student_id: 'student-1',
+      class_id: 'class-1',
+      status: 'ACTIVE',
+      payment_status: 'PENDING',
+      enrolled_at: enrolledAt,
+      student: { name: 'Test Student' },
+      class: { name: 'Math 101' },
+    };
+
+    it('should return CSV string with headers and data', async () => {
+      prisma.enrollment.findMany.mockResolvedValue([mockEnrollmentForCsv]);
+
+      const result = await service.exportToCsv({}, 'inst-1');
+
+      expect(typeof result).toBe('string');
+      expect(result).toContain('student_name');
+      expect(result).toContain('class_name');
+      expect(result).toContain('status');
+      expect(result).toContain('payment_status');
+      expect(result).toContain('enrolled_at');
+      expect(result).toContain('Test Student');
+      expect(result).toContain('Math 101');
+      expect(result).toContain('ACTIVE');
+      expect(result).toContain('PENDING');
+      expect(result).toContain('2025-01-15');
+    });
+
+    it('should apply status filter', async () => {
+      prisma.enrollment.findMany.mockResolvedValue([]);
+
+      await service.exportToCsv({ status: 'ACTIVE' }, 'inst-1');
+
+      expect(prisma.enrollment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            institution_id: 'inst-1',
+            status: 'ACTIVE',
+          }),
+        }),
+      );
+    });
+
+    it('should return empty string when no data', async () => {
+      prisma.enrollment.findMany.mockResolvedValue([]);
+
+      const result = await service.exportToCsv({}, 'inst-1');
+
+      expect(typeof result).toBe('string');
+      // csv-stringify with header:true returns empty string when there are no records
+      expect(result).toBe('');
+    });
+  });
+
+  describe('getStats', () => {
+    it('should return counts for each status', async () => {
+      prisma.enrollment.count
+        .mockResolvedValueOnce(10)
+        .mockResolvedValueOnce(3)
+        .mockResolvedValueOnce(2)
+        .mockResolvedValueOnce(5);
+
+      const result = await service.getStats('inst-1');
+
+      expect(result).toEqual({ active: 10, trial: 3, waitlisted: 2, overdue: 5 });
+    });
+
+    it('should scope all counts to institution_id', async () => {
+      prisma.enrollment.count.mockResolvedValue(0);
+
+      await service.getStats('inst-1');
+
+      expect(prisma.enrollment.count).toHaveBeenCalledTimes(4);
+      const calls = prisma.enrollment.count.mock.calls;
+      for (const call of calls) {
+        expect(call[0]).toMatchObject({
+          where: expect.objectContaining({ institution_id: 'inst-1' }),
+        });
+      }
     });
   });
 });
