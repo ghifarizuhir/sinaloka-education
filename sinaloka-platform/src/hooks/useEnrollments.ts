@@ -38,3 +38,9 @@ export function useImportEnrollments() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: enrollmentsService.importCsv, onSuccess: () => qc.invalidateQueries({ queryKey: ['enrollments'] }) });
 }
+export function useEnrollmentStats() {
+  return useQuery({
+    queryKey: ['enrollment-stats'],
+    queryFn: () => enrollmentsService.getStats(),
+  });
+}

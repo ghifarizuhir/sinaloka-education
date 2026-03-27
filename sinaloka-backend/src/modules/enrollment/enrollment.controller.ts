@@ -121,6 +121,11 @@ export class EnrollmentController {
     return this.enrollmentService.bulkDelete(institutionId, dto.ids);
   }
 
+  @Get('stats')
+  async getStats(@InstitutionId() institutionId: string) {
+    return this.enrollmentService.getStats(institutionId);
+  }
+
   @Get(':id')
   async findOne(
     @InstitutionId() institutionId: string,
