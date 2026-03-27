@@ -12,7 +12,7 @@ import { GalleryUploader } from './components/GalleryUploader';
 import { SectionNav } from './components/SectionNav';
 import { SectionIllustration } from './components/SectionIllustration';
 import { TemplateSelector } from './components/TemplateSelector';
-import type { TemplateId } from '@/src/pages/public/templates/template-config';
+import { getTemplateConfig, type TemplateId } from '@/src/pages/public/templates/template-config';
 import type { LandingFeature, GalleryImage, SocialLinks } from '@/src/types/landing';
 
 export const LandingTab = () => {
@@ -68,15 +68,18 @@ export const LandingTab = () => {
     updateSettings.mutate({ landing_enabled: enabled });
   };
 
+  const templateName = (id: string) => getTemplateConfig(id).name;
+
   const handleSave = () => {
+    const oldTemplate = (initialRef.current?.landing_template as TemplateId) ?? 'bold-geometric';
     const changes = collectChanges(
+      detectScalarChange(t('settings.landing.theme'), templateName(oldTemplate), templateName(template)),
       detectScalarChange(t('settings.landing.tagline'), initialRef.current?.landing_tagline ?? '', tagline),
       detectScalarChange(t('settings.landing.about'), initialRef.current?.landing_about ?? '', about),
       detectScalarChange(t('settings.landing.ctaText'), initialRef.current?.landing_cta_text ?? '', ctaText),
       detectScalarChange(t('settings.landing.whatsapp'), initialRef.current?.whatsapp_number ?? '', whatsapp),
     );
     if (changes.length === 0 &&
-        template === ((initialRef.current?.landing_template as TemplateId) ?? 'bold-geometric') &&
         JSON.stringify(features) === JSON.stringify(initialRef.current?.landing_features ?? []) &&
         JSON.stringify(social) === JSON.stringify(initialRef.current?.social_links ?? {})) {
       toast.info('No changes');
@@ -303,6 +306,7 @@ export const LandingTab = () => {
         onClose={() => setShowConfirm(false)}
         onConfirm={confirmSave}
         changes={collectChanges(
+          detectScalarChange(t('settings.landing.theme'), templateName((initialRef.current?.landing_template as TemplateId) ?? 'bold-geometric'), templateName(template)),
           detectScalarChange(t('settings.landing.tagline'), initialRef.current?.landing_tagline ?? '', tagline),
           detectScalarChange(t('settings.landing.about'), initialRef.current?.landing_about ?? '', about),
           detectScalarChange(t('settings.landing.ctaText'), initialRef.current?.landing_cta_text ?? '', ctaText),
