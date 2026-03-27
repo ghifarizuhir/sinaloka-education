@@ -1,3 +1,4 @@
+import type React from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { TEMPLATE_LIST, type TemplateId } from '@/src/pages/public/templates/template-config';
