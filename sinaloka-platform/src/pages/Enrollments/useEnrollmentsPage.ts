@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useCheckConflict, useImportEnrollments, useExportEnrollments, useBulkUpdateEnrollment, useBulkDeleteEnrollment, useEnrollmentStats } from '@/src/hooks/useEnrollments';
+import { useEnrollments, useCreateEnrollment, useUpdateEnrollment, useDeleteEnrollment, useImportEnrollments, useExportEnrollments, useBulkUpdateEnrollment, useBulkDeleteEnrollment, useEnrollmentStats } from '@/src/hooks/useEnrollments';
 import { useStudents } from '@/src/hooks/useStudents';
 import { useClasses } from '@/src/hooks/useClasses';
 import { useOverdueSummary } from '@/src/hooks/usePayments';
@@ -78,8 +78,8 @@ export const useEnrollmentsPage = () => {
     ...(filterStudentId && { student_id: filterStudentId }),
     ...(filterClassId && { class_id: filterClassId }),
   });
-  const studentsQuery = useStudents({ limit: 100 });
-  const classesQuery = useClasses({ limit: 100 });
+  const studentsQuery = useStudents({ limit: 50, search: studentSearch || undefined });
+  const classesQuery = useClasses({ limit: 200 });
 
   const enrollments: Enrollment[] = enrollmentsQuery.data?.data ?? [];
   const students = studentsQuery.data?.data ?? [];
@@ -94,7 +94,6 @@ export const useEnrollmentsPage = () => {
   const createEnrollment = useCreateEnrollment();
   const updateEnrollment = useUpdateEnrollment();
   const deleteEnrollment = useDeleteEnrollment();
-  const checkConflict = useCheckConflict();
   const importEnrollments = useImportEnrollments();
   const exportEnrollments = useExportEnrollments();
   const bulkUpdate = useBulkUpdateEnrollment();
@@ -107,60 +106,40 @@ export const useEnrollmentsPage = () => {
 
   const filteredEnrollments = enrollments;
 
-  const filteredStudents = useMemo(() => {
-    if (!studentSearch) return students;
-    return students.filter(s => s.name.toLowerCase().includes(studentSearch.toLowerCase()));
-  }, [students, studentSearch]);
+  const filteredStudents = students;
 
   const handleEnroll = async () => {
     if (selectedStudentIds.length === 0 || !selectedClassId) return;
 
-    // Check conflicts for each student before enrolling
-    const conflictingStudentNames: string[] = [];
-    const eligibleStudentIds: string[] = [];
-
-    for (const studentId of selectedStudentIds) {
-      try {
-        const result = await checkConflict.mutateAsync({
-          student_id: studentId,
+    const results = await Promise.allSettled(
+      selectedStudentIds.map(sid =>
+        createEnrollment.mutateAsync({
+          student_id: sid,
           class_id: selectedClassId,
-        });
-        if (result.has_conflict) {
-          // Find student name from the students list
-          const student = students.find(s => s.id === studentId);
-          conflictingStudentNames.push(student?.name ?? studentId);
-        } else {
-          eligibleStudentIds.push(studentId);
-        }
-      } catch {
-        eligibleStudentIds.push(studentId);
-      }
-    }
-
-    // Warn about conflicting students
-    if (conflictingStudentNames.length > 0) {
-      toast.warning(t('enrollments.toast.conflictSkipped', { names: conflictingStudentNames.join(', ') }));
-    }
-
-    // If all students conflict, stop here
-    if (eligibleStudentIds.length === 0) return;
-
-    const promises = eligibleStudentIds.map(sid =>
-      createEnrollment.mutateAsync({
-        student_id: sid,
-        class_id: selectedClassId,
-        status: enrollmentType,
-        ...(autoInvoice && { payment_status: 'PENDING' as const }),
-      })
+          status: enrollmentType,
+          ...(autoInvoice && { payment_status: 'PENDING' as const }),
+        })
+      )
     );
 
-    Promise.all(promises)
-      .then(() => {
-        toast.success(t('enrollments.toast.enrolled', { count: eligibleStudentIds.length }));
-        setShowModal(false);
-        resetModalState();
-      })
-      .catch(() => toast.error(t('enrollments.toast.enrollError')));
+    const succeeded = results.filter(r => r.status === 'fulfilled');
+    const failed = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+
+    if (succeeded.length > 0) {
+      toast.success(t('enrollments.toast.enrolled', { count: succeeded.length }));
+    }
+
+    if (failed.length > 0) {
+      const messages = failed.map(r => {
+        const err = r.reason;
+        return err?.response?.data?.message ?? err?.message ?? t('enrollments.toast.enrollError');
+      });
+      const uniqueMessages = [...new Set(messages)];
+      toast.error(uniqueMessages.join('. '));
+    }
+
+    setShowModal(false);
+    resetModalState();
   };
 
   const handleStatusUpdate = (id: string, newStatus: UpdateEnrollmentDto['status']) => {
@@ -310,7 +289,6 @@ export const useEnrollmentsPage = () => {
     createEnrollment,
     updateEnrollment,
     deleteEnrollment,
-    checkConflict,
     importEnrollments,
     exportEnrollments,
     bulkUpdate,
