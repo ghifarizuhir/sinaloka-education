@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { icons, type LucideIcon } from 'lucide-react';
 import type { LandingFeature } from '@/src/types/landing';
+import type { TemplateConfig } from '../templates/template-config';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -12,10 +13,12 @@ const fadeInUp = {
 interface LandingFeaturesProps {
   features: LandingFeature[] | null;
   brandColor: string | null;
+  template: TemplateConfig;
 }
 
-export function LandingFeatures({ features, brandColor }: LandingFeaturesProps) {
+export function LandingFeatures({ features, brandColor, template }: LandingFeaturesProps) {
   const { t } = useTranslation();
+  const tc = template.features;
 
   if (!features || features.length === 0) return null;
 
@@ -27,7 +30,7 @@ export function LandingFeatures({ features, brandColor }: LandingFeaturesProps) 
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-2xl font-bold text-gray-900 text-center mb-10"
+          className={tc.sectionTitle}
         >
           {t('landingPage.features')}
         </motion.h2>
@@ -39,16 +42,13 @@ export function LandingFeatures({ features, brandColor }: LandingFeaturesProps) 
                 key={feature.id}
                 {...fadeInUp}
                 transition={{ delay: i * 0.08, duration: 0.5 }}
-                className="rounded-xl p-6"
-                style={{
-                  backgroundColor: `${color}0d`,
-                  borderLeft: `4px solid ${color}`,
-                }}
+                className={tc.card}
+                style={tc.cardStyle(color)}
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: `${color}26` }}
+                    className={tc.iconWrapper}
+                    style={tc.iconWrapperStyle(color)}
                   >
                     {Icon ? (
                       <Icon size={20} style={{ color }} />
@@ -57,10 +57,10 @@ export function LandingFeatures({ features, brandColor }: LandingFeaturesProps) 
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className={tc.title}>
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
+                    <p className={tc.description}>
                       {feature.description}
                     </p>
                   </div>

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import type { GalleryImage } from '@/src/types/landing';
+import type { TemplateConfig } from '../templates/template-config';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -13,22 +14,24 @@ const fadeInUp = {
 
 interface LandingGalleryProps {
   images: GalleryImage[] | null;
+  template: TemplateConfig;
 }
 
-export function LandingGallery({ images }: LandingGalleryProps) {
+export function LandingGallery({ images, template }: LandingGalleryProps) {
   const { t } = useTranslation();
+  const tc = template.gallery;
 
   if (!images || images.length === 0) return null;
 
   const sorted = [...images].sort((a, b) => a.order - b.order);
 
   return (
-    <section className="px-6 py-16" style={{ backgroundColor: '#F9FAFB' }}>
+    <section className="px-6 py-16" style={{ backgroundColor: tc.sectionBg }}>
       <div className="max-w-2xl mx-auto">
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-2xl font-bold text-gray-900 text-center mb-10"
+          className={tc.sectionTitle}
         >
           {t('landingPage.gallery')}
         </motion.h2>
@@ -47,6 +50,7 @@ export function LandingGallery({ images }: LandingGalleryProps) {
               index={i}
               isFirst={i === 0 && sorted.length >= 2}
               isSingle={sorted.length === 1}
+              imageWrapperClass={tc.imageWrapper}
             />
           ))}
         </div>
@@ -60,12 +64,14 @@ function GalleryItem({
   index,
   isFirst,
   isSingle,
+  imageWrapperClass,
 }: {
   key?: React.Key;
   image: GalleryImage;
   index: number;
   isFirst: boolean;
   isSingle: boolean;
+  imageWrapperClass: string;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -74,7 +80,7 @@ function GalleryItem({
       {...fadeInUp}
       transition={{ delay: index * 0.06, duration: 0.5 }}
       className={cn(
-        'relative rounded-xl overflow-hidden group cursor-default',
+        imageWrapperClass,
         isFirst && 'col-span-2 row-span-2',
         isSingle && 'col-span-full',
       )}

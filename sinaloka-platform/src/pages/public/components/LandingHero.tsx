@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Button } from '@/src/components/UI';
 import type { LandingPageData } from '@/src/types/landing';
+import type { TemplateConfig } from '../templates/template-config';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -11,11 +12,13 @@ const fadeInUp = {
 
 interface LandingHeroProps {
   data: LandingPageData;
+  template: TemplateConfig;
 }
 
-export function LandingHero({ data }: LandingHeroProps) {
+export function LandingHero({ data, template }: LandingHeroProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const tc = template.hero;
 
   const brandColor = data.brand_color ?? '#14b8a6';
   const tagline = data.landing_tagline ?? data.description;
@@ -23,12 +26,12 @@ export function LandingHero({ data }: LandingHeroProps) {
 
   return (
     <section
-      className="relative min-h-[50vh] flex items-center justify-center px-6 py-20 overflow-hidden"
+      className={tc.section}
       style={{ backgroundColor: brandColor }}
     >
       {/* Gradient overlay for depth */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className={tc.overlay}
         style={{
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.08), transparent 40%, transparent)',
         }}
@@ -36,15 +39,15 @@ export function LandingHero({ data }: LandingHeroProps) {
 
       {/* Geometric decorative circles */}
       <div
-        className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full border-[3px] pointer-events-none"
+        className={`${tc.decorativeCircle} -top-10 -right-10 w-[200px] h-[200px]`}
         style={{ borderColor: 'rgba(255,255,255,0.15)' }}
       />
       <div
-        className="absolute top-20 -right-16 w-[120px] h-[120px] rounded-full border-[3px] pointer-events-none"
+        className={`${tc.decorativeCircle} top-20 -right-16 w-[120px] h-[120px]`}
         style={{ borderColor: 'rgba(255,255,255,0.1)' }}
       />
       <div
-        className="absolute -bottom-16 -left-8 w-[160px] h-[160px] rounded-full border-[3px] pointer-events-none"
+        className={`${tc.decorativeCircle} -bottom-16 -left-8 w-[160px] h-[160px]`}
         style={{ borderColor: 'rgba(255,255,255,0.1)' }}
       />
 
@@ -60,14 +63,14 @@ export function LandingHero({ data }: LandingHeroProps) {
             <img
               src={data.logo_url}
               alt={data.name}
-              className="w-16 h-16 rounded-xl object-cover shadow-2xl ring-2 ring-white/30 backdrop-blur"
+              className={`${tc.logoWrapper} object-cover`}
               style={{
                 backgroundColor: 'rgba(255,255,255,0.2)',
               }}
             />
           ) : (
             <div
-              className="w-16 h-16 rounded-xl flex items-center justify-center shadow-2xl text-2xl font-bold backdrop-blur ring-2 ring-white/30"
+              className={`${tc.logoWrapper} flex items-center justify-center text-2xl font-bold`}
               style={{
                 backgroundColor: 'rgba(255,255,255,0.2)',
                 color: '#fff',
@@ -82,7 +85,7 @@ export function LandingHero({ data }: LandingHeroProps) {
         <motion.h1
           {...fadeInUp}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4"
+          className={tc.title}
         >
           {data.name}
         </motion.h1>
@@ -92,7 +95,7 @@ export function LandingHero({ data }: LandingHeroProps) {
           <motion.p
             {...fadeInUp}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-lg max-w-xl leading-relaxed mb-8"
+            className={tc.tagline}
             style={{ color: 'rgba(255,255,255,0.8)' }}
           >
             {tagline}
@@ -108,7 +111,7 @@ export function LandingHero({ data }: LandingHeroProps) {
             <Button
               size="lg"
               onClick={() => navigate('/register')}
-              className="font-bold sm:min-w-[160px] justify-center px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              className={tc.ctaButton}
               style={{ backgroundColor: '#fff', color: brandColor }}
             >
               {ctaText}

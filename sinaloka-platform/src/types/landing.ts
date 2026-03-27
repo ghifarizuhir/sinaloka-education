@@ -22,6 +22,7 @@ export interface SocialLinks {
 
 export interface LandingSettings {
   landing_enabled: boolean;
+  landing_template: string | null;
   landing_tagline: string | null;
   landing_about: string | null;
   landing_cta_text: string | null;
@@ -33,6 +34,7 @@ export interface LandingSettings {
 
 export interface UpdateLandingSettingsDto {
   landing_enabled?: boolean;
+  landing_template?: string | null;
   landing_tagline?: string | null;
   landing_about?: string | null;
   landing_cta_text?: string | null;
@@ -54,6 +56,7 @@ export interface LandingPageData {
   address: string | null;
   registration_enabled: boolean;
   landing_enabled: boolean;
+  landing_template: string | null;
   landing_tagline: string | null;
   landing_about: string | null;
   landing_cta_text: string | null;

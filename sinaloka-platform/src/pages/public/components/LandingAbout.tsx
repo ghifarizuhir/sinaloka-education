@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
+import type { TemplateConfig } from '../templates/template-config';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -10,10 +11,12 @@ const fadeInUp = {
 interface LandingAboutProps {
   text: string | null;
   brandColor: string | null;
+  template: TemplateConfig;
 }
 
-export function LandingAbout({ text, brandColor }: LandingAboutProps) {
+export function LandingAbout({ text, brandColor, template }: LandingAboutProps) {
   const { t } = useTranslation();
+  const tc = template.about;
 
   if (!text) return null;
 
@@ -27,20 +30,20 @@ export function LandingAbout({ text, brandColor }: LandingAboutProps) {
           <motion.h2
             {...fadeInUp}
             transition={{ duration: 0.5 }}
-            className="text-2xl font-bold text-gray-900 mb-3"
+            className={`${tc.sectionTitle} mb-3`}
           >
             {t('landingPage.about')}
           </motion.h2>
           <motion.div
             {...fadeInUp}
             transition={{ delay: 0.05, duration: 0.5 }}
-            className="w-16 h-1 rounded-full mx-auto mb-6"
+            className={`${tc.divider} mx-auto mb-6`}
             style={{ backgroundColor: color }}
           />
           <motion.p
             {...fadeInUp}
             transition={{ delay: 0.1, duration: 0.5 }}
-            className="text-gray-600 leading-relaxed whitespace-pre-line"
+            className={tc.text}
           >
             {text}
           </motion.p>
@@ -58,18 +61,18 @@ export function LandingAbout({ text, brandColor }: LandingAboutProps) {
             transition={{ duration: 0.5 }}
             className="sm:w-1/3 shrink-0 mb-6 sm:mb-0"
           >
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className={tc.sectionTitle}>
               {t('landingPage.about')}
             </h2>
             <div
-              className="w-16 h-1 rounded-full mt-3"
+              className={`${tc.divider} mt-3`}
               style={{ backgroundColor: color }}
             />
           </motion.div>
           <motion.p
             {...fadeInUp}
             transition={{ delay: 0.1, duration: 0.5 }}
-            className="text-gray-600 leading-relaxed whitespace-pre-line"
+            className={tc.text}
           >
             {text}
           </motion.p>

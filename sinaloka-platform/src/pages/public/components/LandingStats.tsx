@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { cn } from '@/src/lib/utils';
+import type { TemplateConfig } from '../templates/template-config';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -15,10 +16,12 @@ interface LandingStatsProps {
     total_subjects: number;
   };
   brandColor: string | null;
+  template: TemplateConfig;
 }
 
-export function LandingStats({ stats, brandColor }: LandingStatsProps) {
+export function LandingStats({ stats, template }: LandingStatsProps) {
   const { t } = useTranslation();
+  const tc = template.stats;
 
   const items = [
     { value: stats.active_students, label: t('landingPage.students') },
@@ -33,7 +36,7 @@ export function LandingStats({ stats, brandColor }: LandingStatsProps) {
       className="-mt-8 relative z-10 mx-6 sm:mx-auto max-w-md"
     >
       <div
-        className="flex bg-white border border-gray-100 overflow-hidden"
+        className={tc.card}
         style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.06)', borderRadius: '0.75rem' }}
       >
         {items.map((item, i) => (
@@ -44,10 +47,10 @@ export function LandingStats({ stats, brandColor }: LandingStatsProps) {
               i < items.length - 1 && 'border-r border-gray-100'
             )}
           >
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <div className={tc.value}>
               {item.value}
             </div>
-            <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mt-1">
+            <div className={tc.label}>
               {item.label}
             </div>
           </div>

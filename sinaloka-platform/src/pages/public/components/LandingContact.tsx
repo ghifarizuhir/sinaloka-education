@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Globe } from 'lucide-react';
 import type { LandingPageData } from '@/src/types/landing';
+import type { TemplateConfig } from '../templates/template-config';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -11,6 +12,7 @@ const fadeInUp = {
 
 interface LandingContactProps {
   data: LandingPageData;
+  template: TemplateConfig;
 }
 
 function InstagramIcon({ size = 18 }: { size?: number }) {
@@ -56,8 +58,9 @@ const SOCIAL_PLATFORMS = [
   { key: 'website' as const, Icon: Globe, urlPrefix: '' },
 ] as const;
 
-export function LandingContact({ data }: LandingContactProps) {
+export function LandingContact({ data, template }: LandingContactProps) {
   const { t } = useTranslation();
+  const tc = template.contact;
 
   const brandColor = data.brand_color ?? '#14b8a6';
   const hasContact = data.email || data.phone || data.address;
@@ -78,7 +81,7 @@ export function LandingContact({ data }: LandingContactProps) {
         <motion.h2
           {...fadeInUp}
           transition={{ duration: 0.5 }}
-          className="text-2xl font-bold text-gray-900 text-center mb-10"
+          className={tc.sectionTitle}
         >
           {t('landingPage.contact')}
         </motion.h2>
@@ -93,13 +96,16 @@ export function LandingContact({ data }: LandingContactProps) {
               const Icon = item.icon;
               const content = (
                 <div
-                  className="flex items-center gap-3 rounded-xl p-4 transition-colors"
-                  style={{ backgroundColor: `${brandColor}0d` }}
+                  className={tc.contactCard}
+                  style={tc.contactCardStyle(brandColor)}
                   onMouseOver={(e) => {
-                    if (item.href) (e.currentTarget as HTMLElement).style.backgroundColor = `${brandColor}1a`;
+                    if (item.href) (e.currentTarget as HTMLElement).style.backgroundColor = tc.contactCardHoverBg(brandColor);
                   }}
                   onMouseOut={(e) => {
-                    if (item.href) (e.currentTarget as HTMLElement).style.backgroundColor = `${brandColor}0d`;
+                    if (item.href) {
+                      const bg = tc.contactCardStyle(brandColor).backgroundColor;
+                      (e.currentTarget as HTMLElement).style.backgroundColor = typeof bg === 'string' ? bg : '';
+                    }
                   }}
                 >
                   <Icon size={18} className="shrink-0" style={{ color: brandColor }} />
@@ -135,7 +141,7 @@ export function LandingContact({ data }: LandingContactProps) {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"
+                  className={tc.socialButton}
                   onMouseOver={(e) => {
                     const el = e.currentTarget as HTMLElement;
                     el.style.backgroundColor = brandColor;
