@@ -32,12 +32,16 @@ describe('EnrollmentService', () => {
       update: jest.Mock;
       delete: jest.Mock;
     };
+    payment: {
+      deleteMany: jest.Mock;
+    };
     student: {
       findFirst: jest.Mock;
     };
     class: {
       findFirst: jest.Mock;
     };
+    $transaction: jest.Mock;
   };
 
   const mockEnrollment = {
@@ -137,12 +141,21 @@ describe('EnrollmentService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      payment: {
+        deleteMany: jest.fn(),
+      },
       student: {
         findFirst: jest.fn(),
       },
       class: {
         findFirst: jest.fn(),
       },
+      $transaction: jest.fn().mockImplementation(async (fn: any) => {
+        return fn({
+          payment: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+          enrollment: { delete: prisma.enrollment.delete },
+        });
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -466,6 +479,7 @@ describe('EnrollmentService', () => {
 
       await service.delete('inst-1', 'enroll-1');
 
+      expect(prisma.$transaction).toHaveBeenCalled();
       expect(prisma.enrollment.delete).toHaveBeenCalledWith({
         where: { id: 'enroll-1' },
       });
