@@ -25,5 +25,9 @@ export default defineConfig(({mode}) => {
         },
       },
     },
+    test: {
+      environment: 'happy-dom',
+      exclude: ['e2e/**', 'node_modules/**'],
+    },
   };
 });

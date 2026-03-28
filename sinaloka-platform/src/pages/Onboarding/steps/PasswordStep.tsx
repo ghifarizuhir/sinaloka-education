@@ -6,7 +6,7 @@ import { authService } from '@/src/services/auth.service';
 import { cn } from '@/src/lib/utils';
 
 interface PasswordStepProps {
-  onNext: () => void;
+  onNext: (tokens: { access_token: string; refresh_token: string }) => void;
 }
 
 export function PasswordStep({ onNext }: PasswordStepProps) {
@@ -33,10 +33,8 @@ export function PasswordStep({ onNext }: PasswordStepProps) {
         new_password: newPassword,
       }),
     onSuccess: (data) => {
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
       toast.success('Password berhasil diubah');
-      onNext();
+      onNext(data);
     },
     onError: (error: any) => {
       const message = error?.response?.data?.message || '';

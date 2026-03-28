@@ -167,4 +167,24 @@ export class ParentInviteService {
 
     return result;
   }
+
+  async validateInvite(token: string): Promise<{ valid: boolean; email: string }> {
+    const invite = await this.prisma.parentInvite.findUnique({
+      where: { token },
+    });
+
+    if (!invite) {
+      throw new BadRequestException('Invalid invite token');
+    }
+
+    if (invite.used_at) {
+      throw new BadRequestException('Invite has already been used');
+    }
+
+    if (invite.expires_at < new Date()) {
+      throw new BadRequestException('Invite has expired');
+    }
+
+    return { valid: true, email: invite.email };
+  }
 }

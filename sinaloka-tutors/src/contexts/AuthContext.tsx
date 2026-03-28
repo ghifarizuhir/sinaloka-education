@@ -37,7 +37,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await api.post('/api/auth/login', { email, password });
+    // Detect institution slug from subdomain so backend can enforce institution-scoped login
+    const slug = (() => {
+      const hostname = window.location.hostname;
+      if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return undefined;
+      if (hostname.endsWith('.localhost')) {
+        const s = hostname.replace('.localhost', '');
+        return s === 'tutors' ? undefined : s;
+      }
+      const parts = hostname.split('.');
+      if (parts.length === 3 && hostname.endsWith('.sinaloka.com')) {
+        return parts[0] === 'tutors' ? undefined : parts[0];
+      }
+      return undefined;
+    })();
+
+    const res = await api.post('/api/auth/login', { email, password, ...(slug ? { slug } : {}) });
     setAccessToken(res.data.access_token);
     setRefreshToken(res.data.refresh_token);
     await fetchProfile();

@@ -174,4 +174,54 @@ describe('ParentInviteService', () => {
       ).rejects.toThrow(ConflictException);
     });
   });
+
+  describe('validateInvite', () => {
+    const validInvite = {
+      id: 'inv-1',
+      token: 'valid-token-uuid',
+      email: 'parent@example.com',
+      institution_id: 'inst-1',
+      student_ids: ['stu-1'],
+      used_at: null,
+      expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000),
+    };
+
+    it('should return valid=true and email for a valid unused token', async () => {
+      prisma.parentInvite.findUnique.mockResolvedValue(validInvite);
+
+      const result = await service.validateInvite('valid-token-uuid');
+
+      expect(result).toEqual({ valid: true, email: 'parent@example.com' });
+    });
+
+    it('should throw BadRequestException for unknown token', async () => {
+      prisma.parentInvite.findUnique.mockResolvedValue(null);
+
+      await expect(service.validateInvite('unknown-token')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException for already-used token', async () => {
+      prisma.parentInvite.findUnique.mockResolvedValue({
+        ...validInvite,
+        used_at: new Date(),
+      });
+
+      await expect(service.validateInvite('used-token')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException for expired token', async () => {
+      prisma.parentInvite.findUnique.mockResolvedValue({
+        ...validInvite,
+        expires_at: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.validateInvite('expired-token')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
 });

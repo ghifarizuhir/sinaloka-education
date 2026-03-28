@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -10,8 +10,9 @@ import { PasswordStep } from './Onboarding/steps/PasswordStep';
 
 export default function ChangePassword() {
   const { t } = useTranslation();
-  const { isAuthenticated, isLoading, user, logout, mustChangePassword } = useAuth();
+  const { isAuthenticated, isLoading, user, mustChangePassword, updateTokens } = useAuth();
   const { institution } = useInstitution();
+  const navigate = useNavigate();
 
   const brandName = institution?.name || user?.institution?.name || 'Sinaloka';
   const brandLogo = institution?.logo_url || null;
@@ -32,9 +33,10 @@ export default function ChangePassword() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const handlePasswordChanged = async () => {
+  const handlePasswordChanged = (tokens: { access_token: string; refresh_token: string }) => {
+    updateTokens(tokens.access_token, tokens.refresh_token);
     toast.success(t('changePassword.success'));
-    await logout();
+    navigate('/dashboard', { replace: true });
   };
 
   return (

@@ -114,6 +114,12 @@ export class AuthController {
     return this.authService.getProfile(user.userId);
   }
 
+  @Public()
+  @Get('register/parent/validate/:token')
+  async validateParentInvite(@Param('token') token: string) {
+    return this.parentInviteService.validateInvite(token);
+  }
+
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   async changePassword(

@@ -6,27 +6,59 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (error: unknown) => void;
-}> = [];
+// ── In-memory access token (never touches localStorage) ──────────────────────
+let accessToken: string | null = null;
+let refreshPromise: Promise<string | null> | null = null;
 
-function processQueue(error: unknown, token: string | null) {
-  failedQueue.forEach((promise) => {
-    if (token) {
-      promise.resolve(token);
-    } else {
-      promise.reject(error);
-    }
-  });
-  failedQueue = [];
+const REFRESH_TOKEN_KEY = 'sinaloka_refresh_token';
+
+export function getAccessToken(): string | null {
+  return accessToken;
 }
 
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+}
+
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+export function setRefreshToken(token: string | null) {
+  if (token) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
+}
+
+export function clearTokens() {
+  accessToken = null;
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return null;
+
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
+      refresh_token: refreshToken,
+    });
+    const { access_token, refresh_token } = response.data;
+    setAccessToken(access_token);
+    setRefreshToken(refresh_token);
+    return access_token;
+  } catch {
+    clearTokens();
+    return null;
+  }
+}
+
+// ── Request interceptor: attach in-memory access token ───────────────────────
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('access_token');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (accessToken && config.headers) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
   try {
     const impersonated = sessionStorage.getItem('impersonatedInstitution');
@@ -40,6 +72,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
+// ── Response interceptor: serialize token refresh, dispatch logout event ─────
 api.interceptors.response.use(
   (response) => {
     // Plan warning interceptor
@@ -64,45 +97,24 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({
-            resolve: (token: string) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(api(originalRequest));
-            },
-            reject,
-          });
-        });
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
 
-      try {
-        const refreshToken = localStorage.getItem('refresh_token');
-        if (!refreshToken) throw new Error('No refresh token');
-
-        const { data } = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-          refresh_token: refreshToken,
+      // Serialize concurrent refresh attempts
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken().finally(() => {
+          refreshPromise = null;
         });
-
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-
-        processQueue(null, data.access_token);
-
-        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
+
+      const newToken = await refreshPromise;
+      if (newToken) {
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      }
+
+      // Refresh failed — dispatch event for AuthContext to handle gracefully
+      window.dispatchEvent(new Event('auth:logout'));
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);

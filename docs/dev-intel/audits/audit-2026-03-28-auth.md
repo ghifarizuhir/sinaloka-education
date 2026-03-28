@@ -92,7 +92,7 @@ await this.prisma.$transaction([
 
 ---
 
-### [HIGH] SA-AUTH-002 — Platform Menyimpan Kedua Token di localStorage (XSS Vulnerable)
+### ~~[HIGH] SA-AUTH-002 — Platform Menyimpan Kedua Token di localStorage (XSS Vulnerable)~~ FIXED 2026-03-28
 
 **Category:** Security
 **File:** `sinaloka-platform/src/lib/api.ts` (line 27, 90-91) dan `sinaloka-platform/src/contexts/AuthContext.tsx` (line 70-71)
@@ -333,7 +333,7 @@ const passwordValidator = z.string()
 
 ---
 
-### [MEDIUM] SA-AUTH-008 — Platform Intercept 401 Melakukan Hard Navigate, Kehilangan State
+### ~~[MEDIUM] SA-AUTH-008 — Platform Intercept 401 Melakukan Hard Navigate, Kehilangan State~~ FIXED 2026-03-28
 
 **Category:** UX / Bug
 **File:** `sinaloka-platform/src/lib/api.ts` (line 101)
@@ -369,7 +369,7 @@ Dan di AuthContext, handle event ini untuk clear state dan redirect.
 
 ---
 
-### [MEDIUM] SA-AUTH-009 — Tutor Login Tidak Mengirim Slug, Bisa Login ke Institusi Lain
+### ~~[MEDIUM] SA-AUTH-009 — Tutor Login Tidak Mengirim Slug, Bisa Login ke Institusi Lain~~ FIXED 2026-03-28
 
 **Category:** Security
 **File:** `sinaloka-tutors/src/contexts/AuthContext.tsx` (line 40)
@@ -544,7 +544,7 @@ Bungkus dalam `$transaction`.
 
 ---
 
-### [LOW] SA-AUTH-015 — UserService.remove Hard-Deletes User Tanpa Cascade Safety
+### ~~[LOW] SA-AUTH-015 — UserService.remove Hard-Deletes User Tanpa Cascade Safety~~ FIXED 2026-03-28
 
 **Category:** Data Integrity
 **File:** `sinaloka-backend/src/modules/user/user.service.ts` (line 214-225)
@@ -598,7 +598,7 @@ Tambahkan cleanup untuk PasswordResetToken, atau tambahkan `onDelete: Cascade` d
 
 ---
 
-### [LOW] SA-AUTH-017 — ChangePassword di Platform Melakukan Logout Setelah Sukses
+### ~~[LOW] SA-AUTH-017 — ChangePassword di Platform Melakukan Logout Setelah Sukses~~ FIXED 2026-03-28
 
 **Category:** UX
 **File:** `sinaloka-platform/src/pages/ChangePassword.tsx` (line 35-38)
@@ -630,7 +630,7 @@ Simpan token baru dari response changePassword, update auth context, redirect ke
 
 ---
 
-### [LOW] SA-AUTH-018 — Parent Register Tidak Validate Invite Token di Frontend Sebelum Show Form
+### ~~[LOW] SA-AUTH-018 — Parent Register Tidak Validate Invite Token di Frontend Sebelum Show Form~~ FIXED 2026-03-28
 
 **Category:** UX
 **File:** `sinaloka-parent/src/pages/RegisterPage.tsx`
@@ -682,20 +682,20 @@ Tambahkan validasi token saat component mount (mirip AcceptInvitePage).
 | Finding | Severity | Status | Sprint | PR |
 |---------|----------|--------|--------|----|
 | SA-AUTH-001 | CRITICAL | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
-| SA-AUTH-002 | HIGH | PLANNED | - | Sprint 2 | - |
+| SA-AUTH-002 | HIGH | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
 | SA-AUTH-003 | HIGH | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-004 | HIGH | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-005 | MEDIUM | PLANNED | - | Sprint 3 | - |
 | SA-AUTH-006 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-007 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
-| SA-AUTH-008 | MEDIUM | PLANNED | - | Sprint 2 | - |
-| SA-AUTH-009 | MEDIUM | PLANNED | - | Sprint 2 | - |
+| SA-AUTH-008 | MEDIUM | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
+| SA-AUTH-009 | MEDIUM | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
 | SA-AUTH-010 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-011 | MEDIUM | PLANNED | - | Sprint 3 | - |
 | SA-AUTH-012 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-013 | LOW | PLANNED | - | Backlog | - |
 | SA-AUTH-014 | LOW | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
-| SA-AUTH-015 | LOW | PLANNED | - | Sprint 2 | - |
+| SA-AUTH-015 | LOW | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
 | SA-AUTH-016 | LOW | PLANNED | - | Sprint 3 | - |
-| SA-AUTH-017 | LOW | PLANNED | - | Sprint 2 | - |
-| SA-AUTH-018 | LOW | PLANNED | - | Sprint 2 | - |
+| SA-AUTH-017 | LOW | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
+| SA-AUTH-018 | LOW | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
