@@ -120,7 +120,9 @@ export class UserService {
   async create(institutionId: string, dto: CreateUserDto) {
     // SUPER_ADMIN cannot be created via this endpoint (privilege escalation guard)
     if ((dto.role as string) === 'SUPER_ADMIN') {
-      throw new ForbiddenException('Cannot create a SUPER_ADMIN user via this endpoint');
+      throw new ForbiddenException(
+        'Cannot create a SUPER_ADMIN user via this endpoint',
+      );
     }
 
     // Check email uniqueness
@@ -188,13 +190,17 @@ export class UserService {
     }
     if (dto.role !== undefined) {
       if (dto.role === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
-        throw new ForbiddenException('Only Super Admin can assign the SUPER_ADMIN role');
+        throw new ForbiddenException(
+          'Only Super Admin can assign the SUPER_ADMIN role',
+        );
       }
       data.role = dto.role;
     }
     if (dto.institution_id !== undefined) {
       if (callerRole !== 'SUPER_ADMIN') {
-        throw new ForbiddenException('Only Super Admin can change institution assignment');
+        throw new ForbiddenException(
+          'Only Super Admin can change institution assignment',
+        );
       }
       data.institution_id = dto.institution_id;
     }

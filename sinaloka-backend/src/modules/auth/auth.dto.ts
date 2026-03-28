@@ -12,10 +12,7 @@ export const LoginSchema = z.object({
   slug: z
     .string()
     .max(63)
-    .regex(
-      /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/,
-      'Invalid slug format',
-    )
+    .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/, 'Invalid slug format')
     .optional(),
 });
 

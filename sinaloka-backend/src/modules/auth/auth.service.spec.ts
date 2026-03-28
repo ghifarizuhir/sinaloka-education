@@ -171,7 +171,10 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
-        service.login({ email: 'nonexistent@test.com', password: 'password123' }),
+        service.login({
+          email: 'nonexistent@test.com',
+          password: 'password123',
+        }),
       ).rejects.toThrow(UnauthorizedException);
 
       // bcrypt.compare MUST be called even for non-existent users
