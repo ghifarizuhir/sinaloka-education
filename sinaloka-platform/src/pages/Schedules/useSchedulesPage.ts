@@ -68,6 +68,34 @@ export function useSchedulesPage() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [page] = useState(1);
 
+  // Auto-compute date range from calendar view
+  const autoDateRange = (() => {
+    if (calendarMode === 'month') {
+      const ms = startOfMonth(currentDate);
+      const me = endOfMonth(currentDate);
+      // Extend to cover the full calendar grid (previous/next month overflow days)
+      const gridStart = startOfWeek(ms);
+      const gridEnd = endOfWeek(me);
+      return {
+        date_from: format(gridStart, 'yyyy-MM-dd'),
+        date_to: format(gridEnd, 'yyyy-MM-dd'),
+      };
+    } else if (calendarMode === 'week') {
+      const ws = startOfWeek(currentDate, { weekStartsOn: 1 });
+      const we = addDays(ws, 6);
+      return {
+        date_from: format(ws, 'yyyy-MM-dd'),
+        date_to: format(we, 'yyyy-MM-dd'),
+      };
+    } else {
+      // day mode
+      return {
+        date_from: format(currentDate, 'yyyy-MM-dd'),
+        date_to: format(currentDate, 'yyyy-MM-dd'),
+      };
+    }
+  })();
+
   // Generate sessions state
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [genClassId, setGenClassId] = useState('');
@@ -80,12 +108,15 @@ export function useSchedulesPage() {
   const [startTime, setStartTime] = useState('10:00');
   const [endTime, setEndTime] = useState('11:30');
 
-  // Queries
+  // Queries — always scope to current calendar view range
+  const effectiveDateFrom = filterDateFrom || autoDateRange.date_from;
+  const effectiveDateTo = filterDateTo || autoDateRange.date_to;
+
   const sessionsQuery = useSessions({
     page,
-    limit: 100,
-    ...(filterDateFrom && { date_from: filterDateFrom }),
-    ...(filterDateTo && { date_to: filterDateTo }),
+    limit: 500,
+    date_from: effectiveDateFrom,
+    date_to: effectiveDateTo,
     ...(filterClassId && { class_id: filterClassId }),
     ...(filterStatus && { status: filterStatus }),
   });
