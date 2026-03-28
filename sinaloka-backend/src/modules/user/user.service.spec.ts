@@ -33,6 +33,10 @@ describe('UserService', () => {
     refreshToken: {
       deleteMany: jest.Mock;
     };
+    passwordResetToken: {
+      deleteMany: jest.Mock;
+    };
+    $transaction: jest.Mock;
   };
 
   const mockUser = {
@@ -63,6 +67,10 @@ describe('UserService', () => {
       refreshToken: {
         deleteMany: jest.fn(),
       },
+      passwordResetToken: {
+        deleteMany: jest.fn(),
+      },
+      $transaction: jest.fn((fn: (tx: any) => Promise<any>) => fn(prisma)),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -273,14 +281,19 @@ describe('UserService', () => {
   });
 
   describe('remove', () => {
-    it('should delete a user and their refresh tokens', async () => {
+    it('should delete user, refresh tokens, and password reset tokens in a transaction', async () => {
       prisma.user.findFirst.mockResolvedValue(mockUser);
       prisma.refreshToken.deleteMany.mockResolvedValue({ count: 0 });
+      prisma.passwordResetToken.deleteMany.mockResolvedValue({ count: 0 });
       prisma.user.delete.mockResolvedValue(mockUser);
 
       await service.remove('user-1');
 
+      expect(prisma.$transaction).toHaveBeenCalled();
       expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
+        where: { user_id: 'user-1' },
+      });
+      expect(prisma.passwordResetToken.deleteMany).toHaveBeenCalledWith({
         where: { user_id: 'user-1' },
       });
       expect(prisma.user.delete).toHaveBeenCalledWith({

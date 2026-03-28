@@ -234,13 +234,11 @@ export class UserService {
   async remove(id: string, institutionId?: string | null) {
     await this.findOne(id, institutionId); // throws NotFoundException if not found or out of scope
 
-    // Delete related refresh tokens first
-    await this.prisma.refreshToken.deleteMany({
-      where: { user_id: id },
-    });
-
-    return this.prisma.user.delete({
-      where: { id },
+    return this.prisma.$transaction(async (tx) => {
+      // Delete all tokens that reference this user to avoid FK constraint errors
+      await tx.refreshToken.deleteMany({ where: { user_id: id } });
+      await tx.passwordResetToken.deleteMany({ where: { user_id: id } });
+      return tx.user.delete({ where: { id } });
     });
   }
 }
