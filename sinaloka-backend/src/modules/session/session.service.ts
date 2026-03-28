@@ -127,7 +127,11 @@ export class SessionService {
   ) {
     const classRecord = await this.prisma.class.findUnique({
       where: { id: classId, institution_id: institutionId },
-      include: { schedules: true },
+      include: {
+        schedules: true,
+        tutor: { include: { user: { select: { name: true } } } },
+        subject: { select: { name: true } },
+      },
     });
 
     if (!classRecord) {
@@ -433,16 +437,11 @@ export class SessionService {
       existingSessions.map((s) => new Date(s.date).toISOString().split('T')[0]),
     );
 
+    // Build snapshot data from current class state
+    const snapshotData = this.buildSnapshotData(classRecord);
+
     // Iterate each date in range, collect matching days
-    const sessionsToCreate: Array<{
-      class_id: string;
-      institution_id: string;
-      date: Date;
-      start_time: string;
-      end_time: string;
-      status: SessionStatus;
-      created_by: string;
-    }> = [];
+    const sessionsToCreate: any[] = [];
 
     let current = new Date(dto.date_from);
     const end = new Date(dto.date_to);
@@ -463,6 +462,7 @@ export class SessionService {
             end_time: schedule.end_time,
             status: SessionStatus.SCHEDULED,
             created_by: userId,
+            ...snapshotData,
           });
         }
       }

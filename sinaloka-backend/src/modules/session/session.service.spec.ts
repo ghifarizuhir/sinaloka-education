@@ -632,6 +632,58 @@ describe('SessionService', () => {
         }),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should include snapshot data in generated sessions', async () => {
+      const classRecord = {
+        id: 'class-uuid-1',
+        institution_id: institutionId,
+        name: 'Math A',
+        tutor_id: 'tutor-uuid-1',
+        fee: 100000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        room: 'Room A',
+        status: 'ACTIVE',
+        schedules: [
+          {
+            id: 'sched-1',
+            day: 'Monday',
+            start_time: '14:00',
+            end_time: '15:30',
+            class_id: 'class-uuid-1',
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        ],
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Mathematics' },
+      };
+
+      mockPrisma.class.findUnique.mockResolvedValue(classRecord);
+      mockPrisma.session.findMany.mockResolvedValue([]);
+      mockPrisma.session.createMany.mockResolvedValue({ count: 1 });
+
+      // Mon Apr 6 only
+      const result = await service.generateSessions(institutionId, userId, {
+        class_id: 'class-uuid-1',
+        date_from: new Date('2026-04-06'),
+        date_to: new Date('2026-04-06'),
+      });
+
+      expect(result.count).toBe(1);
+
+      const createManyCall = mockPrisma.session.createMany.mock.calls[0][0];
+      const createdSession = createManyCall.data[0];
+
+      expect(createdSession.snapshot_tutor_id).toBe('tutor-uuid-1');
+      expect(createdSession.snapshot_tutor_name).toBe('Tutor A');
+      expect(createdSession.snapshot_subject_name).toBe('Mathematics');
+      expect(createdSession.snapshot_class_name).toBe('Math A');
+      expect(createdSession.snapshot_class_fee).toBe(100000n);
+      expect(createdSession.snapshot_class_room).toBe('Room A');
+      expect(createdSession.snapshot_tutor_fee_mode).toBe('FIXED_PER_SESSION');
+      expect(createdSession.snapshot_tutor_fee_per_student).toBeNull();
+    });
   });
 
   describe('requestReschedule', () => {
