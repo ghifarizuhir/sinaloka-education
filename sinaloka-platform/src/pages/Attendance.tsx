@@ -117,7 +117,7 @@ export const Attendance = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedAttendanceId]);
+  }, [focusedAttendanceId, isSessionLocked]);
 
   const getEffectiveStatus = (record: AttendanceRecord): AttendanceStatus => {
     return (pendingChanges[record.id]?.status ?? record.status) as AttendanceStatus;
