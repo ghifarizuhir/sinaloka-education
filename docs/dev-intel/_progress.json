@@ -1,10 +1,10 @@
 {
-  "current_sprint": 6,
-  "current_sprint_file": "docs/dev-intel/sprints/sprint-1-schedules-critical-fixes.md",
-  "status": "all_tasks_completed",
+  "current_sprint": 7,
+  "current_sprint_file": "docs/dev-intel/sprints/sprint-2-schedules-financial-integrity.md",
+  "status": "in_progress",
   "audit_source": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
   "started_at": "2026-03-28T14:00:00Z",
-  "last_session": "2026-03-28T14:45:00Z",
+  "last_session": "2026-03-28T16:40:00Z",
   "sprints": [
     {
       "number": 1,
@@ -107,18 +107,18 @@
       "number": 7,
       "name": "Schedules Financial Integrity & Data Safety",
       "file": "docs/dev-intel/sprints/sprint-2-schedules-financial-integrity.md",
-      "status": "not_started",
+      "status": "completed",
       "branch": "fix/schedules-sprint-2-financial-integrity",
       "pr": null,
       "tasks": [
-        { "id": "CLS-01", "title": "Server-side schedule conflict detection", "status": "not_started", "completed_at": null },
-        { "id": "CLS-02", "title": "Protect class deletion with completed sessions", "status": "not_started", "completed_at": null },
-        { "id": "SA-004", "title": "Add payment reversal on ABSENT status change", "status": "not_started", "completed_at": null },
-        { "id": "SA-005", "title": "Prevent duplicate payout on session complete", "status": "not_started", "completed_at": null },
-        { "id": "SA-012", "title": "Fill snapshot data when generating sessions", "status": "not_started", "completed_at": null }
+        { "id": "CLS-01", "title": "Server-side schedule conflict detection", "status": "completed", "completed_at": "2026-03-28T16:00:00Z" },
+        { "id": "CLS-02", "title": "Protect class deletion with completed sessions", "status": "completed", "completed_at": "2026-03-28T16:05:00Z" },
+        { "id": "SA-004", "title": "Add payment reversal on ABSENT status change", "status": "completed", "completed_at": "2026-03-28T16:15:00Z" },
+        { "id": "SA-005", "title": "Prevent duplicate payout on session complete", "status": "completed", "completed_at": "2026-03-28T16:25:00Z" },
+        { "id": "SA-012", "title": "Fill snapshot data when generating sessions", "status": "completed", "completed_at": "2026-03-28T16:35:00Z" }
       ],
-      "started_at": null,
-      "completed_at": null
+      "started_at": "2026-03-28T15:30:00Z",
+      "completed_at": "2026-03-28T16:40:00Z"
     },
     {
       "number": 8,

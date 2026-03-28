@@ -16,11 +16,11 @@
 | CLS-08 | MEDIUM | FIXED | 2026-03-28 | Sprint 6 | - |
 | CLS-10 | MEDIUM | FIXED | 2026-03-28 | Sprint 6 | - |
 | CLS-12 | MEDIUM | FIXED | 2026-03-28 | Sprint 6 | - |
-| CLS-01 | CRITICAL | OPEN | - | Sprint 7 | - |
-| CLS-02 | HIGH | OPEN | - | Sprint 7 | - |
-| SA-004 | HIGH | OPEN | - | Sprint 7 | - |
-| SA-005 | HIGH | OPEN | - | Sprint 7 | - |
-| SA-012 | MEDIUM | OPEN | - | Sprint 7 | - |
+| CLS-01 | CRITICAL | FIXED | 2026-03-28 | Sprint 7 | - |
+| CLS-02 | HIGH | FIXED | 2026-03-28 | Sprint 7 | - |
+| SA-004 | HIGH | FIXED | 2026-03-28 | Sprint 7 | - |
+| SA-005 | HIGH | FIXED | 2026-03-28 | Sprint 7 | - |
+| SA-012 | MEDIUM | FIXED | 2026-03-28 | Sprint 7 | - |
 | CLS-03 | MEDIUM | OPEN | - | Sprint 8 | - |
 | CLS-04 | MEDIUM | OPEN | - | Sprint 8 | - |
 | CLS-11 | MEDIUM | OPEN | - | Sprint 8 | - |
@@ -64,7 +64,7 @@
 
 ### Classes & Schedules
 
-#### [CRITICAL] CLS-01 — Tidak Ada Server-Side Schedule Conflict Detection untuk Tutor
+#### ~~[CRITICAL] CLS-01 — Tidak Ada Server-Side Schedule Conflict Detection untuk Tutor~~ FIXED 2026-03-28
 
 **Category:** Security / Gap
 **File:** `sinaloka-backend/src/modules/class/class.service.ts` (line 60-106)
@@ -119,7 +119,7 @@ for (const newSch of dto.schedules) {
 
 ---
 
-#### [HIGH] CLS-02 — Hard Delete Class Menghapus Session dan Data Terkait
+#### ~~[HIGH] CLS-02 — Hard Delete Class Menghapus Session dan Data Terkait~~ FIXED 2026-03-28
 
 **Category:** Gap / Security
 **File:** `sinaloka-backend/src/modules/class/class.service.ts` (line 355-367)
@@ -779,7 +779,7 @@ async finalizeSession(institutionId, userId, dto) {
 
 ---
 
-#### [HIGH] SA-004 — Duplicate/Orphan Payment saat Admin Update Attendance Status
+#### ~~[HIGH] SA-004 — Duplicate/Orphan Payment saat Admin Update Attendance Status~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-backend/src/modules/attendance/attendance.service.ts` (line 127-167)
@@ -816,7 +816,7 @@ if (dto.status === 'ABSENT' && attendance.status !== 'ABSENT') {
 
 ---
 
-#### [HIGH] SA-005 — Potensi Duplicate Payout saat Complete Session
+#### ~~[HIGH] SA-005 — Potensi Duplicate Payout saat Complete Session~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-backend/src/modules/session/session.service.ts` (line 741-837 dan 265-358)
@@ -988,7 +988,7 @@ useEffect(() => {
 
 ---
 
-#### [MEDIUM] SA-012 — Session Generate Tidak Mengisi Snapshot Data
+#### ~~[MEDIUM] SA-012 — Session Generate Tidak Mengisi Snapshot Data~~ FIXED 2026-03-28
 
 **Category:** Gap
 **File:** `sinaloka-backend/src/modules/session/session.service.ts` (line 372-455)
