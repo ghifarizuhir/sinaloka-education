@@ -189,7 +189,7 @@ export class UserService {
       data.must_change_password = true;
     }
     if (dto.role !== undefined) {
-      if (dto.role === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
+      if ((dto.role as string) === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
         throw new ForbiddenException(
           'Only Super Admin can assign the SUPER_ADMIN role',
         );

@@ -177,7 +177,7 @@ describe('UserService', () => {
           name: 'Hacker',
           email: 'hacker@test.com',
           password: 'Password1',
-          role: 'SUPER_ADMIN',
+          role: 'SUPER_ADMIN' as any,
         }),
       ).rejects.toThrow(ForbiddenException);
     });
@@ -221,7 +221,7 @@ describe('UserService', () => {
       prisma.user.findFirst.mockResolvedValue(mockUser);
 
       await expect(
-        service.update('user-1', { role: 'SUPER_ADMIN' }, 'inst-1', 'ADMIN'),
+        service.update('user-1', { role: 'SUPER_ADMIN' as any }, 'inst-1', 'ADMIN'),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -248,7 +248,7 @@ describe('UserService', () => {
 
       const result = await service.update(
         'user-1',
-        { role: 'SUPER_ADMIN' },
+        { role: 'SUPER_ADMIN' as any },
         null,
         'SUPER_ADMIN',
       );

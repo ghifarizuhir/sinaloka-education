@@ -49,7 +49,7 @@ export class AuthService {
       // Perform dummy bcrypt compare to prevent timing-based user enumeration
       await bcrypt.compare(
         dto.password,
-        '$2b$10$dummyhashdummyhashdummyhashdummyhashdu',
+        '$2b$10$U.qlZbUfUVTg08qLyvIOOet3if72SGC0Xj2JibkNm..5YJgREsOTW',
       );
       throw new UnauthorizedException('Invalid email or password');
     }

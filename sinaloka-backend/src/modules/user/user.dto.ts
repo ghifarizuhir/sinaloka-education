@@ -16,7 +16,7 @@ export const UpdateUserSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .optional(),
-  role: z.enum(['SUPER_ADMIN', 'ADMIN', 'TUTOR']).optional(),
+  role: z.enum(['ADMIN', 'TUTOR']).optional(),
   institution_id: z
     .string()
     .uuid('Invalid institution ID')
