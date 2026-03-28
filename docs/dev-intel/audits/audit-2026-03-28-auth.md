@@ -215,7 +215,7 @@ role: z.enum(['ADMIN', 'TUTOR']).optional(),
 
 ---
 
-### [MEDIUM] SA-AUTH-005 — Rate Limiting Berbasis In-Memory, Tidak Efektif di Multi-Instance
+### ~~[MEDIUM] SA-AUTH-005 — Rate Limiting Berbasis In-Memory, Tidak Efektif di Multi-Instance~~ FIXED 2026-03-28
 
 **Category:** Security
 **File:** `sinaloka-backend/src/common/guards/rate-limit.guard.ts` (line 21)
@@ -436,7 +436,7 @@ model PasswordResetToken {
 
 ---
 
-### [MEDIUM] SA-AUTH-011 — Expired Refresh Token Tidak Pernah Dibersihkan
+### ~~[MEDIUM] SA-AUTH-011 — Expired Refresh Token Tidak Pernah Dibersihkan~~ FIXED 2026-03-28
 
 **Category:** Performance / Data Integrity
 **File:** `sinaloka-backend/src/modules/auth/auth.service.ts`
@@ -575,7 +575,7 @@ Tambahkan cleanup untuk PasswordResetToken, atau tambahkan `onDelete: Cascade` d
 
 ---
 
-### [LOW] SA-AUTH-016 — Unit Test AuthService Tidak Cover forgotPassword, resetPassword, changePassword
+### ~~[LOW] SA-AUTH-016 — Unit Test AuthService Tidak Cover forgotPassword, resetPassword, changePassword~~ FIXED 2026-03-28
 
 **Category:** Test Coverage
 **File:** `sinaloka-backend/src/modules/auth/auth.service.spec.ts`
@@ -685,17 +685,17 @@ Tambahkan validasi token saat component mount (mirip AcceptInvitePage).
 | SA-AUTH-002 | HIGH | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
 | SA-AUTH-003 | HIGH | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-004 | HIGH | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
-| SA-AUTH-005 | MEDIUM | PLANNED | - | Sprint 3 | - |
+| SA-AUTH-005 | MEDIUM | FIXED | 2026-03-28 | Sprint 3 — Auth Maintenance & Tests | TBD |
 | SA-AUTH-006 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-007 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-008 | MEDIUM | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
 | SA-AUTH-009 | MEDIUM | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
 | SA-AUTH-010 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
-| SA-AUTH-011 | MEDIUM | PLANNED | - | Sprint 3 | - |
+| SA-AUTH-011 | MEDIUM | FIXED | 2026-03-28 | Sprint 3 — Auth Maintenance & Tests | TBD |
 | SA-AUTH-012 | MEDIUM | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-013 | LOW | PLANNED | - | Backlog | - |
 | SA-AUTH-014 | LOW | FIXED | 2026-03-28 | Sprint 1: Auth Critical & Security | TBD |
 | SA-AUTH-015 | LOW | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
-| SA-AUTH-016 | LOW | PLANNED | - | Sprint 3 | - |
+| SA-AUTH-016 | LOW | FIXED | 2026-03-28 | Sprint 3 — Auth Maintenance & Tests | TBD |
 | SA-AUTH-017 | LOW | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
 | SA-AUTH-018 | LOW | FIXED | 2026-03-28 | Sprint 2 — Platform Token & Frontend UX | TBD |
