@@ -51,6 +51,7 @@ export type UpdateClassDto = Partial<CreateClassDto>;
 
 export interface ClassQueryParams extends PaginationParams {
   subject?: string;
+  subject_id?: string;
   tutor_id?: string;
   status?: 'ACTIVE' | 'ARCHIVED';
   semester_id?: string;

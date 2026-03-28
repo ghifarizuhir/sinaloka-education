@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -45,6 +45,7 @@ export function useClassesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
   const [filterSemesterId, setFilterSemesterId] = useState('');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
@@ -73,10 +74,41 @@ export function useClassesPage() {
 
   const formErrors = useFormErrors();
 
-  const { data, isLoading } = useClasses({ page, limit, semester_id: filterSemesterId || undefined });
-  const { data: allClassesData } = useClasses({ page: 1, limit: 100, semester_id: filterSemesterId || undefined });
-  const { data: classStats } = useClassStats({ semester_id: filterSemesterId || undefined });
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const { data: subjectsList } = useSubjects();
+
+  // Resolve subject_id from filterSubject name
+  const filterSubjectId = useMemo(() => {
+    if (!filterSubject || !subjectsList) return undefined;
+    const found = subjectsList.find((s: { name: string; id: string }) => s.name === filterSubject);
+    return found?.id;
+  }, [filterSubject, subjectsList]);
+
+  const { data, isLoading } = useClasses({
+    page,
+    limit,
+    semester_id: filterSemesterId || undefined,
+    search: debouncedSearch || undefined,
+    subject_id: filterSubjectId,
+    status: showOnlyAvailable ? 'ACTIVE' : undefined,
+  });
+  const { data: allClassesData } = useClasses({
+    page: 1,
+    limit: 100,
+    semester_id: filterSemesterId || undefined,
+    search: debouncedSearch || undefined,
+    subject_id: filterSubjectId,
+    status: showOnlyAvailable ? 'ACTIVE' : undefined,
+  });
+  const { data: classStats } = useClassStats({ semester_id: filterSemesterId || undefined });
   const { data: academicYears } = useAcademicYears();
   const { data: subjectTutors } = useSubjectTutors(formSubjectId || null);
   const { data: academicSettings } = useAcademicSettings();
@@ -97,31 +129,11 @@ export function useClassesPage() {
   const classes = data?.data ?? [];
   const meta = data?.meta;
 
-  const filteredClasses = useMemo(() => {
-    return classes.filter(c => {
-      const tutorName = c.tutor?.name ?? '';
-      const matchesSearch =
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tutorName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSubject = !filterSubject || c.subject.name === filterSubject;
-      // "available" means not archived and enrolled (enrollments not in class object; use capacity as proxy)
-      const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
-      return matchesSearch && matchesSubject && matchesAvailability;
-    });
-  }, [classes, searchQuery, filterSubject, showOnlyAvailable]);
+  // Server-side filtering is now handled by the query params above.
+  const filteredClasses = classes;
 
   const allClasses = allClassesData?.data ?? [];
-  const filteredTimetableClasses = useMemo(() => {
-    return allClasses.filter(c => {
-      const tutorName = c.tutor?.name ?? '';
-      const matchesSearch =
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tutorName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSubject = !filterSubject || c.subject.name === filterSubject;
-      const matchesAvailability = !showOnlyAvailable || c.status === 'ACTIVE';
-      return matchesSearch && matchesSubject && matchesAvailability;
-    });
-  }, [allClasses, searchQuery, filterSubject, showOnlyAvailable]);
+  const filteredTimetableClasses = allClasses;
 
   const selectedClass = filteredClasses.find((c) => c.id === selectedClassId) ?? null;
 
