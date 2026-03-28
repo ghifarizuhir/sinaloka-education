@@ -17,7 +17,7 @@ import {
   startOfDay
 } from 'date-fns';
 import { toast } from 'sonner';
-import { useSessions, useSession, useSessionStudents, useCreateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
+import { useSessions, useSession, useSessionStudents, useCreateSession, useUpdateSession, useDeleteSession, useGenerateSessions, useApproveReschedule } from '@/src/hooks/useSessions';
 import { useClasses } from '@/src/hooks/useClasses';
 import type { Session, CreateSessionDto, SessionStatus } from '@/src/types/session';
 
@@ -96,6 +96,7 @@ export function useSchedulesPage() {
 
   // Mutations
   const createSession = useCreateSession();
+  const updateSession = useUpdateSession();
   const deleteSession = useDeleteSession();
   const generateSessions = useGenerateSessions();
   const approveReschedule = useApproveReschedule();
@@ -125,7 +126,7 @@ export function useSchedulesPage() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const handleCancelSession = (id: string) => {
-    deleteSession.mutate(id, {
+    updateSession.mutate({ id, data: { status: 'CANCELLED' } }, {
       onSuccess: () => toast.success(t('schedules.toast.sessionCancelled')),
       onError: () => toast.error(t('schedules.toast.cancelError')),
     });
@@ -213,6 +214,7 @@ export function useSchedulesPage() {
     sessions,
     classes,
     createSession,
+    updateSession,
     deleteSession,
     generateSessions,
     approveReschedule,
