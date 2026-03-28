@@ -125,7 +125,7 @@ export class SessionService {
     classId: string,
     institutionId: string,
   ) {
-    const classRecord = await this.prisma.class.findUnique({
+    const classRecord = await this.prisma.class.findFirst({
       where: { id: classId, institution_id: institutionId },
       include: {
         schedules: true,
@@ -217,7 +217,7 @@ export class SessionService {
   }
 
   async findOne(institutionId: string, id: string) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id, institution_id: institutionId },
       include: {
         class: {
@@ -534,7 +534,7 @@ export class SessionService {
     sessionId: string,
     dto: RequestRescheduleDto,
   ) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
@@ -622,7 +622,7 @@ export class SessionService {
   }
 
   async cancelSession(institutionId: string, userId: string, sessionId: string) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
@@ -662,7 +662,7 @@ export class SessionService {
   }
 
   async getSessionStudents(institutionId: string, userId: string, sessionId: string) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
@@ -725,7 +725,7 @@ export class SessionService {
   }
 
   async getAdminSessionStudents(institutionId: string, sessionId: string) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id: sessionId, institution_id: institutionId },
     });
 
@@ -779,7 +779,7 @@ export class SessionService {
     sessionId: string,
     dto: CompleteSessionDto,
   ) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id: sessionId, institution_id: institutionId },
       include: this.sessionInclude,
     });
@@ -803,7 +803,7 @@ export class SessionService {
     }
 
     // Copy tutor fee from class
-    const classForFee = await this.prisma.class.findUnique({
+    const classForFee = await this.prisma.class.findFirst({
       where: { id: session.class_id, institution_id: institutionId },
       include: {
         subject: { select: { name: true } },
