@@ -61,26 +61,40 @@ export const CreateClassSchema = z
   );
 export type CreateClassDto = z.infer<typeof CreateClassSchema>;
 
-export const UpdateClassSchema = z.object({
-  tutor_id: z.string().uuid().optional(),
-  name: z.string().min(1).max(255).optional(),
-  subject_id: z.string().uuid().optional(),
-  capacity: z.number().int().min(1).optional(),
-  fee: z.number().min(0).optional(),
-  schedules: z
-    .array(ScheduleItemSchema)
-    .min(1)
-    .refine((items) => new Set(items.map((i) => i.day)).size === items.length, {
-      message: 'Duplicate schedule days are not allowed',
-    })
-    .optional(),
-  room: z.string().max(100).optional().nullable(),
-  tutor_fee: z.number().min(0).optional(),
-  tutor_fee_mode: TutorFeeMode.optional(),
-  tutor_fee_per_student: z.number().min(0).optional().nullable(),
-  status: ClassStatus.optional(),
-  semester_id: z.string().uuid().optional().nullable(),
-});
+export const UpdateClassSchema = z
+  .object({
+    tutor_id: z.string().uuid().optional(),
+    name: z.string().min(1).max(255).optional(),
+    subject_id: z.string().uuid().optional(),
+    capacity: z.number().int().min(1).optional(),
+    fee: z.number().min(0).optional(),
+    schedules: z
+      .array(ScheduleItemSchema)
+      .min(1)
+      .refine(
+        (items) => new Set(items.map((i) => i.day)).size === items.length,
+        {
+          message: 'Duplicate schedule days are not allowed',
+        },
+      )
+      .optional(),
+    room: z.string().max(100).optional().nullable(),
+    tutor_fee: z.number().min(0).optional(),
+    tutor_fee_mode: TutorFeeMode.optional(),
+    tutor_fee_per_student: z.number().min(0).optional().nullable(),
+    status: ClassStatus.optional(),
+    semester_id: z.string().uuid().optional().nullable(),
+  })
+  .refine(
+    (data) =>
+      data.tutor_fee_mode !== 'PER_STUDENT_ATTENDANCE' ||
+      (data.tutor_fee_per_student != null && data.tutor_fee_per_student > 0),
+    {
+      message:
+        'tutor_fee_per_student is required when mode is PER_STUDENT_ATTENDANCE',
+      path: ['tutor_fee_per_student'],
+    },
+  );
 export type UpdateClassDto = z.infer<typeof UpdateClassSchema>;
 
 export const ClassQuerySchema = z.object({
