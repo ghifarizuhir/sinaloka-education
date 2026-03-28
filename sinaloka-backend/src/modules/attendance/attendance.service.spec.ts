@@ -102,13 +102,13 @@ describe('AttendanceService', () => {
       mockPrisma.attendance.findMany.mockResolvedValueOnce([]); // first call: check existing
       mockPrisma.attendance.findMany.mockResolvedValueOnce(createdRecords); // second call: return created
 
-      const result = await service.batchCreate(userId, {
+      const result = await service.batchCreate(institutionId, userId, {
         session_id: 'session-uuid-1',
         records,
       });
 
       expect(mockPrisma.session.findUnique).toHaveBeenCalledWith({
-        where: { id: 'session-uuid-1' },
+        where: { id: 'session-uuid-1', institution_id: institutionId },
         include: { class: true },
       });
     });
@@ -127,7 +127,7 @@ describe('AttendanceService', () => {
       });
 
       await expect(
-        service.batchCreate(userId, {
+        service.batchCreate(institutionId, userId, {
           session_id: 'session-uuid-1',
           records: [
             {
@@ -144,7 +144,7 @@ describe('AttendanceService', () => {
       mockPrisma.session.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.batchCreate(userId, {
+        service.batchCreate(institutionId, userId, {
           session_id: 'nonexistent',
           records: [
             {
@@ -179,7 +179,7 @@ describe('AttendanceService', () => {
       ]);
 
       await expect(
-        service.batchCreate(userId, {
+        service.batchCreate(institutionId, userId, {
           session_id: 'session-uuid-1',
           records: [
             {
@@ -278,7 +278,7 @@ describe('AttendanceService', () => {
       const updated = { ...existing, notes: 'Updated note' };
       mockPrisma.attendance.update.mockResolvedValue(updated);
 
-      const result = await service.updateByTutor(userId, 'att-1', {
+      const result = await service.updateByTutor(institutionId, userId, 'att-1', {
         notes: 'Updated note',
       });
 
@@ -303,7 +303,7 @@ describe('AttendanceService', () => {
       });
 
       await expect(
-        service.updateByTutor(userId, 'att-1', { notes: 'Hijack' }),
+        service.updateByTutor(institutionId, userId, 'att-1', { notes: 'Hijack' }),
       ).rejects.toThrow(ForbiddenException);
     });
   });
