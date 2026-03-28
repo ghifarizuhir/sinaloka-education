@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { passwordValidator } from '../auth/auth.dto.js';
 
 // --- Admin DTOs ---
 
@@ -31,7 +32,7 @@ export type ParentQueryDto = z.infer<typeof ParentQuerySchema>;
 export const ParentRegisterSchema = z.object({
   token: z.string().min(1, 'Invite token is required'),
   name: z.string().min(1, 'Name is required').max(255),
-  password: z.string().min(8).max(128),
+  password: passwordValidator.max(128),
 });
 export type ParentRegisterDto = z.infer<typeof ParentRegisterSchema>;
 
