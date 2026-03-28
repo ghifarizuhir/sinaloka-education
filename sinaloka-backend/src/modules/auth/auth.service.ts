@@ -103,12 +103,6 @@ export class AuthService {
       }
     }
 
-    // Update last_login_at
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { last_login_at: new Date() },
-    });
-
     const payload = {
       sub: user.id,
       institutionId: user.institution_id,
@@ -127,13 +121,20 @@ export class AuthService {
     );
     const expiresAt = this.calculateExpiry(refreshExpiry);
 
-    await this.prisma.refreshToken.create({
-      data: {
-        user_id: user.id,
-        token: refreshTokenValue,
-        expires_at: expiresAt,
-      },
-    });
+    // Atomically update last_login_at and create refresh token
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { last_login_at: new Date() },
+      }),
+      this.prisma.refreshToken.create({
+        data: {
+          user_id: user.id,
+          token: refreshTokenValue,
+          expires_at: expiresAt,
+        },
+      }),
+    ]);
 
     const jwtExpiry = this.configService.get<string>('JWT_EXPIRY', '15m');
 

@@ -140,11 +140,8 @@ describe('AuthService', () => {
         institutionId: 'inst-1',
         role: 'ADMIN',
       });
-      expect(prisma.user.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'user-1' },
-        }),
-      );
+      // last_login_at update and refresh token create are now atomic via $transaction
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 
     it('should throw UnauthorizedException for wrong email', async () => {
@@ -153,6 +150,19 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'wrong@test.com', password: 'password123' }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should execute last_login_at update and refresh token creation atomically via $transaction', async () => {
+      const mockTransaction = jest.fn((ops) => Promise.resolve(ops));
+      (prisma as any).$transaction = mockTransaction;
+
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await service.login({ email: 'admin@test.com', password: 'password123' });
+
+      // $transaction must have been called for login atomicity
+      expect(mockTransaction).toHaveBeenCalledTimes(1);
     });
 
     it('should call bcrypt.compare even when user is not found (timing attack mitigation)', async () => {
