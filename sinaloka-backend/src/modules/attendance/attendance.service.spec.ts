@@ -21,6 +21,7 @@ describe('AttendanceService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
       count: jest.fn(),
+      groupBy: jest.fn(),
     },
     session: {
       findUnique: jest.fn(),
@@ -393,15 +394,14 @@ describe('AttendanceService', () => {
     });
   });
 
-  describe('getSummary', () => {
+  describe('getSummary (existing)', () => {
     it('should return attendance summary stats for a class in date range', async () => {
-      mockPrisma.attendance.findMany.mockResolvedValue([
-        { status: 'PRESENT', homework_done: true },
-        { status: 'PRESENT', homework_done: false },
-        { status: 'ABSENT', homework_done: false },
-        { status: 'LATE', homework_done: true },
+      mockPrisma.attendance.groupBy.mockResolvedValue([
+        { status: 'PRESENT', _count: { _all: 2 } },
+        { status: 'ABSENT', _count: { _all: 1 } },
+        { status: 'LATE', _count: { _all: 1 } },
       ]);
-      mockPrisma.attendance.count.mockResolvedValue(4);
+      mockPrisma.attendance.count.mockResolvedValue(2);
 
       const result = await service.getSummary(institutionId, {
         class_id: 'class-uuid-1',
@@ -529,6 +529,64 @@ describe('AttendanceService', () => {
         attendance_rate: 0,
       });
       expect(result.records).toHaveLength(0);
+    });
+  });
+
+  describe('getSummary', () => {
+    it('should use database aggregation instead of loading all records', async () => {
+      mockPrisma.attendance.groupBy.mockResolvedValue([
+        { status: 'PRESENT', _count: { _all: 20 } },
+        { status: 'ABSENT', _count: { _all: 5 } },
+        { status: 'LATE', _count: { _all: 3 } },
+      ]);
+      mockPrisma.attendance.count.mockResolvedValue(10);
+
+      const result = await service.getSummary(institutionId, {
+        class_id: 'class-1',
+        date_from: new Date('2026-03-01'),
+        date_to: new Date('2026-03-31'),
+      });
+
+      expect(mockPrisma.attendance.groupBy).toHaveBeenCalledWith({
+        by: ['status'],
+        where: {
+          institution_id: institutionId,
+          session: {
+            class_id: 'class-1',
+            date: { gte: new Date('2026-03-01'), lte: new Date('2026-03-31') },
+          },
+        },
+        _count: { _all: true },
+      });
+
+      expect(result).toEqual({
+        total_records: 28,
+        present: 20,
+        absent: 5,
+        late: 3,
+        homework_done: 10,
+        attendance_rate: 82.14,
+      });
+    });
+
+    it('should return zero rate when no records exist', async () => {
+      mockPrisma.attendance.groupBy.mockResolvedValue([]);
+      mockPrisma.attendance.count.mockResolvedValue(0);
+
+      const result = await service.getSummary(institutionId, {
+        class_id: 'class-1',
+        date_from: new Date('2026-03-01'),
+        date_to: new Date('2026-03-31'),
+      });
+
+      expect(result).toEqual({
+        total_records: 0,
+        present: 0,
+        absent: 0,
+        late: 0,
+        homework_done: 0,
+        attendance_rate: 0,
+      });
     });
   });
 });

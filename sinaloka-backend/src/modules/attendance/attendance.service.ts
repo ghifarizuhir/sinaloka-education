@@ -233,21 +233,32 @@ export class AttendanceService {
   async getSummary(institutionId: string, query: AttendanceSummaryQueryDto) {
     const { class_id, date_from, date_to } = query;
 
-    const records = await this.prisma.attendance.findMany({
-      where: {
-        institution_id: institutionId,
-        session: {
-          class_id,
-          date: { gte: date_from, lte: date_to },
-        },
+    const where = {
+      institution_id: institutionId,
+      session: {
+        class_id,
+        date: { gte: date_from, lte: date_to },
       },
-    });
+    };
 
-    const total_records = records.length;
-    const present = records.filter((r) => r.status === 'PRESENT').length;
-    const absent = records.filter((r) => r.status === 'ABSENT').length;
-    const late = records.filter((r) => r.status === 'LATE').length;
-    const homework_done = records.filter((r) => r.homework_done).length;
+    const [statusCounts, homeworkCount] = await Promise.all([
+      this.prisma.attendance.groupBy({
+        by: ['status'],
+        where,
+        _count: { _all: true },
+      }),
+      this.prisma.attendance.count({
+        where: { ...where, homework_done: true },
+      }),
+    ]);
+
+    const present =
+      statusCounts.find((s) => s.status === 'PRESENT')?._count._all ?? 0;
+    const absent =
+      statusCounts.find((s) => s.status === 'ABSENT')?._count._all ?? 0;
+    const late =
+      statusCounts.find((s) => s.status === 'LATE')?._count._all ?? 0;
+    const total_records = present + absent + late;
 
     const attendance_rate =
       total_records > 0 ? ((present + late) / total_records) * 100 : 0;
@@ -257,7 +268,7 @@ export class AttendanceService {
       present,
       absent,
       late,
-      homework_done,
+      homework_done: homeworkCount,
       attendance_rate: Math.round(attendance_rate * 100) / 100,
     };
   }
