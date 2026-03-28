@@ -163,6 +163,16 @@ export class AttendanceService {
       });
     }
 
+    // If status changed to ABSENT, cancel the per-session payment
+    if (dto.status === 'ABSENT') {
+      await this.invoiceGenerator.cancelPerSessionPayment({
+        institutionId,
+        studentId: attendance.student_id,
+        sessionId: attendance.session_id,
+        classId: attendance.session.class_id,
+      });
+    }
+
     return result;
   }
 
@@ -200,6 +210,16 @@ export class AttendanceService {
     // If status changed to PRESENT or LATE, generate per-session payment
     if (dto.status === 'PRESENT' || dto.status === 'LATE') {
       await this.invoiceGenerator.generatePerSessionPayment({
+        institutionId: attendance.institution_id,
+        studentId: attendance.student_id,
+        sessionId: attendance.session_id,
+        classId: attendance.session.class_id,
+      });
+    }
+
+    // If status changed to ABSENT, cancel the per-session payment
+    if (dto.status === 'ABSENT') {
+      await this.invoiceGenerator.cancelPerSessionPayment({
         institutionId: attendance.institution_id,
         studentId: attendance.student_id,
         sessionId: attendance.session_id,

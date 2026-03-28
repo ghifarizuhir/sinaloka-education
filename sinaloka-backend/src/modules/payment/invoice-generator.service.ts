@@ -83,6 +83,56 @@ export class InvoiceGeneratorService {
     }
   }
 
+  async cancelPerSessionPayment(
+    params: PerSessionPaymentParams,
+  ): Promise<void> {
+    try {
+      const institution = await this.prisma.institution.findUnique({
+        where: { id: params.institutionId },
+        select: { billing_mode: true },
+      });
+      if (institution?.billing_mode !== 'PER_SESSION') return;
+
+      // Find the per-session payment by enrollment + billing_period
+      const enrollment = await this.prisma.enrollment.findFirst({
+        where: {
+          student_id: params.studentId,
+          class_id: params.classId,
+          status: { in: ['ACTIVE', 'TRIAL'] },
+        },
+      });
+      if (!enrollment) return;
+
+      const billingPeriod = `session-${params.sessionId}`;
+
+      const payment = await this.prisma.payment.findFirst({
+        where: {
+          enrollment_id: enrollment.id,
+          billing_period: billingPeriod,
+        },
+      });
+      if (!payment) return;
+
+      // Only cancel PENDING payments -- never reverse PAID payments
+      if (payment.status !== 'PENDING') {
+        this.logger.warn(
+          `Cannot cancel non-PENDING payment ${payment.id} (status: ${payment.status}) for session ${params.sessionId}`,
+        );
+        return;
+      }
+
+      await this.prisma.payment.delete({
+        where: { id: payment.id },
+      });
+
+      this.logger.log(
+        `Per-session payment cancelled: student=${params.studentId}, session=${params.sessionId}`,
+      );
+    } catch (error: any) {
+      this.logger.error(`Failed to cancel per-session payment: ${error}`);
+    }
+  }
+
   async generateMonthlyPayments(
     params: MonthlyPaymentParams,
   ): Promise<{ created: number }> {
