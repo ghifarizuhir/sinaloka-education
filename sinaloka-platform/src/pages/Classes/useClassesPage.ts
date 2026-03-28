@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -23,19 +23,7 @@ import { classesService } from '../../services/classes.service';
 
 export const DAYS_OF_WEEK: ScheduleDay[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-export function getSubjectColor(name: string): string {
-  const colors = [
-    'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-    'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
-    'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
-    'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
-    'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400',
-    'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-}
+export { getSubjectColor } from '@/src/lib/utils';
 
 export function useClassesPage() {
   const { t, i18n } = useTranslation();
@@ -85,12 +73,8 @@ export function useClassesPage() {
 
   const { data: subjectsList } = useSubjects();
 
-  // Resolve subject_id from filterSubject name
-  const filterSubjectId = useMemo(() => {
-    if (!filterSubject || !subjectsList) return undefined;
-    const found = subjectsList.find((s: { name: string; id: string }) => s.name === filterSubject);
-    return found?.id;
-  }, [filterSubject, subjectsList]);
+  // filterSubject now holds subject ID directly from the Select
+  const filterSubjectId = filterSubject || undefined;
 
   const { data, isLoading } = useClasses({
     page,
@@ -102,7 +86,7 @@ export function useClassesPage() {
   });
   const { data: allClassesData } = useClasses({
     page: 1,
-    limit: 100,
+    limit: 500,
     semester_id: filterSemesterId || undefined,
     search: debouncedSearch || undefined,
     subject_id: filterSubjectId,

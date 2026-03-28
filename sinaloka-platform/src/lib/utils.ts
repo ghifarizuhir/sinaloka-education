@@ -40,6 +40,21 @@ export function openFile(path: string) {
   window.open(getFileUrl(path), '_blank');
 }
 
+export function getSubjectColor(name?: string): string {
+  if (!name) return '';
+  const colors = [
+    'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+    'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
+    'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+    'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+    'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400',
+    'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/20 dark:text-cyan-400',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export function formatCurrencyShort(amount: number, lang: string = 'id'): string {
   const prefix = lang === 'id' ? 'Rp' : 'IDR';
   const locale = lang === 'id' ? 'id-ID' : 'en-US';

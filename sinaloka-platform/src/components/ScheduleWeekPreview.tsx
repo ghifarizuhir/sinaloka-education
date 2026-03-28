@@ -2,10 +2,10 @@ import React from 'react';
 import { cn } from '../lib/utils';
 import type { ClassScheduleItem, Class } from '../types/class';
 
-const PREVIEW_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+const PREVIEW_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 const DAY_SHORT: Record<string, string> = {
   Monday: 'Sen', Tuesday: 'Sel', Wednesday: 'Rab',
-  Thursday: 'Kam', Friday: 'Jum', Saturday: 'Sab',
+  Thursday: 'Kam', Friday: 'Jum', Saturday: 'Sab', Sunday: 'Min',
 };
 
 const START_HOUR = 7;
@@ -58,7 +58,7 @@ export const ScheduleWeekPreview: React.FC<ScheduleWeekPreviewProps> = ({
 
   return (
     <div className="relative border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
-      <div className="grid" style={{ gridTemplateColumns: '40px repeat(6, 1fr)' }}>
+      <div className="grid" style={{ gridTemplateColumns: '40px repeat(7, 1fr)' }}>
         {/* Header */}
         <div className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-1" />
         {PREVIEW_DAYS.map(day => (
