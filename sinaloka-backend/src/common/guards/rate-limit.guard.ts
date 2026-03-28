@@ -18,6 +18,21 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
+/**
+ * In-memory store for rate limiting.
+ *
+ * ⚠️ SINGLE-INSTANCE LIMITATION: This Map lives in process memory.
+ * It is effective only when the backend runs as a single process (current
+ * Railway deployment). If the service is ever scaled horizontally to multiple
+ * instances, each instance will maintain its own separate counter, allowing
+ * a client to multiply its allowed request rate by the instance count.
+ *
+ * Future migration path: replace with @nestjs/throttler backed by a Redis
+ * adapter (e.g. `@nest-lab/throttler-storage-redis`) so counters are shared
+ * across all instances.
+ *
+ * SA-AUTH-005 — tracked in audit-2026-03-28-auth.md
+ */
 const ipMap = new Map<string, RateLimitEntry>();
 
 // Cleanup stale entries every 10 minutes
