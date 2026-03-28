@@ -9,25 +9,41 @@ const SessionStatus = z.enum([
 
 const TimeString = z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:MM format');
 
-export const CreateSessionSchema = z.object({
-  class_id: z.string().uuid(),
-  date: z.coerce.date(),
-  start_time: TimeString,
-  end_time: TimeString,
-  status: SessionStatus.default('SCHEDULED'),
-  topic_covered: z.string().max(500).optional().nullable(),
-  session_summary: z.string().max(2000).optional().nullable(),
-});
+export const CreateSessionSchema = z
+  .object({
+    class_id: z.string().uuid(),
+    date: z.coerce.date(),
+    start_time: TimeString,
+    end_time: TimeString,
+    status: SessionStatus.default('SCHEDULED'),
+    topic_covered: z.string().max(500).optional().nullable(),
+    session_summary: z.string().max(2000).optional().nullable(),
+  })
+  .refine((d) => d.start_time < d.end_time, {
+    message: 'start_time must be before end_time',
+    path: ['end_time'],
+  });
 export type CreateSessionDto = z.infer<typeof CreateSessionSchema>;
 
-export const UpdateSessionSchema = z.object({
-  date: z.coerce.date().optional(),
-  start_time: TimeString.optional(),
-  end_time: TimeString.optional(),
-  status: SessionStatus.optional(),
-  topic_covered: z.string().max(500).optional().nullable(),
-  session_summary: z.string().max(2000).optional().nullable(),
-});
+export const UpdateSessionSchema = z
+  .object({
+    date: z.coerce.date().optional(),
+    start_time: TimeString.optional(),
+    end_time: TimeString.optional(),
+    status: SessionStatus.optional(),
+    topic_covered: z.string().max(500).optional().nullable(),
+    session_summary: z.string().max(2000).optional().nullable(),
+  })
+  .refine(
+    (d) => {
+      if (d.start_time && d.end_time) return d.start_time < d.end_time;
+      return true;
+    },
+    {
+      message: 'start_time must be before end_time',
+      path: ['end_time'],
+    },
+  );
 export type UpdateSessionDto = z.infer<typeof UpdateSessionSchema>;
 
 export const GenerateSessionsSchema = z.object({
@@ -42,12 +58,17 @@ export const ApproveRescheduleSchema = z.object({
 });
 export type ApproveRescheduleDto = z.infer<typeof ApproveRescheduleSchema>;
 
-export const RequestRescheduleSchema = z.object({
-  proposed_date: z.coerce.date(),
-  proposed_start_time: TimeString,
-  proposed_end_time: TimeString,
-  reschedule_reason: z.string().min(1).max(500),
-});
+export const RequestRescheduleSchema = z
+  .object({
+    proposed_date: z.coerce.date(),
+    proposed_start_time: TimeString,
+    proposed_end_time: TimeString,
+    reschedule_reason: z.string().min(1).max(500),
+  })
+  .refine((d) => d.proposed_start_time < d.proposed_end_time, {
+    message: 'proposed_start_time must be before proposed_end_time',
+    path: ['proposed_end_time'],
+  });
 export type RequestRescheduleDto = z.infer<typeof RequestRescheduleSchema>;
 
 export const SessionQuerySchema = z.object({
