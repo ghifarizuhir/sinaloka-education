@@ -15,6 +15,17 @@ export function useStudentAttendance(studentId: string, params: { date_from: str
     enabled: !!studentId && !!params.date_from && !!params.date_to,
   });
 }
+export function useBatchCreateAttendance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: attendanceService.batchCreate,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['attendance'] });
+      qc.invalidateQueries({ queryKey: ['session-students'] });
+      qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] });
+    },
+  });
+}
 export function useUpdateAttendance() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: attendanceService.update, onSuccess: () => { qc.invalidateQueries({ queryKey: ['attendance'] }); qc.invalidateQueries({ queryKey: ['session-students'] }); qc.invalidateQueries({ queryKey: ['dashboard', 'stats'] }); } });

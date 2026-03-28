@@ -114,6 +114,69 @@ export class AttendanceService {
     });
   }
 
+  async adminBatchCreate(institutionId: string, dto: BatchCreateAttendanceDto) {
+    const session = await this.prisma.session.findUnique({
+      where: { id: dto.session_id, institution_id: institutionId },
+      include: { class: true },
+    });
+
+    if (!session) {
+      throw new NotFoundException(
+        `Session with id ${dto.session_id} not found`,
+      );
+    }
+
+    // Check for existing attendance records
+    const studentIds = dto.records.map((r) => r.student_id);
+    const existing = await this.prisma.attendance.findMany({
+      where: {
+        session_id: dto.session_id,
+        student_id: { in: studentIds },
+      },
+    });
+
+    if (existing.length > 0) {
+      const duplicateIds = existing.map((e) => e.student_id).join(', ');
+      throw new ConflictException(
+        `Attendance already exists for students: ${duplicateIds}`,
+      );
+    }
+
+    // Create attendance records
+    const data = dto.records.map((record) => ({
+      session_id: dto.session_id,
+      institution_id: session.institution_id,
+      student_id: record.student_id,
+      status: record.status,
+      homework_done: record.homework_done ?? false,
+      notes: record.notes ?? null,
+    }));
+
+    await this.prisma.attendance.createMany({ data });
+
+    // Auto-generate per-session payments for present/late students
+    const presentRecords = dto.records.filter(
+      (r) => r.status === 'PRESENT' || r.status === 'LATE',
+    );
+    for (const record of presentRecords) {
+      await this.invoiceGenerator.generatePerSessionPayment({
+        institutionId: session.institution_id,
+        studentId: record.student_id,
+        sessionId: dto.session_id,
+        classId: session.class_id,
+      });
+    }
+
+    // Return created records
+    return this.prisma.attendance.findMany({
+      where: {
+        session_id: dto.session_id,
+        student_id: { in: studentIds },
+      },
+      include: { student: true },
+    });
+  }
+
   async findBySession(institutionId: string, sessionId: string) {
     return this.prisma.attendance.findMany({
       where: {
@@ -233,21 +296,32 @@ export class AttendanceService {
   async getSummary(institutionId: string, query: AttendanceSummaryQueryDto) {
     const { class_id, date_from, date_to } = query;
 
-    const records = await this.prisma.attendance.findMany({
-      where: {
-        institution_id: institutionId,
-        session: {
-          class_id,
-          date: { gte: date_from, lte: date_to },
-        },
+    const where = {
+      institution_id: institutionId,
+      session: {
+        class_id,
+        date: { gte: date_from, lte: date_to },
       },
-    });
+    };
 
-    const total_records = records.length;
-    const present = records.filter((r) => r.status === 'PRESENT').length;
-    const absent = records.filter((r) => r.status === 'ABSENT').length;
-    const late = records.filter((r) => r.status === 'LATE').length;
-    const homework_done = records.filter((r) => r.homework_done).length;
+    const [statusCounts, homeworkCount] = await Promise.all([
+      this.prisma.attendance.groupBy({
+        by: ['status'],
+        where,
+        _count: { _all: true },
+      }),
+      this.prisma.attendance.count({
+        where: { ...where, homework_done: true },
+      }),
+    ]);
+
+    const present =
+      statusCounts.find((s) => s.status === 'PRESENT')?._count._all ?? 0;
+    const absent =
+      statusCounts.find((s) => s.status === 'ABSENT')?._count._all ?? 0;
+    const late =
+      statusCounts.find((s) => s.status === 'LATE')?._count._all ?? 0;
+    const total_records = present + absent + late;
 
     const attendance_rate =
       total_records > 0 ? ((present + late) / total_records) * 100 : 0;
@@ -257,7 +331,7 @@ export class AttendanceService {
       present,
       absent,
       late,
-      homework_done,
+      homework_done: homeworkCount,
       attendance_rate: Math.round(attendance_rate * 100) / 100,
     };
   }
@@ -269,34 +343,46 @@ export class AttendanceService {
   ) {
     const { date_from, date_to } = query;
 
-    const records = await this.prisma.attendance.findMany({
-      where: {
-        institution_id: institutionId,
-        student_id: studentId,
-        session: {
-          date: { gte: date_from, lte: date_to },
-        },
+    const where = {
+      institution_id: institutionId,
+      student_id: studentId,
+      session: {
+        date: { gte: date_from, lte: date_to },
       },
-      include: {
-        session: {
-          select: {
-            id: true,
-            date: true,
-            start_time: true,
-            end_time: true,
-            status: true,
-            snapshot_class_name: true,
-            class: { select: { id: true, name: true } },
+    };
+
+    const [statusCounts, records] = await Promise.all([
+      this.prisma.attendance.groupBy({
+        by: ['status'],
+        where,
+        _count: { _all: true },
+      }),
+      this.prisma.attendance.findMany({
+        where,
+        include: {
+          session: {
+            select: {
+              id: true,
+              date: true,
+              start_time: true,
+              end_time: true,
+              status: true,
+              snapshot_class_name: true,
+              class: { select: { id: true, name: true } },
+            },
           },
         },
-      },
-      orderBy: { session: { date: 'desc' } },
-    });
+        orderBy: { session: { date: 'desc' } },
+      }),
+    ]);
 
-    const total_sessions = records.length;
-    const present = records.filter((r) => r.status === 'PRESENT').length;
-    const absent = records.filter((r) => r.status === 'ABSENT').length;
-    const late = records.filter((r) => r.status === 'LATE').length;
+    const present =
+      statusCounts.find((s) => s.status === 'PRESENT')?._count._all ?? 0;
+    const absent =
+      statusCounts.find((s) => s.status === 'ABSENT')?._count._all ?? 0;
+    const late =
+      statusCounts.find((s) => s.status === 'LATE')?._count._all ?? 0;
+    const total_sessions = present + absent + late;
     const attendance_rate =
       total_sessions > 0
         ? Math.round(((present + late) / total_sessions) * 100 * 100) / 100

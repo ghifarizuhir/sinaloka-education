@@ -20,6 +20,16 @@ export interface UpdateAttendanceDto {
   notes?: string;
 }
 
+export interface BatchCreateAttendanceDto {
+  session_id: string;
+  records: {
+    student_id: string;
+    status: AttendanceStatus;
+    homework_done?: boolean;
+    notes?: string;
+  }[];
+}
+
 export interface AttendanceQueryParams {
   session_id: string;
 }

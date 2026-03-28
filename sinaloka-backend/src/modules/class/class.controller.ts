@@ -47,6 +47,16 @@ export class ClassController {
     return this.classService.findAll(institutionId, query);
   }
 
+  @Get('stats')
+  async getStats(
+    @InstitutionId() institutionId: string,
+    @Query('semester_id') semesterId?: string,
+  ) {
+    return this.classService.getStats(institutionId, {
+      semester_id: semesterId,
+    });
+  }
+
   @Get(':id')
   async findOne(
     @InstitutionId() institutionId: string,

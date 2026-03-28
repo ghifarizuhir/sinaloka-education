@@ -5,6 +5,12 @@ import type { ClassQueryParams } from '@/src/types/class';
 export function useClasses(params?: ClassQueryParams) {
   return useQuery({ queryKey: ['classes', params], queryFn: () => classesService.getAll(params) });
 }
+export function useClassStats(params?: { semester_id?: string }) {
+  return useQuery({
+    queryKey: ['classes', 'stats', params],
+    queryFn: () => classesService.getStats(params),
+  });
+}
 export function useClass(id: string | null) {
   return useQuery({ queryKey: ['classes', id], queryFn: () => classesService.getById(id!), enabled: !!id });
 }

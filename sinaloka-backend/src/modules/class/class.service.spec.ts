@@ -22,6 +22,7 @@ describe('ClassService', () => {
       findFirst: jest.Mock;
       findUnique: jest.Mock;
       count: jest.Mock;
+      aggregate: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
@@ -120,6 +121,7 @@ describe('ClassService', () => {
         findFirst: jest.fn(),
         findUnique: jest.fn(),
         count: jest.fn(),
+        aggregate: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -673,6 +675,59 @@ describe('ClassService', () => {
 
       expect(prisma.class.delete).toHaveBeenCalledWith({
         where: { id: 'class-1' },
+      });
+    });
+  });
+
+  describe('getStats', () => {
+    it('should return aggregated stats scoped by institution', async () => {
+      prisma.class.count.mockResolvedValue(12);
+      prisma.class.aggregate.mockResolvedValue({
+        _sum: { fee: 6000000 },
+      });
+
+      const result = await service.getStats('inst-1', {});
+
+      expect(prisma.class.count).toHaveBeenCalledWith({
+        where: { institution_id: 'inst-1', status: 'ACTIVE' },
+      });
+      expect(prisma.class.aggregate).toHaveBeenCalledWith({
+        where: { institution_id: 'inst-1', status: 'ACTIVE' },
+        _sum: { fee: true },
+      });
+      expect(result).toEqual({
+        total_classes: 12,
+        active_classes: 12,
+        total_monthly_fee: 6000000,
+      });
+    });
+
+    it('should filter by semester_id when provided', async () => {
+      prisma.class.count.mockResolvedValue(5);
+      prisma.class.aggregate.mockResolvedValue({
+        _sum: { fee: 2500000 },
+      });
+
+      const result = await service.getStats('inst-1', { semester_id: 'sem-1' });
+
+      expect(prisma.class.count).toHaveBeenCalledWith({
+        where: { institution_id: 'inst-1', status: 'ACTIVE', semester_id: 'sem-1' },
+      });
+      expect(result.total_classes).toBe(5);
+    });
+
+    it('should return zero fee when no classes exist', async () => {
+      prisma.class.count.mockResolvedValue(0);
+      prisma.class.aggregate.mockResolvedValue({
+        _sum: { fee: null },
+      });
+
+      const result = await service.getStats('inst-1', {});
+
+      expect(result).toEqual({
+        total_classes: 0,
+        active_classes: 0,
+        total_monthly_fee: 0,
       });
     });
   });

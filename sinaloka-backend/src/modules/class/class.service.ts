@@ -440,4 +440,32 @@ export class ClassService {
       where: { id },
     });
   }
+
+  async getStats(
+    institutionId: string,
+    filters: { semester_id?: string },
+  ) {
+    const where: Record<string, unknown> = {
+      institution_id: institutionId,
+      status: 'ACTIVE' as const,
+    };
+
+    if (filters.semester_id) {
+      where.semester_id = filters.semester_id;
+    }
+
+    const [activeCount, feeAgg] = await Promise.all([
+      this.prisma.class.count({ where }),
+      this.prisma.class.aggregate({
+        where,
+        _sum: { fee: true },
+      }),
+    ]);
+
+    return {
+      total_classes: activeCount,
+      active_classes: activeCount,
+      total_monthly_fee: Number(feeAgg._sum.fee ?? 0),
+    };
+  }
 }

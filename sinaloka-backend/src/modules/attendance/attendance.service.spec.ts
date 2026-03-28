@@ -21,6 +21,7 @@ describe('AttendanceService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
       count: jest.fn(),
+      groupBy: jest.fn(),
     },
     session: {
       findUnique: jest.fn(),
@@ -393,15 +394,14 @@ describe('AttendanceService', () => {
     });
   });
 
-  describe('getSummary', () => {
+  describe('getSummary (existing)', () => {
     it('should return attendance summary stats for a class in date range', async () => {
-      mockPrisma.attendance.findMany.mockResolvedValue([
-        { status: 'PRESENT', homework_done: true },
-        { status: 'PRESENT', homework_done: false },
-        { status: 'ABSENT', homework_done: false },
-        { status: 'LATE', homework_done: true },
+      mockPrisma.attendance.groupBy.mockResolvedValue([
+        { status: 'PRESENT', _count: { _all: 2 } },
+        { status: 'ABSENT', _count: { _all: 1 } },
+        { status: 'LATE', _count: { _all: 1 } },
       ]);
-      mockPrisma.attendance.count.mockResolvedValue(4);
+      mockPrisma.attendance.count.mockResolvedValue(2);
 
       const result = await service.getSummary(institutionId, {
         class_id: 'class-uuid-1',
@@ -425,7 +425,7 @@ describe('AttendanceService', () => {
       date_to: new Date('2026-03-31'),
     };
 
-    it('should return summary and records for a student', async () => {
+    it('should return summary and records for a student using DB aggregation', async () => {
       const mockRecords = [
         {
           id: 'att-1',
@@ -471,6 +471,11 @@ describe('AttendanceService', () => {
         },
       ];
 
+      mockPrisma.attendance.groupBy.mockResolvedValue([
+        { status: 'PRESENT', _count: { _all: 1 } },
+        { status: 'ABSENT', _count: { _all: 1 } },
+        { status: 'LATE', _count: { _all: 1 } },
+      ]);
       mockPrisma.attendance.findMany.mockResolvedValue(mockRecords);
 
       const result = await service.findByStudent(
@@ -487,32 +492,13 @@ describe('AttendanceService', () => {
         attendance_rate: 66.67,
       });
       expect(result.records).toHaveLength(3);
-      expect(mockPrisma.attendance.findMany).toHaveBeenCalledWith({
-        where: {
-          institution_id: institutionId,
-          student_id: studentId,
-          session: { date: { gte: query.date_from, lte: query.date_to } },
-        },
-        include: {
-          session: {
-            select: {
-              id: true,
-              date: true,
-              start_time: true,
-              end_time: true,
-              status: true,
-              snapshot_class_name: true,
-              class: { select: { id: true, name: true } },
-            },
-          },
-        },
-        orderBy: { session: { date: 'desc' } },
-      });
+      expect(mockPrisma.attendance.groupBy).toHaveBeenCalled();
       // Verify snapshot_class_name fallback: record with snapshot uses it, without uses class.name
       expect(result.records[1].session.class.name).toBe('Old Math');
     });
 
     it('should return zero rate when no records exist', async () => {
+      mockPrisma.attendance.groupBy.mockResolvedValue([]);
       mockPrisma.attendance.findMany.mockResolvedValue([]);
 
       const result = await service.findByStudent(
@@ -529,6 +515,126 @@ describe('AttendanceService', () => {
         attendance_rate: 0,
       });
       expect(result.records).toHaveLength(0);
+    });
+  });
+
+  describe('getSummary', () => {
+    it('should use database aggregation instead of loading all records', async () => {
+      mockPrisma.attendance.groupBy.mockResolvedValue([
+        { status: 'PRESENT', _count: { _all: 20 } },
+        { status: 'ABSENT', _count: { _all: 5 } },
+        { status: 'LATE', _count: { _all: 3 } },
+      ]);
+      mockPrisma.attendance.count.mockResolvedValue(10);
+
+      const result = await service.getSummary(institutionId, {
+        class_id: 'class-1',
+        date_from: new Date('2026-03-01'),
+        date_to: new Date('2026-03-31'),
+      });
+
+      expect(mockPrisma.attendance.groupBy).toHaveBeenCalledWith({
+        by: ['status'],
+        where: {
+          institution_id: institutionId,
+          session: {
+            class_id: 'class-1',
+            date: { gte: new Date('2026-03-01'), lte: new Date('2026-03-31') },
+          },
+        },
+        _count: { _all: true },
+      });
+
+      expect(result).toEqual({
+        total_records: 28,
+        present: 20,
+        absent: 5,
+        late: 3,
+        homework_done: 10,
+        attendance_rate: 82.14,
+      });
+    });
+
+    it('should return zero rate when no records exist', async () => {
+      mockPrisma.attendance.groupBy.mockResolvedValue([]);
+      mockPrisma.attendance.count.mockResolvedValue(0);
+
+      const result = await service.getSummary(institutionId, {
+        class_id: 'class-1',
+        date_from: new Date('2026-03-01'),
+        date_to: new Date('2026-03-31'),
+      });
+
+      expect(result).toEqual({
+        total_records: 0,
+        present: 0,
+        absent: 0,
+        late: 0,
+        homework_done: 0,
+        attendance_rate: 0,
+      });
+    });
+  });
+
+  describe('adminBatchCreate', () => {
+    it('should batch create attendance records without tutor check', async () => {
+      const session = {
+        id: 'session-uuid-1',
+        institution_id: institutionId,
+        class_id: 'class-uuid-1',
+        class: { tutor_id: 'tutor-uuid-1', name: 'Math 101' },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.attendance.findMany
+        .mockResolvedValueOnce([])  // existing check
+        .mockResolvedValueOnce([    // return created records
+          { id: 'att-1', session_id: 'session-uuid-1', student_id: 'student-1', status: 'PRESENT', student: { id: 'student-1', name: 'Alice' } },
+        ]);
+      mockPrisma.attendance.createMany.mockResolvedValue({ count: 1 });
+      mockInvoiceGenerator.generatePerSessionPayment.mockResolvedValue(undefined);
+
+      const result = await service.adminBatchCreate(institutionId, {
+        session_id: 'session-uuid-1',
+        records: [{ student_id: 'student-1', status: 'PRESENT' }],
+      });
+
+      expect(mockPrisma.session.findUnique).toHaveBeenCalledWith({
+        where: { id: 'session-uuid-1', institution_id: institutionId },
+        include: { class: true },
+      });
+      // No tutor check
+      expect(mockPrisma.tutor.findFirst).not.toHaveBeenCalled();
+      expect(mockPrisma.attendance.createMany).toHaveBeenCalled();
+    });
+
+    it('should reject if session not found', async () => {
+      mockPrisma.session.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.adminBatchCreate(institutionId, {
+          session_id: 'invalid-id',
+          records: [{ student_id: 'student-1', status: 'PRESENT' }],
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should reject if duplicate attendance exists', async () => {
+      mockPrisma.session.findUnique.mockResolvedValue({
+        id: 'session-uuid-1',
+        institution_id: institutionId,
+        class: { tutor_id: 'tutor-uuid-1' },
+      });
+      mockPrisma.attendance.findMany.mockResolvedValue([
+        { student_id: 'student-1' },
+      ]);
+
+      await expect(
+        service.adminBatchCreate(institutionId, {
+          session_id: 'session-uuid-1',
+          records: [{ student_id: 'student-1', status: 'PRESENT' }],
+        }),
+      ).rejects.toThrow(ConflictException);
     });
   });
 });

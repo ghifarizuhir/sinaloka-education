@@ -28,9 +28,9 @@ import { format, isSameDay, isBefore, startOfDay, addDays, subDays, parseISO } f
 import { toast } from 'sonner';
 import { Card, Button, Badge, Switch, Input, Label, PageHeader, EmptyState } from '../components/UI';
 import { cn, formatDate } from '../lib/utils';
-import { useAttendanceBySession, useAttendanceSummary, useUpdateAttendance } from '@/src/hooks/useAttendance';
+import { useAttendanceBySession, useAttendanceSummary, useUpdateAttendance, useBatchCreateAttendance } from '@/src/hooks/useAttendance';
 import { useSessions, useSessionStudents } from '@/src/hooks/useSessions';
-import type { Attendance as AttendanceRecord, AttendanceStatus, UpdateAttendanceDto } from '@/src/types/attendance';
+import type { Attendance as AttendanceRecord, AttendanceStatus, UpdateAttendanceDto, BatchCreateAttendanceDto } from '@/src/types/attendance';
 import type { Session, SessionStudent } from '@/src/types/session';
 
 const SESSION_STATUS_COLOR: Record<string, string> = {
@@ -54,7 +54,9 @@ export const Attendance = () => {
   const [focusedAttendanceId, setFocusedAttendanceId] = useState<string | null>(null);
   // Local pending changes before save
   const [pendingChanges, setPendingChanges] = useState<Record<string, UpdateAttendanceDto>>({});
-  const hasUnsavedChanges = Object.keys(pendingChanges).length > 0;
+  // Track new attendance records for students without existing attendance
+  const [pendingNewRecords, setPendingNewRecords] = useState<Record<string, { status: AttendanceStatus; homework_done: boolean; notes: string }>>({});
+  const hasUnsavedChanges = Object.keys(pendingChanges).length > 0 || Object.keys(pendingNewRecords).length > 0;
 
   // Format date for API query
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
@@ -95,13 +97,17 @@ export const Attendance = () => {
     } catch { return false; }
   }, [selectedSession]);
 
-  // Mutation
+  // Mutations
   const updateAttendance = useUpdateAttendance();
+  const batchCreateAttendance = useBatchCreateAttendance();
+
+  // Track which student row is focused (could be attendance_id or student_id for pending)
+  const [focusedStudentId, setFocusedStudentId] = useState<string | null>(null);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!focusedAttendanceId || isSessionLocked) return;
+      if (isSessionLocked) return;
       const key = e.key.toLowerCase();
       if (!['p', 'a', 'l'].includes(key)) return;
 
@@ -109,15 +115,24 @@ export const Attendance = () => {
       if (key === 'a') status = 'ABSENT';
       if (key === 'l') status = 'LATE';
 
-      setPendingChanges(prev => ({
-        ...prev,
-        [focusedAttendanceId]: { ...(prev[focusedAttendanceId] ?? {}), status },
-      }));
+      // Check if focused on an existing attendance record
+      if (focusedAttendanceId) {
+        setPendingChanges(prev => ({
+          ...prev,
+          [focusedAttendanceId]: { ...(prev[focusedAttendanceId] ?? {}), status },
+        }));
+      } else if (focusedStudentId) {
+        // Focused on a pending (no attendance) student
+        setPendingNewRecords(prev => ({
+          ...prev,
+          [focusedStudentId]: { ...(prev[focusedStudentId] ?? { homework_done: false, notes: '' }), status },
+        }));
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedAttendanceId]);
+  }, [focusedAttendanceId, focusedStudentId, isSessionLocked]);
 
   const getEffectiveStatus = (record: AttendanceRecord): AttendanceStatus => {
     return (pendingChanges[record.id]?.status ?? record.status) as AttendanceStatus;
@@ -143,19 +158,77 @@ export const Attendance = () => {
     setPendingChanges(prev => ({ ...prev, [id]: { ...(prev[id] ?? {}), notes } }));
   };
 
+  const setNewRecordStatus = (studentId: string, status: AttendanceStatus) => {
+    setPendingNewRecords(prev => ({
+      ...prev,
+      [studentId]: { ...(prev[studentId] ?? { homework_done: false, notes: '' }), status },
+    }));
+  };
+
+  const setNewRecordHomework = (studentId: string, homework_done: boolean) => {
+    setPendingNewRecords(prev => ({
+      ...prev,
+      [studentId]: { ...(prev[studentId] ?? { status: 'PRESENT' as AttendanceStatus, notes: '' }), homework_done },
+    }));
+  };
+
+  const setNewRecordNotes = (studentId: string, notes: string) => {
+    setPendingNewRecords(prev => ({
+      ...prev,
+      [studentId]: { ...(prev[studentId] ?? { status: 'PRESENT' as AttendanceStatus, homework_done: false }), notes },
+    }));
+  };
+
   const bulkMarkAll = (status: AttendanceStatus) => {
+    // Update existing attendance records
     const updates: Record<string, UpdateAttendanceDto> = {};
-    sessionStudents.filter(s => s.attendance_id !== null).forEach(s => { updates[s.attendance_id!] = { ...(pendingChanges[s.attendance_id!] ?? {}), status }; });
+    sessionStudents.filter(s => s.attendance_id !== null).forEach(s => {
+      updates[s.attendance_id!] = { ...(pendingChanges[s.attendance_id!] ?? {}), status };
+    });
     setPendingChanges(prev => ({ ...prev, ...updates }));
+
+    // Also create records for pending students
+    const newRecords: Record<string, { status: AttendanceStatus; homework_done: boolean; notes: string }> = {};
+    sessionStudents.filter(s => s.attendance_id === null).forEach(s => {
+      newRecords[s.id] = { ...(pendingNewRecords[s.id] ?? { homework_done: false, notes: '' }), status };
+    });
+    setPendingNewRecords(prev => ({ ...prev, ...newRecords }));
   };
 
   const saveAttendance = async () => {
-    const entries = Object.entries(pendingChanges);
-    if (entries.length === 0) return;
+    const updateEntries = Object.entries(pendingChanges);
+    const newEntries = Object.entries(pendingNewRecords) as [string, { status: AttendanceStatus; homework_done: boolean; notes: string }][];
+    if (updateEntries.length === 0 && newEntries.length === 0) return;
 
     try {
-      await Promise.all(entries.map(([id, data]) => updateAttendance.mutateAsync({ id, data })));
+      const promises: Promise<unknown>[] = [];
+
+      // Update existing attendance records
+      if (updateEntries.length > 0) {
+        promises.push(
+          ...updateEntries.map(([id, data]) => updateAttendance.mutateAsync({ id, data })),
+        );
+      }
+
+      // Batch create new attendance records
+      if (newEntries.length > 0 && selectedSessionId) {
+        const records = newEntries.map(([studentId, data]) => ({
+          student_id: studentId,
+          status: data.status,
+          homework_done: data.homework_done,
+          notes: data.notes || undefined,
+        }));
+        promises.push(
+          batchCreateAttendance.mutateAsync({
+            session_id: selectedSessionId,
+            records,
+          }),
+        );
+      }
+
+      await Promise.all(promises);
       setPendingChanges({});
+      setPendingNewRecords({});
       toast.success(t('attendance.toast.saved'));
     } catch {
       toast.error(t('attendance.toast.saveError'));
@@ -163,8 +236,12 @@ export const Attendance = () => {
   };
 
   const studentsWithAttendance = sessionStudents.filter(s => s.attendance_id !== null);
-  const presentCount = studentsWithAttendance.filter(s => (pendingChanges[s.attendance_id!]?.status ?? s.status) === 'PRESENT').length;
-  const absentCount = studentsWithAttendance.filter(s => (pendingChanges[s.attendance_id!]?.status ?? s.status) === 'ABSENT').length;
+  const existingPresent = studentsWithAttendance.filter(s => (pendingChanges[s.attendance_id!]?.status ?? s.status) === 'PRESENT').length;
+  const existingAbsent = studentsWithAttendance.filter(s => (pendingChanges[s.attendance_id!]?.status ?? s.status) === 'ABSENT').length;
+  const newPresent = (Object.values(pendingNewRecords) as { status: AttendanceStatus }[]).filter(r => r.status === 'PRESENT').length;
+  const newAbsent = (Object.values(pendingNewRecords) as { status: AttendanceStatus }[]).filter(r => r.status === 'ABSENT').length;
+  const presentCount = existingPresent + newPresent;
+  const absentCount = existingAbsent + newAbsent;
 
   return (
     <div className="space-y-6 pb-24">
@@ -238,6 +315,7 @@ export const Attendance = () => {
                       onClick={() => {
                         setSelectedSessionId(session.id);
                         setPendingChanges({});
+                        setPendingNewRecords({});
                       }}
                       className={cn(
                         "w-full text-left p-4 rounded-xl border transition-all duration-200 group relative overflow-hidden",
@@ -419,14 +497,22 @@ export const Attendance = () => {
                             return (
                               <tr
                                 key={student.id}
-                                onFocus={() => hasAttendance && setFocusedAttendanceId(student.attendance_id)}
-                                onBlur={() => setFocusedAttendanceId(null)}
-                                tabIndex={hasAttendance ? 0 : undefined}
+                                onFocus={() => {
+                                  if (hasAttendance) {
+                                    setFocusedAttendanceId(student.attendance_id);
+                                    setFocusedStudentId(null);
+                                  } else {
+                                    setFocusedStudentId(student.id);
+                                    setFocusedAttendanceId(null);
+                                  }
+                                }}
+                                onBlur={() => { setFocusedAttendanceId(null); setFocusedStudentId(null); }}
+                                tabIndex={0}
                                 className={cn(
-                                  "transition-colors outline-none",
+                                  "transition-colors outline-none hover:bg-zinc-50/30 dark:hover:bg-zinc-900/30",
                                   hasAttendance
-                                    ? cn("hover:bg-zinc-50/30 dark:hover:bg-zinc-900/30", focusedAttendanceId === student.attendance_id && "bg-zinc-50 dark:bg-zinc-900 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700")
-                                    : "opacity-60"
+                                    ? focusedAttendanceId === student.attendance_id && "bg-zinc-50 dark:bg-zinc-900 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700"
+                                    : pendingNewRecords[student.id] ? "" : "opacity-60"
                                 )}
                               >
                                 <td className="px-6 py-4">
@@ -458,7 +544,29 @@ export const Attendance = () => {
                                       ))}
                                     </div>
                                   ) : (
-                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{t('attendance.pending', 'Pending')}</span>
+                                    <div className="inline-flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg gap-1">
+                                      {(['PRESENT', 'ABSENT', 'LATE'] as AttendanceStatus[]).map((status) => {
+                                        const pendingStatus = pendingNewRecords[student.id]?.status;
+                                        return (
+                                          <button
+                                            key={status}
+                                            onClick={() => !isSessionLocked && setNewRecordStatus(student.id, status)}
+                                            disabled={isSessionLocked}
+                                            className={cn(
+                                              "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
+                                              pendingStatus === status
+                                                ? status === 'PRESENT' ? "bg-emerald-500 text-white shadow-sm" :
+                                                  status === 'ABSENT' ? "bg-rose-500 text-white shadow-sm" :
+                                                  "bg-amber-500 text-white shadow-sm"
+                                                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300",
+                                              isSessionLocked && "cursor-not-allowed opacity-60"
+                                            )}
+                                          >
+                                            {STATUS_LABEL[status][0]}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
                                   )}
                                 </td>
                                 <td className="px-6 py-4 text-center">
@@ -471,7 +579,13 @@ export const Attendance = () => {
                                       onChange={(e) => setLocalHomework(student.attendance_id!, e.target.checked)}
                                     />
                                   ) : (
-                                    <span className="text-zinc-300 dark:text-zinc-700">—</span>
+                                    <input
+                                      type="checkbox"
+                                      className={cn("w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900", isSessionLocked && "cursor-not-allowed opacity-60")}
+                                      checked={pendingNewRecords[student.id]?.homework_done ?? false}
+                                      disabled={isSessionLocked || !pendingNewRecords[student.id]}
+                                      onChange={(e) => setNewRecordHomework(student.id, e.target.checked)}
+                                    />
                                   )}
                                 </td>
                                 <td className="px-6 py-4">
@@ -484,7 +598,13 @@ export const Attendance = () => {
                                       onChange={(e) => setLocalNotes(student.attendance_id!, e.target.value)}
                                     />
                                   ) : (
-                                    <span className="text-zinc-300 dark:text-zinc-700">—</span>
+                                    <Input
+                                      className="h-8 text-xs w-32"
+                                      placeholder={t('attendance.notePlaceholder')}
+                                      value={pendingNewRecords[student.id]?.notes ?? ''}
+                                      disabled={isSessionLocked || !pendingNewRecords[student.id]}
+                                      onChange={(e) => setNewRecordNotes(student.id, e.target.value)}
+                                    />
                                   )}
                                 </td>
                               </tr>
@@ -518,9 +638,9 @@ export const Attendance = () => {
                       size="sm"
                       className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none"
                       onClick={saveAttendance}
-                      disabled={updateAttendance.isPending}
+                      disabled={updateAttendance.isPending || batchCreateAttendance.isPending}
                     >
-                      {updateAttendance.isPending ? (
+                      {(updateAttendance.isPending || batchCreateAttendance.isPending) ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : (
                         <Save size={16} />
@@ -566,7 +686,7 @@ export const Attendance = () => {
                   variant="secondary"
                   size="sm"
                   className="bg-white/10 hover:bg-white/20 border-none text-white dark:text-zinc-900"
-                  onClick={() => setPendingChanges({})}
+                  onClick={() => { setPendingChanges({}); setPendingNewRecords({}); }}
                 >
                   {t('common.discard')}
                 </Button>
