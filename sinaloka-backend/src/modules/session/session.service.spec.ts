@@ -947,5 +947,31 @@ describe('SessionService', () => {
         }),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should filter sessions by institution_id (tenant isolation)', async () => {
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+        institution_id: institutionId,
+      });
+
+      mockPrisma.session.findMany.mockResolvedValue([]);
+      mockPrisma.session.count.mockResolvedValue(0);
+
+      await service.getTutorSchedule(userId, {
+        page: 1,
+        limit: 20,
+        sort_by: 'date',
+        sort_order: 'asc',
+      });
+
+      expect(mockPrisma.session.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            institution_id: institutionId,
+          }),
+        }),
+      );
+    });
   });
 });

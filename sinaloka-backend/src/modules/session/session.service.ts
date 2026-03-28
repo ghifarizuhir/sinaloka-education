@@ -467,6 +467,7 @@ export class SessionService {
       query;
 
     const where: any = {
+      institution_id: tutor.institution_id,
       class: { tutor_id: tutor.id },
     };
 
