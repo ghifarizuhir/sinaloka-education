@@ -815,6 +815,41 @@ describe('EnrollmentService', () => {
       expect(prisma.$transaction).not.toHaveBeenCalled();
     });
 
+    it('capacity full: class at max capacity → skipped, error mentions capacity', async () => {
+      // CLASS_1 has capacity 1, and groupBy returns count 1 (already full)
+      const classAtCapacity = {
+        id: CLASS_1,
+        institution_id: INST,
+        name: 'Full Class',
+        capacity: 1,
+        schedules: [],
+      };
+
+      const csv = toCsv([{ student_id: STUDENT_1, class_id: CLASS_1 }]);
+
+      setupBulkMocks({
+        students: [{ id: STUDENT_1 }],
+        classes: [classAtCapacity],
+        existingEnrollments: [],
+        activeEnrollments: [],
+      });
+      // groupBy returns 1 existing enrollment for CLASS_1 (at capacity)
+      prisma.enrollment.groupBy.mockResolvedValue([
+        { class_id: CLASS_1, _count: { class_id: 1 } },
+      ]);
+
+      const result = await service.importFromCsv(csv, INST);
+
+      expect(result.created).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toMatchObject({
+        row: 1,
+        message: expect.stringContaining('capacity'),
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
     it('invalid schema: row missing required field → error reported', async () => {
       // CSV row with invalid UUID for student_id
       const invalidCsv = Buffer.from(

@@ -564,16 +564,16 @@ export class EnrollmentService {
 
     // --- Phase 2: Execute in transaction ---
     const enrolledAt = new Date();
-    const createdEnrollments = await this.prisma.$transaction(async (tx) => {
-      const results: {
-        id: string;
-        student_id: string;
-        class_id: string;
-        rowNum: number;
-      }[] = [];
+    try {
+      const createdEnrollments = await this.prisma.$transaction(async (tx) => {
+        const results: {
+          id: string;
+          student_id: string;
+          class_id: string;
+          rowNum: number;
+        }[] = [];
 
-      for (const row of validRows) {
-        try {
+        for (const row of validRows) {
           const enrollment = await tx.enrollment.create({
             data: {
               institution_id: institutionId,
@@ -590,32 +590,40 @@ export class EnrollmentService {
             class_id: row.class_id,
             rowNum: row.rowNum,
           });
-        } catch (err: any) {
-          errors.push({
-            row: row.rowNum,
-            message: err.message ?? 'Unknown error',
+        }
+
+        return results;
+      });
+
+      created = createdEnrollments.length;
+
+      // --- Phase 2b: Generate invoices outside transaction ---
+      for (const enrollment of createdEnrollments) {
+        try {
+          await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
+            institutionId,
+            studentId: enrollment.student_id,
+            enrollmentId: enrollment.id,
+            classId: enrollment.class_id,
+            enrolledAt,
           });
+        } catch {
+          // Invoice generation failure is non-fatal — enrollment already created
         }
       }
-
-      return results;
-    });
-
-    created = createdEnrollments.length;
-
-    // --- Phase 2b: Generate invoices outside transaction ---
-    for (const enrollment of createdEnrollments) {
-      try {
-        await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
-          institutionId,
-          studentId: enrollment.student_id,
-          enrollmentId: enrollment.id,
-          classId: enrollment.class_id,
-          enrolledAt,
-        });
-      } catch {
-        // Invoice generation failure is non-fatal — enrollment already created
-      }
+    } catch (err: any) {
+      // Transaction failed — all creates rolled back
+      return {
+        created: 0,
+        skipped,
+        errors: [
+          ...errors,
+          {
+            row: 0,
+            message: 'Import failed: database error, all rows rolled back',
+          },
+        ],
+      };
     }
 
     return { created, skipped, errors };
