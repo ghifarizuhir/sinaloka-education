@@ -19,18 +19,25 @@ describe('AttendanceService', () => {
       createMany: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
       count: jest.fn(),
       groupBy: jest.fn(),
     },
     session: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      update: jest.fn(),
     },
     tutor: {
       findFirst: jest.fn(),
     },
     user: {
       findUnique: jest.fn().mockResolvedValue({ name: 'Tutor Name' }),
+    },
+    payout: {
+      create: jest.fn(),
+      findFirst: jest.fn(),
     },
     $transaction: jest.fn((fn: any) => fn(mockPrisma)),
   };
@@ -73,7 +80,7 @@ describe('AttendanceService', () => {
         class: { tutor_id: 'tutor-uuid-1' },
       };
 
-      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.session.findFirst.mockResolvedValue(session);
       mockPrisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-uuid-1',
         user_id: userId,
@@ -110,7 +117,7 @@ describe('AttendanceService', () => {
         records,
       });
 
-      expect(mockPrisma.session.findUnique).toHaveBeenCalledWith({
+      expect(mockPrisma.session.findFirst).toHaveBeenCalledWith({
         where: { id: 'session-uuid-1', institution_id: institutionId },
         include: { class: true },
       });
@@ -123,7 +130,7 @@ describe('AttendanceService', () => {
         class: { tutor_id: 'tutor-uuid-other' },
       };
 
-      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.session.findFirst.mockResolvedValue(session);
       mockPrisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-uuid-1',
         user_id: userId,
@@ -144,7 +151,7 @@ describe('AttendanceService', () => {
     });
 
     it('should throw NotFoundException if session not found', async () => {
-      mockPrisma.session.findUnique.mockResolvedValue(null);
+      mockPrisma.session.findFirst.mockResolvedValue(null);
 
       await expect(
         service.batchCreate(institutionId, userId, {
@@ -167,7 +174,7 @@ describe('AttendanceService', () => {
         class: { tutor_id: 'tutor-uuid-1' },
       };
 
-      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.session.findFirst.mockResolvedValue(session);
       mockPrisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-uuid-1',
         user_id: userId,
@@ -239,7 +246,7 @@ describe('AttendanceService', () => {
           class_id: 'class-1',
         },
       };
-      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+      mockPrisma.attendance.findFirst.mockResolvedValue(existing);
 
       const updated = { ...existing, status: 'LATE' };
       mockPrisma.attendance.update.mockResolvedValue(updated);
@@ -252,7 +259,7 @@ describe('AttendanceService', () => {
     });
 
     it('should throw NotFoundException if attendance record not found', async () => {
-      mockPrisma.attendance.findUnique.mockResolvedValue(null);
+      mockPrisma.attendance.findFirst.mockResolvedValue(null);
 
       await expect(
         service.update(institutionId, 'nonexistent', { status: 'LATE' }),
@@ -272,7 +279,7 @@ describe('AttendanceService', () => {
           class_id: 'class-1',
         },
       };
-      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+      mockPrisma.attendance.findFirst.mockResolvedValue(existing);
 
       const updated = { ...existing, status: 'ABSENT' };
       mockPrisma.attendance.update.mockResolvedValue(updated);
@@ -300,7 +307,7 @@ describe('AttendanceService', () => {
           class_id: 'class-1',
         },
       };
-      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+      mockPrisma.attendance.findFirst.mockResolvedValue(existing);
 
       const updated = { ...existing, status: 'LATE' };
       mockPrisma.attendance.update.mockResolvedValue(updated);
@@ -323,7 +330,7 @@ describe('AttendanceService', () => {
         },
       };
 
-      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+      mockPrisma.attendance.findFirst.mockResolvedValue(existing);
       mockPrisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-uuid-1',
         user_id: userId,
@@ -350,7 +357,7 @@ describe('AttendanceService', () => {
         },
       };
 
-      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+      mockPrisma.attendance.findFirst.mockResolvedValue(existing);
       mockPrisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-uuid-1',
         user_id: userId,
@@ -374,7 +381,7 @@ describe('AttendanceService', () => {
         },
       };
 
-      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+      mockPrisma.attendance.findFirst.mockResolvedValue(existing);
       mockPrisma.tutor.findFirst.mockResolvedValue({
         id: 'tutor-uuid-1',
         user_id: userId,
@@ -576,6 +583,111 @@ describe('AttendanceService', () => {
     });
   });
 
+  describe('finalizeSession', () => {
+    const finalizeDto = {
+      session_id: 'session-1',
+      records: [
+        { student_id: 'student-1', status: 'PRESENT' as const, homework_done: true },
+        { student_id: 'student-2', status: 'ABSENT' as const },
+      ],
+      topic_covered: 'Algebra basics',
+      session_summary: 'Good session',
+    };
+
+    it('should atomically create attendance, complete session, and generate payout', async () => {
+      mockPrisma.$transaction.mockImplementation(async (cb: any) => cb(mockPrisma));
+
+      // Mock tutor lookup
+      mockPrisma.tutor.findFirst.mockResolvedValue({ id: 'tutor-1', user_id: userId });
+
+      // Mock session lookup
+      mockPrisma.session.findFirst.mockResolvedValue({
+        id: 'session-1',
+        status: 'SCHEDULED',
+        class_id: 'class-1',
+        institution_id: institutionId,
+        date: new Date('2026-04-01'),
+        class: {
+          id: 'class-1',
+          tutor_id: 'tutor-1',
+          fee: 100000,
+          billing_mode: 'PER_SESSION',
+          tutor_fee: 75000,
+          tutor_fee_mode: 'FIXED_PER_SESSION',
+          tutor_fee_per_student: null,
+          name: 'Math 101',
+          room: 'A1',
+          subject: { name: 'Mathematics' },
+          tutor: { user: { name: 'Tutor A' } },
+        },
+      });
+
+      // Mock duplicate check
+      mockPrisma.attendance.findMany.mockResolvedValue([]);
+
+      // Mock attendance createMany
+      mockPrisma.attendance.createMany.mockResolvedValue({ count: 2 });
+
+      // Mock session update
+      mockPrisma.session.update.mockResolvedValue({ id: 'session-1', status: 'COMPLETED' });
+
+      // Mock payout dedup check
+      mockPrisma.payout.findFirst.mockResolvedValue(null);
+
+      // Mock payout create
+      mockPrisma.payout.create.mockResolvedValue({ id: 'payout-1' });
+
+      await service.finalizeSession(institutionId, userId, finalizeDto);
+
+      // Verify transaction was used
+      expect(mockPrisma.$transaction).toHaveBeenCalled();
+
+      // Verify attendance was created
+      expect(mockPrisma.attendance.createMany).toHaveBeenCalled();
+
+      // Verify session was completed
+      expect(mockPrisma.session.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'session-1' },
+          data: expect.objectContaining({ status: 'COMPLETED' }),
+        }),
+      );
+
+      // Verify payout was created
+      expect(mockPrisma.payout.create).toHaveBeenCalled();
+    });
+
+    it('should reject if session is not SCHEDULED', async () => {
+      mockPrisma.$transaction.mockImplementation(async (cb: any) => cb(mockPrisma));
+      mockPrisma.tutor.findFirst.mockResolvedValue({ id: 'tutor-1', user_id: userId });
+      mockPrisma.session.findFirst.mockResolvedValue({
+        id: 'session-1',
+        status: 'COMPLETED',
+        class_id: 'class-1',
+        institution_id: institutionId,
+        class: { tutor_id: 'tutor-1' },
+      });
+
+      await expect(service.finalizeSession(institutionId, userId, finalizeDto))
+        .rejects.toThrow(ConflictException);
+    });
+
+    it('should reject if tutor does not own the session', async () => {
+      mockPrisma.$transaction.mockImplementation(async (cb: any) => cb(mockPrisma));
+      mockPrisma.tutor.findFirst.mockResolvedValue({ id: 'tutor-1', user_id: userId });
+      mockPrisma.session.findFirst.mockResolvedValue({
+        id: 'session-1',
+        status: 'SCHEDULED',
+        class_id: 'class-1',
+        institution_id: institutionId,
+        class: { tutor_id: 'other-tutor' },
+      });
+
+      await expect(service.finalizeSession(institutionId, userId, finalizeDto))
+        .rejects.toThrow(ForbiddenException);
+    });
+  });
+
   describe('adminBatchCreate', () => {
     it('should batch create attendance records without tutor check', async () => {
       const session = {
@@ -585,7 +697,7 @@ describe('AttendanceService', () => {
         class: { tutor_id: 'tutor-uuid-1', name: 'Math 101' },
       };
 
-      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.session.findFirst.mockResolvedValue(session);
       mockPrisma.attendance.findMany
         .mockResolvedValueOnce([])  // existing check
         .mockResolvedValueOnce([    // return created records
@@ -599,7 +711,7 @@ describe('AttendanceService', () => {
         records: [{ student_id: 'student-1', status: 'PRESENT' }],
       });
 
-      expect(mockPrisma.session.findUnique).toHaveBeenCalledWith({
+      expect(mockPrisma.session.findFirst).toHaveBeenCalledWith({
         where: { id: 'session-uuid-1', institution_id: institutionId },
         include: { class: true },
       });
@@ -609,7 +721,7 @@ describe('AttendanceService', () => {
     });
 
     it('should reject if session not found', async () => {
-      mockPrisma.session.findUnique.mockResolvedValue(null);
+      mockPrisma.session.findFirst.mockResolvedValue(null);
 
       await expect(
         service.adminBatchCreate(institutionId, {
@@ -620,7 +732,7 @@ describe('AttendanceService', () => {
     });
 
     it('should reject if duplicate attendance exists', async () => {
-      mockPrisma.session.findUnique.mockResolvedValue({
+      mockPrisma.session.findFirst.mockResolvedValue({
         id: 'session-uuid-1',
         institution_id: institutionId,
         class: { tutor_id: 'tutor-uuid-1' },

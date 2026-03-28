@@ -27,14 +27,14 @@ export function useAttendance() {
     topicCovered: string,
     sessionSummary?: string,
   ) => {
-    // Step 1: Submit attendance records
     const payload = mapAttendanceToBackend(sessionId, studentList);
-    await api.post('/api/tutor/attendance', payload);
 
-    // Step 2: Complete the session
-    await api.patch(`/api/tutor/schedule/${sessionId}/complete`, {
+    // Single atomic call — replaces two sequential calls
+    await api.post('/api/tutor/attendance/finalize', {
+      session_id: sessionId,
+      records: payload.records,
       topic_covered: topicCovered,
-      session_summary: sessionSummary || null,
+      session_summary: sessionSummary || undefined,
     });
   }, []);
 

@@ -14,10 +14,12 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { AttendanceService } from './attendance.service.js';
 import {
   BatchCreateAttendanceSchema,
+  FinalizeSessionSchema,
   UpdateAttendanceSchema,
 } from './attendance.dto.js';
 import type {
   BatchCreateAttendanceDto,
+  FinalizeSessionDto,
   UpdateAttendanceDto,
 } from './attendance.dto.js';
 
@@ -25,6 +27,15 @@ import type {
 @Roles(Role.TUTOR)
 export class TutorAttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
+
+  @Post('finalize')
+  finalizeSession(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(FinalizeSessionSchema))
+    dto: FinalizeSessionDto,
+  ) {
+    return this.attendanceService.finalizeSession(user.institutionId!, user.userId, dto);
+  }
 
   @Post()
   batchCreate(
