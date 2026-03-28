@@ -33,6 +33,12 @@ describe('SessionService', () => {
     tutor: {
       findFirst: jest.fn(),
     },
+    payout: {
+      findFirst: jest.fn().mockResolvedValue(null),
+    },
+    attendance: {
+      count: jest.fn().mockResolvedValue(0),
+    },
   };
 
   const institutionId = 'inst-uuid-1';
@@ -348,6 +354,64 @@ describe('SessionService', () => {
           topic_covered: 'X',
         }),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should skip payout creation when duplicate payout exists for completed session (admin)', async () => {
+      const existing = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'SCHEDULED',
+        date: new Date('2026-04-01'),
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: {
+            id: 'tutor-1',
+            user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' },
+          },
+        },
+        attendances: [],
+      };
+      mockPrisma.session.findUnique.mockResolvedValue(existing);
+
+      const classForFee = {
+        id: 'class-1',
+        name: 'Math A',
+        tutor_id: 'tutor-1',
+        tutor_fee: 200000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        fee: 100000n,
+        room: 'A1',
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Math' },
+      };
+      mockPrisma.class.findUnique.mockResolvedValue(classForFee);
+
+      const updatedSession = {
+        ...existing,
+        status: 'COMPLETED',
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A' } },
+        },
+      };
+      mockPrisma.session.update.mockResolvedValue(updatedSession);
+
+      // Simulate existing payout (duplicate)
+      mockPrisma.payout.findFirst.mockResolvedValue({
+        id: 'existing-payout',
+        tutor_id: 'tutor-1',
+        description: 'Session: Math A - 2026-04-01',
+      });
+
+      await service.update(institutionId, 'session-1', {
+        status: 'COMPLETED',
+      });
+
+      // PayoutService.create should NOT be called because payout already exists
+      expect(mockPayoutService.create).not.toHaveBeenCalled();
     });
   });
 
@@ -911,6 +975,131 @@ describe('SessionService', () => {
       await expect(
         service.cancelSession(institutionId, userId, 'session-1'),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('completeSession (tutor)', () => {
+    it('should skip payout creation when duplicate payout exists', async () => {
+      const session = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'SCHEDULED',
+        date: new Date('2026-04-01'),
+        class_id: 'class-1',
+        class: {
+          name: 'Math A',
+          tutor_id: 'tutor-uuid-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+      });
+
+      const classForFee = {
+        id: 'class-1',
+        name: 'Math A',
+        tutor_id: 'tutor-uuid-1',
+        tutor_fee: 200000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        fee: 100000n,
+        room: 'A1',
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Math' },
+      };
+      mockPrisma.class.findUnique.mockResolvedValue(classForFee);
+
+      const updatedSession = {
+        ...session,
+        status: 'COMPLETED',
+        class: {
+          name: 'Math A',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+      mockPrisma.session.update.mockResolvedValue(updatedSession);
+
+      // Simulate existing payout (duplicate)
+      mockPrisma.payout.findFirst.mockResolvedValue({
+        id: 'existing-payout',
+        tutor_id: 'tutor-uuid-1',
+        description: 'Session: Math A - 2026-04-01',
+      });
+
+      await service.completeSession(institutionId, userId, 'session-1', {
+        topic_covered: 'Algebra basics',
+      });
+
+      expect(mockPayoutService.create).not.toHaveBeenCalled();
+    });
+
+    it('should create payout when no duplicate exists', async () => {
+      const session = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'SCHEDULED',
+        date: new Date('2026-04-01'),
+        class_id: 'class-1',
+        class: {
+          name: 'Math A',
+          tutor_id: 'tutor-uuid-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+      });
+
+      const classForFee = {
+        id: 'class-1',
+        name: 'Math A',
+        tutor_id: 'tutor-uuid-1',
+        tutor_fee: 200000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        fee: 100000n,
+        room: 'A1',
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Math' },
+      };
+      mockPrisma.class.findUnique.mockResolvedValue(classForFee);
+
+      const updatedSession = {
+        ...session,
+        status: 'COMPLETED',
+        class: {
+          name: 'Math A',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+      mockPrisma.session.update.mockResolvedValue(updatedSession);
+
+      // No existing payout
+      mockPrisma.payout.findFirst.mockResolvedValue(null);
+
+      await service.completeSession(institutionId, userId, 'session-1', {
+        topic_covered: 'Algebra basics',
+      });
+
+      expect(mockPayoutService.create).toHaveBeenCalledWith(
+        institutionId,
+        expect.objectContaining({
+          tutor_id: 'tutor-uuid-1',
+          amount: 200000,
+          status: 'PENDING',
+        }),
+      );
     });
   });
 

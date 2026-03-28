@@ -68,6 +68,25 @@ export class SessionService {
     };
   }
 
+  private async hasExistingSessionPayout(
+    institutionId: string,
+    tutorId: string,
+    sessionId: string,
+    sessionDate: Date,
+  ): Promise<boolean> {
+    const dateStr = sessionDate.toISOString().split('T')[0];
+    const existing = await this.prisma.payout.findFirst({
+      where: {
+        institution_id: institutionId,
+        tutor_id: tutorId,
+        period_start: sessionDate,
+        period_end: sessionDate,
+        description: { contains: dateStr },
+      },
+    });
+    return !!existing;
+  }
+
   private flattenSession(session: any) {
     return {
       ...session,
@@ -303,43 +322,52 @@ export class SessionService {
         include: this.sessionInclude,
       });
 
-      // Auto-create payout based on tutor fee mode
+      // Auto-create payout based on tutor fee mode (with dedup check)
       const feeMode = sessionClass?.tutor_fee_mode ?? 'FIXED_PER_SESSION';
+      const sessionDateForPayout = new Date(existing.date);
+      const hasPayout = sessionClass?.tutor_id
+        ? await this.hasExistingSessionPayout(
+            institutionId,
+            sessionClass.tutor_id,
+            id,
+            sessionDateForPayout,
+          )
+        : false;
 
-      if (feeMode === 'FIXED_PER_SESSION' && sessionClass?.tutor_id) {
-        const tutorFee = Number(sessionClass.tutor_fee ?? 0);
-        if (tutorFee > 0) {
-          const sessionDate = new Date(existing.date);
-          await this.payoutService.create(institutionId, {
-            tutor_id: sessionClass.tutor_id,
-            amount: tutorFee,
-            date: sessionDate,
-            status: 'PENDING',
-            description: `Session: ${sessionClass.name} - ${sessionDate.toISOString().split('T')[0]}`,
-            period_start: sessionDate,
-            period_end: sessionDate,
-          });
-        }
-      } else if (
-        feeMode === 'PER_STUDENT_ATTENDANCE' &&
-        sessionClass?.tutor_id
-      ) {
-        const feePerStudent = Number(sessionClass.tutor_fee_per_student ?? 0);
-        if (feePerStudent > 0) {
-          const attendingCount = await this.prisma.attendance.count({
-            where: { session_id: id, status: { in: ['PRESENT', 'LATE'] } },
-          });
-          if (attendingCount > 0) {
-            const sessionDate = new Date(existing.date);
+      if (!hasPayout) {
+        if (feeMode === 'FIXED_PER_SESSION' && sessionClass?.tutor_id) {
+          const tutorFee = Number(sessionClass.tutor_fee ?? 0);
+          if (tutorFee > 0) {
             await this.payoutService.create(institutionId, {
               tutor_id: sessionClass.tutor_id,
-              amount: feePerStudent * attendingCount,
-              date: sessionDate,
+              amount: tutorFee,
+              date: sessionDateForPayout,
               status: 'PENDING',
-              description: `Session: ${sessionClass.name} - ${sessionDate.toISOString().split('T')[0]} (${attendingCount} students)`,
-              period_start: sessionDate,
-              period_end: sessionDate,
+              description: `Session: ${sessionClass.name} - ${sessionDateForPayout.toISOString().split('T')[0]}`,
+              period_start: sessionDateForPayout,
+              period_end: sessionDateForPayout,
             });
+          }
+        } else if (
+          feeMode === 'PER_STUDENT_ATTENDANCE' &&
+          sessionClass?.tutor_id
+        ) {
+          const feePerStudent = Number(sessionClass.tutor_fee_per_student ?? 0);
+          if (feePerStudent > 0) {
+            const attendingCount = await this.prisma.attendance.count({
+              where: { session_id: id, status: { in: ['PRESENT', 'LATE'] } },
+            });
+            if (attendingCount > 0) {
+              await this.payoutService.create(institutionId, {
+                tutor_id: sessionClass.tutor_id,
+                amount: feePerStudent * attendingCount,
+                date: sessionDateForPayout,
+                status: 'PENDING',
+                description: `Session: ${sessionClass.name} - ${sessionDateForPayout.toISOString().split('T')[0]} (${attendingCount} students)`,
+                period_start: sessionDateForPayout,
+                period_end: sessionDateForPayout,
+              });
+            }
           }
         }
       }
@@ -798,43 +826,50 @@ export class SessionService {
       include: this.sessionInclude,
     });
 
-    // Auto-create payout based on tutor fee mode
+    // Auto-create payout based on tutor fee mode (with dedup check)
     const feeMode = classForFee?.tutor_fee_mode ?? 'FIXED_PER_SESSION';
+    const sessionDateForPayout = new Date(session.date);
+    const hasPayout = await this.hasExistingSessionPayout(
+      session.institution_id,
+      tutor.id,
+      sessionId,
+      sessionDateForPayout,
+    );
 
-    if (feeMode === 'FIXED_PER_SESSION') {
-      if (tutorFee > 0) {
-        const sessionDate = new Date(session.date);
-        await this.payoutService.create(session.institution_id, {
-          tutor_id: tutor.id,
-          amount: tutorFee,
-          date: sessionDate,
-          status: 'PENDING',
-          description: `Session: ${classForFee!.name} - ${sessionDate.toISOString().split('T')[0]}`,
-          period_start: sessionDate,
-          period_end: sessionDate,
-        });
-      }
-    } else if (feeMode === 'PER_STUDENT_ATTENDANCE') {
-      const feePerStudent = Number(classForFee?.tutor_fee_per_student ?? 0);
-      if (feePerStudent > 0) {
-        const attendingCount = await this.prisma.attendance.count({
-          where: {
-            session_id: sessionId,
-            status: { in: ['PRESENT', 'LATE'] },
-          },
-        });
-        if (attendingCount > 0) {
-          const totalFee = feePerStudent * attendingCount;
-          const sessionDate = new Date(session.date);
+    if (!hasPayout) {
+      if (feeMode === 'FIXED_PER_SESSION') {
+        if (tutorFee > 0) {
           await this.payoutService.create(session.institution_id, {
             tutor_id: tutor.id,
-            amount: totalFee,
-            date: sessionDate,
+            amount: tutorFee,
+            date: sessionDateForPayout,
             status: 'PENDING',
-            description: `Session: ${classForFee!.name} - ${sessionDate.toISOString().split('T')[0]} (${attendingCount} students)`,
-            period_start: sessionDate,
-            period_end: sessionDate,
+            description: `Session: ${classForFee!.name} - ${sessionDateForPayout.toISOString().split('T')[0]}`,
+            period_start: sessionDateForPayout,
+            period_end: sessionDateForPayout,
           });
+        }
+      } else if (feeMode === 'PER_STUDENT_ATTENDANCE') {
+        const feePerStudent = Number(classForFee?.tutor_fee_per_student ?? 0);
+        if (feePerStudent > 0) {
+          const attendingCount = await this.prisma.attendance.count({
+            where: {
+              session_id: sessionId,
+              status: { in: ['PRESENT', 'LATE'] },
+            },
+          });
+          if (attendingCount > 0) {
+            const totalFee = feePerStudent * attendingCount;
+            await this.payoutService.create(session.institution_id, {
+              tutor_id: tutor.id,
+              amount: totalFee,
+              date: sessionDateForPayout,
+              status: 'PENDING',
+              description: `Session: ${classForFee!.name} - ${sessionDateForPayout.toISOString().split('T')[0]} (${attendingCount} students)`,
+              period_start: sessionDateForPayout,
+              period_end: sessionDateForPayout,
+            });
+          }
         }
       }
     }
