@@ -155,6 +155,23 @@ describe('AuthService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
+    it('should call bcrypt.compare even when user is not found (timing attack mitigation)', async () => {
+      (bcrypt.compare as jest.Mock).mockClear();
+      prisma.user.findUnique.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        service.login({ email: 'nonexistent@test.com', password: 'password123' }),
+      ).rejects.toThrow(UnauthorizedException);
+
+      // bcrypt.compare MUST be called even for non-existent users
+      expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+      // Must use a dummy hash, not the real user hash
+      const callArgs = (bcrypt.compare as jest.Mock).mock.calls[0];
+      expect(callArgs[0]).toBe('password123');
+      expect(callArgs[1]).toMatch(/^\$2b\$/); // must be a bcrypt hash
+    });
+
     it('should throw UnauthorizedException for wrong password', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
