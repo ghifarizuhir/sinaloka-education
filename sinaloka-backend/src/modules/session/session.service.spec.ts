@@ -600,7 +600,7 @@ describe('SessionService', () => {
       };
       mockPrisma.session.update.mockResolvedValue(updatedSession);
 
-      const result = await service.requestReschedule(userId, 'session-1', {
+      const result = await service.requestReschedule(institutionId, userId, 'session-1', {
         proposed_date: new Date('2026-04-10'),
         proposed_start_time: '16:00',
         proposed_end_time: '17:30',
@@ -609,7 +609,7 @@ describe('SessionService', () => {
 
       expect(result.status).toBe('RESCHEDULE_REQUESTED');
       expect(mockPrisma.session.update).toHaveBeenCalledWith({
-        where: { id: 'session-1' },
+        where: { id: 'session-1', institution_id: institutionId },
         data: {
           status: 'RESCHEDULE_REQUESTED',
           proposed_date: new Date('2026-04-10'),
@@ -644,7 +644,7 @@ describe('SessionService', () => {
       });
 
       await expect(
-        service.requestReschedule(userId, 'session-1', {
+        service.requestReschedule(institutionId, userId, 'session-1', {
           proposed_date: new Date('2026-04-10'),
           proposed_start_time: '16:00',
           proposed_end_time: '17:30',
@@ -673,7 +673,7 @@ describe('SessionService', () => {
       });
 
       await expect(
-        service.requestReschedule(userId, 'session-1', {
+        service.requestReschedule(institutionId, userId, 'session-1', {
           proposed_date: new Date('2026-04-10'),
           proposed_start_time: '16:00',
           proposed_end_time: '17:30',
@@ -854,11 +854,11 @@ describe('SessionService', () => {
       };
       mockPrisma.session.update.mockResolvedValue(cancelledSession);
 
-      const result = await service.cancelSession(userId, 'session-1');
+      const result = await service.cancelSession(institutionId, userId, 'session-1');
 
       expect(result.status).toBe('CANCELLED');
       expect(mockPrisma.session.update).toHaveBeenCalledWith({
-        where: { id: 'session-1' },
+        where: { id: 'session-1', institution_id: institutionId },
         data: { status: 'CANCELLED' },
         include: expectedSessionInclude,
       });
@@ -885,7 +885,7 @@ describe('SessionService', () => {
         user_id: userId,
       });
 
-      await expect(service.cancelSession(userId, 'session-1')).rejects.toThrow(
+      await expect(service.cancelSession(institutionId, userId, 'session-1')).rejects.toThrow(
         ForbiddenException,
       );
     });
