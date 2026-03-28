@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle2, X } from 'lucide-react';
+import { CheckCircle2, XCircle, X } from 'lucide-react';
 import { BottomNav } from './components/BottomNav';
 import { LoginPage } from './pages/LoginPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
@@ -34,6 +34,7 @@ function MainAppContent() {
   const [selectedProof, setSelectedProof] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState<'success' | 'error'>('success');
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [topicCovered, setTopicCovered] = useState('');
   const [sessionSummary, setSessionSummary] = useState('');
@@ -64,8 +65,9 @@ function MainAppContent() {
   const tutorName = profile?.name ?? 'Tutor';
   const firstName = tutorName.split(' ')[0];
 
-  const triggerNotification = (msg: string) => {
+  const triggerNotification = (msg: string, type: 'success' | 'error' = 'success') => {
     setNotificationMessage(msg);
+    setNotificationType(type);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 3000);
   };
@@ -86,11 +88,11 @@ function MainAppContent() {
 
   const handleFinishAttendance = async (classId: string) => {
     if (!students.every((s) => s.attendance !== undefined)) {
-      triggerNotification('Harap isi semua absensi murid!');
+      triggerNotification('Harap isi semua absensi murid!', 'error');
       return;
     }
     if (!topicCovered) {
-      triggerNotification('Harap isi topik yang diajarkan!');
+      triggerNotification('Harap isi topik yang diajarkan!', 'error');
       return;
     }
     try {
@@ -100,7 +102,7 @@ function MainAppContent() {
       refetchSchedule();
       refetchPayouts();
     } catch (err: any) {
-      triggerNotification(err?.response?.data?.message || 'Gagal menyimpan absensi');
+      triggerNotification(err?.response?.data?.message || 'Gagal menyimpan absensi', 'error');
     }
   };
 
@@ -109,7 +111,7 @@ function MainAppContent() {
       await cancelSession(id);
       triggerNotification('Jadwal berhasil dibatalkan.');
     } catch (err: any) {
-      triggerNotification(err?.response?.data?.message || 'Gagal membatalkan jadwal');
+      triggerNotification(err?.response?.data?.message || 'Gagal membatalkan jadwal', 'error');
     }
   };
 
@@ -281,8 +283,8 @@ function MainAppContent() {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-24 left-6 right-6 z-[110] flex justify-center pointer-events-none"
           >
-            <div className="bg-brand text-brand-foreground px-6 py-3 rounded-full font-semibold shadow-brand-md flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className={`${notificationType === 'error' ? 'bg-red-500 text-white' : 'bg-brand text-brand-foreground'} px-6 py-3 rounded-full font-semibold shadow-brand-md flex items-center gap-2`}>
+              {notificationType === 'error' ? <XCircle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
               {notificationMessage}
             </div>
           </motion.div>

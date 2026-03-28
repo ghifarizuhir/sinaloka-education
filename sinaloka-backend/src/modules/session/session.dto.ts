@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { startOfDay } from 'date-fns';
 
 const SessionStatus = z.enum([
   'SCHEDULED',
@@ -18,6 +19,10 @@ export const CreateSessionSchema = z
     status: SessionStatus.default('SCHEDULED'),
     topic_covered: z.string().max(500).optional().nullable(),
     session_summary: z.string().max(2000).optional().nullable(),
+  })
+  .refine((d) => d.date >= startOfDay(new Date()), {
+    message: 'Cannot create a session for a past date',
+    path: ['date'],
   })
   .refine((d) => d.start_time < d.end_time, {
     message: 'start_time must be before end_time',

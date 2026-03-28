@@ -27,12 +27,16 @@ const statusLabel = {
 export function SessionDetailPage({ session, onClose }: SessionDetailPageProps) {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
     api.get(`/api/tutor/schedule/${session.id}/students`)
       .then((res) => setStudents(res.data.students.map(mapStudent)))
-      .catch(() => {})
+      .catch((err) => {
+        setError(err?.response?.data?.message || 'Gagal memuat data siswa');
+      })
       .finally(() => setLoading(false));
   }, [session.id]);
 
@@ -109,6 +113,13 @@ export function SessionDetailPage({ session, onClose }: SessionDetailPageProps) 
             <p className="text-lg font-bold text-red-400">{absentCount}</p>
             <p className="text-[10px] font-bold uppercase tracking-wider text-subtle">Tidak Hadir</p>
           </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 text-center">
+          <p className="text-red-400 text-sm">{error}</p>
         </div>
       )}
 
