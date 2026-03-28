@@ -5,6 +5,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -457,6 +458,39 @@ export class AuthService {
       expires_in: this.expiryToSeconds(jwtExpiry),
       must_change_password: false,
     };
+  }
+
+  /**
+   * Purges stale authentication tokens from the database daily at 02:00.
+   *
+   * Cleans up:
+   * - RefreshTokens that have been explicitly revoked (`revoked = true`)
+   * - RefreshTokens whose `expires_at` is in the past
+   * - PasswordResetTokens whose `expires_at` is in the past (used or not)
+   *
+   * Without this job, the `refresh_tokens` and `password_reset_tokens` tables
+   * grow indefinitely because tokens are never hard-deleted elsewhere.
+   *
+   * SA-AUTH-011 — tracked in audit-2026-03-28-auth.md
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  async cleanupExpiredTokens(): Promise<void> {
+    const now = new Date();
+
+    const [deletedRefresh, deletedReset] = await Promise.all([
+      this.prisma.refreshToken.deleteMany({
+        where: {
+          OR: [{ revoked: true }, { expires_at: { lt: now } }],
+        },
+      }),
+      this.prisma.passwordResetToken.deleteMany({
+        where: { expires_at: { lt: now } },
+      }),
+    ]);
+
+    this.logger.log(
+      `Token cleanup: deleted ${deletedRefresh.count} refresh tokens, ${deletedReset.count} password reset tokens`,
+    );
   }
 
   private calculateExpiry(expiry: string): Date {

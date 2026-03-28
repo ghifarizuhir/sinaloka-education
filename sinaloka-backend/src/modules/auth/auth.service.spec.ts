@@ -36,6 +36,7 @@ jest.mock('crypto', () => ({
 
 describe('AuthService', () => {
   let service: AuthService;
+  let module: TestingModule;
   let prisma: {
     user: {
       findUnique: jest.Mock;
@@ -46,6 +47,14 @@ describe('AuthService', () => {
       findUnique: jest.Mock;
       update: jest.Mock;
       updateMany: jest.Mock;
+      deleteMany: jest.Mock;
+    };
+    passwordResetToken: {
+      findUnique: jest.Mock;
+      create: jest.Mock;
+      update: jest.Mock;
+      updateMany: jest.Mock;
+      deleteMany: jest.Mock;
     };
     $transaction: jest.Mock;
   };
@@ -82,6 +91,14 @@ describe('AuthService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
         updateMany: jest.fn(),
+        deleteMany: jest.fn(),
+      },
+      passwordResetToken: {
+        findUnique: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        updateMany: jest.fn(),
+        deleteMany: jest.fn(),
       },
       $transaction: jest.fn((ops) => Promise.resolve(ops)),
     };
@@ -90,7 +107,7 @@ describe('AuthService', () => {
       sign: jest.fn(() => 'mock-access-token'),
     };
 
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: PrismaService, useValue: prisma },
@@ -348,6 +365,43 @@ describe('AuthService', () => {
       });
 
       expect(result.message).toBe('Logged out successfully');
+    });
+  });
+
+  describe('cleanupExpiredTokens', () => {
+    it('should delete expired and revoked refresh tokens and expired password reset tokens', async () => {
+      prisma.refreshToken.deleteMany = jest.fn().mockResolvedValue({ count: 5 });
+      prisma.passwordResetToken.deleteMany = jest
+        .fn()
+        .mockResolvedValue({ count: 3 });
+
+      await service.cleanupExpiredTokens();
+
+      expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
+        where: {
+          OR: [{ revoked: true }, { expires_at: { lt: expect.any(Date) } }],
+        },
+      });
+      expect(prisma.passwordResetToken.deleteMany).toHaveBeenCalledWith({
+        where: { expires_at: { lt: expect.any(Date) } },
+      });
+    });
+
+    it('should log the number of deleted tokens', async () => {
+      prisma.refreshToken.deleteMany = jest.fn().mockResolvedValue({ count: 2 });
+      prisma.passwordResetToken.deleteMany = jest
+        .fn()
+        .mockResolvedValue({ count: 1 });
+
+      const loggerSpy = jest
+        .spyOn((service as any).logger, 'log')
+        .mockImplementation(() => {});
+
+      await service.cleanupExpiredTokens();
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'Token cleanup: deleted 2 refresh tokens, 1 password reset tokens',
+      );
     });
   });
 });
