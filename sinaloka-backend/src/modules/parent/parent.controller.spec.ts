@@ -151,7 +151,7 @@ describe('Parent (integration)', () => {
       .send({
         token: inviteRes.body.token,
         name: 'Parent User',
-        password: 'securepass123',
+        password: 'SecurePass123',
       })
       .expect(201);
 
@@ -181,7 +181,7 @@ describe('Parent (integration)', () => {
     // Login as parent
     const loginRes = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'parent-user@test.com', password: 'securepass123' });
+      .send({ email: 'parent-user@test.com', password: 'SecurePass123' });
     const parentToken = loginRes.body.access_token;
 
     // Try to access unlinked student

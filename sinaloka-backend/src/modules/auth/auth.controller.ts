@@ -78,6 +78,7 @@ export class AuthController {
     });
   }
 
+  @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ZodValidationPipe(LogoutSchema))

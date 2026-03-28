@@ -46,6 +46,11 @@ export class AuthService {
     });
 
     if (!user) {
+      // Perform dummy bcrypt compare to prevent timing-based user enumeration
+      await bcrypt.compare(
+        dto.password,
+        '$2b$10$U.qlZbUfUVTg08qLyvIOOet3if72SGC0Xj2JibkNm..5YJgREsOTW',
+      );
       throw new UnauthorizedException('Invalid email or password');
     }
 
@@ -98,12 +103,6 @@ export class AuthService {
       }
     }
 
-    // Update last_login_at
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { last_login_at: new Date() },
-    });
-
     const payload = {
       sub: user.id,
       institutionId: user.institution_id,
@@ -122,13 +121,20 @@ export class AuthService {
     );
     const expiresAt = this.calculateExpiry(refreshExpiry);
 
-    await this.prisma.refreshToken.create({
-      data: {
-        user_id: user.id,
-        token: refreshTokenValue,
-        expires_at: expiresAt,
-      },
-    });
+    // Atomically update last_login_at and create refresh token
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { last_login_at: new Date() },
+      }),
+      this.prisma.refreshToken.create({
+        data: {
+          user_id: user.id,
+          token: refreshTokenValue,
+          expires_at: expiresAt,
+        },
+      }),
+    ]);
 
     const jwtExpiry = this.configService.get<string>('JWT_EXPIRY', '15m');
 
@@ -172,12 +178,6 @@ export class AuthService {
       );
     }
 
-    // Revoke old refresh token
-    await this.prisma.refreshToken.update({
-      where: { id: refreshToken.id },
-      data: { revoked: true },
-    });
-
     // Generate new tokens
     const payload = {
       sub: refreshToken.user.id,
@@ -194,13 +194,20 @@ export class AuthService {
     );
     const expiresAt = this.calculateExpiry(refreshExpiry);
 
-    await this.prisma.refreshToken.create({
-      data: {
-        user_id: refreshToken.user.id,
-        token: newRefreshTokenValue,
-        expires_at: expiresAt,
-      },
-    });
+    // Atomically revoke old token and create new token
+    await this.prisma.$transaction([
+      this.prisma.refreshToken.update({
+        where: { id: refreshToken.id },
+        data: { revoked: true },
+      }),
+      this.prisma.refreshToken.create({
+        data: {
+          user_id: refreshToken.user.id,
+          token: newRefreshTokenValue,
+          expires_at: expiresAt,
+        },
+      }),
+    ]);
 
     const jwtExpiry = this.configService.get<string>('JWT_EXPIRY', '15m');
 

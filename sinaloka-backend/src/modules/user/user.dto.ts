@@ -4,7 +4,7 @@ export const CreateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(['SUPER_ADMIN', 'ADMIN', 'TUTOR']),
+  role: z.enum(['ADMIN', 'TUTOR']),
 });
 
 export type CreateUserDto = z.infer<typeof CreateUserSchema>;
@@ -16,7 +16,7 @@ export const UpdateUserSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .optional(),
-  role: z.enum(['SUPER_ADMIN', 'ADMIN', 'TUTOR']).optional(),
+  role: z.enum(['ADMIN', 'TUTOR']).optional(),
   institution_id: z
     .string()
     .uuid('Invalid institution ID')

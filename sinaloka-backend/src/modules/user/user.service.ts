@@ -118,6 +118,13 @@ export class UserService {
   }
 
   async create(institutionId: string, dto: CreateUserDto) {
+    // SUPER_ADMIN cannot be created via this endpoint (privilege escalation guard)
+    if ((dto.role as string) === 'SUPER_ADMIN') {
+      throw new ForbiddenException(
+        'Cannot create a SUPER_ADMIN user via this endpoint',
+      );
+    }
+
     // Check email uniqueness
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -181,9 +188,22 @@ export class UserService {
       data.password_hash = await bcrypt.hash(dto.password, 10);
       data.must_change_password = true;
     }
-    if (dto.role !== undefined) data.role = dto.role;
-    if (dto.institution_id !== undefined)
+    if (dto.role !== undefined) {
+      if ((dto.role as string) === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
+        throw new ForbiddenException(
+          'Only Super Admin can assign the SUPER_ADMIN role',
+        );
+      }
+      data.role = dto.role;
+    }
+    if (dto.institution_id !== undefined) {
+      if (callerRole !== 'SUPER_ADMIN') {
+        throw new ForbiddenException(
+          'Only Super Admin can change institution assignment',
+        );
+      }
       data.institution_id = dto.institution_id;
+    }
     if (dto.is_active !== undefined) data.is_active = dto.is_active;
 
     const updatedUser = await this.prisma.user.update({

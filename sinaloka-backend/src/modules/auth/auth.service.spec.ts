@@ -45,7 +45,9 @@ describe('AuthService', () => {
       create: jest.Mock;
       findUnique: jest.Mock;
       update: jest.Mock;
+      updateMany: jest.Mock;
     };
+    $transaction: jest.Mock;
   };
   let jwtService: { sign: jest.Mock };
 
@@ -79,7 +81,9 @@ describe('AuthService', () => {
         create: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
       },
+      $transaction: jest.fn((ops) => Promise.resolve(ops)),
     };
 
     jwtService = {
@@ -136,11 +140,8 @@ describe('AuthService', () => {
         institutionId: 'inst-1',
         role: 'ADMIN',
       });
-      expect(prisma.user.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'user-1' },
-        }),
-      );
+      // last_login_at update and refresh token create are now atomic via $transaction
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 
     it('should throw UnauthorizedException for wrong email', async () => {
@@ -149,6 +150,39 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'wrong@test.com', password: 'password123' }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should execute last_login_at update and refresh token creation atomically via $transaction', async () => {
+      const mockTransaction = jest.fn((ops) => Promise.resolve(ops));
+      (prisma as any).$transaction = mockTransaction;
+
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await service.login({ email: 'admin@test.com', password: 'password123' });
+
+      // $transaction must have been called for login atomicity
+      expect(mockTransaction).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call bcrypt.compare even when user is not found (timing attack mitigation)', async () => {
+      (bcrypt.compare as jest.Mock).mockClear();
+      prisma.user.findUnique.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        service.login({
+          email: 'nonexistent@test.com',
+          password: 'password123',
+        }),
+      ).rejects.toThrow(UnauthorizedException);
+
+      // bcrypt.compare MUST be called even for non-existent users
+      expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+      // Must use a dummy hash, not the real user hash
+      const callArgs = (bcrypt.compare as jest.Mock).mock.calls[0];
+      expect(callArgs[0]).toBe('password123');
+      expect(callArgs[1]).toMatch(/^\$2b\$/); // must be a bcrypt hash
     });
 
     it('should throw UnauthorizedException for wrong password', async () => {
@@ -242,11 +276,8 @@ describe('AuthService', () => {
       expect(result.access_token).toBe('mock-access-token');
       expect(result.refresh_token).toBe('mock-refresh-token-hex');
       expect(result.token_type).toBe('Bearer');
-      // Old token should be revoked
-      expect(prisma.refreshToken.update).toHaveBeenCalledWith({
-        where: { id: 'rt-1' },
-        data: { revoked: true },
-      });
+      // Old token should be revoked atomically via $transaction
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 
     it('should throw UnauthorizedException for invalid refresh token', async () => {
@@ -255,6 +286,24 @@ describe('AuthService', () => {
       await expect(
         service.refresh({ refresh_token: 'invalid-token' }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should execute refresh token rotation atomically via $transaction', async () => {
+      const mockTransaction = jest.fn((ops) => Promise.resolve(ops));
+      (prisma as any).$transaction = mockTransaction;
+
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1',
+        token: 'valid-refresh-token',
+        revoked: false,
+        expires_at: new Date(Date.now() + 86400000),
+        user: mockUser,
+      });
+
+      await service.refresh({ refresh_token: 'valid-refresh-token' });
+
+      // $transaction must have been called — rotation is atomic
+      expect(mockTransaction).toHaveBeenCalledTimes(1);
     });
 
     it('should throw UnauthorizedException for revoked refresh token', async () => {

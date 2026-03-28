@@ -749,6 +749,7 @@ model PasswordResetToken {
 
   user User @relation(fields: [user_id], references: [id])
 
+  @@index([user_id])
   @@map("password_reset_tokens")
 }
 

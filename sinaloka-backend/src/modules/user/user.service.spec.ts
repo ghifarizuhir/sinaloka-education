@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -167,6 +171,17 @@ describe('UserService', () => {
       );
     });
 
+    it('should reject creating a SUPER_ADMIN user', async () => {
+      await expect(
+        service.create('inst-1', {
+          name: 'Hacker',
+          email: 'hacker@test.com',
+          password: 'Password1',
+          role: 'SUPER_ADMIN' as any,
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
     it('should throw ConflictException for duplicate email', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser); // email taken
 
@@ -200,6 +215,60 @@ describe('UserService', () => {
       await expect(
         service.update('nonexistent', { name: 'New Name' }),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should reject updating role to SUPER_ADMIN by ADMIN caller', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+
+      await expect(
+        service.update('user-1', { role: 'SUPER_ADMIN' as any }, 'inst-1', 'ADMIN'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject changing institution_id by ADMIN caller', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+
+      await expect(
+        service.update(
+          'user-1',
+          { institution_id: 'inst-2' },
+          'inst-1',
+          'ADMIN',
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow SUPER_ADMIN to set role to SUPER_ADMIN', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        role: 'SUPER_ADMIN',
+      });
+
+      const result = await service.update(
+        'user-1',
+        { role: 'SUPER_ADMIN' as any },
+        null,
+        'SUPER_ADMIN',
+      );
+      expect(result.role).toBe('SUPER_ADMIN');
+    });
+
+    it('should allow SUPER_ADMIN to change institution_id', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        institution_id: 'inst-2',
+      });
+
+      const result = await service.update(
+        'user-1',
+        { institution_id: 'inst-2' },
+        null,
+        'SUPER_ADMIN',
+      );
+      expect(result.institution_id).toBe('inst-2');
     });
   });
 
