@@ -186,9 +186,18 @@ export class UserService {
       data.password_hash = await bcrypt.hash(dto.password, 10);
       data.must_change_password = true;
     }
-    if (dto.role !== undefined) data.role = dto.role;
-    if (dto.institution_id !== undefined)
+    if (dto.role !== undefined) {
+      if (dto.role === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
+        throw new ForbiddenException('Only Super Admin can assign the SUPER_ADMIN role');
+      }
+      data.role = dto.role;
+    }
+    if (dto.institution_id !== undefined) {
+      if (callerRole !== 'SUPER_ADMIN') {
+        throw new ForbiddenException('Only Super Admin can change institution assignment');
+      }
       data.institution_id = dto.institution_id;
+    }
     if (dto.is_active !== undefined) data.is_active = dto.is_active;
 
     const updatedUser = await this.prisma.user.update({

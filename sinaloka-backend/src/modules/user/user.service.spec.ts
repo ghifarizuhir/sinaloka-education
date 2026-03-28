@@ -212,6 +212,49 @@ describe('UserService', () => {
         service.update('nonexistent', { name: 'New Name' }),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should reject updating role to SUPER_ADMIN by ADMIN caller', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+
+      await expect(
+        service.update('user-1', { role: 'SUPER_ADMIN' }, 'inst-1', 'ADMIN'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject changing institution_id by ADMIN caller', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+
+      await expect(
+        service.update('user-1', { institution_id: 'inst-2' }, 'inst-1', 'ADMIN'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow SUPER_ADMIN to set role to SUPER_ADMIN', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.update.mockResolvedValue({ ...mockUser, role: 'SUPER_ADMIN' });
+
+      const result = await service.update(
+        'user-1',
+        { role: 'SUPER_ADMIN' },
+        null,
+        'SUPER_ADMIN',
+      );
+      expect(result.role).toBe('SUPER_ADMIN');
+    });
+
+    it('should allow SUPER_ADMIN to change institution_id', async () => {
+      prisma.user.findFirst.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, institution_id: 'inst-2' });
+
+      const result = await service.update(
+        'user-1',
+        { institution_id: 'inst-2' },
+        null,
+        'SUPER_ADMIN',
+      );
+      expect(result.institution_id).toBe('inst-2');
+    });
   });
 
   describe('remove', () => {
