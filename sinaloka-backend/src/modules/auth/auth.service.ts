@@ -477,20 +477,24 @@ export class AuthService {
   async cleanupExpiredTokens(): Promise<void> {
     const now = new Date();
 
-    const [deletedRefresh, deletedReset] = await Promise.all([
-      this.prisma.refreshToken.deleteMany({
-        where: {
-          OR: [{ revoked: true }, { expires_at: { lt: now } }],
-        },
-      }),
-      this.prisma.passwordResetToken.deleteMany({
-        where: { expires_at: { lt: now } },
-      }),
-    ]);
+    try {
+      const [deletedRefresh, deletedReset] = await Promise.all([
+        this.prisma.refreshToken.deleteMany({
+          where: {
+            OR: [{ revoked: true }, { expires_at: { lt: now } }],
+          },
+        }),
+        this.prisma.passwordResetToken.deleteMany({
+          where: { expires_at: { lt: now } },
+        }),
+      ]);
 
-    this.logger.log(
-      `Token cleanup: deleted ${deletedRefresh.count} refresh tokens, ${deletedReset.count} password reset tokens`,
-    );
+      this.logger.log(
+        `Token cleanup: deleted ${deletedRefresh.count} refresh tokens, ${deletedReset.count} password reset tokens`,
+      );
+    } catch (error) {
+      this.logger.error('Token cleanup failed', error);
+    }
   }
 
   private calculateExpiry(expiry: string): Date {
