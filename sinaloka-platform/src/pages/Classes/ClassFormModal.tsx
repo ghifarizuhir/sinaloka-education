@@ -105,10 +105,10 @@ export const ClassFormModal = ({
   errors,
   clearError,
 }: ClassFormModalProps) => {
-  const feeLabel = billingMode === 'PER_SESSION' ? 'Tarif per sesi' : 'Biaya bulanan';
+  const feeLabel = billingMode === 'PER_SESSION' ? t('classes.form.feePerSession') : t('classes.form.monthlyFee');
   const feeHelper = billingMode === 'PER_SESSION'
-    ? 'Siswa ditagih nominal ini setiap hadir di sesi kelas'
-    : 'Siswa ditagih nominal ini setiap awal bulan';
+    ? t('classes.form.feePerSessionHelper')
+    : t('classes.form.monthlyFeeHelper');
 
   const roomOptions = availableRooms.map(r => ({
     value: r.name,

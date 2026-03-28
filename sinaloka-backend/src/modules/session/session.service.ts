@@ -474,6 +474,13 @@ export class SessionService {
       return { count: 0, sessions: [] };
     }
 
+    const SESSION_GENERATE_LIMIT = 200;
+    if (sessionsToCreate.length > SESSION_GENERATE_LIMIT) {
+      throw new BadRequestException(
+        `Cannot generate more than ${SESSION_GENERATE_LIMIT} sessions at once (requested: ${sessionsToCreate.length}). Please use a smaller date range.`,
+      );
+    }
+
     const result = await this.prisma.session.createMany({
       data: sessionsToCreate,
       skipDuplicates: true,

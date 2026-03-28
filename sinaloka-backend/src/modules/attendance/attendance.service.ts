@@ -77,18 +77,20 @@ export class AttendanceService {
 
     await this.prisma.attendance.createMany({ data });
 
-    // Auto-generate per-session payments for present/late students
+    // Auto-generate per-session payments for present/late students (parallel)
     const presentRecords = dto.records.filter(
       (r) => r.status === 'PRESENT' || r.status === 'LATE',
     );
-    for (const record of presentRecords) {
-      await this.invoiceGenerator.generatePerSessionPayment({
-        institutionId: session.institution_id,
-        studentId: record.student_id,
-        sessionId: dto.session_id,
-        classId: session.class_id,
-      });
-    }
+    await Promise.all(
+      presentRecords.map((record) =>
+        this.invoiceGenerator.generatePerSessionPayment({
+          institutionId: session.institution_id,
+          studentId: record.student_id,
+          sessionId: dto.session_id,
+          classId: session.class_id,
+        }),
+      ),
+    );
 
     // Emit attendance submitted event
     const tutorUser = tutor
@@ -328,18 +330,20 @@ export class AttendanceService {
 
     await this.prisma.attendance.createMany({ data });
 
-    // Auto-generate per-session payments for present/late students
+    // Auto-generate per-session payments for present/late students (parallel)
     const presentRecords = dto.records.filter(
       (r) => r.status === 'PRESENT' || r.status === 'LATE',
     );
-    for (const record of presentRecords) {
-      await this.invoiceGenerator.generatePerSessionPayment({
-        institutionId: session.institution_id,
-        studentId: record.student_id,
-        sessionId: dto.session_id,
-        classId: session.class_id,
-      });
-    }
+    await Promise.all(
+      presentRecords.map((record) =>
+        this.invoiceGenerator.generatePerSessionPayment({
+          institutionId: session.institution_id,
+          studentId: record.student_id,
+          sessionId: dto.session_id,
+          classId: session.class_id,
+        }),
+      ),
+    );
 
     // Return created records
     return this.prisma.attendance.findMany({

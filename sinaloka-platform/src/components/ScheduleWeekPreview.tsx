@@ -1,12 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
 import type { ClassScheduleItem, Class } from '../types/class';
 
 const PREVIEW_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
-const DAY_SHORT: Record<string, string> = {
-  Monday: 'Sen', Tuesday: 'Sel', Wednesday: 'Rab',
-  Thursday: 'Kam', Friday: 'Jum', Saturday: 'Sab', Sunday: 'Min',
-};
 
 const START_HOUR = 7;
 const END_HOUR = 21;
@@ -28,6 +25,7 @@ export const ScheduleWeekPreview: React.FC<ScheduleWeekPreviewProps> = ({
   tutorClasses,
   currentClassId,
 }) => {
+  const { t } = useTranslation();
   const otherClasses = tutorClasses.filter(c => c.id !== currentClassId);
 
   const hasConflict = (schedule: ClassScheduleItem): string | null => {
@@ -63,7 +61,7 @@ export const ScheduleWeekPreview: React.FC<ScheduleWeekPreviewProps> = ({
         <div className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-1" />
         {PREVIEW_DAYS.map(day => (
           <div key={day} className="text-center text-xs font-medium py-1.5 bg-zinc-50 dark:bg-zinc-900 border-b border-l border-zinc-200 dark:border-zinc-800">
-            {DAY_SHORT[day]}
+            {t(`common.daysShort.${day}`)}
           </div>
         ))}
 
@@ -126,7 +124,7 @@ export const ScheduleWeekPreview: React.FC<ScheduleWeekPreviewProps> = ({
                         : 'bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
                     )}
                     style={getBlockStyle(s.start_time, s.end_time)}
-                    title={conflictWith ? `Bentrok dengan ${conflictWith}` : `${s.start_time}-${s.end_time}`}
+                    title={conflictWith ? t('common.conflictWith', { name: conflictWith }) : `${s.start_time}-${s.end_time}`}
                   >
                     {s.start_time}
                     {conflictWith && ' ⚠'}
