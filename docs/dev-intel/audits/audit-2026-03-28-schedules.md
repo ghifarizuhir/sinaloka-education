@@ -21,13 +21,13 @@
 | SA-004 | HIGH | FIXED | 2026-03-28 | Sprint 7 | - |
 | SA-005 | HIGH | FIXED | 2026-03-28 | Sprint 7 | - |
 | SA-012 | MEDIUM | FIXED | 2026-03-28 | Sprint 7 | - |
-| CLS-03 | MEDIUM | OPEN | - | Sprint 8 | - |
-| CLS-04 | MEDIUM | OPEN | - | Sprint 8 | - |
-| CLS-11 | MEDIUM | OPEN | - | Sprint 8 | - |
-| SA-009 | LOW | OPEN | - | Sprint 8 | - |
-| SA-013 | MEDIUM | OPEN | - | Sprint 8 | - |
-| SA-014 | MEDIUM | OPEN | - | Sprint 8 | - |
-| SA-008 | MEDIUM | OPEN | - | Sprint 8 | - |
+| CLS-03 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
+| CLS-04 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
+| CLS-11 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
+| SA-009 | LOW | FIXED | 2026-03-28 | Sprint 8 | - |
+| SA-013 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
+| SA-014 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
+| SA-008 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
 
 ## Executive Summary
 
@@ -168,7 +168,7 @@ if (completedSessions > 0) {
 
 ---
 
-#### [HIGH] CLS-03 — Stats "Active Courses" dan "Total Monthly Fee" Hanya Berdasarkan Page Saat Ini
+#### ~~[HIGH] CLS-03 — Stats "Active Courses" dan "Total Monthly Fee" Hanya Berdasarkan Page Saat Ini~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-platform/src/pages/Classes/index.tsx` (line 72, 54)
@@ -206,7 +206,7 @@ const totalRevenue = useMemo(() => {
 
 ---
 
-#### [HIGH] CLS-04 — Schedules Page Fetch Semua Session Tanpa Pagination (limit: 100)
+#### ~~[HIGH] CLS-04 — Schedules Page Fetch Semua Session Tanpa Pagination (limit: 100)~~ FIXED 2026-03-28
 
 **Category:** Performance
 **File:** `sinaloka-platform/src/pages/Schedules/useSchedulesPage.ts` (line 84-91)
@@ -467,7 +467,7 @@ export const CreateSessionSchema = z.object({
 
 ---
 
-#### [MEDIUM] CLS-11 — Double Filter: Client-Side + Server-Side Filtering Tidak Sinkron
+#### ~~[MEDIUM] CLS-11 — Double Filter: Client-Side + Server-Side Filtering Tidak Sinkron~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-platform/src/pages/Classes/useClassesPage.ts` (line 75, 98-109)
@@ -916,7 +916,7 @@ const result = await service.updateByTutor(institutionId, userId, 'att-1', { not
 
 ---
 
-#### [MEDIUM] SA-008 — Admin Tidak Bisa Create Attendance untuk Siswa Tanpa Record
+#### ~~[MEDIUM] SA-008 — Admin Tidak Bisa Create Attendance untuk Siswa Tanpa Record~~ FIXED 2026-03-28
 
 **Category:** Gap
 **File:** `sinaloka-platform/src/pages/Attendance.tsx` (line 408-492)
@@ -940,7 +940,7 @@ const result = await service.updateByTutor(institutionId, userId, 'att-1', { not
 
 ---
 
-#### [MEDIUM] SA-009 — Keyboard Shortcut Dependencies Array Incomplete
+#### ~~[MEDIUM] SA-009 — Keyboard Shortcut Dependencies Array Incomplete~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-platform/src/pages/Attendance.tsx` (line 102-120)
@@ -1015,7 +1015,7 @@ sessionsToCreate.push({
 
 ---
 
-#### [MEDIUM] SA-013 — `getSummary` Memuat Semua Records ke Memory
+#### ~~[MEDIUM] SA-013 — `getSummary` Memuat Semua Records ke Memory~~ FIXED 2026-03-28
 
 **Category:** Performance
 **File:** `sinaloka-backend/src/modules/attendance/attendance.service.ts` (line 213-243)
@@ -1036,7 +1036,7 @@ const [present, absent, late, hwDone, total] = await Promise.all([
 
 ---
 
-#### [MEDIUM] SA-014 — `findByStudent` Juga Memuat Semua Records ke Memory
+#### ~~[MEDIUM] SA-014 — `findByStudent` Juga Memuat Semua Records ke Memory~~ FIXED 2026-03-28
 
 **Category:** Performance
 **File:** `sinaloka-backend/src/modules/attendance/attendance.service.ts` (line 245-300)
