@@ -415,6 +415,22 @@ export class ClassService {
       throw new NotFoundException(`Class with ID "${id}" not found`);
     }
 
+    // Protect financial history: prevent deletion when completed sessions exist
+    const completedSessions = await this.prisma.session.findMany({
+      where: {
+        class_id: id,
+        status: 'COMPLETED',
+      },
+      select: { id: true },
+      take: 1,
+    });
+
+    if (completedSessions.length > 0) {
+      throw new BadRequestException(
+        'Cannot delete a class with completed sessions. Archive it instead by setting status to ARCHIVED.',
+      );
+    }
+
     return this.prisma.class.delete({
       where: { id },
     });

@@ -609,5 +609,33 @@ describe('ClassService', () => {
         NotFoundException,
       );
     });
+
+    it('should throw BadRequestException when class has completed sessions', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClass);
+      prisma.session.findMany.mockResolvedValue([
+        {
+          id: 'session-1',
+          class_id: 'class-1',
+          status: 'COMPLETED',
+          date: new Date(),
+        },
+      ]);
+
+      await expect(service.delete('inst-1', 'class-1')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should allow deletion when class has no completed sessions', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClass);
+      prisma.session.findMany.mockResolvedValue([]);
+      prisma.class.delete.mockResolvedValue(mockClass);
+
+      await service.delete('inst-1', 'class-1');
+
+      expect(prisma.class.delete).toHaveBeenCalledWith({
+        where: { id: 'class-1' },
+      });
+    });
   });
 });
