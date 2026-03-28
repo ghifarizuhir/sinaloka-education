@@ -17,6 +17,21 @@ export type BatchCreateAttendanceDto = z.infer<
   typeof BatchCreateAttendanceSchema
 >;
 
+export const FinalizeSessionSchema = z.object({
+  session_id: z.string().uuid(),
+  records: z.array(
+    z.object({
+      student_id: z.string().uuid(),
+      status: AttendanceStatus,
+      homework_done: z.boolean().optional().default(false),
+      notes: z.string().max(500).optional(),
+    }),
+  ).min(1),
+  topic_covered: z.string().min(1).max(500),
+  session_summary: z.string().max(2000).optional(),
+});
+export type FinalizeSessionDto = z.infer<typeof FinalizeSessionSchema>;
+
 export const UpdateAttendanceSchema = z.object({
   status: AttendanceStatus.optional(),
   homework_done: z.boolean().optional(),

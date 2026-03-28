@@ -15,6 +15,7 @@ import type {
   UpdateAttendanceDto,
   AttendanceSummaryQueryDto,
   StudentAttendanceQueryDto,
+  FinalizeSessionDto,
 } from './attendance.dto.js';
 
 @Injectable()
@@ -112,6 +113,179 @@ export class AttendanceService {
       },
       include: { student: true },
     });
+  }
+
+  async finalizeSession(
+    institutionId: string,
+    userId: string,
+    dto: FinalizeSessionDto,
+  ) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1. Validate tutor
+      const tutor = await tx.tutor.findFirst({
+        where: { user_id: userId, institution_id: institutionId },
+      });
+      if (!tutor) throw new NotFoundException('Tutor not found');
+
+      // 2. Validate session — must be SCHEDULED and owned by this tutor
+      const session = await tx.session.findFirst({
+        where: {
+          id: dto.session_id,
+          institution_id: institutionId,
+        },
+        include: {
+          class: {
+            include: {
+              subject: true,
+              tutor: { include: { user: true } },
+            },
+          },
+        },
+      });
+
+      if (!session) throw new NotFoundException('Session not found');
+      if (session.class.tutor_id !== tutor.id) {
+        throw new ForbiddenException('Not your session');
+      }
+      if (session.status !== 'SCHEDULED') {
+        throw new ConflictException(`Session status is ${session.status}, expected SCHEDULED`);
+      }
+
+      // 3. Check for duplicate attendance
+      const existing = await tx.attendance.findMany({
+        where: { session_id: dto.session_id },
+        select: { student_id: true },
+      });
+      if (existing.length > 0) {
+        throw new ConflictException('Attendance already exists for this session');
+      }
+
+      // 4. Create attendance records
+      await tx.attendance.createMany({
+        data: dto.records.map((r) => ({
+          session_id: dto.session_id,
+          student_id: r.student_id,
+          institution_id: institutionId,
+          status: r.status,
+          homework_done: r.homework_done ?? false,
+          notes: r.notes,
+        })),
+      });
+
+      // 5. Complete session with snapshot data
+      const tutorFee = Number(session.class.tutor_fee ?? 0);
+      const snapshotData = {
+        snapshot_tutor_id: session.class.tutor_id ?? null,
+        snapshot_tutor_name: session.class.tutor?.user?.name ?? null,
+        snapshot_subject_name: session.class.subject?.name ?? null,
+        snapshot_class_name: session.class.name ?? null,
+        snapshot_class_fee: session.class.fee ?? null,
+        snapshot_class_room: session.class.room ?? null,
+        snapshot_tutor_fee_mode: session.class.tutor_fee_mode ?? null,
+        snapshot_tutor_fee_per_student: session.class.tutor_fee_per_student ?? null,
+      };
+
+      await tx.session.update({
+        where: { id: dto.session_id },
+        data: {
+          status: 'COMPLETED',
+          topic_covered: dto.topic_covered,
+          session_summary: dto.session_summary ?? null,
+          ...(tutorFee > 0 ? { tutor_fee_amount: session.class.tutor_fee } : {}),
+          ...snapshotData,
+        },
+      });
+
+      // 6. Generate tutor payout (with dedup check)
+      const presentRecords = dto.records.filter(
+        (r) => r.status === 'PRESENT' || r.status === 'LATE',
+      );
+
+      const feeMode = session.class.tutor_fee_mode ?? 'FIXED_PER_SESSION';
+      const sessionDate = new Date(session.date);
+      const dateStr = sessionDate.toISOString().split('T')[0];
+
+      const hasPayout = await tx.payout.findFirst({
+        where: {
+          institution_id: institutionId,
+          tutor_id: tutor.id,
+          period_start: sessionDate,
+          period_end: sessionDate,
+          description: { contains: dateStr },
+        },
+      });
+
+      if (!hasPayout) {
+        if (feeMode === 'FIXED_PER_SESSION' && tutorFee > 0) {
+          await tx.payout.create({
+            data: {
+              institution_id: institutionId,
+              tutor_id: tutor.id,
+              amount: tutorFee,
+              date: sessionDate,
+              status: 'PENDING',
+              description: `Session: ${session.class.name} - ${dateStr}`,
+              period_start: sessionDate,
+              period_end: sessionDate,
+            },
+          });
+        } else if (feeMode === 'PER_STUDENT_ATTENDANCE') {
+          const feePerStudent = Number(session.class.tutor_fee_per_student ?? 0);
+          if (feePerStudent > 0 && presentRecords.length > 0) {
+            await tx.payout.create({
+              data: {
+                institution_id: institutionId,
+                tutor_id: tutor.id,
+                amount: feePerStudent * presentRecords.length,
+                date: sessionDate,
+                status: 'PENDING',
+                description: `Session: ${session.class.name} - ${dateStr} (${presentRecords.length} students)`,
+                period_start: sessionDate,
+                period_end: sessionDate,
+              },
+            });
+          }
+        }
+      }
+      // MONTHLY_SALARY: no per-session payout
+
+      return {
+        session_id: dto.session_id,
+        class_id: session.class_id,
+        class_name: session.class.name ?? 'Unknown',
+        tutor_name: session.class.tutor?.user?.name ?? 'Unknown',
+        attendance_count: dto.records.length,
+        present_count: presentRecords.length,
+      };
+    });
+
+    // 7. Generate per-session payments (best-effort, outside transaction)
+    const presentRecords = dto.records.filter(
+      (r) => r.status === 'PRESENT' || r.status === 'LATE',
+    );
+    for (const record of presentRecords) {
+      await this.invoiceGenerator.generatePerSessionPayment({
+        institutionId,
+        studentId: record.student_id,
+        sessionId: dto.session_id,
+        classId: result.class_id,
+      });
+    }
+
+    // 8. Emit notification (best-effort)
+    this.eventEmitter.emit(NOTIFICATION_EVENTS.ATTENDANCE_SUBMITTED, {
+      institutionId,
+      sessionId: dto.session_id,
+      className: result.class_name,
+      tutorName: result.tutor_name,
+      studentCount: dto.records.length,
+    });
+
+    return {
+      session_id: result.session_id,
+      attendance_count: result.attendance_count,
+      present_count: result.present_count,
+    };
   }
 
   async adminBatchCreate(institutionId: string, dto: BatchCreateAttendanceDto) {
