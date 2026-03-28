@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -37,6 +37,10 @@ describe('ClassService', () => {
     classSchedule: {
       createMany: jest.Mock;
       deleteMany: jest.Mock;
+      findMany: jest.Mock;
+    };
+    session: {
+      findMany: jest.Mock;
     };
     $transaction: jest.Mock;
   };
@@ -131,6 +135,10 @@ describe('ClassService', () => {
       classSchedule: {
         createMany: jest.fn(),
         deleteMany: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+      session: {
+        findMany: jest.fn().mockResolvedValue([]),
       },
       $transaction: jest.fn((fn: (tx: any) => Promise<any>) => fn(prisma)),
     };
@@ -279,6 +287,100 @@ describe('ClassService', () => {
           ],
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw ConflictException when tutor has schedule conflict on same day/time', async () => {
+      prisma.institution.findUnique.mockResolvedValue({
+        billing_mode: 'PER_SESSION',
+      });
+      prisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-1',
+        institution_id: 'inst-1',
+        is_verified: true,
+      });
+      prisma.subject.findFirst.mockResolvedValue({
+        id: 'subject-1',
+        name: 'Mathematics',
+        institution_id: 'inst-1',
+      });
+      prisma.tutorSubject.findUnique.mockResolvedValue({
+        tutor_id: 'tutor-1',
+        subject_id: 'subject-1',
+      });
+
+      // Tutor already has a Monday 14:00-15:30 schedule on another class
+      prisma.classSchedule.findMany.mockResolvedValue([
+        {
+          id: 'existing-sched-1',
+          class_id: 'other-class',
+          day: 'Monday',
+          start_time: '14:00',
+          end_time: '15:30',
+        },
+      ]);
+
+      await expect(
+        service.create('inst-1', {
+          tutor_id: 'tutor-1',
+          name: 'Math 102',
+          subject_id: 'subject-1',
+          capacity: 30,
+          fee: 500000,
+          tutor_fee: 200000,
+          schedules: [
+            { day: 'Monday', start_time: '14:30', end_time: '16:00' },
+          ],
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should allow creation when tutor schedules do not overlap', async () => {
+      prisma.institution.findUnique.mockResolvedValue({
+        billing_mode: 'PER_SESSION',
+      });
+      prisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-1',
+        institution_id: 'inst-1',
+        is_verified: true,
+      });
+      prisma.subject.findFirst.mockResolvedValue({
+        id: 'subject-1',
+        name: 'Mathematics',
+        institution_id: 'inst-1',
+      });
+      prisma.tutorSubject.findUnique.mockResolvedValue({
+        tutor_id: 'tutor-1',
+        subject_id: 'subject-1',
+      });
+
+      // Tutor has Monday 14:00-15:30 on another class -- no overlap with 16:00-17:30
+      prisma.classSchedule.findMany.mockResolvedValue([
+        {
+          id: 'existing-sched-1',
+          class_id: 'other-class',
+          day: 'Monday',
+          start_time: '14:00',
+          end_time: '15:30',
+        },
+      ]);
+
+      prisma.class.create.mockResolvedValue(mockClass);
+      prisma.classSchedule.createMany.mockResolvedValue({ count: 1 });
+      prisma.class.findUnique.mockResolvedValue(mockClass);
+
+      const result = await service.create('inst-1', {
+        tutor_id: 'tutor-1',
+        name: 'Math 102',
+        subject_id: 'subject-1',
+        capacity: 30,
+        fee: 500000,
+        tutor_fee: 200000,
+        schedules: [
+          { day: 'Monday', start_time: '16:00', end_time: '17:30' },
+        ],
+      });
+
+      expect(result).toBeDefined();
     });
   });
 
@@ -450,6 +552,29 @@ describe('ClassService', () => {
           subject_id: 'subject-from-other-institution',
         }),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ConflictException when updated schedules conflict with tutor existing schedules', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClass);
+
+      // Existing schedule for the tutor on another class
+      prisma.classSchedule.findMany.mockResolvedValue([
+        {
+          id: 'existing-sched-other',
+          class_id: 'other-class',
+          day: 'Monday',
+          start_time: '14:00',
+          end_time: '15:30',
+        },
+      ]);
+
+      await expect(
+        service.update('inst-1', 'class-1', {
+          schedules: [
+            { day: 'Monday', start_time: '14:30', end_time: '16:00' },
+          ],
+        }),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should allow update when tutor_id is not provided', async () => {

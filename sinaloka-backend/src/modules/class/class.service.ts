@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +14,36 @@ import { CreateClassDto, UpdateClassDto, ClassQueryDto } from './class.dto.js';
 @Injectable()
 export class ClassService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async checkTutorScheduleConflicts(
+    tutorId: string,
+    schedules: Array<{ day: string; start_time: string; end_time: string }>,
+    excludeClassId?: string,
+  ) {
+    const days = schedules.map((s) => s.day);
+
+    const existingSchedules = await this.prisma.classSchedule.findMany({
+      where: {
+        class: { tutor_id: tutorId },
+        day: { in: days },
+        ...(excludeClassId ? { class_id: { not: excludeClassId } } : {}),
+      },
+    });
+
+    for (const proposed of schedules) {
+      for (const existing of existingSchedules) {
+        if (
+          existing.day === proposed.day &&
+          proposed.start_time < existing.end_time &&
+          proposed.end_time > existing.start_time
+        ) {
+          throw new ConflictException(
+            `Schedule conflict: tutor already has a class on ${existing.day} from ${existing.start_time} to ${existing.end_time}`,
+          );
+        }
+      }
+    }
+  }
 
   async create(institutionId: string, dto: CreateClassDto) {
     const institution = await this.prisma.institution.findUnique({
@@ -56,6 +87,9 @@ export class ClassService {
     });
     if (!tutorSubject)
       throw new BadRequestException('Tutor does not teach this subject');
+
+    // Check tutor schedule conflicts
+    await this.checkTutorScheduleConflicts(dto.tutor_id, dto.schedules);
 
     return this.prisma.$transaction(async (tx) => {
       const record = await tx.class.create({
@@ -310,6 +344,19 @@ export class ClassService {
       status,
       semester_id,
     } = dto;
+
+    // Check tutor schedule conflicts when schedules or tutor_id change
+    if (schedules || tutor_id) {
+      const effectiveTutorId = tutor_id ?? existing.tutor_id;
+      const effectiveSchedules = schedules ?? [];
+      if (effectiveSchedules.length > 0) {
+        await this.checkTutorScheduleConflicts(
+          effectiveTutorId,
+          effectiveSchedules,
+          id, // exclude current class from conflict check
+        );
+      }
+    }
 
     return this.prisma.$transaction(async (tx) => {
       if (schedules) {
