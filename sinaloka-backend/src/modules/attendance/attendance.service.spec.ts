@@ -575,4 +575,66 @@ describe('AttendanceService', () => {
       });
     });
   });
+
+  describe('adminBatchCreate', () => {
+    it('should batch create attendance records without tutor check', async () => {
+      const session = {
+        id: 'session-uuid-1',
+        institution_id: institutionId,
+        class_id: 'class-uuid-1',
+        class: { tutor_id: 'tutor-uuid-1', name: 'Math 101' },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.attendance.findMany
+        .mockResolvedValueOnce([])  // existing check
+        .mockResolvedValueOnce([    // return created records
+          { id: 'att-1', session_id: 'session-uuid-1', student_id: 'student-1', status: 'PRESENT', student: { id: 'student-1', name: 'Alice' } },
+        ]);
+      mockPrisma.attendance.createMany.mockResolvedValue({ count: 1 });
+      mockInvoiceGenerator.generatePerSessionPayment.mockResolvedValue(undefined);
+
+      const result = await service.adminBatchCreate(institutionId, {
+        session_id: 'session-uuid-1',
+        records: [{ student_id: 'student-1', status: 'PRESENT' }],
+      });
+
+      expect(mockPrisma.session.findUnique).toHaveBeenCalledWith({
+        where: { id: 'session-uuid-1', institution_id: institutionId },
+        include: { class: true },
+      });
+      // No tutor check
+      expect(mockPrisma.tutor.findFirst).not.toHaveBeenCalled();
+      expect(mockPrisma.attendance.createMany).toHaveBeenCalled();
+    });
+
+    it('should reject if session not found', async () => {
+      mockPrisma.session.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.adminBatchCreate(institutionId, {
+          session_id: 'invalid-id',
+          records: [{ student_id: 'student-1', status: 'PRESENT' }],
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should reject if duplicate attendance exists', async () => {
+      mockPrisma.session.findUnique.mockResolvedValue({
+        id: 'session-uuid-1',
+        institution_id: institutionId,
+        class: { tutor_id: 'tutor-uuid-1' },
+      });
+      mockPrisma.attendance.findMany.mockResolvedValue([
+        { student_id: 'student-1' },
+      ]);
+
+      await expect(
+        service.adminBatchCreate(institutionId, {
+          session_id: 'session-uuid-1',
+          records: [{ student_id: 'student-1', status: 'PRESENT' }],
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+  });
 });

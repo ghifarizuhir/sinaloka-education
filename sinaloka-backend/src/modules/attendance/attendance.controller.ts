@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Param,
   Body,
@@ -13,11 +14,13 @@ import { InstitutionId } from '../../common/decorators/institution-id.decorator.
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { AttendanceService } from './attendance.service.js';
 import {
+  BatchCreateAttendanceSchema,
   UpdateAttendanceSchema,
   AttendanceQuerySchema,
   AttendanceSummaryQuerySchema,
 } from './attendance.dto.js';
 import type {
+  BatchCreateAttendanceDto,
   UpdateAttendanceDto,
   AttendanceQueryDto,
   AttendanceSummaryQueryDto,
@@ -27,6 +30,15 @@ import type {
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
+
+  @Post('batch')
+  batchCreate(
+    @InstitutionId() institutionId: string,
+    @Body(new ZodValidationPipe(BatchCreateAttendanceSchema))
+    dto: BatchCreateAttendanceDto,
+  ) {
+    return this.attendanceService.adminBatchCreate(institutionId, dto);
+  }
 
   @Get()
   findBySession(
