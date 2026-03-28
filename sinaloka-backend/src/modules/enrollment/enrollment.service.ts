@@ -18,6 +18,7 @@ import {
   EnrollmentQueryDto,
   CheckConflictDto,
   ImportEnrollmentRowSchema,
+  ImportEnrollmentRowDto,
   BulkUpdateEnrollmentDto,
   EnrollmentExportQueryDto,
 } from './enrollment.dto.js';
@@ -111,6 +112,26 @@ export class EnrollmentService {
       throw new ConflictException(
         `Schedule conflict with existing class(es): ${names}`,
       );
+    }
+
+    // Check class capacity
+    const targetClass = await this.prisma.class.findFirst({
+      where: { id: dto.class_id, institution_id: institutionId },
+      select: { capacity: true, name: true },
+    });
+    if (targetClass?.capacity) {
+      const currentCount = await this.prisma.enrollment.count({
+        where: {
+          class_id: dto.class_id,
+          institution_id: institutionId,
+          status: { in: ['ACTIVE', 'TRIAL'] },
+        },
+      });
+      if (currentCount >= targetClass.capacity) {
+        throw new ConflictException(
+          `Class "${targetClass.name}" is at full capacity (${currentCount}/${targetClass.capacity})`,
+        );
+      }
     }
 
     // Check for duplicate enrollment (student+class) scoped to institution
@@ -350,104 +371,259 @@ export class EnrollmentService {
     let skipped = 0;
     const errors: { row: number; message: string }[] = [];
 
+    // --- Phase 1: Parse & schema-validate all rows ---
+    const parsedRows: (ImportEnrollmentRowDto & { rowNum: number })[] = [];
+
     for (let i = 0; i < records.length; i++) {
       const row = records[i];
       const rowNum = i + 1;
-
-      try {
-        // 1. Validate row schema
-        const result = ImportEnrollmentRowSchema.safeParse(row);
-        if (!result.success) {
-          errors.push({
-            row: rowNum,
-            message: result.error.issues
-              .map((e: any) => `${e.path}: ${e.message}`)
-              .join('; '),
-          });
-          continue;
-        }
-
-        const { student_id, class_id, status } = result.data;
-
-        // 2. Verify student exists in institution
-        const student = await this.prisma.student.findFirst({
-          where: { id: student_id, institution_id: institutionId },
+      const result = ImportEnrollmentRowSchema.safeParse(row);
+      if (!result.success) {
+        errors.push({
+          row: rowNum,
+          message: result.error.issues
+            .map((e: any) => `${e.path}: ${e.message}`)
+            .join('; '),
         });
-        if (!student) {
-          errors.push({
-            row: rowNum,
-            message: `Student ${student_id} not found in institution`,
-          });
-          continue;
-        }
-
-        // 3. Verify class exists in institution
-        const cls = await this.prisma.class.findFirst({
-          where: { id: class_id, institution_id: institutionId },
-        });
-        if (!cls) {
-          errors.push({
-            row: rowNum,
-            message: `Class ${class_id} not found in institution`,
-          });
-          continue;
-        }
-
-        // 4. Check duplicate enrollment (student+class)
-        const existing = await this.prisma.enrollment.findFirst({
-          where: { student_id, class_id, institution_id: institutionId },
-        });
-        if (existing) {
-          skipped++;
-          errors.push({
-            row: rowNum,
-            message: `Student already enrolled in this class`,
-          });
-          continue;
-        }
-
-        // 5. Run schedule conflict detection
-        const conflictResult = await this.checkConflict(institutionId, {
-          student_id,
-          class_id,
-        });
-        if (conflictResult.has_conflict) {
-          const names = conflictResult.conflicting_classes
-            .map((c) => c.name)
-            .join(', ');
-          skipped++;
-          errors.push({
-            row: rowNum,
-            message: `Schedule conflict with: ${names}`,
-          });
-          continue;
-        }
-
-        // 6. Create enrollment
-        const enrollment = await this.prisma.enrollment.create({
-          data: {
-            institution_id: institutionId,
-            student_id,
-            class_id,
-            status,
-            payment_status: 'NEW',
-            enrolled_at: new Date(),
-          },
-        });
-
-        // 7. Generate mid-month enrollment payment
-        await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
-          institutionId,
-          studentId: student_id,
-          enrollmentId: enrollment.id,
-          classId: class_id,
-          enrolledAt: new Date(),
-        });
-
-        created++;
-      } catch (err: any) {
-        errors.push({ row: rowNum, message: err.message ?? 'Unknown error' });
+        continue;
       }
+      parsedRows.push({ rowNum, ...result.data });
+    }
+
+    if (parsedRows.length === 0) {
+      return { created, skipped, errors };
+    }
+
+    // --- Phase 1b: Bulk pre-fetch in parallel ---
+    const studentIds = [...new Set(parsedRows.map((r) => r.student_id))];
+    const classIds = [...new Set(parsedRows.map((r) => r.class_id))];
+
+    const [students, classes, existingEnrollments, activeEnrollments, classEnrollmentCountsRaw] =
+      await Promise.all([
+        // All referenced students in this institution
+        this.prisma.student.findMany({
+          where: { id: { in: studentIds }, institution_id: institutionId },
+          select: { id: true },
+        }),
+        // All referenced classes with schedules
+        this.prisma.class.findMany({
+          where: { id: { in: classIds }, institution_id: institutionId },
+          include: { schedules: true },
+        }),
+        // Existing enrollments for duplicate check (student+class pairs)
+        this.prisma.enrollment.findMany({
+          where: {
+            institution_id: institutionId,
+            student_id: { in: studentIds },
+            class_id: { in: classIds },
+          },
+          select: { student_id: true, class_id: true },
+        }),
+        // All ACTIVE/TRIAL enrollments for conflict check
+        this.prisma.enrollment.findMany({
+          where: {
+            institution_id: institutionId,
+            student_id: { in: studentIds },
+            status: { in: ['ACTIVE', 'TRIAL'] },
+          },
+          include: { class: { include: { schedules: true } } },
+        }),
+        // Current enrollment counts per class for capacity check
+        this.prisma.enrollment.groupBy({
+          by: ['class_id'],
+          where: {
+            institution_id: institutionId,
+            class_id: { in: classIds },
+            status: { in: ['ACTIVE', 'TRIAL'] },
+          },
+          _count: { class_id: true },
+        }),
+      ]);
+
+    // --- Phase 1c: Build lookup maps ---
+    const studentSet = new Set(students.map((s) => s.id));
+    const classMap = new Map(classes.map((c) => [c.id, c]));
+    const duplicateSet = new Set(
+      existingEnrollments.map((e) => `${e.student_id}:${e.class_id}`),
+    );
+
+    // Map student_id -> list of enrolled class schedules (for conflict check)
+    const studentEnrollmentsMap = new Map<
+      string,
+      { className: string; schedules: { day: string; start_time: string; end_time: string }[] }[]
+    >();
+    for (const e of activeEnrollments) {
+      const list = studentEnrollmentsMap.get(e.student_id) ?? [];
+      list.push({ className: e.class.name, schedules: e.class.schedules });
+      studentEnrollmentsMap.set(e.student_id, list);
+    }
+
+    // Track class enrollment counts for capacity checking (mutable — incremented per valid row)
+    const classEnrollmentCounts = new Map<string, number>(
+      classEnrollmentCountsRaw.map((c) => [c.class_id, c._count.class_id]),
+    );
+
+    // Track intra-batch duplicates
+    const batchDuplicateSet = new Set<string>();
+
+    // --- Phase 1d: In-memory validation ---
+    const validRows: (ImportEnrollmentRowDto & { rowNum: number })[] = [];
+
+    for (const row of parsedRows) {
+      const { rowNum, student_id, class_id } = row;
+      const pairKey = `${student_id}:${class_id}`;
+
+      // Student exists?
+      if (!studentSet.has(student_id)) {
+        errors.push({
+          row: rowNum,
+          message: `Student ${student_id} not found in institution`,
+        });
+        continue;
+      }
+
+      // Class exists?
+      const targetClass = classMap.get(class_id);
+      if (!targetClass) {
+        errors.push({
+          row: rowNum,
+          message: `Class ${class_id} not found in institution`,
+        });
+        continue;
+      }
+
+      // Duplicate in DB?
+      if (duplicateSet.has(pairKey)) {
+        skipped++;
+        errors.push({
+          row: rowNum,
+          message: `Student already enrolled in this class`,
+        });
+        continue;
+      }
+
+      // Intra-batch duplicate?
+      if (batchDuplicateSet.has(pairKey)) {
+        skipped++;
+        errors.push({
+          row: rowNum,
+          message: `Student already enrolled in this class`,
+        });
+        continue;
+      }
+
+      // Schedule conflict?
+      const existingSchedules = studentEnrollmentsMap.get(student_id) ?? [];
+      const conflictNames: string[] = [];
+      for (const enrolled of existingSchedules) {
+        if (this.schedulesConflict(targetClass.schedules, enrolled.schedules)) {
+          conflictNames.push(enrolled.className);
+        }
+      }
+
+      if (conflictNames.length > 0) {
+        skipped++;
+        errors.push({
+          row: rowNum,
+          message: `Schedule conflict with: ${conflictNames.join(', ')}`,
+        });
+        continue;
+      }
+
+      // Capacity check
+      if (targetClass.capacity) {
+        const currentCount = classEnrollmentCounts.get(class_id) ?? 0;
+        if (currentCount >= targetClass.capacity) {
+          skipped++;
+          errors.push({
+            row: rowNum,
+            message: `Class "${targetClass.name}" is at full capacity (${currentCount}/${targetClass.capacity})`,
+          });
+          continue;
+        }
+      }
+
+      // Row is valid — track it for intra-batch dedup, conflict detection, and capacity
+      batchDuplicateSet.add(pairKey);
+      classEnrollmentCounts.set(class_id, (classEnrollmentCounts.get(class_id) ?? 0) + 1);
+
+      // Add this new enrollment's schedules to the student's map for subsequent rows
+      const studentList = studentEnrollmentsMap.get(student_id) ?? [];
+      studentList.push({
+        className: targetClass.name,
+        schedules: targetClass.schedules,
+      });
+      studentEnrollmentsMap.set(student_id, studentList);
+
+      validRows.push(row);
+    }
+
+    if (validRows.length === 0) {
+      return { created, skipped, errors };
+    }
+
+    // --- Phase 2: Execute in transaction ---
+    const enrolledAt = new Date();
+    try {
+      const createdEnrollments = await this.prisma.$transaction(async (tx) => {
+        const results: {
+          id: string;
+          student_id: string;
+          class_id: string;
+          rowNum: number;
+        }[] = [];
+
+        for (const row of validRows) {
+          const enrollment = await tx.enrollment.create({
+            data: {
+              institution_id: institutionId,
+              student_id: row.student_id,
+              class_id: row.class_id,
+              status: row.status,
+              payment_status: 'NEW',
+              enrolled_at: enrolledAt,
+            },
+          });
+          results.push({
+            id: enrollment.id,
+            student_id: row.student_id,
+            class_id: row.class_id,
+            rowNum: row.rowNum,
+          });
+        }
+
+        return results;
+      });
+
+      created = createdEnrollments.length;
+
+      // --- Phase 2b: Generate invoices outside transaction ---
+      for (const enrollment of createdEnrollments) {
+        try {
+          await this.invoiceGenerator.generateMidMonthEnrollmentPayment({
+            institutionId,
+            studentId: enrollment.student_id,
+            enrollmentId: enrollment.id,
+            classId: enrollment.class_id,
+            enrolledAt,
+          });
+        } catch {
+          // Invoice generation failure is non-fatal — enrollment already created
+        }
+      }
+    } catch (err: any) {
+      // Transaction failed — all creates rolled back
+      return {
+        created: 0,
+        skipped,
+        errors: [
+          ...errors,
+          {
+            row: 0,
+            message: 'Import failed: database error, all rows rolled back',
+          },
+        ],
+      };
     }
 
     return { created, skipped, errors };

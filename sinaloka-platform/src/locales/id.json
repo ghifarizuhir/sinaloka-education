@@ -836,7 +836,8 @@
       "bulkStatusUpdated": "{{count}} pendaftaran diperbarui menjadi {{status}}",
       "bulkStatusError": "Gagal memperbarui status pendaftaran",
       "bulkDeleted": "{{count}} pendaftaran dihapus",
-      "bulkDeleteError": "Gagal menghapus pendaftaran"
+      "bulkDeleteError": "Gagal menghapus pendaftaran",
+      "capacityFull": "Kelas sudah penuh"
     },
     "modal": {
       "newTitle": "Tambah Pendaftaran",
