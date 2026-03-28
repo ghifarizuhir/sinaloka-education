@@ -273,6 +273,13 @@ export class ClassService {
       }
     }
 
+    if (dto.subject_id) {
+      const subject = await this.prisma.subject.findFirst({
+        where: { id: dto.subject_id, institution_id: institutionId },
+      });
+      if (!subject) throw new NotFoundException('Subject not found');
+    }
+
     if (dto.tutor_id || dto.subject_id) {
       const effectiveTutorId = dto.tutor_id ?? existing.tutor_id;
       const effectiveSubjectId = dto.subject_id ?? existing.subject_id;

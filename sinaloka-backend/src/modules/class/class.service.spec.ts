@@ -441,6 +441,17 @@ describe('ClassService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    it('should throw NotFoundException if subject does not belong to institution', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClass);
+      prisma.subject.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.update('inst-1', 'class-1', {
+          subject_id: 'subject-from-other-institution',
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
     it('should allow update when tutor_id is not provided', async () => {
       prisma.class.findFirst.mockResolvedValue(mockClass);
       prisma.class.update.mockResolvedValue({ ...mockClass, name: 'New Name' });
