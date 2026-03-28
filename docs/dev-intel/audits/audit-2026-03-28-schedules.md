@@ -37,6 +37,13 @@
 | CLS-18 | LOW | FIXED | 2026-03-28 | Sprint 10 | #124 |
 | SA-011 | MEDIUM | FIXED | 2026-03-28 | Sprint 10 | #124 |
 | SA-020 | MEDIUM | FIXED | 2026-03-28 | Sprint 10 | #124 |
+| CLS-06 | MEDIUM | FIXED | 2026-03-28 | Sprint 11 | #125 |
+| CLS-14 | LOW | FIXED | 2026-03-28 | Sprint 11 | #125 |
+| CLS-17 | LOW | FIXED | 2026-03-28 | Sprint 11 | #125 |
+| SA-015 | LOW | FIXED | 2026-03-28 | Sprint 11 | #125 |
+| SA-016 | LOW | FIXED | 2026-03-28 | Sprint 11 | #125 |
+| SA-017 | LOW | FIXED | 2026-03-28 | Sprint 11 | #125 |
+| SA-019 | LOW | FIXED | 2026-03-28 | Sprint 11 | #125 |
 
 ## Executive Summary
 
@@ -305,7 +312,7 @@ const handleCancelSession = (id: string) => {
 
 ---
 
-#### [MEDIUM] CLS-06 — Hardcoded Bahasa Indonesia di ClassFormModal
+#### ~~[MEDIUM] CLS-06 — Hardcoded Bahasa Indonesia di ClassFormModal~~ FIXED 2026-03-28
 
 **Category:** i18n
 **File:** `sinaloka-platform/src/pages/Classes/ClassFormModal.tsx` (line 108-111)
@@ -591,7 +598,7 @@ const classRecord = await this.prisma.class.findFirst({
 
 ---
 
-#### [LOW] CLS-14 — ScheduleWeekPreview Hardcoded Bahasa Indonesia
+#### ~~[LOW] CLS-14 — ScheduleWeekPreview Hardcoded Bahasa Indonesia~~ FIXED 2026-03-28
 
 **Category:** i18n
 **File:** `sinaloka-platform/src/components/ScheduleWeekPreview.tsx` (line 7-9, 129)
@@ -651,7 +658,7 @@ title={conflictWith ? `Bentrok dengan ${conflictWith}` : `${s.start_time}-${s.en
 
 ---
 
-#### [LOW] CLS-17 — Session Generate Bisa Membuat Ratusan Record Sekaligus Tanpa Limit
+#### ~~[LOW] CLS-17 — Session Generate Bisa Membuat Ratusan Record Sekaligus Tanpa Limit~~ FIXED 2026-03-28
 
 **Category:** Performance
 **File:** `sinaloka-backend/src/modules/session/session.service.ts` (line 372-455)
@@ -1055,7 +1062,7 @@ const [present, absent, late, hwDone, total] = await Promise.all([
 
 ---
 
-#### [LOW] SA-015 — Payment Generation Loop Sequential
+#### ~~[LOW] SA-015 — Payment Generation Loop Sequential~~ FIXED 2026-03-28
 
 **Category:** Performance
 **File:** `sinaloka-backend/src/modules/attendance/attendance.service.ts` (line 80-90)
@@ -1065,7 +1072,7 @@ const [present, absent, late, hwDone, total] = await Promise.all([
 
 ---
 
-#### [LOW] SA-016 — Error Handling Silence di SessionDetailPage
+#### ~~[LOW] SA-016 — Error Handling Silence di SessionDetailPage~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-tutors/src/pages/SessionDetailPage.tsx` (line 32-37)
@@ -1075,7 +1082,7 @@ const [present, absent, late, hwDone, total] = await Promise.all([
 
 ---
 
-#### [LOW] SA-017 — No Past Date Validation pada CreateSessionSchema
+#### ~~[LOW] SA-017 — No Past Date Validation pada CreateSessionSchema~~ FIXED 2026-03-28
 
 **Category:** Gap
 **File:** `sinaloka-backend/src/modules/session/session.dto.ts` (line 12-21)
@@ -1085,7 +1092,7 @@ const [present, absent, late, hwDone, total] = await Promise.all([
 
 ---
 
-#### [LOW] SA-019 — Notification Toast di Tutors App Selalu Hijau (Termasuk Error)
+#### ~~[LOW] SA-019 — Notification Toast di Tutors App Selalu Hijau (Termasuk Error)~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-tutors/src/App.tsx` (line 278-290)
