@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import { NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -165,6 +165,17 @@ describe('UserService', () => {
           }),
         }),
       );
+    });
+
+    it('should reject creating a SUPER_ADMIN user', async () => {
+      await expect(
+        service.create('inst-1', {
+          name: 'Hacker',
+          email: 'hacker@test.com',
+          password: 'Password1',
+          role: 'SUPER_ADMIN',
+        }),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw ConflictException for duplicate email', async () => {

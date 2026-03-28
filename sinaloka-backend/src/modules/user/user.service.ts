@@ -118,6 +118,11 @@ export class UserService {
   }
 
   async create(institutionId: string, dto: CreateUserDto) {
+    // SUPER_ADMIN cannot be created via this endpoint (privilege escalation guard)
+    if ((dto.role as string) === 'SUPER_ADMIN') {
+      throw new ForbiddenException('Cannot create a SUPER_ADMIN user via this endpoint');
+    }
+
     // Check email uniqueness
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
