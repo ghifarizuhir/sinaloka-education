@@ -49,8 +49,17 @@ export function useSchedule(initialFilter?: ScheduleFilter) {
     id: string,
     dto: { proposed_date: string; proposed_start_time: string; proposed_end_time: string; reschedule_reason: string },
   ) => {
-    await api.patch(`/api/tutor/schedule/${id}/request-reschedule`, dto);
-    await fetchSchedule();
+    // Optimistic update
+    setData((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status: 'rescheduled' as const } : s)),
+    );
+    try {
+      await api.patch(`/api/tutor/schedule/${id}/request-reschedule`, dto);
+    } catch (err: any) {
+      // Revert
+      await fetchSchedule();
+      throw err;
+    }
   }, [fetchSchedule]);
 
   return {

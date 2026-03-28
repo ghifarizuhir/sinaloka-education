@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Clock, MapPin, CheckCircle2, XCircle, RefreshCcw } from 'lucide-react';
+import { Calendar, Clock, MapPin, CheckCircle2, XCircle, RefreshCcw, AlertCircle } from 'lucide-react';
 import { ClassSchedule } from '../types';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -16,6 +16,7 @@ interface ScheduleCardProps {
 
 export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendance, onReschedule, onCancel, onViewDetail }) => {
   const isUpcoming = item.status === 'upcoming';
+  const isRescheduled = item.status === 'rescheduled';
   const allAttended = item.students.length > 0 && item.students.every(s => s.attendance !== undefined);
   
   return (
@@ -34,9 +35,10 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
             "inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mt-2",
             item.status === 'upcoming' ? "bg-blue-500/20 text-blue-400" :
             item.status === 'completed' ? "bg-brand-muted text-brand" :
+            item.status === 'rescheduled' ? "bg-amber-500/20 text-amber-400" :
             "bg-red-500/20 text-red-400"
           )}>
-            {item.status}
+            {item.status === 'rescheduled' ? 'Menunggu Persetujuan' : item.status}
           </div>
         </div>
         {allAttended && item.status === 'completed' && (
@@ -93,7 +95,16 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, onOpenAttendan
         </div>
       )}
 
-      {!isUpcoming && onViewDetail && (
+      {isRescheduled && (
+        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+          <div className="flex items-center justify-center gap-2 text-amber-400">
+            <AlertCircle className="w-4 h-4" />
+            <p className="text-[10px] font-bold uppercase tracking-wider">Menunggu Persetujuan Reschedule</p>
+          </div>
+        </div>
+      )}
+
+      {!isUpcoming && !isRescheduled && onViewDetail && (
         <button
           onClick={() => onViewDetail(item.id)}
           className="w-full p-3 rounded-lg bg-surface-elevated text-subtle hover:bg-surface-elevated/80 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider"

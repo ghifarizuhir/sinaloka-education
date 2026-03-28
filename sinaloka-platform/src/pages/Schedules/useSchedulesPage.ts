@@ -21,20 +21,10 @@ import { useSessions, useSession, useSessionStudents, useCreateSession, useUpdat
 import { useClasses } from '@/src/hooks/useClasses';
 import type { Session, CreateSessionDto, SessionStatus } from '@/src/types/session';
 
-export const SUBJECT_COLORS: Record<string, string> = {
-  'Mathematics': 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800',
-  'Science': 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800',
-  'English': 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-800',
-};
-
+export { getSubjectColor } from '@/src/lib/utils';
 
 export function getSessionDate(session: Session): Date {
   return parseISO(session.date);
-}
-
-export function getSubjectColor(subject?: string) {
-  if (!subject) return '';
-  return SUBJECT_COLORS[subject] || '';
 }
 
 export function getStatusBorder(status: SessionStatus): string {

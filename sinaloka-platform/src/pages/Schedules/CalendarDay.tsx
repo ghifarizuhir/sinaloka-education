@@ -24,7 +24,7 @@ export const CalendarDay: React.FC<CalendarDayProps> = ({
       <div className="min-w-[400px] h-full flex flex-col">
         <div className="flex-1 relative">
           <div className="absolute inset-0 flex flex-col">
-            {Array.from({ length: 14 }, (_, i) => i + 8).map(hour => {
+            {Array.from({ length: 16 }, (_, i) => i + 6).map(hour => {
               const hourSessions = sessions.filter(s => {
                 try {
                   return isSameDay(parseISO(s.date), currentDate) && parseInt(s.start_time.split(':')[0]) === hour;

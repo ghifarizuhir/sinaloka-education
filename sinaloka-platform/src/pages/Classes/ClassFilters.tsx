@@ -67,7 +67,7 @@ export const ClassFilters = ({
           onChange={onFilterSubjectChange}
           options={[
             { value: '', label: t('common.allSubjects') },
-            ...(subjectsList ?? []).map(s => ({ value: s.name, label: s.name })),
+            ...(subjectsList ?? []).map(s => ({ value: s.id, label: s.name })),
           ]}
         />
 

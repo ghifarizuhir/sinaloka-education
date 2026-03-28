@@ -30,6 +30,13 @@
 | SA-008 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
 | SA-003 | CRITICAL | FIXED | 2026-03-28 | Sprint 9 | - |
 | CLS-13 | MEDIUM | FIXED | 2026-03-28 | Sprint 9 | - |
+| CLS-07 | MEDIUM | FIXED | 2026-03-28 | Sprint 10 | #124 |
+| CLS-09 | MEDIUM | FIXED | 2026-03-28 | Sprint 10 | #124 |
+| CLS-15 | LOW | FIXED | 2026-03-28 | Sprint 10 | #124 |
+| CLS-16 | LOW | FIXED | 2026-03-28 | Sprint 10 | #124 |
+| CLS-18 | LOW | FIXED | 2026-03-28 | Sprint 10 | #124 |
+| SA-011 | MEDIUM | FIXED | 2026-03-28 | Sprint 10 | #124 |
+| SA-020 | MEDIUM | FIXED | 2026-03-28 | Sprint 10 | #124 |
 
 ## Executive Summary
 
@@ -332,7 +339,7 @@ const feeHelper = billingMode === 'PER_SESSION'
 
 ---
 
-#### [MEDIUM] CLS-07 — ScheduleWeekPreview Tidak Menampilkan Hari Minggu
+#### ~~[MEDIUM] CLS-07 — ScheduleWeekPreview Tidak Menampilkan Hari Minggu~~ FIXED 2026-03-28
 
 **Category:** Gap
 **File:** `sinaloka-platform/src/components/ScheduleWeekPreview.tsx` (line 5)
@@ -400,7 +407,7 @@ if (dto.subject_id) {
 
 ---
 
-#### [MEDIUM] CLS-09 — Timetable View Mengambil Data dengan Hard Limit 100
+#### ~~[MEDIUM] CLS-09 — Timetable View Mengambil Data dengan Hard Limit 100~~ FIXED 2026-03-28
 
 **Category:** Performance / Bug
 **File:** `sinaloka-platform/src/pages/Classes/useClassesPage.ts` (line 76)
@@ -608,7 +615,7 @@ title={conflictWith ? `Bentrok dengan ${conflictWith}` : `${s.start_time}-${s.en
 
 ---
 
-#### [LOW] CLS-15 — CalendarDay Hanya Menampilkan 08:00-21:00
+#### ~~[LOW] CLS-15 — CalendarDay Hanya Menampilkan 08:00-21:00~~ FIXED 2026-03-28
 
 **Category:** Gap
 **File:** `sinaloka-platform/src/pages/Schedules/CalendarDay.tsx` (line 27)
@@ -628,7 +635,7 @@ title={conflictWith ? `Bentrok dengan ${conflictWith}` : `${s.start_time}-${s.en
 
 ---
 
-#### [LOW] CLS-16 — Duplicate `getSubjectColor` Function dengan Implementasi Berbeda
+#### ~~[LOW] CLS-16 — Duplicate `getSubjectColor` Function dengan Implementasi Berbeda~~ FIXED 2026-03-28
 
 **Category:** Improvement
 **File:** `sinaloka-platform/src/pages/Classes/useClassesPage.ts` (line 25-37) dan `sinaloka-platform/src/pages/Schedules/useSchedulesPage.ts` (line 35-38)
@@ -656,7 +663,7 @@ title={conflictWith ? `Bentrok dengan ${conflictWith}` : `${s.start_time}-${s.en
 
 ---
 
-#### [LOW] CLS-18 — Subject Filter di Frontend Menggunakan Name, Bukan ID
+#### ~~[LOW] CLS-18 — Subject Filter di Frontend Menggunakan Name, Bukan ID~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-platform/src/pages/Classes/ClassFilters.tsx` (line 68-71)
@@ -978,7 +985,7 @@ useEffect(() => {
 
 ---
 
-#### [MEDIUM] SA-011 — ScheduleCard RESCHEDULE_REQUESTED Tampil Misleading
+#### ~~[MEDIUM] SA-011 — ScheduleCard RESCHEDULE_REQUESTED Tampil Misleading~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-tutors/src/components/ScheduleCard.tsx` (line 19, 42)
@@ -1088,7 +1095,7 @@ const [present, absent, late, hwDone, total] = await Promise.all([
 
 ---
 
-#### [LOW] SA-020 — Stale Data pada Schedule Setelah Cancel/Reschedule
+#### ~~[LOW] SA-020 — Stale Data pada Schedule Setelah Cancel/Reschedule~~ FIXED 2026-03-28
 
 **Category:** Improvement
 **File:** `sinaloka-tutors/src/hooks/useSchedule.ts` (line 34-45)
