@@ -306,8 +306,8 @@ export class SessionService {
 
     // Copy tutor fee when session is marked COMPLETED
     if (dto.status === 'COMPLETED') {
-      const sessionClass = await this.prisma.class.findUnique({
-        where: { id: existing.class?.id ?? '' },
+      const sessionClass = await this.prisma.class.findFirst({
+        where: { id: existing.class?.id ?? '', institution_id: institutionId },
         include: {
           subject: { select: { name: true } },
           tutor: { include: { user: { select: { name: true } } } },

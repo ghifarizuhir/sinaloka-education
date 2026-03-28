@@ -27,7 +27,7 @@ export class AttendanceService {
   ) {}
 
   async batchCreate(institutionId: string, userId: string, dto: BatchCreateAttendanceDto) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id: dto.session_id, institution_id: institutionId },
       include: { class: true },
     });
@@ -289,7 +289,7 @@ export class AttendanceService {
   }
 
   async adminBatchCreate(institutionId: string, dto: BatchCreateAttendanceDto) {
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prisma.session.findFirst({
       where: { id: dto.session_id, institution_id: institutionId },
       include: { class: true },
     });
@@ -362,7 +362,7 @@ export class AttendanceService {
   }
 
   async update(institutionId: string, id: string, dto: UpdateAttendanceDto) {
-    const attendance = await this.prisma.attendance.findUnique({
+    const attendance = await this.prisma.attendance.findFirst({
       where: { id, institution_id: institutionId },
       include: { session: true },
     });
@@ -414,7 +414,7 @@ export class AttendanceService {
   }
 
   async updateByTutor(institutionId: string, userId: string, id: string, dto: UpdateAttendanceDto) {
-    const attendance = await this.prisma.attendance.findUnique({
+    const attendance = await this.prisma.attendance.findFirst({
       where: { id, institution_id: institutionId },
       include: {
         session: {
