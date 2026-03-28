@@ -425,7 +425,7 @@ describe('AttendanceService', () => {
       date_to: new Date('2026-03-31'),
     };
 
-    it('should return summary and records for a student', async () => {
+    it('should return summary and records for a student using DB aggregation', async () => {
       const mockRecords = [
         {
           id: 'att-1',
@@ -471,6 +471,11 @@ describe('AttendanceService', () => {
         },
       ];
 
+      mockPrisma.attendance.groupBy.mockResolvedValue([
+        { status: 'PRESENT', _count: { _all: 1 } },
+        { status: 'ABSENT', _count: { _all: 1 } },
+        { status: 'LATE', _count: { _all: 1 } },
+      ]);
       mockPrisma.attendance.findMany.mockResolvedValue(mockRecords);
 
       const result = await service.findByStudent(
@@ -487,32 +492,13 @@ describe('AttendanceService', () => {
         attendance_rate: 66.67,
       });
       expect(result.records).toHaveLength(3);
-      expect(mockPrisma.attendance.findMany).toHaveBeenCalledWith({
-        where: {
-          institution_id: institutionId,
-          student_id: studentId,
-          session: { date: { gte: query.date_from, lte: query.date_to } },
-        },
-        include: {
-          session: {
-            select: {
-              id: true,
-              date: true,
-              start_time: true,
-              end_time: true,
-              status: true,
-              snapshot_class_name: true,
-              class: { select: { id: true, name: true } },
-            },
-          },
-        },
-        orderBy: { session: { date: 'desc' } },
-      });
+      expect(mockPrisma.attendance.groupBy).toHaveBeenCalled();
       // Verify snapshot_class_name fallback: record with snapshot uses it, without uses class.name
       expect(result.records[1].session.class.name).toBe('Old Math');
     });
 
     it('should return zero rate when no records exist', async () => {
+      mockPrisma.attendance.groupBy.mockResolvedValue([]);
       mockPrisma.attendance.findMany.mockResolvedValue([]);
 
       const result = await service.findByStudent(

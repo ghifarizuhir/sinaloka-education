@@ -280,34 +280,46 @@ export class AttendanceService {
   ) {
     const { date_from, date_to } = query;
 
-    const records = await this.prisma.attendance.findMany({
-      where: {
-        institution_id: institutionId,
-        student_id: studentId,
-        session: {
-          date: { gte: date_from, lte: date_to },
-        },
+    const where = {
+      institution_id: institutionId,
+      student_id: studentId,
+      session: {
+        date: { gte: date_from, lte: date_to },
       },
-      include: {
-        session: {
-          select: {
-            id: true,
-            date: true,
-            start_time: true,
-            end_time: true,
-            status: true,
-            snapshot_class_name: true,
-            class: { select: { id: true, name: true } },
+    };
+
+    const [statusCounts, records] = await Promise.all([
+      this.prisma.attendance.groupBy({
+        by: ['status'],
+        where,
+        _count: { _all: true },
+      }),
+      this.prisma.attendance.findMany({
+        where,
+        include: {
+          session: {
+            select: {
+              id: true,
+              date: true,
+              start_time: true,
+              end_time: true,
+              status: true,
+              snapshot_class_name: true,
+              class: { select: { id: true, name: true } },
+            },
           },
         },
-      },
-      orderBy: { session: { date: 'desc' } },
-    });
+        orderBy: { session: { date: 'desc' } },
+      }),
+    ]);
 
-    const total_sessions = records.length;
-    const present = records.filter((r) => r.status === 'PRESENT').length;
-    const absent = records.filter((r) => r.status === 'ABSENT').length;
-    const late = records.filter((r) => r.status === 'LATE').length;
+    const present =
+      statusCounts.find((s) => s.status === 'PRESENT')?._count._all ?? 0;
+    const absent =
+      statusCounts.find((s) => s.status === 'ABSENT')?._count._all ?? 0;
+    const late =
+      statusCounts.find((s) => s.status === 'LATE')?._count._all ?? 0;
+    const total_sessions = present + absent + late;
     const attendance_rate =
       total_sessions > 0
         ? Math.round(((present + late) / total_sessions) * 100 * 100) / 100
