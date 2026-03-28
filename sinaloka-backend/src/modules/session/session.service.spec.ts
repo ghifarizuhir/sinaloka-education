@@ -889,6 +889,29 @@ describe('SessionService', () => {
         ForbiddenException,
       );
     });
+
+    it('should throw BadRequestException if session is not SCHEDULED', async () => {
+      const session = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'COMPLETED',
+        class: {
+          tutor_id: 'tutor-uuid-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+      });
+
+      await expect(
+        service.cancelSession(institutionId, userId, 'session-1'),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe('getTutorSchedule', () => {

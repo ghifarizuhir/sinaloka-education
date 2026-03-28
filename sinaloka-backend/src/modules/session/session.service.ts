@@ -611,6 +611,12 @@ export class SessionService {
       throw new ForbiddenException('You can only cancel your own sessions');
     }
 
+    if (session.status !== 'SCHEDULED') {
+      throw new BadRequestException(
+        'Only sessions with status SCHEDULED can be cancelled',
+      );
+    }
+
     const updated = await this.prisma.session.update({
       where: { id: sessionId, institution_id: institutionId },
       data: { status: 'CANCELLED' },
