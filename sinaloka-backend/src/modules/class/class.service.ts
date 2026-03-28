@@ -348,7 +348,12 @@ export class ClassService {
     // Check tutor schedule conflicts when schedules or tutor_id change
     if (schedules || tutor_id) {
       const effectiveTutorId = tutor_id ?? existing.tutor_id;
-      const effectiveSchedules = schedules ?? [];
+      const effectiveSchedules =
+        schedules ??
+        (await this.prisma.classSchedule.findMany({
+          where: { class_id: id },
+          select: { day: true, start_time: true, end_time: true },
+        }));
       if (effectiveSchedules.length > 0) {
         await this.checkTutorScheduleConflicts(
           effectiveTutorId,

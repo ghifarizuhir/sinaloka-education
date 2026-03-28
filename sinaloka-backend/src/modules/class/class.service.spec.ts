@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 
 jest.mock('../../common/prisma/prisma.service', () => {
   return {
@@ -375,9 +379,7 @@ describe('ClassService', () => {
         capacity: 30,
         fee: 500000,
         tutor_fee: 200000,
-        schedules: [
-          { day: 'Monday', start_time: '16:00', end_time: '17:30' },
-        ],
+        schedules: [{ day: 'Monday', start_time: '16:00', end_time: '17:30' }],
       });
 
       expect(result).toBeDefined();
@@ -573,6 +575,42 @@ describe('ClassService', () => {
           schedules: [
             { day: 'Monday', start_time: '14:30', end_time: '16:00' },
           ],
+        }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw ConflictException when tutor_id changes and existing schedules conflict', async () => {
+      prisma.class.findFirst.mockResolvedValue(mockClass);
+      prisma.tutor.findFirst.mockResolvedValue({
+        id: 'new-tutor-id',
+        institution_id: 'inst-1',
+        is_verified: true,
+      });
+      prisma.tutorSubject.findUnique.mockResolvedValue({
+        tutor_id: 'new-tutor-id',
+        subject_id: 'subject-1',
+      });
+
+      // No schedules provided — service should fetch existing schedules for this class
+      // First call: fetch existing schedules for this class (tutor_id-only update)
+      // Second call: fetch tutor's other class schedules for conflict check
+      prisma.classSchedule.findMany
+        .mockResolvedValueOnce([
+          { day: 'Monday', start_time: '14:00', end_time: '15:30' },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: 'existing-sched-other',
+            class_id: 'other-class',
+            day: 'Monday',
+            start_time: '14:30',
+            end_time: '16:00',
+          },
+        ]);
+
+      await expect(
+        service.update('inst-1', 'class-1', {
+          tutor_id: 'new-tutor-id',
         }),
       ).rejects.toThrow(ConflictException);
     });
