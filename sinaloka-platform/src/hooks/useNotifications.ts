@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsService } from '@/src/services/notifications.service';
+import { getAccessToken } from '@/src/lib/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -28,7 +29,7 @@ export function useNotificationSSE() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const connect = useCallback(() => {
-    const token = localStorage.getItem('access_token');
+    const token = getAccessToken();
     if (!token) return;
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
