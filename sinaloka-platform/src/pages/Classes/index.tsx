@@ -69,7 +69,7 @@ export const Classes = () => {
             </div>
             <div>
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{state.t('classes.activeCourses')}</p>
-              <p className="text-xl font-bold">{state.classes.filter(c => c.status === 'ACTIVE').length}</p>
+              <p className="text-xl font-bold">{state.activeClassCount}</p>
             </div>
           </Card>
         </div>

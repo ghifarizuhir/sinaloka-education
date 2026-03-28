@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   useClasses,
+  useClassStats,
   useClass,
   useCreateClass,
   useUpdateClass,
@@ -74,6 +75,7 @@ export function useClassesPage() {
 
   const { data, isLoading } = useClasses({ page, limit, semester_id: filterSemesterId || undefined });
   const { data: allClassesData } = useClasses({ page: 1, limit: 100, semester_id: filterSemesterId || undefined });
+  const { data: classStats } = useClassStats({ semester_id: filterSemesterId || undefined });
   const { data: subjectsList } = useSubjects();
   const { data: academicYears } = useAcademicYears();
   const { data: subjectTutors } = useSubjectTutors(formSubjectId || null);
@@ -123,9 +125,8 @@ export function useClassesPage() {
 
   const selectedClass = filteredClasses.find((c) => c.id === selectedClassId) ?? null;
 
-  const totalRevenue = useMemo(() => {
-    return classes.reduce((sum, c) => sum + Number(c.fee), 0);
-  }, [classes]);
+  const totalRevenue = classStats?.total_monthly_fee ?? 0;
+  const activeClassCount = classStats?.active_classes ?? 0;
 
   const openAddModal = () => {
     formErrors.clearAll();
@@ -385,6 +386,7 @@ export function useClassesPage() {
     filteredTimetableClasses,
     selectedClass,
     totalRevenue,
+    activeClassCount,
     openAddModal,
     openEditModal,
     toggleScheduleDay,
