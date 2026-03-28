@@ -45,7 +45,9 @@ describe('AuthService', () => {
       create: jest.Mock;
       findUnique: jest.Mock;
       update: jest.Mock;
+      updateMany: jest.Mock;
     };
+    $transaction: jest.Mock;
   };
   let jwtService: { sign: jest.Mock };
 
@@ -79,7 +81,9 @@ describe('AuthService', () => {
         create: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
       },
+      $transaction: jest.fn((ops) => Promise.resolve(ops)),
     };
 
     jwtService = {
@@ -242,11 +246,8 @@ describe('AuthService', () => {
       expect(result.access_token).toBe('mock-access-token');
       expect(result.refresh_token).toBe('mock-refresh-token-hex');
       expect(result.token_type).toBe('Bearer');
-      // Old token should be revoked
-      expect(prisma.refreshToken.update).toHaveBeenCalledWith({
-        where: { id: 'rt-1' },
-        data: { revoked: true },
-      });
+      // Old token should be revoked atomically via $transaction
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 
     it('should throw UnauthorizedException for invalid refresh token', async () => {
@@ -255,6 +256,24 @@ describe('AuthService', () => {
       await expect(
         service.refresh({ refresh_token: 'invalid-token' }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should execute refresh token rotation atomically via $transaction', async () => {
+      const mockTransaction = jest.fn((ops) => Promise.resolve(ops));
+      (prisma as any).$transaction = mockTransaction;
+
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1',
+        token: 'valid-refresh-token',
+        revoked: false,
+        expires_at: new Date(Date.now() + 86400000),
+        user: mockUser,
+      });
+
+      await service.refresh({ refresh_token: 'valid-refresh-token' });
+
+      // $transaction must have been called — rotation is atomic
+      expect(mockTransaction).toHaveBeenCalledTimes(1);
     });
 
     it('should throw UnauthorizedException for revoked refresh token', async () => {
