@@ -33,6 +33,12 @@ describe('SessionService', () => {
     tutor: {
       findFirst: jest.fn(),
     },
+    payout: {
+      findFirst: jest.fn().mockResolvedValue(null),
+    },
+    attendance: {
+      count: jest.fn().mockResolvedValue(0),
+    },
   };
 
   const institutionId = 'inst-uuid-1';
@@ -349,6 +355,64 @@ describe('SessionService', () => {
         }),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should skip payout creation when duplicate payout exists for completed session (admin)', async () => {
+      const existing = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'SCHEDULED',
+        date: new Date('2026-04-01'),
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: {
+            id: 'tutor-1',
+            user: { id: 'user-2', name: 'Tutor A', email: 'tutor@test.com' },
+          },
+        },
+        attendances: [],
+      };
+      mockPrisma.session.findUnique.mockResolvedValue(existing);
+
+      const classForFee = {
+        id: 'class-1',
+        name: 'Math A',
+        tutor_id: 'tutor-1',
+        tutor_fee: 200000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        fee: 100000n,
+        room: 'A1',
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Math' },
+      };
+      mockPrisma.class.findUnique.mockResolvedValue(classForFee);
+
+      const updatedSession = {
+        ...existing,
+        status: 'COMPLETED',
+        class: {
+          id: 'class-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-1', user: { id: 'user-2', name: 'Tutor A' } },
+        },
+      };
+      mockPrisma.session.update.mockResolvedValue(updatedSession);
+
+      // Simulate existing payout (duplicate)
+      mockPrisma.payout.findFirst.mockResolvedValue({
+        id: 'existing-payout',
+        tutor_id: 'tutor-1',
+        description: 'Session: Math A - 2026-04-01',
+      });
+
+      await service.update(institutionId, 'session-1', {
+        status: 'COMPLETED',
+      });
+
+      // PayoutService.create should NOT be called because payout already exists
+      expect(mockPayoutService.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('delete', () => {
@@ -568,6 +632,58 @@ describe('SessionService', () => {
         }),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should include snapshot data in generated sessions', async () => {
+      const classRecord = {
+        id: 'class-uuid-1',
+        institution_id: institutionId,
+        name: 'Math A',
+        tutor_id: 'tutor-uuid-1',
+        fee: 100000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        room: 'Room A',
+        status: 'ACTIVE',
+        schedules: [
+          {
+            id: 'sched-1',
+            day: 'Monday',
+            start_time: '14:00',
+            end_time: '15:30',
+            class_id: 'class-uuid-1',
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        ],
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Mathematics' },
+      };
+
+      mockPrisma.class.findUnique.mockResolvedValue(classRecord);
+      mockPrisma.session.findMany.mockResolvedValue([]);
+      mockPrisma.session.createMany.mockResolvedValue({ count: 1 });
+
+      // Mon Apr 6 only
+      const result = await service.generateSessions(institutionId, userId, {
+        class_id: 'class-uuid-1',
+        date_from: new Date('2026-04-06'),
+        date_to: new Date('2026-04-06'),
+      });
+
+      expect(result.count).toBe(1);
+
+      const createManyCall = mockPrisma.session.createMany.mock.calls[0][0];
+      const createdSession = createManyCall.data[0];
+
+      expect(createdSession.snapshot_tutor_id).toBe('tutor-uuid-1');
+      expect(createdSession.snapshot_tutor_name).toBe('Tutor A');
+      expect(createdSession.snapshot_subject_name).toBe('Mathematics');
+      expect(createdSession.snapshot_class_name).toBe('Math A');
+      expect(createdSession.snapshot_class_fee).toBe(100000n);
+      expect(createdSession.snapshot_class_room).toBe('Room A');
+      expect(createdSession.snapshot_tutor_fee_mode).toBe('FIXED_PER_SESSION');
+      expect(createdSession.snapshot_tutor_fee_per_student).toBeNull();
+    });
   });
 
   describe('requestReschedule', () => {
@@ -600,7 +716,7 @@ describe('SessionService', () => {
       };
       mockPrisma.session.update.mockResolvedValue(updatedSession);
 
-      const result = await service.requestReschedule(userId, 'session-1', {
+      const result = await service.requestReschedule(institutionId, userId, 'session-1', {
         proposed_date: new Date('2026-04-10'),
         proposed_start_time: '16:00',
         proposed_end_time: '17:30',
@@ -609,7 +725,7 @@ describe('SessionService', () => {
 
       expect(result.status).toBe('RESCHEDULE_REQUESTED');
       expect(mockPrisma.session.update).toHaveBeenCalledWith({
-        where: { id: 'session-1' },
+        where: { id: 'session-1', institution_id: institutionId },
         data: {
           status: 'RESCHEDULE_REQUESTED',
           proposed_date: new Date('2026-04-10'),
@@ -644,7 +760,7 @@ describe('SessionService', () => {
       });
 
       await expect(
-        service.requestReschedule(userId, 'session-1', {
+        service.requestReschedule(institutionId, userId, 'session-1', {
           proposed_date: new Date('2026-04-10'),
           proposed_start_time: '16:00',
           proposed_end_time: '17:30',
@@ -673,7 +789,7 @@ describe('SessionService', () => {
       });
 
       await expect(
-        service.requestReschedule(userId, 'session-1', {
+        service.requestReschedule(institutionId, userId, 'session-1', {
           proposed_date: new Date('2026-04-10'),
           proposed_start_time: '16:00',
           proposed_end_time: '17:30',
@@ -854,11 +970,11 @@ describe('SessionService', () => {
       };
       mockPrisma.session.update.mockResolvedValue(cancelledSession);
 
-      const result = await service.cancelSession(userId, 'session-1');
+      const result = await service.cancelSession(institutionId, userId, 'session-1');
 
       expect(result.status).toBe('CANCELLED');
       expect(mockPrisma.session.update).toHaveBeenCalledWith({
-        where: { id: 'session-1' },
+        where: { id: 'session-1', institution_id: institutionId },
         data: { status: 'CANCELLED' },
         include: expectedSessionInclude,
       });
@@ -885,8 +1001,156 @@ describe('SessionService', () => {
         user_id: userId,
       });
 
-      await expect(service.cancelSession(userId, 'session-1')).rejects.toThrow(
+      await expect(service.cancelSession(institutionId, userId, 'session-1')).rejects.toThrow(
         ForbiddenException,
+      );
+    });
+
+    it('should throw BadRequestException if session is not SCHEDULED', async () => {
+      const session = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'COMPLETED',
+        class: {
+          tutor_id: 'tutor-uuid-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+      });
+
+      await expect(
+        service.cancelSession(institutionId, userId, 'session-1'),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('completeSession (tutor)', () => {
+    it('should skip payout creation when duplicate payout exists', async () => {
+      const session = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'SCHEDULED',
+        date: new Date('2026-04-01'),
+        class_id: 'class-1',
+        class: {
+          name: 'Math A',
+          tutor_id: 'tutor-uuid-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+      });
+
+      const classForFee = {
+        id: 'class-1',
+        name: 'Math A',
+        tutor_id: 'tutor-uuid-1',
+        tutor_fee: 200000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        fee: 100000n,
+        room: 'A1',
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Math' },
+      };
+      mockPrisma.class.findUnique.mockResolvedValue(classForFee);
+
+      const updatedSession = {
+        ...session,
+        status: 'COMPLETED',
+        class: {
+          name: 'Math A',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+      mockPrisma.session.update.mockResolvedValue(updatedSession);
+
+      // Simulate existing payout (duplicate)
+      mockPrisma.payout.findFirst.mockResolvedValue({
+        id: 'existing-payout',
+        tutor_id: 'tutor-uuid-1',
+        description: 'Session: Math A - 2026-04-01',
+      });
+
+      await service.completeSession(institutionId, userId, 'session-1', {
+        topic_covered: 'Algebra basics',
+      });
+
+      expect(mockPayoutService.create).not.toHaveBeenCalled();
+    });
+
+    it('should create payout when no duplicate exists', async () => {
+      const session = {
+        id: 'session-1',
+        institution_id: institutionId,
+        status: 'SCHEDULED',
+        date: new Date('2026-04-01'),
+        class_id: 'class-1',
+        class: {
+          name: 'Math A',
+          tutor_id: 'tutor-uuid-1',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+
+      mockPrisma.session.findUnique.mockResolvedValue(session);
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+      });
+
+      const classForFee = {
+        id: 'class-1',
+        name: 'Math A',
+        tutor_id: 'tutor-uuid-1',
+        tutor_fee: 200000n,
+        tutor_fee_mode: 'FIXED_PER_SESSION',
+        tutor_fee_per_student: null,
+        fee: 100000n,
+        room: 'A1',
+        tutor: { user: { name: 'Tutor A' } },
+        subject: { name: 'Math' },
+      };
+      mockPrisma.class.findUnique.mockResolvedValue(classForFee);
+
+      const updatedSession = {
+        ...session,
+        status: 'COMPLETED',
+        class: {
+          name: 'Math A',
+          fee: 100000n,
+          tutor: { id: 'tutor-uuid-1', user: { id: userId, name: 'Tutor A' } },
+        },
+      };
+      mockPrisma.session.update.mockResolvedValue(updatedSession);
+
+      // No existing payout
+      mockPrisma.payout.findFirst.mockResolvedValue(null);
+
+      await service.completeSession(institutionId, userId, 'session-1', {
+        topic_covered: 'Algebra basics',
+      });
+
+      expect(mockPayoutService.create).toHaveBeenCalledWith(
+        institutionId,
+        expect.objectContaining({
+          tutor_id: 'tutor-uuid-1',
+          amount: 200000,
+          status: 'PENDING',
+        }),
       );
     });
   });
@@ -946,6 +1210,32 @@ describe('SessionService', () => {
           sort_order: 'asc',
         }),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should filter sessions by institution_id (tenant isolation)', async () => {
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+        institution_id: institutionId,
+      });
+
+      mockPrisma.session.findMany.mockResolvedValue([]);
+      mockPrisma.session.count.mockResolvedValue(0);
+
+      await service.getTutorSchedule(userId, {
+        page: 1,
+        limit: 20,
+        sort_by: 'date',
+        sort_order: 'asc',
+      });
+
+      expect(mockPrisma.session.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            institution_id: institutionId,
+          }),
+        }),
+      );
     });
   });
 });

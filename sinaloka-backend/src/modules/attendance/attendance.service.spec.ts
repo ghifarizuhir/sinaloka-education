@@ -36,6 +36,7 @@ describe('AttendanceService', () => {
 
   const mockInvoiceGenerator = {
     generatePerSessionPayment: jest.fn(),
+    cancelPerSessionPayment: jest.fn(),
   };
 
   const mockEventEmitter = {
@@ -59,6 +60,7 @@ describe('AttendanceService', () => {
     prisma = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
     mockInvoiceGenerator.generatePerSessionPayment.mockReset();
+    mockInvoiceGenerator.cancelPerSessionPayment.mockReset();
     mockEventEmitter.emit.mockReset();
   });
 
@@ -102,13 +104,13 @@ describe('AttendanceService', () => {
       mockPrisma.attendance.findMany.mockResolvedValueOnce([]); // first call: check existing
       mockPrisma.attendance.findMany.mockResolvedValueOnce(createdRecords); // second call: return created
 
-      const result = await service.batchCreate(userId, {
+      const result = await service.batchCreate(institutionId, userId, {
         session_id: 'session-uuid-1',
         records,
       });
 
       expect(mockPrisma.session.findUnique).toHaveBeenCalledWith({
-        where: { id: 'session-uuid-1' },
+        where: { id: 'session-uuid-1', institution_id: institutionId },
         include: { class: true },
       });
     });
@@ -127,7 +129,7 @@ describe('AttendanceService', () => {
       });
 
       await expect(
-        service.batchCreate(userId, {
+        service.batchCreate(institutionId, userId, {
           session_id: 'session-uuid-1',
           records: [
             {
@@ -144,7 +146,7 @@ describe('AttendanceService', () => {
       mockPrisma.session.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.batchCreate(userId, {
+        service.batchCreate(institutionId, userId, {
           session_id: 'nonexistent',
           records: [
             {
@@ -179,7 +181,7 @@ describe('AttendanceService', () => {
       ]);
 
       await expect(
-        service.batchCreate(userId, {
+        service.batchCreate(institutionId, userId, {
           session_id: 'session-uuid-1',
           records: [
             {
@@ -255,6 +257,57 @@ describe('AttendanceService', () => {
         service.update(institutionId, 'nonexistent', { status: 'LATE' }),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should cancel per-session payment when status changes to ABSENT', async () => {
+      const existing = {
+        id: 'att-1',
+        institution_id: institutionId,
+        status: 'PRESENT',
+        student_id: 'student-1',
+        session_id: 'session-uuid-1',
+        session: {
+          status: 'SCHEDULED',
+          date: new Date('2099-05-01'),
+          class_id: 'class-1',
+        },
+      };
+      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+
+      const updated = { ...existing, status: 'ABSENT' };
+      mockPrisma.attendance.update.mockResolvedValue(updated);
+
+      await service.update(institutionId, 'att-1', { status: 'ABSENT' });
+
+      expect(mockInvoiceGenerator.cancelPerSessionPayment).toHaveBeenCalledWith({
+        institutionId,
+        studentId: 'student-1',
+        sessionId: 'session-uuid-1',
+        classId: 'class-1',
+      });
+    });
+
+    it('should not cancel payment when status changes to LATE', async () => {
+      const existing = {
+        id: 'att-1',
+        institution_id: institutionId,
+        status: 'PRESENT',
+        student_id: 'student-1',
+        session_id: 'session-uuid-1',
+        session: {
+          status: 'SCHEDULED',
+          date: new Date('2099-05-01'),
+          class_id: 'class-1',
+        },
+      };
+      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+
+      const updated = { ...existing, status: 'LATE' };
+      mockPrisma.attendance.update.mockResolvedValue(updated);
+
+      await service.update(institutionId, 'att-1', { status: 'LATE' });
+
+      expect(mockInvoiceGenerator.cancelPerSessionPayment).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateByTutor', () => {
@@ -278,7 +331,7 @@ describe('AttendanceService', () => {
       const updated = { ...existing, notes: 'Updated note' };
       mockPrisma.attendance.update.mockResolvedValue(updated);
 
-      const result = await service.updateByTutor(userId, 'att-1', {
+      const result = await service.updateByTutor(institutionId, userId, 'att-1', {
         notes: 'Updated note',
       });
 
@@ -303,8 +356,40 @@ describe('AttendanceService', () => {
       });
 
       await expect(
-        service.updateByTutor(userId, 'att-1', { notes: 'Hijack' }),
+        service.updateByTutor(institutionId, userId, 'att-1', { notes: 'Hijack' }),
       ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should cancel per-session payment when tutor changes status to ABSENT', async () => {
+      const existing = {
+        id: 'att-1',
+        institution_id: institutionId,
+        session_id: 'session-uuid-1',
+        student_id: 'student-1',
+        status: 'PRESENT',
+        session: {
+          class_id: 'class-1',
+          class: { tutor_id: 'tutor-uuid-1' },
+        },
+      };
+
+      mockPrisma.attendance.findUnique.mockResolvedValue(existing);
+      mockPrisma.tutor.findFirst.mockResolvedValue({
+        id: 'tutor-uuid-1',
+        user_id: userId,
+      });
+
+      const updated = { ...existing, status: 'ABSENT' };
+      mockPrisma.attendance.update.mockResolvedValue(updated);
+
+      await service.updateByTutor(institutionId, userId, 'att-1', { status: 'ABSENT' });
+
+      expect(mockInvoiceGenerator.cancelPerSessionPayment).toHaveBeenCalledWith({
+        institutionId,
+        studentId: 'student-1',
+        sessionId: 'session-uuid-1',
+        classId: 'class-1',
+      });
     });
   });
 
