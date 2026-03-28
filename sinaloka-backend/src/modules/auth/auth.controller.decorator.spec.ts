@@ -20,10 +20,11 @@ import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator.js';
 
 describe('AuthController — @Public() decorators', () => {
   it('logout method should be decorated with @Public()', () => {
-    const isPublic = Reflect.getMetadata(
-      IS_PUBLIC_KEY,
-      AuthController.prototype.logout,
+    const descriptor = Object.getOwnPropertyDescriptor(
+      AuthController.prototype,
+      'logout',
     );
+    const isPublic = Reflect.getMetadata(IS_PUBLIC_KEY, descriptor!.value);
     expect(isPublic).toBe(true);
   });
 });
