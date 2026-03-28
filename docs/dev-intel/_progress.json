@@ -1,143 +1,83 @@
 {
-  "current_sprint": 8,
-  "current_sprint_file": "docs/dev-intel/sprints/sprint-3-schedules-ux-performance.md",
-  "status": "all_tasks_completed",
-  "audit_source": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
-  "started_at": "2026-03-28T14:00:00Z",
-  "last_session": "2026-03-28T17:50:00Z",
-  "sprints": [
-    {
-      "number": 1,
-      "name": "Enrollment Quick Wins",
-      "file": "docs/dev-intel/sprints/sprint-1-enrollment-quick-wins.md",
+  "current": null,
+  "last_session": "2026-03-28T20:00:00Z",
+  "sprints": {
+    "docs/dev-intel/sprints/sprint-1-enrollment-quick-wins.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-27-enrollments.md",
       "branch": "fix/enrollment-sprint-1-quick-wins",
       "pr": 116,
-      "tasks": [
-        { "id": "ENR-01", "title": "Fix Single Delete FK Violation", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" },
-        { "id": "ENR-05", "title": "Validate Export CSV Query Params", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" },
-        { "id": "ENR-08", "title": "Fix enrolled_at Timestamp Mismatch", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" },
-        { "id": "ENR-11", "title": "Add File Upload Size Limit", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" },
-        { "id": "ENR-12", "title": "Add Missing i18n Key for Delete Confirm", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" },
-        { "id": "ENR-13", "title": "Fix Drop Menu Icon (UserPlus → UserMinus)", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" },
-        { "id": "ENR-14", "title": "Remove Duplicate Menu Item", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" },
-        { "id": "ENR-15", "title": "Reset Modal State on Close", "status": "completed", "completed_at": "2026-03-27T22:30:00Z" }
-      ],
-      "started_at": "2026-03-27T22:00:00Z",
       "completed_at": "2026-03-27T22:41:11Z"
     },
-    {
-      "number": 2,
-      "name": "Enrollment Core Bug Fixes",
-      "file": "docs/dev-intel/sprints/sprint-2-enrollment-core-bugs.md",
+    "docs/dev-intel/sprints/sprint-2-enrollment-core-bugs.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-27-enrollments.md",
       "branch": "fix/enrollment-sprint-2-core-bugs",
       "pr": 117,
-      "tasks": [
-        { "id": "ENR-02", "title": "Implement Backend Search for Enrollments", "status": "completed", "completed_at": "2026-03-27T23:00:00Z" },
-        { "id": "ENR-03", "title": "Fix Stats Cards (Server-side Endpoint)", "status": "completed", "completed_at": "2026-03-27T23:00:00Z" },
-        { "id": "ENR-04", "title": "Fix autoInvoice Toggle", "status": "completed", "completed_at": "2026-03-27T23:00:00Z" }
-      ],
-      "started_at": "2026-03-27T22:41:11Z",
       "completed_at": "2026-03-27T22:43:46Z"
     },
-    {
-      "number": 3,
-      "name": "CSV Import Rewrite",
-      "file": "docs/dev-intel/sprints/sprint-3-enrollment-csv-import-rewrite.md",
+    "docs/dev-intel/sprints/sprint-3-enrollment-csv-import-rewrite.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-27-enrollments.md",
       "branch": "fix/enrollment-sprint-3-5-backlog",
       "pr": 119,
-      "tasks": [
-        { "id": "ENR-06", "title": "Rewrite CSV Import with Bulk Pre-fetch", "status": "completed", "completed_at": "2026-03-28T00:00:00Z" },
-        { "id": "ENR-07", "title": "Wrap Import in Transaction", "status": "completed", "completed_at": "2026-03-28T00:00:00Z" }
-      ],
-      "started_at": "2026-03-27T22:43:46Z",
       "completed_at": "2026-03-28T00:00:00Z"
     },
-    {
-      "number": 4,
-      "name": "Enrollment Flow Improvements",
-      "file": "docs/dev-intel/sprints/sprint-4-enrollment-flow-improvements.md",
+    "docs/dev-intel/sprints/sprint-4-enrollment-flow-improvements.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-27-enrollments.md",
       "branch": "fix/enrollment-sprint-3-5-backlog",
       "pr": 119,
-      "tasks": [
-        { "id": "ENR-09", "title": "Fix Conflict Check Race Condition", "status": "completed", "completed_at": "2026-03-28T00:03:00Z" },
-        { "id": "ENR-10", "title": "Fix Student/Class Dropdown Limit", "status": "completed", "completed_at": "2026-03-28T00:03:00Z" },
-        { "id": "ENR-17", "title": "Add Capacity Check on Enrollment", "status": "completed", "completed_at": "2026-03-28T00:03:00Z" }
-      ],
-      "started_at": "2026-03-28T00:00:00Z",
       "completed_at": "2026-03-28T00:03:00Z"
     },
-    {
-      "number": 5,
-      "name": "Enrollment Test Coverage",
-      "file": "docs/dev-intel/sprints/sprint-5-enrollment-test-coverage.md",
+    "docs/dev-intel/sprints/sprint-5-enrollment-test-coverage.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-27-enrollments.md",
       "branch": "fix/enrollment-sprint-3-5-backlog",
       "pr": 119,
-      "tasks": [
-        { "id": "ENR-16", "title": "Add Tests for bulkUpdate, bulkDelete, exportToCsv, importFromCsv", "status": "completed", "completed_at": "2026-03-28T00:06:00Z" }
-      ],
-      "started_at": "2026-03-28T00:03:00Z",
       "completed_at": "2026-03-28T00:06:18Z"
     },
-    {
-      "number": 6,
-      "name": "Schedules Critical & Quick Fixes",
-      "file": "docs/dev-intel/sprints/sprint-1-schedules-critical-fixes.md",
+    "docs/dev-intel/sprints/sprint-1-schedules-critical-fixes.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
       "branch": "fix/schedules-sprint-1-critical-fixes",
       "pr": null,
-      "tasks": [
-        { "id": "SA-001", "title": "Add tenant isolation to getTutorSchedule", "status": "completed", "completed_at": "2026-03-28T14:10:00Z" },
-        { "id": "SA-002", "title": "Prevent cancel of non-SCHEDULED sessions", "status": "completed", "completed_at": "2026-03-28T14:15:00Z" },
-        { "id": "CLS-05", "title": "Fix cancel session to use PATCH instead of DELETE", "status": "completed", "completed_at": "2026-03-28T14:20:00Z" },
-        { "id": "SA-006", "title": "Fix session service test parameter signatures", "status": "completed", "completed_at": "2026-03-28T14:25:00Z" },
-        { "id": "SA-007", "title": "Fix attendance service test parameter signatures", "status": "completed", "completed_at": "2026-03-28T14:30:00Z" },
-        { "id": "CLS-08", "title": "Add subject validation in class update", "status": "completed", "completed_at": "2026-03-28T14:35:00Z" },
-        { "id": "CLS-10", "title": "Add start_time < end_time validation to session DTOs", "status": "completed", "completed_at": "2026-03-28T14:40:00Z" },
-        { "id": "CLS-12", "title": "Add PER_STUDENT_ATTENDANCE validation to UpdateClassSchema", "status": "completed", "completed_at": "2026-03-28T14:45:00Z" }
-      ],
-      "started_at": "2026-03-28T14:00:00Z",
       "completed_at": "2026-03-28T14:50:00Z"
     },
-    {
-      "number": 7,
-      "name": "Schedules Financial Integrity & Data Safety",
-      "file": "docs/dev-intel/sprints/sprint-2-schedules-financial-integrity.md",
+    "docs/dev-intel/sprints/sprint-2-schedules-financial-integrity.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
       "branch": "fix/schedules-sprint-2-financial-integrity",
       "pr": null,
-      "tasks": [
-        { "id": "CLS-01", "title": "Server-side schedule conflict detection", "status": "completed", "completed_at": "2026-03-28T16:00:00Z" },
-        { "id": "CLS-02", "title": "Protect class deletion with completed sessions", "status": "completed", "completed_at": "2026-03-28T16:05:00Z" },
-        { "id": "SA-004", "title": "Add payment reversal on ABSENT status change", "status": "completed", "completed_at": "2026-03-28T16:15:00Z" },
-        { "id": "SA-005", "title": "Prevent duplicate payout on session complete", "status": "completed", "completed_at": "2026-03-28T16:25:00Z" },
-        { "id": "SA-012", "title": "Fill snapshot data when generating sessions", "status": "completed", "completed_at": "2026-03-28T16:35:00Z" }
-      ],
-      "started_at": "2026-03-28T15:30:00Z",
       "completed_at": "2026-03-28T16:40:00Z"
     },
-    {
-      "number": 8,
-      "name": "Schedules UX & Performance",
-      "file": "docs/dev-intel/sprints/sprint-3-schedules-ux-performance.md",
+    "docs/dev-intel/sprints/sprint-3-schedules-ux-performance.md": {
       "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
       "branch": "fix/schedules-sprint-3-ux-performance",
       "pr": null,
-      "tasks": [
-        { "id": "CLS-03", "title": "Add dedicated class stats endpoint", "status": "completed", "completed_at": "2026-03-28T17:10:00Z" },
-        { "id": "CLS-04", "title": "Sync calendar date filter with view range", "status": "completed", "completed_at": "2026-03-28T17:15:00Z" },
-        { "id": "CLS-11", "title": "Move class filters to server-side", "status": "completed", "completed_at": "2026-03-28T17:20:00Z" },
-        { "id": "SA-009", "title": "Fix keyboard shortcut stale closure", "status": "completed", "completed_at": "2026-03-28T17:22:00Z" },
-        { "id": "SA-013", "title": "Optimize getSummary with DB aggregation", "status": "completed", "completed_at": "2026-03-28T17:30:00Z" },
-        { "id": "SA-014", "title": "Optimize findByStudent with DB aggregation", "status": "completed", "completed_at": "2026-03-28T17:35:00Z" },
-        { "id": "SA-008", "title": "Allow admin to create attendance for pending students", "status": "completed", "completed_at": "2026-03-28T17:45:00Z" }
-      ],
-      "started_at": "2026-03-28T17:00:00Z",
       "completed_at": "2026-03-28T17:50:00Z"
+    },
+    "docs/dev-intel/sprints/sprint-4-schedules-atomic-finalize.md": {
+      "status": "completed",
+      "audit": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
+      "branch": "fix/schedules-sprint-4-atomic-finalize",
+      "pr": null,
+      "completed_at": "2026-03-28T20:15:00Z"
+    },
+    "docs/dev-intel/sprints/sprint-5-schedules-frontend-ux.md": {
+      "status": "not_started",
+      "audit": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
+      "branch": "fix/schedules-sprint-5-frontend-ux",
+      "pr": null,
+      "completed_at": null
+    },
+    "docs/dev-intel/sprints/sprint-6-schedules-polish.md": {
+      "status": "not_started",
+      "audit": "docs/dev-intel/audits/audit-2026-03-28-schedules.md",
+      "branch": "fix/schedules-sprint-6-polish",
+      "pr": null,
+      "completed_at": null
     }
-  ]
+  }
 }

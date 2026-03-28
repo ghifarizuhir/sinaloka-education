@@ -28,6 +28,8 @@
 | SA-013 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
 | SA-014 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
 | SA-008 | MEDIUM | FIXED | 2026-03-28 | Sprint 8 | - |
+| SA-003 | CRITICAL | FIXED | 2026-03-28 | Sprint 9 | - |
+| CLS-13 | MEDIUM | FIXED | 2026-03-28 | Sprint 9 | - |
 
 ## Executive Summary
 
@@ -549,7 +551,7 @@ export const UpdateClassSchema = z.object({ ... }).refine(
 
 ---
 
-#### [MEDIUM] CLS-13 — findUnique dengan Compound Where Mungkin Abaikan institution_id
+#### ~~[MEDIUM] CLS-13 — findUnique dengan Compound Where Mungkin Abaikan institution_id~~ FIXED 2026-03-28
 
 **Category:** Security
 **File:** `sinaloka-backend/src/modules/session/session.service.ts` (line 109)
@@ -740,7 +742,7 @@ if (session.status !== 'SCHEDULED') {
 
 ---
 
-#### [CRITICAL] SA-003 — Race Condition: Attendance + Complete Session Bukan Atomic
+#### ~~[CRITICAL] SA-003 — Race Condition: Attendance + Complete Session Bukan Atomic~~ FIXED 2026-03-28
 
 **Category:** Bug
 **File:** `sinaloka-tutors/src/hooks/useAttendance.ts` (line 24-38)
